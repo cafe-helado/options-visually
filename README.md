@@ -14,6 +14,23 @@ assets/
 .nojekyll             tells GitHub Pages to serve files as-is
 ```
 
+## Two forms of the same page
+
+**Split** (the files in the repo root) — pages link to `assets/lab.css` and
+`assets/lab.js`. This is what you host: the shared engine is downloaded once and
+cached across the whole series, so page two costs ~40KB instead of ~230KB.
+
+**Standalone** (`dist/`, produced by `build.py`) — everything inlined into one file.
+Relative paths only resolve when the folder is served together, so a page opened from
+a preview pane, emailed, or dropped somewhere on its own will render unstyled unless
+it's the inlined copy. Regenerate any time with:
+
+```bash
+python3 build.py
+```
+
+Host the split files. Share the `dist/` ones.
+
 ## Publishing to GitHub Pages
 
 This folder is already a git repository with one commit on `main`. You only need to
