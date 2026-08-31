@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>PAGE TITLE — subtitle</title>
+<meta name="description" content="One sentence. Shows up in search results and link previews.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PAGE TITLE">
+<meta property="og:description" content="One sentence.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">No. 0X &middot; Short label</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>First idea</span><i></i></a>
+  <a href="#c2"><span>Second idea</span><i></i></a>
+</nav>
+
+<!-- ══ HERO ══ One bold moment per page. Make it native to the subject. -->
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation</div>
+    <h1>Title with one <em>italic blue</em> word</h1>
+    <p class="sub">One sentence naming what the reader will be able to do at the end.</p>
+  </div>
+  <div class="scrollcue">Scroll &darr;</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">What this page assumes and what it gives you.</p>
+  <ol>
+    <li><b>Read in order.</b> Why the sequence matters here.</li>
+    <li><b>Do the "try this" boxes.</b> Predict, then press.</li>
+    <li><b>Answer the checks.</b> Self-marking, explanation either way.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation &mdash; every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>X</td><td>Plain-language definition, with a concrete number.</td></tr>
+    </table>
+  </details>
+</div>
+
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Chapter title that states a claim</h2>
+    <p class="dek">One line: what this chapter establishes and why it comes here.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Lead paragraph gets the drop cap automatically.</p>
+    <p>Gloss jargon inline: <span class="term" data-t="Term" data-def="Say what it is FOR, not just what it is.">like this</span>.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Figure title</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Series name</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl1"></div>
+        <div class="btnrow"><button class="act" id="run1">Run</button></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Say what to NOTICE, not what the axes are.</figcaption>
+  </figure>
+
+  <div class="mline">y = f(x)</div>
+  <p class="mread">Reads as: <b>the sentence a person would say out loud.</b> Never omit this.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Ask for a <b>prediction</b>, then give the button.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"a":0.9}' data-focus="cv1" data-then="run1">Set it up and run</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A question whose wrong answers are real misconceptions.</p>
+    <div class="opts">
+      <button>A mistake people actually make</button>
+      <button data-ok="1">The right answer, with its reason</button>
+    </div>
+    <div class="ans"><b>Verdict first.</b> Then why, then why the wrong answer was tempting.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation &mdash; what this proves</summary>
+    <div class="body">
+      <p>Prose between every step; never two equations in a row.</p>
+      <div class="mline">step</div>
+      <p class="mread">Reads as: <b>plain English.</b></p>
+      <p><b>Where it breaks.</b> Always end by naming the assumption that fails in practice.</p>
+    </div>
+  </details>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">State the assumptions and name what each failure is called in the real world.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ── one block per figure ────────────────────────────────────────
+   const s1={a:0.5};
+   (function(){
+     sliders(document.getElementById("ctl1"),
+       [{id:"a1",k:"a",lbl:"a",name:"Label",min:0,max:1,step:.01,fmt:v=>v.toFixed(2)}],
+       s1,()=>draw(),"c1");        // last arg registers it for data-preset
+     window.draw1=draw;
+     function draw(){
+       const xs=[],ys=[];
+       for(let i=0;i<200;i++){const x=i/199;xs.push(x);ys.push(Math.sin(x*6)*s1.a);}
+       const o=Fig(document.getElementById("cv1"),{h:300,x0:0,x1:1,y0:-1,y1:1,pad:{l:56}});
+       axes(o, v=>v.toFixed(2), null, 5, 4);
+       clip(o,()=>line(o,xs,ys,C("--blue"),2));
+       vline(o,0.5,C("--ochre"),"marker");
+       document.getElementById("kv1").innerHTML=kvHTML([["Label","value"]]);
+     }
+   })();
+
+   FROM lab.js
+     bs(S,K,T,v,r,q,isCall)  full Black-Scholes with all greeks
+     gbm(S0,mu,sig,T,n)      a price path;  gauss()  one normal draw
+     ncdf(x) / npdf(x)       normal cumulative and density
+     Fig(canvas,{h,x0,x1,y0,y1,pad})   -> {g,X(),Y(),P,pw,ph}
+     axes(o,xFmt,yFmt,nx,ny) / line(o,xs,ys,col,w,dash,alpha)
+     vline(o,x,col,label,dash) / clip(o,fn) / kvHTML([[k,v]])
+     sliders(host,specs,state,onChange,key) / preset(key,patch,focusId)
+     pct, pct2, fnum, nice   formatters
+     C("--blue")             design token;   NARROW()  true on phones
+     cvh(px)                 responsive canvas height (Fig applies it)
+
+   COLOURS  --blue primary | --verm risk/counterpoint | --moss positive/proof
+            --ochre markers | --grey secondary | --ink text
+   ──────────────────────────────────────────────────────────────── */
+
+function drawAll(){
+  /* call every draw function here, e.g. draw1(); */
+}
+LAB.boot(drawAll);
+</script>
+</body>
+</html>
