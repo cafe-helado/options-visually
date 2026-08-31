@@ -16,9 +16,32 @@ assets/
 
 ## Publishing to GitHub Pages
 
-1. Create a repo and push these files to the **root** of the `main` branch.
-2. Settings → Pages → Source: *Deploy from a branch* → `main` / `/ (root)`.
-3. It goes live at `https://<user>.github.io/<repo>/` in a minute or two.
+This folder is already a git repository with one commit on `main`. You only need to
+point it at a remote and push.
+
+1. **Make an empty repo on GitHub.** github.com → New repository. Give it a name
+   (`options-visually` works). Do **not** tick "Add a README" — you already have one,
+   and an initialising commit will make the first push conflict.
+
+2. **Point this folder at it and push.** From inside this folder:
+
+   ```bash
+   git remote add origin https://github.com/<your-username>/options-visually.git
+   git push -u origin main
+   ```
+
+   If you'd rather start the history yourself, delete the `.git` folder first and run
+   `git init -b main && git add -A && git commit -m "initial"` before the two commands
+   above.
+
+3. **Turn on Pages.** In the repo: Settings → Pages → Source: *Deploy from a branch*,
+   Branch: `main`, folder: `/ (root)` → Save.
+
+4. **Wait a minute**, then open `https://<your-username>.github.io/options-visually/`.
+   The Actions tab shows the deploy if you want to watch it.
+
+To publish changes later: `git add -A && git commit -m "..." && git push`. Pages
+redeploys on every push to `main`.
 
 `.nojekyll` matters: without it GitHub runs Jekyll, which ignores files and folders
 beginning with an underscore. Keep it.
