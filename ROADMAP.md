@@ -1,6 +1,6 @@
 # Roadmap
 
-Ten pages. Each needs a result that is hard to believe from a description and
+Eleven pages. Each needs a result that is hard to believe from a description and
 obvious once you have watched it — if a page has no such moment, it is an article,
 not a page in this series.
 
@@ -147,7 +147,64 @@ Two constraints on writing it
 
 ---
 
-## 06 · Parity, Boxes and Rolls — arbitrage as construction
+## 06 · Executing the Hedge — algos, dark pools, ETFs
+
+**Spine:** page 01 proved replication works and never charged for it. Every rebalance
+is an order that pays a spread and moves the market. Put the bill back in.
+
+Verified: short one 90d ATM call at 28 vol, 5bp cost on traded notional. Hedging error
+falls like 1/sqrt(N) (sd*sqrt(N) flat at 4.4-5.2). Transaction cost climbs. The
+objective E[loss] + lambda*sd is a clean U with an interior minimum that moves with
+risk aversion:
+
+      N        8      32      64     128     256     512
+   lam=0.5  0.887   0.566   0.475  *0.457*  0.478   0.548
+   lam=2.0  3.289   1.840   1.392   1.109   0.967  *0.934*
+
+Honest caveat: cost approaches sqrt(N) only asymptotically (ratio 1.76 vs predicted
+2.0 between N=128 and 512). At low N the initial hedge and final unwind dominate.
+
+Signature 1: the U-curve, with sliders for cost in bps and risk aversion. This is the
+honest ending to page 01 chapter 06 — "hedge continuously" becomes a corner solution
+that is wrong as soon as trading costs anything.
+
+Signature 2: one parent order, five algos, simulated fills. Then a benchmark toggle —
+the same execution looks excellent against VWAP and terrible against arrival price.
+Choosing the benchmark chooses the verdict, which is why execution arguments never
+resolve.
+
+Signature 3: dark pool adverse selection. Rest at the midpoint, get filled, and watch
+what happens next. Fills cluster right before adverse moves. Same lesson as page 05's
+market-making sim, taken from the other side of the trade.
+
+Chapters
+- The missing line item — costs added to page 01's replication; the U-curve
+- Impact vs timing risk — trade fast and pay certain impact, trade slow and take
+  uncertain drift. Why the optimal trajectory is neither instant nor uniform
+- The algo menu — TWAP, VWAP, POV/participation, implementation shortfall, MOC/close,
+  liquidity-seeking, pegged and midpoint, iceberg. Each mapped to what it optimizes,
+  and when it is the wrong tool
+- Benchmarks disagree — arrival vs interval VWAP vs close. The same fills, three
+  verdicts. Pick the benchmark and you have picked the answer
+- Dark venues — midpoint matching, no pre-trade transparency, block crossing, minimum
+  quantity, information leakage, and why dark fills are adversely selected
+- ETFs as the hedge — creation and redemption, authorised participants, the arbitrage
+  band that holds price to NAV, why ETF liquidity is inherited from the basket rather
+  than intrinsic, ETF options vs index options on settlement and exercise style, and
+  beta-hedging a single name with residual basis risk
+- Where it breaks — impact models are fitted rather than observed, slippage attribution
+  is contentious, and the close is crowded
+
+Interactive for the ETF chapter: price vs NAV with the creation/redemption band, where
+raising creation cost visibly loosens tracking.
+
+Relationship to 05: siblings. 05 is what happens when you are the one quoting; 06 is
+what happens when you are the one taking. They could merge into one longer page if the
+series needs to be shorter.
+
+---
+
+## 07 · Parity, Boxes and Rolls — arbitrage as construction
 
 **Spine:** put–call parity is not an identity to memorize, it is a machine for
 building one instrument out of others. Everything here is that machine applied twice.
@@ -168,7 +225,7 @@ Chapters
 
 ---
 
-## 07 · Early Exercise and Assignment
+## 08 · Early Exercise and Assignment
 
 **Spine:** the American premium is the value of a decision, and most of the time that
 value is zero. Knowing exactly when it is not is a real edge and is mostly arithmetic.
@@ -190,7 +247,7 @@ Chapters
 
 ---
 
-## 08 · Variance, Volatility, and the Log Contract
+## 09 · Variance, Volatility, and the Log Contract
 
 **Spine:** variance is replicable with a static strip of options; volatility is not.
 That asymmetry is the whole subject.
@@ -209,7 +266,7 @@ Chapters
 
 ---
 
-## 09 · Dispersion and Correlation
+## 10 · Dispersion and Correlation
 
 **Spine:** index variance is a weighted sum of single-name variances plus a correlation
 term. Trade the difference and you are trading correlation, whether you meant to or not.
@@ -226,7 +283,7 @@ Chapters
 
 ---
 
-## 10 · The Book
+## 11 · The Book
 
 **Spine:** everything so far has been one option. A book is a portfolio, and portfolio
 risk is not the sum of the parts.
@@ -250,10 +307,12 @@ Chapters
 - **02 first.** Both 03 and 04 need smile and term-structure vocabulary; 07 needs it too.
 - **05 needs no other page but 01**, and is the one whose content sounds most like
   someone who has sat on a desk.
-- **06 and 07** can be written from existing desk knowledge rather than research, and
-  07 in particular has no good treatment anywhere online.
-- **10 last.** It is the capstone and assumes everything.
+- **06 closes the loop on page 01.** Its U-curve is the honest ending to the
+  replication chapter, so it reads as a sequel rather than a detour.
+- **07 and 08** can be written from existing desk knowledge rather than research, and
+  08 in particular has no good treatment anywhere online.
+- **11 last.** It is the capstone and assumes everything.
 - Reuse page 01's math primer by reference. Later pages should link back rather than
   re-explain, and add primer sections only for genuinely new machinery
   (Breeden–Litzenberger in 02, quadratic variation in 03, adverse selection in 05,
-  static replication in 08).
+  impact and timing risk in 06, static replication in 09).
