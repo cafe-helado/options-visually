@@ -1,6 +1,6 @@
 # Roadmap
 
-Nine pages. Each needs a result that is hard to believe from a description and
+Ten pages. Each needs a result that is hard to believe from a description and
 obvious once you have watched it — if a page has no such moment, it is an article,
 not a page in this series.
 
@@ -100,7 +100,54 @@ Chapters
 
 ---
 
-## 05 · Parity, Boxes and Rolls — arbitrage as construction
+## 05 · The Market, Not the Model — options microstructure
+
+**Spine:** every price in pages 01–04 is a model output. A real option has a bid, an
+ask, a queue, and a counterparty who may know something you don't.
+
+Verified: one cent is 0.04 vol points on a 180d ATM option and **11.57 vol points on a
+7d 5-delta**. A nickel-wide market is 0.2 vol wide in one case and 58 vol wide in the
+other. Tick size is fixed in price and wildly variable in vol.
+
+Verified: a toy dealer-hedging model reproduces pinning, but only above a price-impact
+threshold. Long-gamma dealers pull spot to the strike (mean |S_T − K| = 1.50 vs 2.46
+unhedged; 19.4% finish within 50c vs 12.2%). Short-gamma dealers push it away (4.41;
+0.8% pinned). Below that threshold the effect vanishes into the noise entirely — which
+is the honest version of a claim usually made without conditions.
+
+Signature 1: the tick-in-vol table. Explains why far OTM short-dated markets look
+absurd, and why market makers quote in vol while screens display price.
+
+Signature 2: the pinning simulator with a price-impact slider, showing the effect
+emerge from nothing — and disappear again when flow is small relative to volume.
+
+Signature 3: quote a market yourself. Set a bid/ask in vol against incoming order flow
+that is part informed and part uninformed; get filled, hedged, and marked. Adverse
+selection is felt rather than defined — your fills land on the wrong side, and you can
+be right on vol and still lose. Widen and the losses stop along with the volume.
+
+Chapters
+- Price quoting vs vol quoting — what a tick is worth, and why it varies by 300x
+- What is actually inside a spread — hedge cost, inventory risk, adverse selection,
+  fees, edge. Decomposed with sliders
+- Where liquidity really sits — volume vs open interest; the ATM front-month
+  concentration and what it means for anything outside it
+- Legging risk and complex orders — why multi-leg trades are quoted as a package
+- Auctions and price improvement — the mechanism, not the current rulebook
+- Dealer positioning and hedging flow — the mechanism, the impact condition that makes
+  it real, and the explicit caveat that positioning is inferred rather than observed
+- Pinning and expiration — the simulator, plus what else pins a stock
+- What a market maker's day optimizes — and why it is not "predicting the stock"
+
+Two constraints on writing it
+- **Plumbing rots.** Exchange counts, fee schedules and auction names change. Teach
+  mechanisms; date anything venue-specific and expect to revise it
+- **Do not overclaim dealer gamma.** The narrative is popular and usually stated
+  without the flow-size condition. The page's value is including the condition
+
+---
+
+## 06 · Parity, Boxes and Rolls — arbitrage as construction
 
 **Spine:** put–call parity is not an identity to memorize, it is a machine for
 building one instrument out of others. Everything here is that machine applied twice.
@@ -121,7 +168,7 @@ Chapters
 
 ---
 
-## 06 · Early Exercise and Assignment
+## 07 · Early Exercise and Assignment
 
 **Spine:** the American premium is the value of a decision, and most of the time that
 value is zero. Knowing exactly when it is not is a real edge and is mostly arithmetic.
@@ -143,7 +190,7 @@ Chapters
 
 ---
 
-## 07 · Variance, Volatility, and the Log Contract
+## 08 · Variance, Volatility, and the Log Contract
 
 **Spine:** variance is replicable with a static strip of options; volatility is not.
 That asymmetry is the whole subject.
@@ -162,7 +209,7 @@ Chapters
 
 ---
 
-## 08 · Dispersion and Correlation
+## 09 · Dispersion and Correlation
 
 **Spine:** index variance is a weighted sum of single-name variances plus a correlation
 term. Trade the difference and you are trading correlation, whether you meant to or not.
@@ -179,7 +226,7 @@ Chapters
 
 ---
 
-## 09 · The Book
+## 10 · The Book
 
 **Spine:** everything so far has been one option. A book is a portfolio, and portfolio
 risk is not the sum of the parts.
@@ -201,9 +248,12 @@ Chapters
 ## Notes on sequencing
 
 - **02 first.** Both 03 and 04 need smile and term-structure vocabulary; 07 needs it too.
-- **05 and 06** are the two that can be written from existing desk knowledge rather than
-  research, and 06 in particular has no good treatment anywhere online.
-- **09 last.** It is the capstone and assumes everything.
+- **05 needs no other page but 01**, and is the one whose content sounds most like
+  someone who has sat on a desk.
+- **06 and 07** can be written from existing desk knowledge rather than research, and
+  07 in particular has no good treatment anywhere online.
+- **10 last.** It is the capstone and assumes everything.
 - Reuse page 01's math primer by reference. Later pages should link back rather than
   re-explain, and add primer sections only for genuinely new machinery
-  (Breeden–Litzenberger in 02, quadratic variation in 03, static replication in 07).
+  (Breeden–Litzenberger in 02, quadratic variation in 03, adverse selection in 05,
+  static replication in 08).
