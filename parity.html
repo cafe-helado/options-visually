@@ -29,13 +29,13 @@
 <nav class="chapnav" id="chapnav" aria-label="Chapters">
   <a href="#c1"><span>The identity</span><i></i></a>
   <a href="#c2"><span>The synthetic</span><i></i></a>
-  <a href="#c3"><span>Combo & straddle</span><i></i></a>
-  <a href="#c4"><span>Carry</span><i></i></a>
-  <a href="#c5"><span>Convert & reverse</span><i></i></a>
-  <a href="#c6"><span>The rate</span><i></i></a>
-  <a href="#c7"><span>Jelly rolls</span><i></i></a>
-  <a href="#c8"><span>Borrow</span><i></i></a>
-  <a href="#c9"><span>Drill</span><i></i></a>
+  <a href="#c4"><span>Combo & straddle</span><i></i></a>
+  <a href="#c5"><span>Carry</span><i></i></a>
+  <a href="#c6"><span>Convert & reverse</span><i></i></a>
+  <a href="#c7"><span>The rate</span><i></i></a>
+  <a href="#c8"><span>Jelly rolls</span><i></i></a>
+  <a href="#c9"><span>Borrow</span><i></i></a>
+  <a href="#c10"><span>Drill</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -185,6 +185,59 @@
 <section class="chapter" id="c3">
   <div class="chead">
     <div class="cnum">03</div>
+    <h2>The trade that has no distribution</h2>
+    <p class="dek">Page 01 spent a chapter showing that a delta hedge shrinks your risk toward zero. This one removes it outright, and the difference is the whole reason a financing desk is not a volatility desk.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Run the same few thousand random price paths through three positions and look at what each one is worth at the end. Long stock gives you the distribution you expect — wide, roughly symmetric in logs, a real gamble. A short call delta-hedged sixty times gives you something much tighter, because that is what hedging does: page 01 measured the residual and found it falling like 1/√N, so more rebalancing buys a narrower distribution and it never quite reaches zero.</p>
+    <p>The conversion gives you a <b>vertical line</b>. Not a narrow distribution. Not a distribution with small standard deviation. A single value, achieved on every path, with no rebalancing and no model.</p>
+    <p>That is worth sitting with, because it is easy to read the three panels as "risky, less risky, least risky" and miss that the third one is a different kind of object. The middle panel is literally <a href="black-scholes.html#c6" style="color:var(--blue)">page 01's replication experiment</a> replayed — same construction, same 1/√N residual. The delta hedge is an <b>approximation that improves with effort</b> — it needs a volatility input, it needs you to trade all day, and it is wrong if the vol you assumed was wrong. The conversion is an <b>identity</b>. It needs no vol input, no rebalancing, and no view. You set it up once and the arithmetic does the rest.</p>
+    <p>So the question a revcon desk asks is never "where is the stock going" or even "what is realized vol going to be." It is only: <em>what rate did I lock, and what does my funding cost?</em> Everything on the rest of this page is machinery for answering that precisely.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Terminal P&amp;L over the same paths</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--grey)"></i>Long stock</span>
+            <span><i class="sw" style="background:var(--ochre)"></i>Delta-hedged short call</span>
+            <span><i class="sw" style="background:var(--blue)"></i>Conversion</span>
+          </span>
+        </div>
+        <canvas id="cvDist" height="320"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Spread of outcomes, log scale</h3></div>
+        <canvas id="cvSd" height="150"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Simulation</h4>
+        <div id="ctl3"></div>
+        <div class="btnrow"><button class="act" id="run3">Run paths</button><button class="act ghost" id="clr3">Clear</button></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Raise the volatility slider and watch the first two distributions widen while the third does not move at all. Raise the rehedge count and the middle one narrows, slowly, at the square-root rate. Nothing you can do to the market moves the blue line, because nothing in its construction referred to the market.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You double implied volatility in the simulation. What happens to the three distributions?</p>
+    <div class="opts">
+      <button>All three widen proportionally</button>
+      <button data-ok="1">Stock and the delta-hedged call widen; the conversion does not move, because its payoff never depended on the path</button>
+      <button>Only the delta-hedged call widens — stock is unaffected by implied vol</button>
+      <button>The conversion widens most, since it holds two options</button>
+    </div>
+    <div class="ans"><b>The conversion does not move.</b> It holds two options, but they are locked against each other and against the stock so that every path ends at the same place — you deliver at K whether the call is assigned or the put is exercised. Volatility is the parameter that describes how paths spread out, and the conversion's payoff is constant across paths, so vol cannot touch it. This is exactly why a revcon is quoted as a <em>rate</em> rather than a vol: there is no vol in it.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
     <h2>The combo and the straddle</h2>
     <p class="dek">Difference and sum. Two numbers that between them contain both option prices.</p>
   </div>
@@ -213,10 +266,10 @@
   </div>
 </section>
 
-<!-- ══════════ 04 ══════════ -->
-<section class="chapter" id="c4">
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
   <div class="chead">
-    <div class="cnum">04</div>
+    <div class="cnum">05</div>
     <h2>What r/c actually is</h2>
     <p class="dek">Carry is two things netted against each other, over a period defined by settlement dates rather than trade dates.</p>
   </div>
@@ -261,10 +314,10 @@
   </div>
 </section>
 
-<!-- ══════════ 05 ══════════ -->
-<section class="chapter" id="c5">
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
   <div class="chead">
-    <div class="cnum">05</div>
+    <div class="cnum">06</div>
     <h2>The conversion and the reversal</h2>
     <p class="dek">One formula. It works for both directions, any dividend, any strike, bid or offer. The direction changes only what you compare the answer to.</p>
   </div>
@@ -362,10 +415,10 @@
   </div>
 </section>
 
-<!-- ══════════ 06 ══════════ -->
-<section class="chapter" id="c6">
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
   <div class="chead">
-    <div class="cnum">06</div>
+    <div class="cnum">07</div>
     <h2>Simple, compound, and which one the screen means</h2>
     <p class="dek">Two conventions that agree to a basis point on short dates and diverge on long ones. Mixing them is a real error with a real size.</p>
   </div>
@@ -395,10 +448,10 @@
   </div>
 </section>
 
-<!-- ══════════ 07 ══════════ -->
-<section class="chapter" id="c7">
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
   <div class="chead">
-    <div class="cnum">07</div>
+    <div class="cnum">08</div>
     <h2>Jelly rolls</h2>
     <p class="dek">Two revcons in different expiries. The stock cancels, and what is left is the pure interest and dividend differential between two dates.</p>
   </div>
@@ -459,10 +512,10 @@
   </div>
 </section>
 
-<!-- ══════════ 08 ══════════ -->
-<section class="chapter" id="c8">
+<!-- ══════════ 09 ══════════ -->
+<section class="chapter" id="c9">
   <div class="chead">
-    <div class="cnum">08</div>
+    <div class="cnum">09</div>
     <h2>Borrow, and why the riskless trade isn't</h2>
     <p class="dek">Hard-to-borrow names break the benchmark, not the formula. And the borrow is the thing that actually loses money.</p>
   </div>
@@ -471,8 +524,32 @@
     <p class="lead">Everything so far assumed you can short the stock at a normal rate. When you cannot, nothing about the pricing changes — the formula is identical — but the number you compare against does. Instead of EFFR ± 25 basis points you use the actual borrow rate for that name, and the pricer needs a manual override for it.</p>
     <p>This produces results that look alarming and are not. <b>Negative implied rates are ordinary on hard-to-borrow names.</b> A negative rate means the converter is paying to hold the trade, which makes sense when the cost of borrowing exceeds the interest earned on the short sale proceeds. The test is never whether the rate is positive. It is whether the rate beats <em>your</em> funding: a convert implying 12% against a 15% borrow is a three-point loss even though 12% sounds enormous.</p>
     <p><b>Where the real risk lives.</b> A conversion is described as riskless and is not, and the gap is almost entirely the borrow. If the stock becomes harder to borrow after you put the trade on, your funding cost rises while the package price is fixed — you are locked into lending at a rate that was fair and no longer is. Worse, a <b>recall</b> forces you to buy in the short leg at whatever the market offers, which converts a financing trade into a directional one at the worst possible moment. This is the mechanism behind most of the memorable revcon losses, and it is not in any of the formulas above.</p>
-    <p>Two smaller ones worth naming. <b>Early exercise:</b> the options are American, so a short in-the-money put can be assigned before expiry, unwinding one leg and leaving you with a stock position you did not want — most likely just before an ex-dividend date. And <b>unannounced dividends:</b> parity requires knowing r/c, and a special dividend declared after you trade changes it retroactively against you.</p>
+    <p>Two smaller ones worth naming. <b>Early exercise:</b> the options are American, so a short in-the-money call can be exercised against you before an ex-dividend date, unwinding one leg and taking away the dividend you had priced in. And <b>unannounced dividends:</b> parity requires knowing r/c, and a special dividend declared after you trade changes it retroactively.</p>
+    <p>Early assignment is worth seeing rather than describing, because it does something specific to the picture from chapter 03. The rule governing it is exact: a rational holder exercises a call early, giving up its remaining time value, only when the dividend exceeds that time value. Since the time value of an at-the-money call equals the corresponding put, the condition is just <code>put value &lt; dividend</code>.</p>
+    <p>Feed that rule into the same simulation and the vertical line from chapter 03 <b>splits into two</b>. Most paths still pay exactly the carry. The ones where the call goes deep enough in the money before the ex-date get assigned, you deliver the stock early, and you never collect the dividend you had already priced into the package. The gap between the two modes is essentially that dividend.</p>
+    <p>This is the honest version of "riskless." The trade has no <em>market</em> risk — no path dependence, no vol exposure, nothing chapter 03 could not eliminate. What it has is a set of discrete, structural ways to lose: assignment, recall, and a dividend that changes. None of them are in the pricing formula, and all of them are in the P&amp;L.</p>
   </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The same conversion, with early assignment switched on</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>Held to expiry — pays the carry</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Assigned early — dividend lost</span>
+          </span>
+        </div>
+        <canvas id="cvBreak" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Assignment risk</h4>
+        <div id="ctl9"></div>
+        <div class="kv" style="margin-top:20px" id="kv9"></div>
+      </div>
+    </div>
+    <figcaption>Raise the dividend and two things happen at once: more paths satisfy the early-exercise condition, and each assignment costs more. Push it far enough and the second mode carries more weight than the first — at which point the "arbitrage" is a coin flip on assignment, priced as though it were not.</figcaption>
+  </figure>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -487,10 +564,10 @@
   </div>
 </section>
 
-<!-- ══════════ 09 ══════════ -->
-<section class="chapter" id="c9">
+<!-- ══════════ 10 ══════════ -->
+<section class="chapter" id="c10">
   <div class="chead">
-    <div class="cnum">09</div>
+    <div class="cnum">10</div>
     <h2>Parity drill</h2>
     <p class="dek">Solve for the missing variable. Randomized, tolerance-marked, working shown every time.</p>
   </div>
@@ -1025,7 +1102,149 @@ function jrNewton(JR,Kf,dF,Kn,dN,div,comm){
   stats();next();
 })();
 
-function drawAll(){draw1();draw2();draw4();draw5();draw7();}
+
+/* ══════════════════════════════════════════════
+   03 — three positions, one set of paths
+   ══════════════════════════════════════════════ */
+const s3={sig:.35,days:60,steps:60,rate:4.5};
+const D3={stock:[],hedge:[],conv:[]};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"sg3",k:"sig",lbl:"σ",name:"Volatility",min:.08,max:1.2,step:.01,fmt:pct},
+    {id:"d3",k:"days",lbl:"T",name:"Days",min:10,max:365,step:5,fmt:v=>v.toFixed(0)},
+    {id:"st3",k:"steps",lbl:"N",name:"Rehedges (middle panel)",min:2,max:250,step:1,fmt:v=>v.toFixed(0)},
+    {id:"r3",k:"rate",lbl:"r",name:"Rate",min:0,max:10,step:.05,fmt:v=>v.toFixed(2)+"%"}
+  ],s3,()=>{clear();add(600);draw();},"c3");
+  const S0=100,K=100;
+  function clear(){D3.stock=[];D3.hedge=[];D3.conv=[];}
+  function add(n){
+    const T=s3.days/365,r=s3.rate/100,N=Math.max(2,Math.round(s3.steps)),dt=T/N;
+    const combo=S0-K*Math.exp(-r*T);
+    const convPL=K-(S0-combo)*Math.exp(r*T);
+    for(let i=0;i<n;i++){
+      const p=gbm(S0,.10,s3.sig,T,N), ST=p[N];
+      D3.stock.push(ST-S0);
+      let d=bs(S0,K,T,s3.sig,r,0,true).delta;
+      let cash=bs(S0,K,T,s3.sig,r,0,true).price-d*S0;
+      for(let k=1;k<=N;k++){
+        cash*=Math.exp(r*dt);
+        const tau=T-k*dt;
+        if(tau>1e-9){const dn=bs(p[k],K,tau,s3.sig,r,0,true).delta;cash-=(dn-d)*p[k];d=dn;}
+      }
+      D3.hedge.push(cash+d*ST-Math.max(0,ST-K));
+      D3.conv.push(convPL);
+    }
+  }
+  const sd=a=>{if(a.length<2)return 0;const m=a.reduce((x,y)=>x+y,0)/a.length;
+    return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(a.length-1));};
+  window.draw3=draw;
+  function draw(){
+    if(!D3.stock.length)add(600);
+    const sets=[["Long stock",D3.stock,"--grey"],["Delta-hedged",D3.hedge,"--ochre"],["Conversion",D3.conv,"--blue"]];
+    const all=D3.stock.concat(D3.hedge,D3.conv);
+    const lim=Math.max(...all.map(Math.abs))*1.05||1;
+    const NB=71;
+    const bins=sets.map(([,a])=>{const b=new Int32Array(NB);
+      a.forEach(v=>{const k=Math.floor((v+lim)/(2*lim)*NB);if(k>=0&&k<NB)b[k]++;});return b;});
+    const mx=Math.max(1,...bins.map(b=>Math.max(...b)));
+    const o2=Fig(document.getElementById("cvDist"),{h:320,x0:-lim,x1:lim,y0:0,y1:mx*1.12,pad:{l:56}});
+    axes(o2,v=>(v>=0?"+":"")+v.toFixed(0),v=>v.toFixed(0),5,4);
+    const g=o2.g,bw=o2.pw/NB;
+    bins.forEach((b,i)=>{
+      g.fillStyle=C(sets[i][2]);g.globalAlpha=i===2?.9:.55;
+      for(let k=0;k<NB;k++){if(!b[k])continue;
+        g.fillRect(o2.P.l+k*bw,o2.Y(b[k]),Math.max(bw-.6,1.4),o2.P.t+o2.ph-o2.Y(b[k]));}
+    });
+    g.globalAlpha=1;
+    vline(o2,0,C("--ink"),"zero",[3,3]);
+    const sds=sets.map(([n,a])=>[n,sd(a)]);
+    const lo=Math.min(...sds.map(x=>x[1]).filter(v=>v>0),1e-4);
+    const o3=Fig(document.getElementById("cvSd"),{h:150,x0:0,x1:3,
+      y0:Math.log10(Math.max(lo,1e-7))-.5,y1:Math.log10(Math.max(...sds.map(x=>x[1])))+.5,pad:{l:56,b:24}});
+    axes(o3,()=>"",v=>"1e"+v.toFixed(0),3,3);
+    sds.forEach(([n,v],i)=>{
+      const x=0.5+i, y=Math.log10(Math.max(v,1e-7));
+      const g3=o3.g;g3.fillStyle=C(sets[i][2]);
+      g3.fillRect(o3.X(x)-16,o3.Y(y),32,o3.P.t+o3.ph-o3.Y(y));
+      g3.fillStyle=C("--ink");g3.textAlign="center";g3.textBaseline="bottom";
+      g3.font="10px 'IBM Plex Mono', monospace";
+      g3.fillText(v<1e-9?"0":v.toFixed(3),o3.X(x),o3.Y(y)-4);
+      g3.fillStyle=C("--grey");g3.textBaseline="top";g3.font="9px 'IBM Plex Mono', monospace";
+      g3.fillText(n,o3.X(x),o3.P.t+o3.ph+6);
+    });
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Paths",D3.stock.length.toLocaleString()],
+      ["Stock sd",sd(D3.stock).toFixed(4)],
+      ["Hedged sd",sd(D3.hedge).toFixed(4)],
+      ["Conversion sd",sd(D3.conv)<1e-9?"0.000000":sd(D3.conv).toFixed(6)],
+      ["Conversion P&L",(D3.conv[0]||0).toFixed(5)],
+      ["Ratio hedged/conv",sd(D3.conv)<1e-12?"∞":"—"],
+      ["Rehedges",Math.round(s3.steps)]
+    ]);
+  }
+  document.getElementById("run3").addEventListener("click",()=>{add(600);draw();});
+  document.getElementById("clr3").addEventListener("click",()=>{clear();add(600);draw();});
+  clear();add(600);
+})();
+
+/* ══════════════════════════════════════════════
+   09 — early assignment breaks the spike
+   ══════════════════════════════════════════════ */
+const s9={div:0.80,sig:.35,days:60,tEx:.6,rate:4.5};
+(function(){
+  sliders(document.getElementById("ctl9"),[
+    {id:"v9",k:"div",lbl:"Div",name:"Dividend",min:0,max:3,step:.05,fmt:v=>"$"+v.toFixed(2)},
+    {id:"s9s",k:"sig",lbl:"σ",name:"Volatility",min:.08,max:1.2,step:.01,fmt:pct},
+    {id:"t9",k:"tEx",lbl:"ex",name:"Ex-date, fraction of life",min:.1,max:.95,step:.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"d9",k:"days",lbl:"T",name:"Days",min:10,max:250,step:5,fmt:v=>v.toFixed(0)}
+  ],s9,()=>draw(),"c9");
+  window.draw9=draw;
+  function draw(){
+    const S0=100,K=100,T=s9.days/365,r=s9.rate/100,N=1400,STEPS=40;
+    const iEx=Math.max(1,Math.round(STEPS*s9.tEx)), tau=T*(1-s9.tEx);
+    const combo=S0-K*Math.exp(-r*T)-s9.div*Math.exp(-r*T*s9.tEx);
+    const held=[],asg=[];
+    for(let i=0;i<N;i++){
+      const p=gbm(S0,.10,s9.sig,T,STEPS), Sx=p[iEx];
+      const putVal=bs(Sx,K,Math.max(tau,1e-6),s9.sig,r,0,false).price;
+      const cost=(S0-combo)*Math.exp(r*T);
+      if(putVal<s9.div) asg.push(K*Math.exp(r*T*(1-s9.tEx))-cost);
+      else held.push(K+s9.div*Math.exp(r*T*(1-s9.tEx))-cost);
+    }
+    const all=held.concat(asg);
+    const lo=Math.min(...all,0)-.05, hi=Math.max(...all,0)+.05;
+    const NB=61,bH=new Int32Array(NB),bA=new Int32Array(NB);
+    const idx=v=>Math.floor((v-lo)/(hi-lo)*NB);
+    held.forEach(v=>{const k=idx(v);if(k>=0&&k<NB)bH[k]++;});
+    asg.forEach(v=>{const k=idx(v);if(k>=0&&k<NB)bA[k]++;});
+    const mx=Math.max(1,...bH,...bA);
+    const o=Fig(document.getElementById("cvBreak"),{h:290,x0:lo,x1:hi,y0:0,y1:mx*1.12,pad:{l:58}});
+    axes(o,v=>(v>=0?"+":"")+v.toFixed(2),v=>v.toFixed(0),5,4);
+    const g=o.g,bw=o.pw/NB;
+    for(let k=0;k<NB;k++){
+      if(bH[k]){g.fillStyle=C("--blue");g.globalAlpha=.85;
+        g.fillRect(o.P.l+k*bw,o.Y(bH[k]),Math.max(bw-.6,1.6),o.P.t+o.ph-o.Y(bH[k]));}
+      if(bA[k]){g.fillStyle=C("--verm");g.globalAlpha=.85;
+        g.fillRect(o.P.l+k*bw,o.Y(bA[k]),Math.max(bw-.6,1.6),o.P.t+o.ph-o.Y(bA[k]));}
+    }
+    g.globalAlpha=1;
+    vline(o,0,C("--ink"),"fair",[3,3]);
+    const rate=asg.length/N;
+    const mean=all.reduce((a,b)=>a+b,0)/N;
+    document.getElementById("kv9").innerHTML=kvHTML([
+      ["Paths",N.toLocaleString()],
+      ["Assigned early",(rate*100).toFixed(1)+"%"],
+      ["Held to expiry",((1-rate)*100).toFixed(1)+"%"],
+      ["Mean P&L",mean.toFixed(4)],
+      ["Worst path",Math.min(...all).toFixed(4)],
+      ["Gap between modes",asg.length&&held.length?
+        Math.abs(held.reduce((a,b)=>a+b,0)/held.length-asg.reduce((a,b)=>a+b,0)/asg.length).toFixed(4):"—"],
+      ["Dividend","$"+s9.div.toFixed(2)]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw7();draw9();}
 LAB.boot(drawAll);
 
 </script>

@@ -204,14 +204,20 @@ series needs to be shorter.
 
 ---
 
-## 07 · Parity, Boxes and Rolls — arbitrage as construction
+## 07 · Parity, Boxes and Rolls — arbitrage as construction  ✅ live
 
 **Spine:** put–call parity is not an identity to memorize, it is a machine for
 building one instrument out of others. Everything here is that machine applied twice.
 
-Signature: an interactive where you assemble a synthetic stock from options and watch
-its P&L track real stock to the penny — then break it by changing the financing rate
-and watch the gap open exactly as much as theory says.
+Signature as built: the same few thousand paths run through three positions. Long stock
+sd 14.39, delta-hedged short call sd 0.63, conversion sd **0.000000** — a vertical line,
+not a narrow distribution. The middle panel is page 01's replication chapter replayed,
+which makes the contrast the point: hedging is an approximation that improves with
+effort, a conversion is an identity that needs none.
+
+Second signature: switch on early assignment (exercise iff put value < dividend) and the
+vertical line splits in two. At a $1.50 dividend, 33% of paths get assigned and the mean
+falls to -0.40. The "riskless" trade has a second mode.
 
 Chapters
 - Parity as construction — synthetic stock, synthetic call, synthetic put
