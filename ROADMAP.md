@@ -50,15 +50,23 @@ Chapters
 
 ---
 
-## 03 · Catalyst and Noise — decomposing volatility
+## 03 · Catalyst and Noise — decomposing volatility  ✅ live (catalyst.html)
 
 **Spine:** variance is additive.  σ²T = σ_diff²·T + Σ J².  One equation, whole page.
 
 Verified: two-expiry strip recovers a 25% diffusive vol and a 6% event move exactly
 from a 39.5% / 29.1% inverted term structure.
 
-Signature: raw IV term structure (kinked, inverted, apparently arbitrary) beside the
-event-stripped curve (smooth, flat). The mess was one number hiding in the curve.
+Signature as built: raw term structure (kinked, inverted) beside the event-stripped
+curve (flat). A 39.54% front and 29.05% back recover sigma_d = 25.000% and J = 6.000%
+exactly, from any pair of expiries.
+
+Also built: the straddle-vs-one-sigma trap. Straddle = E|move| = 0.7979 S sigma sqrt(T),
+so at 20 vol / 30 days it is 4.57 against a one-sigma 5.73 — a 25% gap in a number that
+gets quoted to two decimals and reasoned about as though it were a standard deviation.
+
+And: a fairly priced earnings straddle has mean ~0, median -0.93, win rate 33%. The gap
+between mean and median is the whole behavioural problem with event vol.
 
 Second signature: the straddle price *is* the expected absolute move.
 straddle = E|S_T − S| = √(2/π)·S·σ√T, confirmed to three decimals across tenors.

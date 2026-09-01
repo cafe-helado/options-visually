@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>One Number Holding Two Things — catalyst and non-catalyst volatility</title>
+<meta name="description" content="Decomposing implied volatility into diffusive and event components: vol-day weighting, the two-expiry strip, implied move vs one sigma, the P&amp;L shape of an earnings straddle, and calendars.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="One Number Holding Two Things — catalyst and non-catalyst volatility">
+<meta property="og:description" content="Decomposing implied volatility into diffusive and event components: vol-day weighting, the two-expiry strip, implied move vs one sigma, the P&amp;L shape of an earnings straddle, and calendars.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 03 · Catalyst and Noise</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Two kinds of move</span><i></i></a>
+  <a href="#c2"><span>Vol days</span><i></i></a>
+  <a href="#c3"><span>Stripping</span><i></i></a>
+  <a href="#c4"><span>The implied move</span><i></i></a>
+  <a href="#c5"><span>Through the print</span><i></i></a>
+  <a href="#c6"><span>Calendars</span><i></i></a>
+  <a href="#c7"><span>Drill</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 03</div>
+    <h1>One number holding <em>two</em> things</h1>
+    <p class="sub">An implied volatility quoted into an earnings date is a blend of ordinary daily drift and one scheduled shock. They obey different rules and they are worth separating — and because variance adds, separating them takes one equation.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This page assumes <a href="black-scholes.html" style="color:var(--blue)">page 01</a> for implied vol and the greeks, and leans on <a href="surface.html" style="color:var(--blue)">page 02</a>'s term-structure chapter — particularly the fact that you subtract total variances rather than averaging volatilities.</p>
+  <ol>
+    <li><b>One equation carries the page.</b> σ²T = σ<sub>diff</sub>²T + J². Everything else is applying it or checking where it fails.</li>
+    <li><b>Chapter 03 is the payoff.</b> A term structure that looks arbitrary becomes flat once one number is removed from it.</li>
+    <li><b>Chapter 05 is the one traders get wrong.</b> The P&amp;L distribution of a fairly priced earnings straddle is not centred on zero in the way people assume.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>σ<sub>imp</sub></td><td>The implied volatility you see quoted — a blend of everything between now and expiry.</td></tr>
+      <tr><td>σ<sub>diff</sub></td><td>Diffusive volatility. The ordinary day-to-day component, with the event removed.</td></tr>
+      <tr><td>J</td><td>The event's contribution, expressed as a one-off move in <em>fractional</em> terms. A J of 0.06 is a 6% jump.</td></tr>
+      <tr><td>Vol day</td><td>A weight assigned to a calendar day, saying how much variance it contributes relative to an ordinary trading day.</td></tr>
+      <tr><td>Implied move</td><td>The market's expected absolute move over the event. Usually derived from the straddle, which — chapter 04 — is not the same as one standard deviation.</td></tr>
+      <tr><td>Vol crush</td><td>The collapse in implied volatility immediately after an event resolves, as J leaves the remaining window.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Two kinds of move, one number</h2>
+    <p class="dek">A stock's variance between now and expiry has an ordinary part that accumulates smoothly and a scheduled part that arrives all at once.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Page 01 modelled a stock as pure diffusion — many small independent moves, variance accruing evenly with time. That is a decent description of most days and a terrible description of the morning after an earnings release, when the whole distribution of a quarter's worth of information resolves in a single print.</p>
+    <p>The fix is not a more complicated process. It is to admit there are two sources of variance and to add them, which you are allowed to do because <b>variance is additive over independent components</b> — the same fact page 01 used to derive √T scaling, applied along a different seam.</p>
+    <div class="mline">σ<sub>imp</sub>² · T = σ<sub>diff</sub>² · T + J²</div>
+    <p class="mread">Reads as: <b>total variance is the ordinary variance that accumulates with time, plus a fixed lump the event contributes regardless of how far away it is.</b></p>
+    <p>Look carefully at the asymmetry in that equation, because everything downstream comes from it. The diffusive term is multiplied by T — the longer the window, the more of it you accumulate. The event term is <em>not</em>. A single earnings release contributes the same J² whether it sits inside a one-week option or a one-year option.</p>
+    <p>Which immediately explains the shape of every earnings term structure you have ever seen. Divide through by T to get the quoted volatility, and the event's contribution is J²/T — enormous in the front month and negligible in the back. The front is not "expensive." It is carrying the same lump of event variance over far less time.</p>
+    <p>The figure shows the two components accumulating. Diffusion is the ramp; the event is the step. What the market quotes is neither — it is the square root of their sum, divided by elapsed time.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Variance accumulating toward expiry</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Diffusive, accrues with time</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Event, arrives at once</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Total</span>
+          </span>
+        </div>
+        <canvas id="cvAccum" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>What that does to the quoted volatility</h3></div>
+        <canvas id="cvQuoted" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Components</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Drag the event date and watch the step slide along the ramp. The lower panel is the number actually on your screen: it jumps the moment the event enters the window, then decays as the diffusive term catches up. Nothing about the stock changed — only how much time the same lump is being spread over.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A name has 25% diffusive vol and an earnings event worth a 6% move. Why is the two-week implied vol so much higher than the two-month?</p>
+    <div class="opts">
+      <button>The market expects higher volatility in the near term</button>
+      <button data-ok="1">Both windows contain the same event variance J², but the front spreads it over a sixth of the time, so J²/T is six times larger</button>
+      <button>Short-dated options always trade at a premium because of gamma</button>
+      <button>The back month has more diffusive volatility to average against</button>
+    </div>
+    <div class="ans"><b>Same lump, less time.</b> The event contributes a fixed J² to both windows. Quoted vol is √(total variance / T), so dividing that fixed contribution by a smaller T inflates the front-month number without anything about the event being different. This is why comparing front and back implied vols on an earnings name tells you almost nothing until you strip the event out — which is chapter 03.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>Not all days are equal</h2>
+    <p class="dek">Calendar time is a poor clock for volatility. Desks replace it with a weighted one, and the weights are a view.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Black–Scholes accrues variance uniformly in calendar time, which implies a weekend contains as much risk as a Wednesday. It does not. Markets are shut, and while some information still arrives, empirically a weekend behaves like a fraction of a trading day rather than two full ones.</p>
+    <p>The practical fix is to stop using calendar days as the clock and start assigning each day a <b>weight</b>: how much variance it contributes relative to an ordinary trading day. An ordinary day is 1.0. A weekend day is perhaps 0.1 to 0.2. A holiday is low. The day after a long weekend is often slightly above 1. And an earnings day is <b>three to five</b>, because a quarter's information lands in one session.</p>
+    <div class="mline">total variance = σ<sub>ref</sub>² × ( Σ w<sub>i</sub> ) / 252</div>
+    <p class="mread">Reads as: <b>add up the weights of the days you actually hold the option, not the days on the calendar.</b> σ<sub>ref</sub> is the vol of a single ordinary day, annualized.</p>
+    <p>Editing the weights below is the closest thing on this page to what a vol desk actually does before an earnings season. The term structure it produces is not fitted to anything — it falls out of the weights, and every kink in it is a day you decided was special.</p>
+    <p>Notice what happens as you slide the earnings date. Every expiry <em>before</em> the event is unaffected; every expiry <em>after</em> it jumps. With the event on day 21 and a weight of 4, the twenty-day implied vol is 25.97% and the twenty-one-day is <b>28.54%</b> — a 2.6-point step from one expiry to the next, caused entirely by a single day crossing into the window.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The weights</h3>
+          <span class="note">Each bar is one calendar day's contribution relative to an ordinary trading day.</span>
+        </div>
+        <canvas id="cvWeights" height="190"></canvas>
+        <div class="figtop" style="margin:22px 0 6px">
+          <h3>The term structure those weights imply</h3>
+          <span class="legend" style="margin:0"><span><i class="swl" style="background:var(--blue)"></i>Implied ATM vol</span></span>
+        </div>
+        <canvas id="cvTermW" height="250"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Calendar</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The step is the whole point. A term structure built from weighted days has a discontinuity exactly at the event, and the size of the step is a direct readout of what the market thinks the event is worth. Reading that step is the next chapter.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>Stripping the event out</h2>
+    <p class="dek">Two expiries, two unknowns, one linear solve. The messy curve becomes a flat one and a single number.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Take two expiries that both contain the event. Each satisfies the same decomposition with the same two unknowns:</p>
+    <div class="mline">σ₁²T₁ = σ<sub>d</sub>²T₁ + J² &nbsp;&nbsp;·&nbsp;&nbsp; σ₂²T₂ = σ<sub>d</sub>²T₂ + J²</div>
+    <p class="mread">Reads as: <b>two equations, two unknowns.</b> The event term is identical in both because it is the same event; only the time differs.</p>
+    <p>Subtract them and J² cancels, leaving the diffusive vol directly. Substitute back for J:</p>
+    <div class="mline">σ<sub>d</sub>² = (σ₁²T₁ − σ₂²T₂) / (T₁ − T₂) &nbsp;&nbsp;·&nbsp;&nbsp; J = √(σ₁²T₁ − σ<sub>d</sub>²T₁)</div>
+    <p class="mread">Reads as: <b>the slope of total variance against time is the diffusive variance; whatever is left over is the event.</b></p>
+    <p>That is the entire method, and it is exact rather than approximate. A front month at 39.54% and a back month at 29.05% — a wildly inverted, unhelpful-looking pair — recover σ<sub>d</sub> = <b>25.000%</b> and J = <b>6.000%</b>. The inversion was never a signal about the diffusive vol. It was one number hiding in the curve.</p>
+    <p>The figure is the payoff for the whole page. On the left, the raw term structure: kinked, inverted, apparently telling you something complicated. On the right, the same curve with J² removed from every point. It goes flat. <b>The complexity was one scalar.</b></p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Before and after the strip</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Quoted implied vol</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Diffusive vol, event removed</span>
+          </span>
+        </div>
+        <canvas id="cvStrip" height="300"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Recovered from any two expiries you pick</h3></div>
+        <div class="dollars" id="stripOut"></div>
+      </div>
+      <div class="rail panel">
+        <h4>Market</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Move the two chosen expiries anywhere on the curve and the recovered numbers barely change — which is the test that the decomposition is describing the data rather than fitting it. When the recovered σ<sub>d</sub> starts drifting with your choice of expiries, that is evidence of a second event, or of an event whose date you have wrong.</figcaption>
+  </figure>
+
+  <div class="derive">
+    <details class="derive" open style="margin-left:0;border-top:0;padding-top:0">
+      <summary>Derivation — why the event term does not scale with time</summary>
+      <div class="body">
+        <p>Split the log return to expiry into two independent pieces: the accumulated diffusion, and the jump that occurs if the event falls inside the window.</p>
+        <div class="mline">ln(S<sub>T</sub>/S₀) = X<sub>diff</sub> + X<sub>event</sub></div>
+        <p class="mread">Reads as: <b>the total move is ordinary drift plus, once, the shock.</b></p>
+        <p>Independence means variances add with no cross term:</p>
+        <div class="mline">Var(total) = Var(X<sub>diff</sub>) + Var(X<sub>event</sub>) = σ<sub>d</sub>²T + J²</div>
+        <p class="mread">Reads as: <b>independent risks add in variance, so the two pieces simply stack.</b> No cross term, because the event does not know what the diffusion did.</p>
+        <p>The diffusion is a sum of T years' worth of independent increments, so its variance is proportional to T. The event is a <b>single</b> draw. It happens once, and its variance is whatever it is, regardless of how much time surrounds it. That is the entire asymmetry, and everything on this page is a consequence of it.</p>
+        <p>Divide by T to get quoted volatility and the two terms behave completely differently:</p>
+        <div class="mline">σ<sub>imp</sub>² = σ<sub>d</sub>² + J²/T</div>
+        <p class="mread">Reads as: <b>quoted variance is the diffusive level plus an event term that decays like 1/T.</b> Plot this against 1/T and it is a straight line whose intercept is σ<sub>d</sub>² and whose slope is J².</p>
+        <p>That linearization is worth knowing as a practical trick: plot quoted variance against 1/T across every expiry, and if the points fall on a line, one event explains the whole curve. Curvature means more than one thing is going on.</p>
+        <p><b>Where it breaks.</b> Two events in one window give you two lumps that cannot be separated from two expiries alone — you need a third, and you need to know the dates. Vol also leaks: the market often bids the event premium up in the days before the print, so J measured a week out is not J measured the morning of. And an event whose date is not yet confirmed smears the lump across several possible days, which flattens the step and biases J downward.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>The implied move, and the factor everyone drops</h2>
+    <p class="dek">The number quoted on every earnings preview is not a standard deviation. It is about 80% of one.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Having recovered J, converting it to dollars looks trivial — multiply by spot. But the number the market <em>quotes</em> as the implied move is usually derived from the straddle price, and that is a different quantity from a one-standard-deviation move. The gap is large and it is a constant, so it is worth getting right once.</p>
+    <p>Here is the fact. For a driftless lognormal, the price of an at-the-money straddle equals the <b>expected absolute move</b>:</p>
+    <div class="mline">Straddle = E |S<sub>T</sub> − S₀| = √(2/π) · S · σ√T ≈ 0.7979 · S · σ√T</div>
+    <p class="mread">Reads as: <b>a straddle costs exactly the average size of the move, ignoring direction.</b> Which makes sense — that is what it pays.</p>
+    <p>A one-standard-deviation move is <code>S·σ√T</code>, with no 0.7979 in front. So the straddle-derived implied move is about <b>80% of a one-sigma move</b>, and the two get used interchangeably all the time. At 20 vol over 30 days on a $100 stock the straddle is <b>4.57</b> while one sigma is <b>5.73</b> — a 25% difference in a number people quote to two decimals.</p>
+    <p>The consequence is concrete. If you read "the options imply a 4.6% move" and then reason about the probability of exceeding it as though it were a standard deviation, you will overstate how unusual a larger move is. For a lognormal, the stock exceeds the straddle-implied move roughly <b>58%</b> of the time, and exceeds a genuine one-sigma move about 32% of the time. Those are very different claims.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Two different "expected moves" on the same distribution</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Straddle-implied, E|move|</span>
+            <span><i class="swl" style="background:var(--verm)"></i>One standard deviation</span>
+          </span>
+        </div>
+        <canvas id="cvMove" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Contract</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>The shaded region is where the move exceeds the straddle-implied number. It is more than half the distribution, which surprises people who have been treating that number as a one-sigma band. The ratio between the two markers is always √(2/π) — it does not depend on volatility, spot or tenor.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">An earnings preview says "the options are implying a 7% move." The stock moves 8%. Was the market wrong?</p>
+    <div class="opts">
+      <button>Yes — the move exceeded what was priced</button>
+      <button data-ok="1">Not necessarily. That number is the expected absolute move, which is exceeded more than half the time; being "wrong" would require the average of many such moves to miss</button>
+      <button>Yes, and the straddle buyer made money by definition</button>
+      <button>No — moves always exceed the implied move</button>
+    </div>
+    <div class="ans"><b>A single move above the implied move is the base case, not a miss.</b> The straddle price is a mean of absolute moves, and for a right-skewed distribution the majority of outcomes sit above the straddle-implied level while a minority of large ones pull the average up. Roughly 58% of moves exceed it. Judging an implied move from one print is like judging a coin from one flip — and note the second answer's caveat, because a straddle buyer can still lose on an 8% move if the vol crush costs more than the gamma gained, which is chapter 05.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Through the print</h2>
+    <p class="dek">A fairly priced earnings straddle loses money about two times in three. That is not a mispricing — it is the shape of the payoff.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Buy the straddle the afternoon before the print, sell it the morning after. Two things happen overnight and they pull against each other. The stock gaps, which helps you. And the implied volatility <b>collapses</b>, because J has left the window — every remaining day is now an ordinary day, and the option reprices at σ<sub>diff</sub> instead of σ<sub>imp</sub>. That is the vol crush, and it is not a market overreaction. It is the arithmetic of chapter 01 running in reverse.</p>
+    <p>Simulate it a few thousand times with realized event vol set exactly equal to implied — a perfectly fair price, by construction — and look at the distribution.</p>
+    <p>The <b>mean</b> is about zero, as it must be for a fair price. The <b>median</b> is around −0.94, and the win rate is <b>33%</b>. You lose, modestly, in two trades out of three, and the trade is nonetheless fairly priced, because the third outcome is large enough to pay for the other two.</p>
+    <p>This is the single most important thing to understand about event vol, and it is a psychological problem more than a mathematical one. A strategy that loses two thirds of the time feels broken long before the sample is large enough to say anything. Traders abandon fairly priced long-vol event trades constantly, and buy fairly priced short-vol event trades enthusiastically, because a 67% win rate feels like skill until the fourth trade.</p>
+    <p>Push realized above implied and the whole distribution shifts right — at 1.5× implied the win rate goes to 52% and the mean to +1.67. Push it below and the picture is brutal: at half implied you win <b>5%</b> of the time. The asymmetry between those two cases is why selling event vol looks so attractive and why it periodically ends careers.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>P&amp;L of a long earnings straddle, held through the print</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--moss)"></i>Profit</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Loss</span>
+            <span><i class="swl" style="background:var(--ink)"></i>Mean</span>
+          </span>
+        </div>
+        <canvas id="cvPnl" height="310"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Outcome summary</h3></div>
+        <div class="dollars" id="pnlOut"></div>
+      </div>
+      <div class="rail panel">
+        <h4>Event</h4>
+        <div id="ctl5"></div>
+        <div class="btnrow"><button class="act" id="run5">Run 4,000</button><button class="act ghost" id="clr5">Reset</button></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Set realized equal to implied and read the two statistics against each other: a mean at zero and a median well below it. That gap <em>is</em> the trade. Everything about how event vol feels to trade — and most of the behavioural errors around it — comes from the distance between those two numbers.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You have bought fairly priced earnings straddles eight times and lost on six. What does that tell you?</p>
+    <div class="opts">
+      <button>The strategy is losing and should be stopped</button>
+      <button>Implied event vol is systematically too high</button>
+      <button data-ok="1">Almost nothing — a 33% win rate is the expected shape of a fairly priced long-vol event trade, and eight trades cannot distinguish fair from unfair</button>
+      <button>You should switch to selling straddles instead</button>
+    </div>
+    <div class="ans"><b>Six losses in eight is the base case.</b> At a fair price the win rate is about a third, so losing six of eight is close to the mode of the outcome distribution and carries almost no information about whether you are being charged too much. Judging this strategy needs the <em>sum</em> of P&amp;L over a large sample, not the hit rate — and the sample has to be large because the payoff is dominated by rare large wins. The fourth answer is the trap: it is exactly the inference that a 67% loss rate invites, and it puts you short a tail you have just watched not happen.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Expressing it</h2>
+    <p class="dek">If your view is about the event rather than the stock, the front month alone is the wrong instrument.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Suppose the strip says the market is charging J = 6% for a print and you think it is worth 4%. Buying or selling the front month expresses that, but it expresses a great deal else besides — you are also taking a position in the diffusive vol, and in the direction, and in the gamma between now and expiry.</p>
+    <p>The cleaner expression is a <b>calendar</b>: trade the front month against the back. Because both expiries share the same σ<sub>d</sub> and only the front carries a meaningful J²/T, the spread isolates the event. Sell the front and buy the back and you are short the event and roughly flat the diffusive level.</p>
+    <p>The numbers make the case. On a name with 25% diffusive vol and a 6% event, a two-week option prices at 39.5% and a two-month at 29.1%. If you think J is really 4%, the fair front-month vol is <b>31.3%</b> — an 8-point difference in the front and under 2 points in the back. Nearly all of your edge is in the near expiry, and nearly all of the risk you did not want is in the shared diffusive component that the spread cancels.</p>
+    <p>Two warnings, both from chapter 01's asymmetry. First, a calendar is not a clean event bet: the legs have different gammas and different vegas, so you are still short front gamma when you sell the front, and a large move hurts you regardless of what the vol does. Second, the event has to actually happen inside the front expiry — a confirmed date matters more than the vol level, and a date that moves turns the position into something you did not choose.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Where your view actually shows up</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Market's curve</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Your curve, at your J</span>
+          </span>
+        </div>
+        <canvas id="cvView" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Vol difference by expiry — your edge, in vol points</h3></div>
+        <canvas id="cvEdge" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your view</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>The lower panel is the shape that matters: your disagreement is concentrated almost entirely in the front and decays like 1/T. That concentration is what makes calendars the natural vehicle, and it is also why a view on an event is worth very little expressed in a one-year option.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Event drill</h2>
+    <p class="dek">Stripping, implied moves, and the conversions that get fumbled under time pressure.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The arithmetic of event vol is variance arithmetic, which means the mistakes are always the same two: averaging volatilities instead of variances, and treating a straddle-implied move as a standard deviation. Both are drilled here. Tolerance is ±1% on Core and ±0.5% on Full.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:150px"><span class="k">Difficulty</span>
+          <div class="seg" style="margin-top:5px;max-width:230px">
+            <button id="dEasy" aria-pressed="true">Core</button>
+            <button id="dHard" aria-pressed="false">Full</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+  </figure>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">This page models an event as a single independent shock with a known date and a symmetric distribution. Real events leak into prices beforehand, have dates that move, arrive in clusters through a reporting season, and produce moves that are neither symmetric nor independent of the diffusive regime. The decomposition survives all of that as an approximation and stops being exact the moment any of it bites — which is why the recovered σ<sub>d</sub> drifting with your choice of expiries is worth treating as a diagnostic rather than noise.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ═══════════ event-vol machinery ═══════════ */
+const bsc=(S,K,T,v,cp)=>{if(T<=1e-9)return Math.max(0,cp?S-K:K-S);
+  const sq=Math.sqrt(T),sv=Math.max(v,1e-9)*sq;
+  const d1=(Math.log(S/K)+.5*v*v*T)/sv,d2=d1-sv;
+  return cp?S*ncdf(d1)-K*ncdf(d2):K*ncdf(-d2)-S*ncdf(-d1);};
+const straddle=(S,K,T,v)=>bsc(S,K,T,v,true)+bsc(S,K,T,v,false);
+/* total implied vol for a window of d days containing an event worth J */
+const totalVol=(sd,J,days,evIn)=>{const T=days/365;
+  return Math.sqrt((sd*sd*T+(evIn?J*J:0))/T);};
+/* two-expiry strip */
+function stripEvent(iv1,d1,iv2,d2){
+  const T1=d1/365,T2=d2/365;
+  if(Math.abs(T1-T2)<1e-9)return[NaN,NaN];
+  const v=(iv1*iv1*T1-iv2*iv2*T2)/(T1-T2);
+  const sd=v>0?Math.sqrt(v):NaN;
+  const J2=iv1*iv1*T1-(v>0?v:0)*T1;
+  return [sd, J2>0?Math.sqrt(J2):0];
+}
+const ROOT2PI=Math.sqrt(2/Math.PI);
+
+/* ══════════════════════════════════════════════
+   HERO — variance ramps with a step in them
+   ══════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById("heroCv");
+  let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);}
+  function ramp(ph,i,n){
+    const ev=.18+.64*(((i*.37+ph*.25)%1));
+    const step=.10+.16*Math.abs(Math.sin(ph+i));
+    const base=h*(.22+.58*i/n);
+    g.strokeStyle=i%3===0?C("--verm"):C("--blue");
+    g.globalAlpha=.09+.15*(1-i/n);g.lineWidth=i%3===0?1.5:1.05;
+    g.beginPath();
+    for(let j=0;j<=120;j++){
+      const t=j/120;
+      const y=base-(t*.30+(t>=ev?step:0))*h*.55;
+      j?g.lineTo(t*w,y):g.moveTo(t*w,y);
+    }
+    g.stroke();g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;
+    g.globalAlpha=.030;g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);g.globalAlpha=1;
+    const ph=(ts-t0)/4200;
+    for(let i=0;i<10;i++)ramp(ph,i,10);
+    raf=requestAnimationFrame(frame);}
+  function statics(){for(let i=0;i<10;i++)ramp(.4,i,10);}
+  size();if(RM)statics();else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)statics();else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════════════════════════════════════════
+   01 — variance accumulation
+   ══════════════════════════════════════════════ */
+const s1={sd:.25,J:.06,evDay:21,horizon:90};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"sd1",k:"sd",lbl:"σd",name:"Diffusive vol",min:.05,max:.9,step:.01,fmt:pct},
+    {id:"J1",k:"J",lbl:"J",name:"Event move",min:0,max:.25,step:.005,fmt:v=>(v*100).toFixed(1)+"%"},
+    {id:"e1",k:"evDay",lbl:"D",name:"Event day",min:1,max:88,step:1,fmt:v=>"day "+v.toFixed(0)},
+    {id:"h1",k:"horizon",lbl:"H",name:"Horizon",min:20,max:180,step:5,fmt:v=>v.toFixed(0)+"d"}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function draw(){
+    const H=s1.horizon,xs=[],vd=[],ve=[],vt=[];
+    for(let d=1;d<=H;d++){const T=d/365;
+      xs.push(d);
+      vd.push(s1.sd*s1.sd*T);
+      ve.push(d>=s1.evDay?s1.J*s1.J:0);
+      vt.push(s1.sd*s1.sd*T+(d>=s1.evDay?s1.J*s1.J:0));}
+    const o=Fig(document.getElementById("cvAccum"),{h:290,x0:1,x1:H,y0:0,
+      y1:Math.max(...vt)*1.12,pad:{l:66}});
+    axes(o,v=>v.toFixed(0)+"d",v=>v.toFixed(4),5,4);
+    clip(o,()=>{line(o,xs,vd,C("--grey"),1.6,[5,4]);
+      line(o,xs,ve,C("--verm"),1.8);line(o,xs,vt,C("--blue"),2.3);});
+    vline(o,s1.evDay,C("--ochre"),"event",[3,3]);
+    const q=xs.map((d,i)=>Math.sqrt(vt[i]/(d/365))*100);
+    const o2=Fig(document.getElementById("cvQuoted"),{h:200,x0:1,x1:H,
+      y0:Math.min(...q)*.92,y1:Math.max(...q)*1.06,pad:{l:66,b:22}});
+    axes(o2,v=>v.toFixed(0)+"d",v=>v.toFixed(0)+"%",5,3);
+    clip(o2,()=>line(o2,xs,q,C("--blue"),2.2));
+    vline(o2,s1.evDay,C("--ochre"),null,[3,3]);
+    const pre=s1.evDay>1?q[s1.evDay-2]:q[0], post=q[Math.min(s1.evDay-1,q.length-1)];
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Diffusive vol",pct2(s1.sd)],
+      ["Event move",(s1.J*100).toFixed(2)+"%"],
+      ["Event variance J²",(s1.J*s1.J).toFixed(5)],
+      ["Vol just before",pct2(pre/100)],
+      ["Vol just after",pct2(post/100)],
+      ["Step",((post-pre)).toFixed(2)+" pts"],
+      ["Vol at horizon",pct2(q[q.length-1]/100)]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   02 — vol days
+   ══════════════════════════════════════════════ */
+const s2={ev:21,evW:4.0,wknd:.15,ref:.25,days:90};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"e2",k:"ev",lbl:"E",name:"Earnings day",min:2,max:80,step:1,fmt:v=>"day "+v.toFixed(0)},
+    {id:"w2",k:"evW",lbl:"wE",name:"Earnings weight",min:1,max:8,step:.1,fmt:v=>v.toFixed(1)+"×"},
+    {id:"k2",k:"wknd",lbl:"wW",name:"Weekend weight",min:0,max:1,step:.01,fmt:v=>v.toFixed(2)+"×"},
+    {id:"r2",k:"ref",lbl:"σ",name:"Ordinary-day vol",min:.08,max:.8,step:.01,fmt:pct}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function weights(){
+    const w=[];
+    for(let d=1;d<=s2.days;d++){
+      const dow=(d+2)%7;
+      let x=(dow===0||dow===6)?s2.wknd:1;
+      if(d===Math.round(s2.ev))x=s2.evW;
+      w.push(x);
+    }
+    return w;
+  }
+  function draw(){
+    const w=weights();
+    const o=Fig(document.getElementById("cvWeights"),{h:190,x0:1,x1:s2.days,y0:0,
+      y1:Math.max(...w)*1.15,pad:{l:56,b:22}});
+    axes(o,v=>v.toFixed(0)+"d",v=>v.toFixed(1),5,3);
+    const g=o.g,bw=Math.max(o.pw/s2.days-0.7,1);
+    w.forEach((x,i)=>{
+      const d=i+1;
+      g.fillStyle=d===Math.round(s2.ev)?C("--verm"):(x<1?C("--grey"):C("--blue"));
+      g.globalAlpha=d===Math.round(s2.ev)?.95:(x<1?.4:.65);
+      g.fillRect(o.X(d)-bw/2,o.Y(x),bw,o.P.t+o.ph-o.Y(x));
+    });
+    g.globalAlpha=1;
+    const xs=[],iv=[];let cum=0;
+    for(let d=1;d<=s2.days;d++){cum+=w[d-1];
+      const varTot=cum*(s2.ref*s2.ref/252);
+      xs.push(d);iv.push(Math.sqrt(varTot/(d/365))*100);}
+    const o2=Fig(document.getElementById("cvTermW"),{h:250,x0:1,x1:s2.days,
+      y0:Math.min(...iv)*.93,y1:Math.max(...iv)*1.07,pad:{l:56}});
+    axes(o2,v=>v.toFixed(0)+"d",v=>v.toFixed(0)+"%",5,4);
+    clip(o2,()=>line(o2,xs,iv,C("--blue"),2.2));
+    vline(o2,s2.ev,C("--verm"),"earnings",[3,3]);
+    const e=Math.round(s2.ev);
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Total weight",w.reduce((a,b)=>a+b,0).toFixed(1)],
+      ["Calendar days",s2.days],
+      ["Vol at "+(e-1)+"d",iv[e-2]!==undefined?iv[e-2].toFixed(2)+"%":"—"],
+      ["Vol at "+e+"d",iv[e-1].toFixed(2)+"%"],
+      ["Step",iv[e-2]!==undefined?(iv[e-1]-iv[e-2]).toFixed(2)+" pts":"—"],
+      ["Earnings weight",s2.evW.toFixed(1)+"×"],
+      ["Implied J",iv[e-2]!==undefined?
+        (Math.sqrt(Math.max(0,(s2.evW-1)*(s2.ref*s2.ref/252)))*100).toFixed(2)+"%":"—"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   03 — stripping
+   ══════════════════════════════════════════════ */
+const s3={sd:.25,J:.06,d1:14,d2:60};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"sd3",k:"sd",lbl:"σd",name:"True diffusive vol",min:.05,max:.9,step:.01,fmt:pct},
+    {id:"J3",k:"J",lbl:"J",name:"True event move",min:0,max:.25,step:.005,fmt:v=>(v*100).toFixed(1)+"%"},
+    {id:"a3",k:"d1",lbl:"T₁",name:"Front expiry",min:3,max:60,step:1,fmt:v=>v.toFixed(0)+"d"},
+    {id:"b3",k:"d2",lbl:"T₂",name:"Back expiry",min:20,max:250,step:1,fmt:v=>v.toFixed(0)+"d"}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  function draw(){
+    const d2=Math.max(s3.d2,s3.d1+5);
+    const xs=[],raw=[],str=[];
+    for(let d=3;d<=250;d+=2){xs.push(d);
+      raw.push(totalVol(s3.sd,s3.J,d,true)*100);
+      str.push(s3.sd*100);}
+    const iv1=totalVol(s3.sd,s3.J,s3.d1,true), iv2=totalVol(s3.sd,s3.J,d2,true);
+    const [rsd,rJ]=stripEvent(iv1,s3.d1,iv2,d2);
+    const o=Fig(document.getElementById("cvStrip"),{h:300,x0:3,x1:250,
+      y0:Math.min(...str,...raw)*.9,y1:Math.max(...raw)*1.08,pad:{l:58}});
+    axes(o,v=>v.toFixed(0)+"d",v=>v.toFixed(0)+"%",5,5);
+    clip(o,()=>{line(o,xs,raw,C("--verm"),2.3);line(o,xs,str,C("--blue"),2.3);});
+    vline(o,s3.d1,C("--ochre"),"T₁",[3,3]);
+    vline(o,d2,C("--ochre"),"T₂",[3,3]);
+    const g=o.g;
+    [[s3.d1,iv1*100],[d2,iv2*100]].forEach(([d,v])=>{
+      g.fillStyle=C("--verm");g.beginPath();g.arc(o.X(d),o.Y(v),4.2,0,6.284);g.fill();
+      g.strokeStyle=C("--chalk");g.lineWidth=1.6;g.stroke();});
+    document.getElementById("stripOut").innerHTML=[
+      ["verm","Front "+s3.d1+"d",(iv1*100).toFixed(2)+"%","quoted"],
+      ["verm","Back "+d2+"d",(iv2*100).toFixed(2)+"%","quoted"],
+      ["blue","Recovered σd",(rsd*100).toFixed(3)+"%","true "+(s3.sd*100).toFixed(1)+"%"],
+      ["moss","Recovered J",(rJ*100).toFixed(3)+"%","true "+(s3.J*100).toFixed(1)+"%"],
+      ["","Front − back",((iv1-iv2)*100).toFixed(2)+" pts","the inversion"],
+      ["","Recovery error",(Math.abs(rsd-s3.sd)*100).toExponential(1)+" pts","exact solve"]
+    ].map(([c,k,v,sub])=>`<div class="c ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${sub}</span></div>`).join("");
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["σ₁²T₁",(iv1*iv1*s3.d1/365).toFixed(6)],
+      ["σ₂²T₂",(iv2*iv2*d2/365).toFixed(6)],
+      ["Difference",((iv1*iv1*s3.d1/365)-(iv2*iv2*d2/365)).toFixed(6)],
+      ["T₁ − T₂",((s3.d1-d2)/365).toFixed(5)],
+      ["σd recovered",(rsd*100).toFixed(4)+"%"],
+      ["J recovered",(rJ*100).toFixed(4)+"%"],
+      ["Implied move on 100","$"+(rJ*100).toFixed(2)]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   04 — implied move vs one sigma
+   ══════════════════════════════════════════════ */
+const s4={S:100,vol:.20,days:30};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"S4",k:"S",lbl:"S",name:"Spot",min:20,max:400,step:5,fmt:v=>"$"+v.toFixed(0)},
+    {id:"v4",k:"vol",lbl:"σ",name:"Implied vol",min:.05,max:1.2,step:.01,fmt:pct},
+    {id:"d4",k:"days",lbl:"T",name:"Days",min:1,max:120,step:1,fmt:v=>v.toFixed(0)+"d"}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const S=s4.S,T=s4.days/365,v=s4.vol;
+    const st=straddle(S,S,T,v), sd1=S*v*Math.sqrt(T);
+    const sig=v*Math.sqrt(T), mu=Math.log(S)-.5*sig*sig;
+    const lo=Math.max(1,S*Math.exp(-4*sig)),hi=S*Math.exp(4*sig);
+    const xs=[],dn=[];
+    for(let i=0;i<=280;i++){const x=lo+(hi-lo)*i/280;xs.push(x);
+      dn.push(x<=0?0:npdf((Math.log(x)-mu)/sig)/(x*sig));}
+    const o=Fig(document.getElementById("cvMove"),{h:300,x0:lo,x1:hi,y0:0,
+      y1:Math.max(...dn)*1.14,pad:{l:64}});
+    axes(o,x=>"$"+x.toFixed(0),x=>x.toFixed(3),5,4);
+    const g=o.g;
+    g.save();g.beginPath();g.rect(o.P.l,o.P.t,o.pw,o.ph);g.clip();
+    g.fillStyle=C("--blue");g.globalAlpha=.16;
+    for(let i=0;i<xs.length;i++){
+      if(Math.abs(xs[i]-S)<st)continue;
+      g.fillRect(o.X(xs[i]),o.Y(dn[i]),Math.max(o.pw/280,1.4),o.P.t+o.ph-o.Y(dn[i]));
+    }
+    g.globalAlpha=1;g.restore();
+    clip(o,()=>line(o,xs,dn,C("--ink"),2.1));
+    vline(o,S-st,C("--blue"),null,[4,3]); vline(o,S+st,C("--blue"),"straddle",[4,3]);
+    vline(o,S-sd1,C("--verm"),null,[2,4]); vline(o,S+sd1,C("--verm"),"1 sd",[2,4]);
+    // probability of exceeding each
+    const pExceed=(m)=>{const up=1-ncdf((Math.log((S+m)/S)-mu+Math.log(S))/sig);
+      return 0;};
+    const cum=(x)=>ncdf((Math.log(x)-mu)/sig);
+    const pSt=cum(S-st)+(1-cum(S+st)), pSd=cum(S-sd1)+(1-cum(S+sd1));
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Straddle price","$"+st.toFixed(4)],
+      ["as % of spot",(st/S*100).toFixed(2)+"%"],
+      ["One sd","$"+sd1.toFixed(4)],
+      ["as % of spot",(sd1/S*100).toFixed(2)+"%"],
+      ["Ratio",(st/sd1).toFixed(4)],
+      ["√(2/π)",ROOT2PI.toFixed(4)],
+      ["P(exceed straddle)",(pSt*100).toFixed(1)+"%"],
+      ["P(exceed 1 sd)",(pSd*100).toFixed(1)+"%"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   05 — through the print
+   ══════════════════════════════════════════════ */
+const s5={Jimp:.06,ratio:1.0,sd:.25,days:30};
+const D5={pnl:[]};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"j5",k:"Jimp",lbl:"J",name:"Implied event move",min:.01,max:.25,step:.005,fmt:v=>(v*100).toFixed(1)+"%"},
+    {id:"r5",k:"ratio",lbl:"×",name:"Realized ÷ implied",min:.2,max:2.5,step:.05,fmt:v=>v.toFixed(2)+"×"},
+    {id:"s5d",k:"sd",lbl:"σd",name:"Diffusive vol",min:.05,max:.9,step:.01,fmt:pct},
+    {id:"d5",k:"days",lbl:"T",name:"Days to expiry",min:3,max:120,step:1,fmt:v=>v.toFixed(0)+"d"}
+  ],s5,()=>{D5.pnl=[];add(4000);draw();},"c5");
+  function add(n){
+    const T=s5.days/365, S0=100, K=100;
+    const ivPre=Math.sqrt((s5.sd*s5.sd*T+s5.Jimp*s5.Jimp)/T);
+    const cost=straddle(S0,K,T,ivPre);
+    const Jr=s5.Jimp*s5.ratio;
+    const Taf=Math.max((s5.days-1)/365,1e-6);
+    for(let i=0;i<n;i++){
+      const S1=S0*Math.exp(Jr*gauss()-.5*Jr*Jr);
+      D5.pnl.push(straddle(S1,K,Taf,s5.sd)-cost);
+    }
+  }
+  window.draw5=draw;
+  function draw(){
+    if(!D5.pnl.length)add(4000);
+    const a=D5.pnl, n=a.length;
+    const lo=Math.min(...a),hi=Math.max(...a);
+    const NB=61,bins=new Int32Array(NB);
+    a.forEach(v=>{const k=Math.floor((v-lo)/(hi-lo)*NB);if(k>=0&&k<NB)bins[k]++;});
+    const mx=Math.max(1,...bins);
+    const o=Fig(document.getElementById("cvPnl"),{h:310,x0:lo,x1:hi,y0:0,y1:mx*1.12,pad:{l:58}});
+    axes(o,v=>(v>=0?"+":"")+v.toFixed(1),v=>v.toFixed(0),5,4);
+    const g=o.g,bw=o.pw/NB;
+    for(let k=0;k<NB;k++){
+      if(!bins[k])continue;
+      const c=lo+(k+.5)/NB*(hi-lo);
+      g.fillStyle=c>=0?C("--moss"):C("--verm");g.globalAlpha=.8;
+      g.fillRect(o.P.l+k*bw,o.Y(bins[k]),Math.max(bw-.6,1.5),o.P.t+o.ph-o.Y(bins[k]));
+    }
+    g.globalAlpha=1;
+    const mean=a.reduce((x,y)=>x+y,0)/n;
+    const sorted=[...a].sort((x,y)=>x-y);
+    const med=sorted[Math.floor(n/2)];
+    vline(o,0,C("--ink"),"zero",[3,3]);
+    vline(o,mean,C("--blue"),"mean",[2,3]);
+    const win=a.filter(x=>x>0).length/n;
+    document.getElementById("pnlOut").innerHTML=[
+      [mean>=0?"moss":"verm","Mean",mean.toFixed(4),"fair price ⇒ near zero"],
+      ["verm","Median",med.toFixed(4),"the typical outcome"],
+      ["","Win rate",(win*100).toFixed(1)+"%","fraction profitable"],
+      ["","Best 5%",sorted[Math.floor(n*.95)].toFixed(3),"the tail that pays"],
+      ["","Worst 5%",sorted[Math.floor(n*.05)].toFixed(3),""],
+      ["ochre","Mean − median",(mean-med).toFixed(4),"the skew of the payoff"]
+    ].map(([c,k,v,s])=>`<div class="c ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join("");
+    const T=s5.days/365;
+    const ivPre=Math.sqrt((s5.sd*s5.sd*T+s5.Jimp*s5.Jimp)/T);
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Pre-event IV",pct2(ivPre)],
+      ["Post-event IV",pct2(s5.sd)],
+      ["Vol crush",((ivPre-s5.sd)*100).toFixed(2)+" pts"],
+      ["Straddle cost",straddle(100,100,T,ivPre).toFixed(4)],
+      ["Implied move","$"+(s5.Jimp*100).toFixed(2)],
+      ["Realized move","$"+(s5.Jimp*s5.ratio*100).toFixed(2)],
+      ["Trials",n.toLocaleString()]
+    ]);
+  }
+  document.getElementById("run5").addEventListener("click",()=>{add(4000);draw();});
+  document.getElementById("clr5").addEventListener("click",()=>{D5.pnl=[];add(4000);draw();});
+  add(4000);
+})();
+
+/* ══════════════════════════════════════════════
+   06 — expressing the view
+   ══════════════════════════════════════════════ */
+const s6={sd:.25,Jmkt:.06,Jyou:.04};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"s6d",k:"sd",lbl:"σd",name:"Diffusive vol",min:.05,max:.9,step:.01,fmt:pct},
+    {id:"m6",k:"Jmkt",lbl:"Jm",name:"Market's event move",min:.01,max:.25,step:.005,fmt:v=>(v*100).toFixed(1)+"%"},
+    {id:"y6",k:"Jyou",lbl:"Jy",name:"Your event move",min:.01,max:.25,step:.005,fmt:v=>(v*100).toFixed(1)+"%"}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  function draw(){
+    const xs=[],mk=[],yo=[],ed=[];
+    for(let d=5;d<=200;d+=2){xs.push(d);
+      const a=totalVol(s6.sd,s6.Jmkt,d,true)*100, b=totalVol(s6.sd,s6.Jyou,d,true)*100;
+      mk.push(a);yo.push(b);ed.push(a-b);}
+    const o=Fig(document.getElementById("cvView"),{h:290,x0:5,x1:200,
+      y0:Math.min(...mk,...yo)*.92,y1:Math.max(...mk,...yo)*1.07,pad:{l:58}});
+    axes(o,v=>v.toFixed(0)+"d",v=>v.toFixed(0)+"%",5,4);
+    clip(o,()=>{line(o,xs,yo,C("--blue"),2.2);line(o,xs,mk,C("--verm"),2.2);});
+    const o2=Fig(document.getElementById("cvEdge"),{h:190,x0:5,x1:200,
+      y0:Math.min(0,...ed)*1.1,y1:Math.max(...ed,0)*1.15||1,pad:{l:58,b:22}});
+    axes(o2,v=>v.toFixed(0)+"d",v=>v.toFixed(1),5,3);
+    clip(o2,()=>line(o2,xs,ed,C("--ochre"),2.2));
+    const at=(d)=>(totalVol(s6.sd,s6.Jmkt,d,true)-totalVol(s6.sd,s6.Jyou,d,true))*100;
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Market J",(s6.Jmkt*100).toFixed(2)+"%"],
+      ["Your J",(s6.Jyou*100).toFixed(2)+"%"],
+      ["Edge at 14d",at(14).toFixed(2)+" pts"],
+      ["Edge at 30d",at(30).toFixed(2)+" pts"],
+      ["Edge at 60d",at(60).toFixed(2)+" pts"],
+      ["Edge at 180d",at(180).toFixed(2)+" pts"],
+      ["Front ÷ back",Math.abs(at(60))>1e-6?(at(14)/at(60)).toFixed(1)+"×":"—"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   07 — drill
+   ══════════════════════════════════════════════ */
+(function(){
+  const D={n:0,ok:0,streak:0,best:0,hard:false,cur:null,answered:false};
+  const ri=(a,b,st)=>{st=st||1;return Math.round((a+Math.random()*(b-a))/st)*st;};
+  const CORE=[
+    ()=>{const S=ri(30,400,5),v=ri(20,90)/100,d=ri(2,45);
+      const T=d/365,st=ROOT2PI*S*v*Math.sqrt(T);
+      return{k:"Implied move",u:"dollars",a:st,
+        t:`A <b>$${S}</b> stock has <b>${(v*100).toFixed(0)}%</b> implied vol with <b>${d}</b> days to expiry. What is the straddle-implied move in dollars?`,
+        w:`Straddle ≈ 0.7979 × S × σ√T = 0.7979 × ${S} × ${v.toFixed(2)} × ${Math.sqrt(T).toFixed(4)} = <code>$${st.toFixed(2)}</code>. Note the 0.7979 = √(2/π): a one-standard-deviation move would be $${(S*v*Math.sqrt(T)).toFixed(2)}, about 25% larger.`};},
+    ()=>{const sd=ri(15,50)/100,J=ri(3,15)/100,d=ri(5,45);
+      const T=d/365,iv=Math.sqrt((sd*sd*T+J*J)/T);
+      return{k:"Blend the two",u:"percent",a:iv*100,
+        t:`Diffusive vol is <b>${(sd*100).toFixed(0)}%</b> and an event worth a <b>${(J*100).toFixed(0)}%</b> move sits inside a <b>${d}</b>-day window. What implied vol is quoted?`,
+        w:`Total variance = σd²T + J² = ${(sd*sd*T).toFixed(6)} + ${(J*J).toFixed(6)} = ${(sd*sd*T+J*J).toFixed(6)}. Divide by T and take the root: <code>${(iv*100).toFixed(2)}%</code>. Add variances, never volatilities.`};},
+    ()=>{const S=ri(30,400,5),v=ri(20,90)/100,d=ri(2,45);
+      return{k:"One sigma",u:"dollars",a:S*v*Math.sqrt(d/365),
+        t:`Same <b>$${S}</b> stock, <b>${(v*100).toFixed(0)}%</b> vol, <b>${d}</b> days. What is a one-standard-deviation move in dollars?`,
+        w:`One sd = S × σ√T = ${S} × ${v.toFixed(2)} × ${Math.sqrt(d/365).toFixed(4)} = <code>$${(S*v*Math.sqrt(d/365)).toFixed(2)}</code>. No √(2/π) here — that factor only appears when you go via the straddle.`};},
+  ];
+  const FULL=CORE.concat([
+    ()=>{const sd=ri(15,45)/100,J=ri(3,14)/100,d1=ri(5,25),d2=d1+ri(20,90);
+      const T1=d1/365,T2=d2/365;
+      const iv1=Math.sqrt((sd*sd*T1+J*J)/T1), iv2=Math.sqrt((sd*sd*T2+J*J)/T2);
+      return{k:"Strip the event",u:"percent",a:sd*100,
+        t:`Front <b>${d1}</b>-day vol is <b>${(iv1*100).toFixed(2)}%</b>; back <b>${d2}</b>-day is <b>${(iv2*100).toFixed(2)}%</b>. Both contain the same event. What is the diffusive vol?`,
+        w:`σd² = (σ₁²T₁ − σ₂²T₂)/(T₁ − T₂) = (${(iv1*iv1*T1).toFixed(6)} − ${(iv2*iv2*T2).toFixed(6)})/(${T1.toFixed(5)} − ${T2.toFixed(5)}) = ${(sd*sd).toFixed(6)}. Root: <code>${(sd*100).toFixed(2)}%</code>. The event term cancels because it is identical in both windows.`};},
+    ()=>{const sd=ri(15,45)/100,J=ri(3,14)/100,d1=ri(5,25),d2=d1+ri(20,90);
+      const T1=d1/365,T2=d2/365;
+      const iv1=Math.sqrt((sd*sd*T1+J*J)/T1), iv2=Math.sqrt((sd*sd*T2+J*J)/T2);
+      return{k:"Recover J",u:"percent",a:J*100,
+        t:`Same pair: front <b>${d1}</b>d at <b>${(iv1*100).toFixed(2)}%</b>, back <b>${d2}</b>d at <b>${(iv2*100).toFixed(2)}%</b>, diffusive vol <b>${(sd*100).toFixed(2)}%</b>. What event move is implied?`,
+        w:`J² = σ₁²T₁ − σd²T₁ = ${(iv1*iv1*T1).toFixed(6)} − ${(sd*sd*T1).toFixed(6)} = ${(J*J).toFixed(6)}. Root: <code>${(J*100).toFixed(2)}%</code>, i.e. a $${(J*100).toFixed(2)} move on a $100 stock.`};},
+    ()=>{const sd=ri(15,45)/100,J=ri(4,16)/100,d=ri(5,40);
+      const T=d/365, pre=Math.sqrt((sd*sd*T+J*J)/T);
+      return{k:"Vol crush",u:"percent",a:(pre-sd)*100,
+        t:`Pre-event implied vol is the blend of <b>${(sd*100).toFixed(0)}%</b> diffusive and a <b>${(J*100).toFixed(0)}%</b> event over <b>${d}</b> days. How many vol points does implied drop the morning after, assuming diffusive vol is unchanged?`,
+        w:`Pre-event IV = √((${(sd*sd*T).toFixed(6)} + ${(J*J).toFixed(6)})/${T.toFixed(5)}) = ${(pre*100).toFixed(2)}%. After the print the event term is gone, leaving ${(sd*100).toFixed(2)}%. Crush = <code>${((pre-sd)*100).toFixed(2)} vol points</code>. That is what a straddle buyer pays for the gamma.`};},
+  ]);
+  function next(){const bank=D.hard?FULL:CORE;
+    D.cur=bank[Math.floor(Math.random()*bank.length)]();D.answered=false;
+    document.getElementById("dKind").textContent=D.cur.k;
+    document.getElementById("dText").innerHTML=D.cur.t;
+    document.getElementById("dUnit").textContent=D.cur.u;
+    const i=document.getElementById("dInput");i.value="";i.disabled=false;
+    document.getElementById("drill").classList.remove("done");i.focus();}
+  function stats(){document.getElementById("dScore").textContent=D.ok+" / "+D.n;
+    document.getElementById("dStreak").textContent=D.streak;
+    document.getElementById("dBest").textContent=D.best;}
+  function submit(){if(D.answered)return;
+    const raw=document.getElementById("dInput").value.replace(/[$,%\s]/g,"");
+    if(raw===""||isNaN(+raw))return;
+    const got=+raw,want=D.cur.a,tol=D.hard?.005:.01;
+    const ok=Math.abs(got-want)<=Math.max(Math.abs(want)*tol,.005);
+    D.n++;D.answered=true;
+    if(ok){D.ok++;D.streak++;D.best=Math.max(D.best,D.streak);}else D.streak=0;
+    stats();
+    const v=document.getElementById("dVerdict");
+    v.className="vd "+(ok?"ok":"no");
+    v.textContent=ok?"Correct — "+want.toFixed(3):"Not quite. Answer: "+want.toFixed(3)+"  (you said "+got+")";
+    document.getElementById("dWork").innerHTML=D.cur.w;
+    document.getElementById("drill").classList.add("done");
+    document.getElementById("dInput").disabled=true;}
+  document.getElementById("dSubmit").addEventListener("click",submit);
+  document.getElementById("dInput").addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();D.answered?next():submit();}});
+  document.getElementById("dNext").addEventListener("click",next);
+  document.getElementById("dSkip").addEventListener("click",()=>{D.streak=0;stats();next();});
+  const eb=document.getElementById("dEasy"),hb=document.getElementById("dHard");
+  eb.addEventListener("click",()=>{D.hard=false;eb.setAttribute("aria-pressed",true);hb.setAttribute("aria-pressed",false);next();});
+  hb.addEventListener("click",()=>{D.hard=true;hb.setAttribute("aria-pressed",true);eb.setAttribute("aria-pressed",false);next();});
+  stats();next();
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
