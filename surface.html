@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>The Shape of What We Don&#x27;t Believe — the volatility surface</title>
+<meta name="description" content="The implied volatility surface read as a probability distribution: Breeden-Litzenberger, jumps vs stochastic vol, term structure and forward vol, sticky rules, and arbitrage constraints.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Shape of What We Don&#x27;t Believe — the volatility surface">
+<meta property="og:description" content="The implied volatility surface read as a probability distribution: Breeden-Litzenberger, jumps vs stochastic vol, term structure and forward vol, sticky rules, and arbitrage constraints.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 02 · The Surface</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>One vol each</span><i></i></a>
+  <a href="#c2"><span>Smile = density</span><i></i></a>
+  <a href="#c3"><span>Two generators</span><i></i></a>
+  <a href="#c4"><span>Term structure</span><i></i></a>
+  <a href="#c5"><span>Sticky rules</span><i></i></a>
+  <a href="#c6"><span>Bad surfaces</span><i></i></a>
+  <a href="#c7"><span>Drill</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 02</div>
+    <h1>The shape of what we <em>don't</em> believe</h1>
+    <p class="sub">Black–Scholes takes one volatility. The market quotes a different one for every strike and every expiry. That disagreement is not a defect in the model — it is a picture of the distribution the market actually has in mind, and you can read it directly.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This page assumes <a href="black-scholes.html" style="color:var(--blue)">page 01</a> — you need implied volatility, vega and vanna to be familiar. Everything else is built here.</p>
+  <ol>
+    <li><b>The surface is data, not theory.</b> Every chapter treats it as something to be read rather than explained away.</li>
+    <li><b>Chapter 02 is the one to slow down on.</b> It shows the smile and the probability distribution are the same object written two ways.</li>
+    <li><b>Chapters 05 and 06 are the practical ones.</b> What your delta actually is, and how to tell a surface that cannot be right.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>σ(K,T)</td><td>The implied volatility surface: one number for each strike and expiry.</td></tr>
+      <tr><td>F</td><td>Forward price, Se<sup>(r−q)T</sup>. Smiles are naturally centred on the forward, not on spot.</td></tr>
+      <tr><td>k</td><td>Log-moneyness, ln(K/F). Zero at the forward, negative for downside strikes.</td></tr>
+      <tr><td>Skew</td><td>The slope of the smile in strike. Quoted as the 90–110 or 25-delta vol difference.</td></tr>
+      <tr><td>Smile</td><td>The curvature. A pure smile is symmetric; equity surfaces are mostly skew.</td></tr>
+      <tr><td>f(K)</td><td>The risk-neutral density: the market's implied probability of finishing at K.</td></tr>
+      <tr><td>Sticky rule</td><td>An assumption about what the surface does when spot moves. Determines your delta.</td></tr>
+      <tr><td>λ, μ<sub>J</sub>, δ<sub>J</sub></td><td>Jump intensity, mean jump size and jump volatility in the Merton model of chapter 03.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>One volatility per option</h2>
+    <p class="dek">The model takes a single σ. The market refuses to supply one. Start by taking the refusal seriously.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Take every listed option on one underlying, invert Black–Scholes on each quoted price, and write down the volatility that makes the formula reproduce the market. If the model were literally true you would get the same number every time. You never do. You get a systematically curved, systematically tilted sheet of numbers — low strikes trading at higher volatility than high strikes, front months behaving differently from back.</p>
+    <p>There are two ways to react and only one of them is useful. The first is to call the model broken. The second — the right one — is to notice that <b>implied volatility is not a forecast, it is a price in different units</b>. Black–Scholes is a monotonic function from vol to price, so quoting an option in vol is just quoting it in a currency everybody agrees to convert with. The surface is the market disagreeing with the model's <em>distribution</em>, and expressing that disagreement in the only variable the model gives it.</p>
+    <p>That reframing is what makes the rest of the page possible. A smile is not evidence that traders are confused about volatility. It is a set of prices that, decoded, tells you exactly what probability distribution they are using instead.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>An implied volatility surface, sliced by expiry</h3>
+          <span class="note">Each curve is one expiry. The dot marks the forward.</span>
+        </div>
+        <canvas id="cvSmile" height="320"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Surface shape</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Two features to separate in your head. <b>Skew</b> is the tilt — downside strikes bid over upside. <b>Smile</b> is the curvature — both wings over the middle. Equity index surfaces are mostly skew; currencies are closer to a true symmetric smile. They are different parameters and they come from different causes, which is chapter 03.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The smile is a probability distribution</h2>
+    <p class="dek">Not analogous to one. Not a summary of one. The same object, and there is an exact formula that converts between them.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Here is the result that makes the surface legible. Consider a call spread: long a call at K, short a call at K + ΔK. It pays ΔK if the stock finishes above both strikes, zero if below both, and something in between otherwise. Make ΔK small and it becomes a bet on finishing above K, so its price is proportional to the probability of that happening.</p>
+    <p>Now take a <b>butterfly</b>: long K − ΔK, short two at K, long K + ΔK. It pays only if the stock lands near K. Its price is therefore the probability of landing near K — which, as ΔK shrinks, is the probability density at K. A butterfly is a second difference in strike, so:</p>
+    <div class="mline">∂²C/∂K² = e<sup>−rT</sup> · f(K)</div>
+    <p class="mread">Reads as: <b>the curvature of call price in strike is the risk-neutral density, discounted.</b> This is the Breeden–Litzenberger result, and it is exact.</p>
+    <p>So the surface is not merely <em>related</em> to a distribution. Differentiate it twice and the distribution falls out. Below, the recovered density is computed from the smile above by numerical second difference — no model, no fitting — and drawn against the lognormal that a flat volatility would have implied.</p>
+    <p>Flatten the skew slider and the two curves lie on top of each other, because a flat surface <em>is</em> the lognormal assumption. Tilt it and watch the left tail thicken and the right tail thin. At a −0.35 skew the probability of finishing below 70 goes from <b>5.0% to 8.6%</b> — nearly double — while the chance of finishing above 130 falls from 10.2% to 6.6%. That is what the skew has been saying all along, and it is a statement about crashes rather than about volatility.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The density implied by the smile above</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Recovered from the smile</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Lognormal at the same ATM vol</span>
+          </span>
+        </div>
+        <canvas id="cvDens" height="320"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Tail probabilities, both distributions</h3></div>
+        <div class="bars" id="tailBars"></div>
+      </div>
+      <div class="rail panel">
+        <h4>Same controls</h4>
+        <p style="font-family:var(--mono);font-size:10.5px;line-height:1.5;color:var(--grey);margin:0 0 14px">
+          Driven by the surface controls in chapter 01.
+        </p>
+        <div class="kv" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The recovered density is not fitted to anything — it is the second derivative of the prices the smile implies. With a flat surface it reproduces the lognormal to within 0.05%, which is a good check that the machinery is right.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A trader says the put skew means "the market expects volatility to be higher if we sell off." Is that the best reading?</p>
+    <div class="opts">
+      <button>Yes — that is exactly what higher downside implied vol means</button>
+      <button data-ok="1">It is one reading, but the direct statement is about the distribution: the market assigns more probability to large declines than a lognormal would</button>
+      <button>No — skew is purely a supply and demand artifact with no informational content</button>
+      <button>No — skew only reflects interest rates and dividends</button>
+    </div>
+    <div class="ans"><b>The distributional reading is the primary one.</b> Breeden–Litzenberger says the surface <em>is</em> a density, so the most direct translation of downside strikes trading rich is "more probability mass in the left tail than lognormal." The conditional-volatility story is a plausible mechanism for why that mass is there — and so is crash risk, and so is hedging demand — but those are explanations for the shape, whereas the fat left tail is simply what the shape says. Keeping the observation separate from its explanations is what lets you evaluate the explanations.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — from call spreads to the density in three steps</summary>
+    <div class="body">
+      <p>Write the call price as the discounted expected payoff under the risk-neutral density f:</p>
+      <div class="mline">C(K) = e<sup>−rT</sup> ∫<sub>K</sub><sup>∞</sup> (x − K) f(x) dx</div>
+      <p class="mread">Reads as: <b>average what the call pays over every outcome above the strike, then discount.</b></p>
+      <p>Differentiate once with respect to K. The integrand's boundary term vanishes because the payoff is zero at x = K, leaving only the derivative of −K inside:</p>
+      <div class="mline">∂C/∂K = −e<sup>−rT</sup> ∫<sub>K</sub><sup>∞</sup> f(x) dx = −e<sup>−rT</sup> · P(S<sub>T</sub> &gt; K)</div>
+      <p class="mread">Reads as: <b>the slope of call price in strike is the probability of finishing in the money.</b> That is a digital option, and it is also why N(d₂) showed up in page 01.</p>
+      <p>Differentiate again. The derivative of a tail probability is minus the density:</p>
+      <div class="mline">∂²C/∂K² = e<sup>−rT</sup> f(K)</div>
+      <p class="mread">Reads as: <b>differentiate the tail probability and you get the density.</b> Two derivatives take you from prices to probabilities with nothing assumed in between.</p>
+      <p>Each derivative has a trading interpretation, which is worth carrying: the <b>first</b> is a call spread, so a tight call spread prices a digital. The <b>second</b> is a butterfly, so a tight butterfly prices the density. When somebody says the wings are expensive, they are making a claim about tail probabilities whether they mean to or not.</p>
+      <p><b>Where it breaks.</b> Strikes are discrete, so you get a finite difference rather than a derivative and the estimate is noisy where strikes are sparse. The tails are worse: the density beyond the lowest and highest listed strike is unobserved and has to be extrapolated, and chapter 06 shows how badly that can go.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>Two ways to make a smile</h2>
+    <p class="dek">Jumps and stochastic volatility both bend the surface. At a single expiry they are indistinguishable. Across expiries they are not.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Black–Scholes produces a flat surface because it assumes a stock diffuses continuously at a constant volatility. Break either assumption and a smile appears.</p>
+    <p><b>Jumps.</b> Let the stock occasionally gap by a random amount, as it does through an earnings release or a headline. Merton's model adds exactly that — a Poisson arrival of lognormal jumps — and it has a closed form, so no simulation is needed. Give the jumps a negative mean and the resulting density has a fat left tail, which the surface reports as skew.</p>
+    <p><b>Stochastic volatility.</b> Let the volatility itself be random. If vol moves independently of spot, the terminal distribution becomes a mixture of lognormals with different widths, which is fat-tailed on <em>both</em> sides. The surface reports that as a symmetric smile with no skew. To get skew you need vol to move <em>against</em> spot — the leverage effect — which is why real stochastic-vol models carry a correlation parameter and why it is always negative for equities.</p>
+    <p>Here is the problem: at one expiry, calibrated to the same data, both produce curves you cannot tell apart by eye. The panels below start with settings that look nearly identical at three months.</p>
+    <p><b>The test is the term structure.</b> A jump is a fixed-size shock. Over a short window it dominates the diffusion and bends the surface violently; over a long window the diffusion accumulates while the jump does not, so the skew washes out. Stochastic volatility has no such decay — the vol-of-vol keeps working at every horizon. The numbers are stark: jump-driven skew falls from <b>8.46 vol points at one month to 0.40 at three years</b>, while the mixture's stays essentially flat at 0.3 to 0.6 throughout.</p>
+    <p>So when you see a surface whose skew collapses as you go out in time, that is a market pricing event risk. When the skew persists into the long end, that is a market pricing a regime.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Two models, matched at the front, compared across expiries</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Merton jumps</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Uncorrelated stochastic vol</span>
+          </span>
+        </div>
+        <canvas id="cvGen" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>90–110 skew against maturity — the distinguishing test</h3></div>
+        <canvas id="cvDecay" height="220"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Generators</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Slide the expiry and watch the red curve flatten while the blue one holds its shape. Real equity surfaces do both: a steep front-month skew that decays like a jump, sitting on a persistent long-dated skew that does not. That is the empirical case for models with jumps <em>and</em> correlated stochastic volatility, and the reason neither one alone fits the whole surface.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You observe a name whose 90–110 skew is 9 vol points in the front month and under 1 point at two years. What does that most suggest?</p>
+    <div class="opts">
+      <button>A pricing error in the back months</button>
+      <button data-ok="1">Event risk — a discrete jump the market expects soon, whose effect dilutes over longer horizons</button>
+      <button>Persistent stochastic volatility with negative correlation</button>
+      <button>Nothing — all surfaces do this</button>
+    </div>
+    <div class="ans"><b>Event risk.</b> Fixed-size jump risk contributes a constant amount of variance regardless of horizon, while diffusion accumulates with time — so the jump's share of total variance, and therefore its effect on the shape, shrinks as maturity grows. Persistent skew into the long end points at a regime property instead. This distinction has a direct trade behind it, which is <a href="index.html" style="color:var(--blue)">page 03's</a> subject: if the front-month skew is event-driven you can strip out the event and price what is left.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>The other axis</h2>
+    <p class="dek">A surface has two dimensions and most explanations only draw one. Term structure is where the tradeable information usually is.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Fix the strike at the money and look across expiries. The resulting curve is usually upward sloping in calm markets — the front is cheap because nothing is scheduled — and inverts sharply in stress, because whatever people are afraid of has a date on it and the date is soon.</p>
+    <p>The mechanism is the same additivity that page 01 used for √T. <b>Variance adds</b>, so total variance to expiry is the sum of each day's variance, and the implied vol you see quoted is a time-average of forward variance rather than a forecast of any particular day. That has an immediate consequence: you can back out the <b>forward volatility</b> between two expiries from the two quoted vols, exactly the way you back a forward rate out of two spot rates.</p>
+    <div class="mline">σ<sub>fwd</sub>² · (T₂ − T₁) = σ₂²T₂ − σ₁²T₁</div>
+    <p class="mread">Reads as: <b>the variance between two dates is the difference of the total variances.</b> Subtract, don't average — averaging vols instead of variances is one of the most common errors on a vol desk.</p>
+    <p>The forward vol is where the term structure becomes tradeable. A calendar spread is a position in it, and an inverted curve does not automatically mean the front is expensive — it may mean the forward vol implied between the two dates is absurd, which is a sharper and more testable statement.</p>
+    <p>One warning the figure makes vivid: if the front vol is high enough relative to the back, the implied forward variance goes <b>negative</b>, which is impossible. That is a calendar arbitrage, and it is chapter 06's subject.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Term structure, and the forward vol it implies</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Quoted ATM vol</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Forward vol between adjacent expiries</span>
+          </span>
+        </div>
+        <canvas id="cvTerm" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Curve</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Push the front-month vol up and watch the forward vol between the first two expiries fall faster than the quoted curve suggests — and eventually go imaginary. The quoted curve can look merely steep while the forward it implies is already impossible.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>What your delta actually is</h2>
+    <p class="dek">Black–Scholes delta assumes vol does not move when spot does. On a skewed surface that assumption is a choice, and it is worth real money.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Ask what happens to the surface when spot moves and you will find the question has no model-provided answer. It has conventions, and the convention you pick changes your hedge.</p>
+    <p><b>Sticky strike:</b> the vol attached to each strike stays put as spot moves. Under this rule the Black–Scholes delta is the whole story, since σ does not change.</p>
+    <p><b>Sticky delta</b> (or sticky moneyness): the smile is a function of K/F and travels with the underlying. A fixed strike therefore sees its vol change as spot moves, and your total delta picks up a second term:</p>
+    <div class="mline">Δ<sub>total</sub> = Δ<sub>BS</sub> + vega × ∂σ/∂S</div>
+    <p class="mread">Reads as: <b>the direct effect, plus what the moving smile does to you through vega.</b> That second term is vanna's territory — page 01 built it, and this is where it earns its keep.</p>
+    <p>The sign is not obvious and matters. With a downward-sloping equity skew, a rise in spot means a fixed strike now sits at lower moneyness on the shifted curve, so its implied vol goes <em>up</em>. Higher vol means a higher call price, which is extra positive delta. On a 100-strike, six-month call at 30 vol with a −0.35 skew, the difference is about <b>0.097 of delta</b> — roughly 10 shares per contract, or a thousand shares on a hundred lots, from nothing but a choice of convention.</p>
+    <p>Neither rule is correct. They are descriptions of surface behaviour that hold in different regimes — sticky strike in quiet drifting markets, sticky delta in trending ones — and desks pick one, mark against it, and monitor the error. The one indefensible position is not knowing which one your risk system assumes.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The same options, two hedge ratios</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Sticky strike (= Black–Scholes)</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Sticky delta</span>
+          </span>
+        </div>
+        <canvas id="cvSticky" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Difference, in shares per contract</h3></div>
+        <canvas id="cvStickyD" height="180"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Surface &amp; position</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Flatten the skew and the two rules converge, because with no slope there is nothing for the smile to do to you. The gap is proportional to skew times vega, which is exactly why it is largest for at-the-money options in names with steep surfaces.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Under which condition do sticky-strike and sticky-delta give the same hedge?</p>
+    <div class="opts">
+      <button>When the option is at the money</button>
+      <button>When implied vol is low</button>
+      <button data-ok="1">When the surface is flat, since the extra term is vega × the smile's slope</button>
+      <button>They never agree</button>
+    </div>
+    <div class="ans"><b>When the surface is flat.</b> The correction is vega × ∂σ/∂S, and ∂σ/∂S is proportional to the slope of the smile, so no slope means no correction and both rules return the Black–Scholes delta. It also means the disagreement is worst exactly where you have the most vega — at the money, in high-skew names — which is the least convenient place for a convention to matter.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Surfaces that cannot be right</h2>
+    <p class="dek">Not every set of numbers is a surface. Two constraints, both with a trade attached, and both checkable in seconds.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Because the surface is a probability distribution, it inherits the rules that distributions obey. Break one and you have not merely mispriced something — you have written down a set of quotes that lets somebody take money out of you with certainty.</p>
+    <p><b>Butterfly constraint.</b> A density cannot be negative, and by Breeden–Litzenberger the density is the butterfly price. So <code>∂²C/∂K² ≥ 0</code> everywhere. Steepen the skew past a point and the recovered density dips below zero — at which point a butterfly is trading for a negative premium, and you buy it, and you can only make money. The figure highlights the region in red when it happens; in these settings it appears somewhere around a −1.0 skew.</p>
+    <p><b>Calendar constraint.</b> Total variance cannot decrease with maturity, since variance accumulates. So <code>σ²T</code> must be non-decreasing in T at a fixed moneyness. Violate it and the forward variance between two expiries is negative — you would be selling the near-dated option and buying the far-dated one for a certain profit.</p>
+    <p>There is a third and subtler one worth knowing about. The wings cannot grow arbitrarily fast: if implied vol rises faster than roughly <code>√|k|</code> in the far strikes, the implied density stops integrating to one. This page's own machinery demonstrates it — set a large positive wing curvature and the "density" integrates to <b>1.19</b> instead of 1, which is not a rounding error but a signal that the parameterization is not describing a probability distribution at all.</p>
+    <p>The practical version: any smile you fit needs its wings constrained, and a parameterization that looks great through the listed strikes can be nonsense just outside them. This is why surface fitting in production uses forms that are arbitrage-free by construction rather than whatever curve minimises the error.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Push the skew until the density breaks</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Implied density</span>
+            <span><i class="sw" style="background:rgba(229,67,44,.3)"></i>Negative — butterfly arbitrage</span>
+          </span>
+        </div>
+        <canvas id="cvArb" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Stress the surface</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>The integral readout is the quiet diagnostic. A density that dips negative is obviously broken; one that integrates to 1.19 looks perfectly reasonable strike by strike and is equally impossible. Checking the integral costs nothing and catches the wing problems that eyeballing the smile will not.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A vendor surface prices the 95, 100 and 105 strikes such that the 95/100/105 butterfly costs −0.02. What do you do?</p>
+    <div class="opts">
+      <button>Nothing — negative butterfly values are normal for skewed surfaces</button>
+      <button data-ok="1">Buy it if those are real tradeable prices; otherwise treat the surface as broken, since it implies negative probability</button>
+      <button>Sell it, since it is cheap</button>
+      <button>Widen the strikes until the value turns positive</button>
+    </div>
+    <div class="ans"><b>Buy it, or distrust the surface.</b> A butterfly is a bet on landing near the middle strike and cannot be worth less than zero, so a negative price is either free money or, far more often, a fitting artifact in a vendor surface. In practice the second is overwhelmingly more likely — which makes this a good automated check to run across every surface you consume, because it flags exactly the strikes where the fit has come apart.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Surface drill</h2>
+    <p class="dek">Forward vol, skew conversion, and the arbitrage checks — under time pressure.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The arithmetic here is the arithmetic of a vol desk: converting between total variance and forward variance, reading a skew, and checking a surface. Tolerance is ±1% on Core and ±0.5% on Full.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:150px"><span class="k">Difficulty</span>
+          <div class="seg" style="margin-top:5px;max-width:230px">
+            <button id="dEasy" aria-pressed="true">Core</button>
+            <button id="dHard" aria-pressed="false">Full</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>The forward-variance questions are the ones worth getting automatic. Averaging volatilities instead of variances is a mistake that survives in spreadsheets for years.</figcaption>
+  </figure>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Everything here treats the surface as a static object read at one instant. Real surfaces move, and how they move is the harder question — sticky rules are crude descriptions of that motion, and the difference between them is a live P&amp;L item rather than a modelling nicety. The models in chapter 03 are also deliberately simple: Merton has constant jump parameters, and the mixture has no correlation between spot and volatility. Real calibration uses both mechanisms together, because neither alone reproduces both ends of the term structure.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ═══════════ surface machinery ═══════════ */
+const RQ={r:.03,q:0};
+const bsCall=(S,K,T,v)=>{if(T<=0)return Math.max(0,S-K);
+  const sq=Math.sqrt(T),sv=Math.max(v,1e-9)*sq;
+  const d1=(Math.log(S/K)+(RQ.r-RQ.q+.5*v*v)*T)/sv,d2=d1-sv;
+  return S*Math.exp(-RQ.q*T)*ncdf(d1)-K*Math.exp(-RQ.r*T)*ncdf(d2);};
+const bsVega=(S,K,T,v)=>{const sq=Math.sqrt(T);
+  const d1=(Math.log(S/K)+(RQ.r-RQ.q+.5*v*v)*T)/(v*sq);
+  return S*Math.exp(-RQ.q*T)*npdf(d1)*sq;};
+const bsDelta=(S,K,T,v)=>{const sq=Math.sqrt(T);
+  const d1=(Math.log(S/K)+(RQ.r-RQ.q+.5*v*v)*T)/(v*sq);
+  return Math.exp(-RQ.q*T)*ncdf(d1);};
+function impliedVol(px,S,K,T){let lo=.001,hi=5;
+  for(let i=0;i<80;i++){const m=(lo+hi)/2; if(bsCall(S,K,T,m)<px) lo=m; else hi=m;}
+  return (lo+hi)/2;}
+const fwd=(S,T)=>S*Math.exp((RQ.r-RQ.q)*T);
+/* smile in log-moneyness: sigma = atm + beta*k + gamma*k^2 */
+const smileVol=(S,K,T,atm,beta,gam)=>{
+  const k=Math.log(K/fwd(S,T));
+  return Math.max(.02,atm+beta*k+gam*k*k);};
+/* Breeden-Litzenberger: second difference of call price in strike */
+function blDensity(S,T,atm,beta,gam,K,h){
+  const c=x=>bsCall(S,x,T,smileVol(S,x,T,atm,beta,gam));
+  return Math.exp(RQ.r*T)*(c(K+h)-2*c(K)+c(K-h))/(h*h);}
+/* Merton jump diffusion, closed form */
+function merton(S,K,T,sig,lam,muJ,delJ){
+  const k=Math.exp(muJ+.5*delJ*delJ)-1, lp=lam*(1+k);
+  let sum=0,logf=0;
+  for(let n=0;n<50;n++){
+    if(n>0) logf+=Math.log(lp*T/n);
+    const w=Math.exp(-lp*T+logf);
+    const sn=Math.sqrt(sig*sig+n*delJ*delJ/T);
+    const rn=RQ.r-lam*k+n*Math.log(1+k)/T;
+    const sq=Math.sqrt(T),sv=sn*sq;
+    const d1=(Math.log(S/K)+(rn-RQ.q+.5*sn*sn)*T)/sv,d2=d1-sv;
+    sum+=w*(S*Math.exp(-RQ.q*T)*ncdf(d1)-K*Math.exp(-rn*T)*ncdf(d2));
+    if(w<1e-13&&n>10)break;
+  }
+  return sum;}
+/* uncorrelated stochastic vol == mixture of lognormals */
+const MIX=[[.3,.15],[.4,.25],[.3,.38]];
+const mixCall=(S,K,T,scale)=>MIX.reduce((a,[w,v])=>a+w*bsCall(S,K,T,v*scale),0);
+
+/* ══════════════════════════════════════════════
+   HERO — smiles accumulating
+   ══════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById("heroCv");
+  let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);}
+  function curve(phase,i,n){
+    const beta=-.30-.22*Math.sin(phase+i*.5), gam=.35+.3*Math.cos(phase*.7+i);
+    const yOff=h*(.30+.42*i/n);
+    g.strokeStyle=i%4===0?C("--verm"):C("--blue");
+    g.globalAlpha=.10+.16*(1-i/n); g.lineWidth=i%4===0?1.5:1.1;
+    g.beginPath();
+    for(let j=0;j<=90;j++){
+      const k=-1.1+2.2*j/90;
+      const v=.28+beta*k*.42+gam*k*k*.30;
+      const x=j/90*w, y=yOff-(v-.28)*h*1.5;
+      j?g.lineTo(x,y):g.moveTo(x,y);
+    }
+    g.stroke(); g.globalAlpha=1;
+  }
+  function frame(ts){
+    if(!t0)t0=ts;
+    g.globalAlpha=.030;g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);g.globalAlpha=1;
+    const ph=(ts-t0)/5200;
+    const n=9;
+    for(let i=0;i<n;i++) curve(ph,i,n);
+    raf=requestAnimationFrame(frame);
+  }
+  function statics(){for(let i=0;i<9;i++)curve(0,i,9);}
+  size(); if(RM)statics(); else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)statics();else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════════════════════════════════════════
+   01 + 02 — the surface and its density
+   ══════════════════════════════════════════════ */
+const s1={S:100,atm:.30,beta:-.35,gam:.25,T:.5};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"a1",k:"atm",lbl:"σ",name:"ATM volatility",min:.08,max:.9,step:.01,fmt:pct},
+    {id:"b1",k:"beta",lbl:"β",name:"Skew (slope)",min:-.9,max:.4,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"g1",k:"gam",lbl:"γ",name:"Smile (curvature)",min:-.4,max:1.2,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"T1",k:"T",lbl:"T",name:"Expiry shown",min:.08,max:2,step:.02,fmt:v=>(v*12).toFixed(1)+"m"}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function draw(){
+    const S=s1.S;
+    const lo=S*.6,hi=S*1.5,xs=[];
+    for(let i=0;i<200;i++)xs.push(lo+(hi-lo)*i/199);
+    const tenors=[.08,.25,.5,1,2];
+    const cols=[C("--verm"),C("--ochre"),C("--blue"),C("--moss"),C("--grey")];
+    const series=tenors.map(T=>xs.map(K=>smileVol(S,K,T,s1.atm,s1.beta,s1.gam)*100));
+    const o=Fig(document.getElementById("cvSmile"),{h:320,x0:lo,x1:hi,
+      y0:Math.min(...series.flat())*.92,y1:Math.max(...series.flat())*1.06,pad:{l:58}});
+    axes(o,v=>"$"+v.toFixed(0),v=>v.toFixed(0)+"%",5,5);
+    clip(o,()=>series.forEach((ys,i)=>
+      line(o,xs,ys,cols[i],Math.abs(tenors[i]-s1.T)<.03?2.6:1.4,null,
+        Math.abs(tenors[i]-s1.T)<.03?1:.5)));
+    vline(o,fwd(S,s1.T),C("--ink"),"forward",[3,3]);
+    const g=o.g;g.fillStyle=C("--blue");
+    g.beginPath();g.arc(o.X(fwd(S,s1.T)),o.Y(smileVol(S,fwd(S,s1.T),s1.T,s1.atm,s1.beta,s1.gam)*100),4,0,6.284);g.fill();
+    g.strokeStyle=C("--chalk");g.lineWidth=1.5;g.stroke();
+    const k90=smileVol(S,90,s1.T,s1.atm,s1.beta,s1.gam),
+          k110=smileVol(S,110,s1.T,s1.atm,s1.beta,s1.gam);
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Forward","$"+fwd(S,s1.T).toFixed(2)],
+      ["ATM vol",pct2(smileVol(S,fwd(S,s1.T),s1.T,s1.atm,s1.beta,s1.gam))],
+      ["90 strike",pct2(k90)],["110 strike",pct2(k110)],
+      ["90–110 skew",((k90-k110)*100).toFixed(2)+" pts"],
+      ["Shown expiry",(s1.T*12).toFixed(1)+" months"]
+    ]);
+    density();
+  }
+  function density(){
+    const S=s1.S,T=s1.T;
+    const lo=Math.max(5,S*.35),hi=S*2.0,n=260,h=(hi-lo)/n;
+    const xs=[],dn=[],ln=[];
+    const atmV=smileVol(S,fwd(S,T),T,s1.atm,s1.beta,s1.gam);
+    const sd=atmV*Math.sqrt(T), mu=Math.log(S)+(RQ.r-RQ.q-.5*atmV*atmV)*T;
+    let area=0;
+    for(let i=0;i<=n;i++){
+      const K=lo+i*h;xs.push(K);
+      const d=blDensity(S,T,s1.atm,s1.beta,s1.gam,K,Math.max(.05,S*0.0008));
+      dn.push(d); area+=(i===0||i===n?.5:1)*Math.max(0,d)*h;
+      ln.push(K<=0?0:npdf((Math.log(K)-mu)/sd)/(K*sd));
+    }
+    const o=Fig(document.getElementById("cvDens"),{h:320,x0:lo,x1:hi,y0:Math.min(0,...dn)*1.1,
+      y1:Math.max(...dn,...ln)*1.12,pad:{l:64}});
+    axes(o,v=>"$"+v.toFixed(0),v=>v.toFixed(3),5,4);
+    clip(o,()=>{line(o,xs,ln,C("--grey"),1.6,[5,4]);line(o,xs,dn,C("--blue"),2.2);});
+    vline(o,S,C("--ochre"),"spot",[2,4]);
+    const cum=(arr,x)=>{let c=0;for(let i=0;i<xs.length;i++){if(xs[i]>x)break;c+=Math.max(0,arr[i])*h;}return c;};
+    const tot=cum(dn,1e9)||1, totL=cum(ln,1e9)||1;
+    const rows=[
+      ["P(below 70%)",cum(dn,S*.7)/tot,cum(ln,S*.7)/totL],
+      ["P(below 80%)",cum(dn,S*.8)/tot,cum(ln,S*.8)/totL],
+      ["P(above 130%)",1-cum(dn,S*1.3)/tot,1-cum(ln,S*1.3)/totL]
+    ];
+    const mx=Math.max(...rows.flatMap(r=>[r[1],r[2]]),1e-9);
+    document.getElementById("tailBars").innerHTML=rows.map(([n2,a,b])=>
+      `<div class="brow"><span class="l">${n2}</span>
+       <div class="trk"><i style="background:${C("--blue")};left:0;width:${a/mx*100}%"></i></div>
+       <span class="a">${(a*100).toFixed(2)}%</span></div>
+       <div class="brow"><span class="l" style="color:var(--grey)">…lognormal</span>
+       <div class="trk"><i style="background:${C("--grey")};left:0;width:${b/mx*100}%"></i></div>
+       <span class="a" style="color:var(--grey)">${(b*100).toFixed(2)}%</span></div>`).join("");
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Density integral",area.toFixed(5)],
+      ["Valid density?",Math.abs(area-1)<.02&&Math.min(...dn)>=-1e-9?"yes":"NO"],
+      ["Min density",Math.min(...dn).toExponential(1)],
+      ["Implied mean","$"+(xs.reduce((a,K,i)=>a+K*Math.max(0,dn[i])*h,0)/tot).toFixed(2)],
+      ["Forward","$"+fwd(S,T).toFixed(2)],
+      ["Left tail vs LN",(rows[0][1]/Math.max(rows[0][2],1e-9)).toFixed(2)+"×"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   03 — two generators
+   ══════════════════════════════════════════════ */
+const s3={T:.25,lam:1.0,muJ:-.12,delJ:.12,sig:.20};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"T3",k:"T",lbl:"T",name:"Expiry",min:.04,max:3,step:.02,fmt:v=>(v*12).toFixed(1)+"m"},
+    {id:"l3",k:"lam",lbl:"λ",name:"Jumps per year",min:0,max:4,step:.05,fmt:v=>v.toFixed(2)},
+    {id:"m3",k:"muJ",lbl:"μJ",name:"Mean jump",min:-.4,max:.1,step:.01,fmt:pct},
+    {id:"j3",k:"delJ",lbl:"δJ",name:"Jump vol",min:.02,max:.4,step:.01,fmt:pct}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  const S=100;
+  const skewAt=(T)=>{
+    const j=(K)=>impliedVol(merton(S,K,T,s3.sig,s3.lam,s3.muJ,s3.delJ),S,K,T);
+    const m=(K)=>impliedVol(mixCall(S,K,T,1),S,K,T);
+    return [(j(90)-j(110))*100,(m(90)-m(110))*100];
+  };
+  function draw(){
+    const T=s3.T,lo=70,hi=135,xs=[],yj=[],ym=[];
+    for(let i=0;i<70;i++){const K=lo+(hi-lo)*i/69;xs.push(K);
+      yj.push(impliedVol(merton(S,K,T,s3.sig,s3.lam,s3.muJ,s3.delJ),S,K,T)*100);
+      ym.push(impliedVol(mixCall(S,K,T,1),S,K,T)*100);}
+    const o=Fig(document.getElementById("cvGen"),{h:290,x0:lo,x1:hi,
+      y0:Math.min(...yj,...ym)*.93,y1:Math.max(...yj,...ym)*1.07,pad:{l:58}});
+    axes(o,v=>"$"+v.toFixed(0),v=>v.toFixed(0)+"%",5,4);
+    clip(o,()=>{line(o,xs,ym,C("--blue"),2.1);line(o,xs,yj,C("--verm"),2.1);});
+    vline(o,fwd(S,T),C("--ink"),"fwd",[3,3]);
+    const Ts=[],sj=[],sm=[];
+    for(let i=0;i<26;i++){const t=.04+2.96*i/25;Ts.push(t);
+      const [a,b]=skewAt(t);sj.push(a);sm.push(b);}
+    const o2=Fig(document.getElementById("cvDecay"),{h:220,x0:0,x1:3,
+      y0:Math.min(0,...sj,...sm),y1:Math.max(...sj,...sm)*1.1,pad:{l:58}});
+    axes(o2,v=>v.toFixed(1)+"y",v=>v.toFixed(1),5,4);
+    clip(o2,()=>{line(o2,Ts,sm,C("--blue"),2);line(o2,Ts,sj,C("--verm"),2.2);});
+    vline(o2,T,C("--ochre"),"shown");
+    const [a,b]=skewAt(T);
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Expiry",(T*12).toFixed(1)+"m"],
+      ["Jump skew 90–110",a.toFixed(2)+" pts"],
+      ["Stoch-vol skew",b.toFixed(2)+" pts"],
+      ["Jump ATM vol",pct2(impliedVol(merton(S,fwd(S,T),T,s3.sig,s3.lam,s3.muJ,s3.delJ),S,fwd(S,T),T))],
+      ["Mixture ATM vol",pct2(impliedVol(mixCall(S,fwd(S,T),T,1),S,fwd(S,T),T))],
+      ["Skew at 3y (jump)",skewAt(3)[0].toFixed(2)+" pts"],
+      ["Decay ratio",Math.abs(skewAt(3)[0])>1e-6?(a/skewAt(3)[0]).toFixed(1)+"×":"—"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   04 — term structure and forward vol
+   ══════════════════════════════════════════════ */
+const s4={front:.42,back:.26,decay:1.4};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"f4",k:"front",lbl:"σ₁",name:"Front-month vol",min:.08,max:1.2,step:.01,fmt:pct},
+    {id:"b4",k:"back",lbl:"σ∞",name:"Long-dated vol",min:.08,max:.8,step:.01,fmt:pct},
+    {id:"d4",k:"decay",lbl:"κ",name:"Convergence speed",min:.2,max:6,step:.1,fmt:v=>v.toFixed(1)}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const Ts=[],vs=[];
+    for(let i=0;i<40;i++){const T=.04+2.5*i/39;Ts.push(T);
+      vs.push(s4.back+(s4.front-s4.back)*Math.exp(-s4.decay*T));}
+    const fw=[],fwT=[];
+    for(let i=1;i<Ts.length;i++){
+      const v=(vs[i]*vs[i]*Ts[i]-vs[i-1]*vs[i-1]*Ts[i-1])/(Ts[i]-Ts[i-1]);
+      fwT.push((Ts[i]+Ts[i-1])/2);
+      fw.push(v>0?Math.sqrt(v):NaN);
+    }
+    const all=vs.map(v=>v*100).concat(fw.filter(isFinite).map(v=>v*100));
+    const o=Fig(document.getElementById("cvTerm"),{h:300,x0:0,x1:2.6,
+      y0:Math.min(...all)*.9,y1:Math.max(...all)*1.08,pad:{l:58}});
+    axes(o,v=>v.toFixed(1)+"y",v=>v.toFixed(0)+"%",5,5);
+    clip(o,()=>{line(o,fwT,fw.map(v=>v*100),C("--ochre"),1.9,[5,4]);
+      line(o,Ts,vs.map(v=>v*100),C("--blue"),2.3);});
+    const neg=fw.filter(v=>!isFinite(v)).length;
+    const v1=vs[0],v2=vs[6],T1=Ts[0],T2=Ts[6];
+    const fvar=(v2*v2*T2-v1*v1*T1)/(T2-T1);
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Front vol",pct2(s4.front)],["Long vol",pct2(s4.back)],
+      ["Shape",s4.front>s4.back?"inverted":"upward"],
+      ["σ²T at "+(T1*12).toFixed(0)+"m",(v1*v1*T1).toFixed(5)],
+      ["σ²T at "+(T2*12).toFixed(0)+"m",(v2*v2*T2).toFixed(5)],
+      ["Fwd variance",fvar.toFixed(5)],
+      ["Fwd vol",fvar>0?pct2(Math.sqrt(fvar)):"IMAGINARY"],
+      ["Negative fwd points",neg]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   05 — sticky rules
+   ══════════════════════════════════════════════ */
+const s5={atm:.30,beta:-.35,T:.5};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"a5",k:"atm",lbl:"σ",name:"ATM volatility",min:.08,max:.9,step:.01,fmt:pct},
+    {id:"b5",k:"beta",lbl:"β",name:"Skew (slope)",min:-.9,max:.2,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"T5",k:"T",lbl:"T",name:"Expiry",min:.05,max:2,step:.02,fmt:v=>(v*12).toFixed(1)+"m"}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  const S=100;
+  function deltas(K){
+    const T=s5.T, v=smileVol(S,K,T,s5.atm,s5.beta,0);
+    const dBS=bsDelta(S,K,T,v);
+    const h=.01, vh=Math.max(.02,s5.atm+s5.beta*Math.log(K/fwd(S+h,T)));
+    const dSD=dBS+bsVega(S,K,T,v)*(vh-v)/h;
+    return [dBS,dSD,v];
+  }
+  function draw(){
+    const lo=70,hi=135,xs=[],a=[],b=[],d=[];
+    for(let i=0;i<140;i++){const K=lo+(hi-lo)*i/139;xs.push(K);
+      const [x,y]=deltas(K);a.push(x);b.push(y);d.push((y-x)*100);}
+    const o=Fig(document.getElementById("cvSticky"),{h:290,x0:lo,x1:hi,y0:0,y1:1.05,pad:{l:58}});
+    axes(o,v=>"$"+v.toFixed(0),v=>v.toFixed(2),5,5);
+    clip(o,()=>{line(o,xs,a,C("--grey"),2.4);line(o,xs,b,C("--blue"),2);});
+    vline(o,S,C("--ochre"),"spot",[2,4]);
+    const o2=Fig(document.getElementById("cvStickyD"),{h:180,x0:lo,x1:hi,
+      y0:Math.min(0,...d)*1.15,y1:Math.max(...d,0)*1.15||1,pad:{l:58,b:22}});
+    axes(o2,v=>"$"+v.toFixed(0),v=>v.toFixed(1),5,3);
+    clip(o2,()=>line(o2,xs,d,C("--verm"),2.1));
+    const [x0,y0,v0]=deltas(100);
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["100-strike IV",pct2(v0)],
+      ["Sticky-strike Δ",x0.toFixed(4)],
+      ["Sticky-delta Δ",y0.toFixed(4)],
+      ["Difference",((y0-x0)).toFixed(4)],
+      ["Shares / contract",((y0-x0)*100).toFixed(1)],
+      ["On 100 lots",Math.round((y0-x0)*100*100)+" sh"],
+      ["Vega /pt",(bsVega(S,100,s5.T,v0)/100).toFixed(4)]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   06 — arbitrage constraints
+   ══════════════════════════════════════════════ */
+const s6={atm:.30,beta:-.55,gam:.30,T:.5};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"b6",k:"beta",lbl:"β",name:"Skew — push until it breaks",min:-1.6,max:.2,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"g6",k:"gam",lbl:"γ",name:"Wing curvature",min:-.5,max:2,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"a6",k:"atm",lbl:"σ",name:"ATM volatility",min:.08,max:.9,step:.01,fmt:pct},
+    {id:"T6",k:"T",lbl:"T",name:"Expiry",min:.08,max:2,step:.02,fmt:v=>(v*12).toFixed(1)+"m"}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  const S=100;
+  function draw(){
+    const T=s6.T,lo=Math.max(5,S*.3),hi=S*2.2,n=240,h=(hi-lo)/n;
+    const xs=[],dn=[];let area=0,minD=Infinity;
+    for(let i=0;i<=n;i++){const K=lo+i*h;xs.push(K);
+      const d=blDensity(S,T,s6.atm,s6.beta,s6.gam,K,Math.max(.05,S*0.0008));
+      dn.push(d);minD=Math.min(minD,d);
+      area+=(i===0||i===n?.5:1)*Math.max(0,d)*h;}
+    const o=Fig(document.getElementById("cvArb"),{h:300,x0:lo,x1:hi,
+      y0:Math.min(0,minD)*1.2||-.001,y1:Math.max(...dn)*1.12,pad:{l:64}});
+    axes(o,v=>"$"+v.toFixed(0),v=>v.toFixed(3),5,4);
+    const g=o.g;
+    g.save();g.beginPath();g.rect(o.P.l,o.P.t,o.pw,o.ph);g.clip();
+    g.fillStyle="rgba(229,67,44,.30)";
+    for(let i=0;i<xs.length;i++){
+      if(dn[i]>=0)continue;
+      g.fillRect(o.X(xs[i]),o.Y(0),Math.max(o.pw/n,1.5),o.Y(dn[i])-o.Y(0));
+    }
+    g.restore();
+    clip(o,()=>line(o,xs,dn,C("--blue"),2.2));
+    const g2=o.g;g2.strokeStyle=C("--ink");g2.lineWidth=1;g2.setLineDash([3,3]);
+    const zy=Math.round(o.Y(0))+.5;
+    g2.beginPath();g2.moveTo(o.P.l,zy);g2.lineTo(o.P.l+o.pw,zy);g2.stroke();g2.setLineDash([]);
+    const negOK=minD>=-1e-9, intOK=Math.abs(area-1)<.02;
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Min density",minD.toExponential(2)],
+      ["Butterfly test",negOK?"passes":"VIOLATED"],
+      ["Density integral",area.toFixed(5)],
+      ["Integral test",intOK?"passes":"VIOLATED"],
+      ["Verdict",(negOK&&intOK)?"admissible":"not a distribution"],
+      ["Skew",s6.beta.toFixed(2)],
+      ["Wing curvature",s6.gam.toFixed(2)]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   07 — drill
+   ══════════════════════════════════════════════ */
+(function(){
+  const D={n:0,ok:0,streak:0,best:0,hard:false,cur:null,answered:false};
+  const ri=(a,b,st)=>{st=st||1;return Math.round((a+Math.random()*(b-a))/st)*st;};
+  const CORE=[
+    ()=>{const v1=ri(20,60)/100,T1=ri(1,4)/12,v2=ri(18,45)/100,T2=T1+ri(2,9)/12;
+      const fv=Math.sqrt(Math.max(.0001,(v2*v2*T2-v1*v1*T1)/(T2-T1)));
+      return{k:"Forward vol",u:"percent",a:fv*100,
+        t:`The <b>${(T1*12).toFixed(0)}</b>-month vol is <b>${(v1*100).toFixed(0)}%</b> and the <b>${(T2*12).toFixed(0)}</b>-month is <b>${(v2*100).toFixed(0)}%</b>. What forward volatility is implied between them?`,
+        w:`Subtract total variances, never average vols. σ²T at each: ${(v1*v1*T1).toFixed(5)} and ${(v2*v2*T2).toFixed(5)}. Forward variance = (${(v2*v2*T2).toFixed(5)} − ${(v1*v1*T1).toFixed(5)}) / ${(T2-T1).toFixed(4)} = ${((v2*v2*T2-v1*v1*T1)/(T2-T1)).toFixed(5)}. Square root: <code>${(fv*100).toFixed(2)}%</code>.`};},
+    ()=>{const v=ri(15,70)/100,T=ri(1,24)/12;
+      return{k:"Total variance",u:"decimal",a:v*v*T,
+        t:`An option has <b>${(T*12).toFixed(0)}</b> months to expiry at <b>${(v*100).toFixed(0)}%</b> implied vol. What is its total variance σ²T?`,
+        w:`σ²T = ${(v).toFixed(2)}² × ${T.toFixed(4)} = <code>${(v*v*T).toFixed(5)}</code>. Total variance is the additive quantity — it is what you compare across expiries, and what a variance swap pays on.`};},
+    ()=>{const a=ri(18,45),sk=ri(2,14);
+      return{k:"Read the skew",u:"percent",a:a+sk/2,
+        t:`ATM vol is <b>${a}%</b> and the 90–110 skew is <b>${sk}</b> vol points, split symmetrically about the money. What is the 90-strike implied vol?`,
+        w:`Symmetric split means the 90 strike sits half the skew above ATM: ${a} + ${sk}/2 = <code>${(a+sk/2).toFixed(2)}%</code>, and the 110 strike sits the same distance below at ${(a-sk/2).toFixed(2)}%.`};},
+  ];
+  const FULL=CORE.concat([
+    ()=>{const S=ri(50,300,5),v=ri(15,60)/100,T=ri(1,12)/12,beta=-ri(15,80)/100;
+      const K=Math.round(S*(1+ri(-15,15)/100));
+      const iv=Math.max(.02,v+beta*Math.log(K/(S*Math.exp(.03*T))));
+      return{k:"Smile lookup",u:"percent",a:iv*100,
+        t:`A surface is parameterised as σ = ${(v*100).toFixed(0)}% ${beta<0?"−":"+"} ${Math.abs(beta).toFixed(2)}·ln(K/F). Spot is <b>${S}</b>, r = 3%, T = <b>${(T*12).toFixed(0)}</b> months. What is the implied vol at the <b>${K}</b> strike?`,
+        w:`F = ${S}·e^(0.03×${T.toFixed(4)}) = ${(S*Math.exp(.03*T)).toFixed(2)}. ln(K/F) = ${Math.log(K/(S*Math.exp(.03*T))).toFixed(5)}. σ = ${(v*100).toFixed(0)}% + (${beta.toFixed(2)})(${Math.log(K/(S*Math.exp(.03*T))).toFixed(4)}) = <code>${(iv*100).toFixed(2)}%</code>. Note the smile is centred on the forward, not on spot.`};},
+    ()=>{const veg=ri(5,40)/100,slope=ri(10,60)/1000;
+      return{k:"Sticky-delta shift",u:"delta",a:veg*slope*100,
+        t:`An option has vega of <b>${veg.toFixed(2)}</b> per vol point. Under sticky-delta, a $1 move in spot changes its implied vol by <b>${(slope*100).toFixed(1)}</b> vol points. How much extra delta does that give you?`,
+        w:`Extra delta = vega × ∂σ/∂S = ${veg.toFixed(2)} × ${(slope*100).toFixed(1)} = <code>${(veg*slope*100).toFixed(3)}</code> of delta, i.e. ${(veg*slope*100*100).toFixed(1)} shares per contract. This term is zero under sticky strike, which is the entire difference between the two conventions.`};},
+    ()=>{const v1=ri(30,70)/100,T1=ri(1,3)/12,T2=T1+ri(2,6)/12;
+      const need=Math.sqrt(v1*v1*T1/T2);
+      return{k:"Calendar bound",u:"percent",a:need*100,
+        t:`The <b>${(T1*12).toFixed(0)}</b>-month vol is <b>${(v1*100).toFixed(0)}%</b>. Below what <b>${(T2*12).toFixed(0)}</b>-month vol does total variance fall with maturity, creating a calendar arbitrage?`,
+        w:`Total variance must not decrease: σ₂²T₂ ≥ σ₁²T₁. So σ₂ ≥ √(σ₁²T₁/T₂) = √(${(v1*v1*T1).toFixed(5)}/${T2.toFixed(4)}) = <code>${(need*100).toFixed(2)}%</code>. Quote the back month below that and you are selling variance for a negative price.`};},
+  ]);
+  function next(){
+    const bank=D.hard?FULL:CORE;
+    D.cur=bank[Math.floor(Math.random()*bank.length)]();D.answered=false;
+    document.getElementById("dKind").textContent=D.cur.k;
+    document.getElementById("dText").innerHTML=D.cur.t;
+    document.getElementById("dUnit").textContent=D.cur.u;
+    const i=document.getElementById("dInput");i.value="";i.disabled=false;
+    document.getElementById("drill").classList.remove("done");i.focus();}
+  function stats(){document.getElementById("dScore").textContent=D.ok+" / "+D.n;
+    document.getElementById("dStreak").textContent=D.streak;
+    document.getElementById("dBest").textContent=D.best;}
+  function submit(){
+    if(D.answered)return;
+    const raw=document.getElementById("dInput").value.replace(/[$,%\s]/g,"");
+    if(raw===""||isNaN(+raw))return;
+    const got=+raw,want=D.cur.a,tol=D.hard?.005:.01;
+    const ok=Math.abs(got-want)<=Math.max(Math.abs(want)*tol,.0005);
+    D.n++;D.answered=true;
+    if(ok){D.ok++;D.streak++;D.best=Math.max(D.best,D.streak);}else D.streak=0;
+    stats();
+    const v=document.getElementById("dVerdict");
+    v.className="vd "+(ok?"ok":"no");
+    v.textContent=ok?"Correct — "+want.toFixed(4):"Not quite. Answer: "+want.toFixed(4)+"  (you said "+got+")";
+    document.getElementById("dWork").innerHTML=D.cur.w;
+    document.getElementById("drill").classList.add("done");
+    document.getElementById("dInput").disabled=true;}
+  document.getElementById("dSubmit").addEventListener("click",submit);
+  document.getElementById("dInput").addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();D.answered?next():submit();}});
+  document.getElementById("dNext").addEventListener("click",next);
+  document.getElementById("dSkip").addEventListener("click",()=>{D.streak=0;stats();next();});
+  const eb=document.getElementById("dEasy"),hb=document.getElementById("dHard");
+  eb.addEventListener("click",()=>{D.hard=false;eb.setAttribute("aria-pressed",true);hb.setAttribute("aria-pressed",false);next();});
+  hb.addEventListener("click",()=>{D.hard=true;hb.setAttribute("aria-pressed",true);eb.setAttribute("aria-pressed",false);next();});
+  stats();next();
+})();
+
+function drawAll(){draw1();draw3();draw4();draw5();draw6();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

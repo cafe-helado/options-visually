@@ -17,14 +17,22 @@ Signature: the delta hedge lands on zero regardless of drift.
 
 ---
 
-## 02 · The Surface — why one volatility isn't enough
+## 02 · The Surface — why one volatility isn't enough  ✅ live (surface.html)
 
 **Spine:** Black–Scholes assumes one σ. The market quotes a different one for every
 strike and expiry. The surface is not a failure of the model; it is the market telling
 you what the model's distribution got wrong.
 
-Signature: draw a smile, invert it to the implied *distribution*, and show the fat left
-tail appear. The smile and the distribution are the same statement.
+Signature as built: Breeden-Litzenberger. The recovered density reproduces the lognormal
+to 0.04% under a flat surface, and a -0.35 skew moves P(finish below 70) from 5.0% to
+8.6% while P(above 130) falls from 10.2% to 6.6%.
+
+Second signature: two generators separated by term structure, not shape. Merton jump skew
+runs 8.46 vol points at one month and 0.40 at three years; an uncorrelated stochastic-vol
+mixture holds 0.56 to 0.33 across the same range. Indistinguishable at one expiry.
+
+Third: sticky-strike vs sticky-delta differ by 0.0972 of delta on a 100-strike six-month
+call at 30 vol with -0.35 skew — about 10 shares a contract from a choice of convention.
 
 Chapters
 - One vol per option — build the surface from quoted prices; implied vol as a price in
