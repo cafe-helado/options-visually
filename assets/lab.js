@@ -206,8 +206,9 @@ document.querySelectorAll(".check").forEach(box=>{
 });
 function score(){
   const n=document.querySelectorAll(".check[data-quiz]").length;
-  document.getElementById("scoreNum").textContent=QUIZ.correct+" / "+n;
-  const t=document.getElementById("scoreTxt");
+  const num=document.getElementById("scoreNum"), t=document.getElementById("scoreTxt");
+  if(!num||!t) return;               // page has checks but no scoreboard
+  num.textContent=QUIZ.correct+" / "+n;
   if(QUIZ.answered<n){
     t.textContent=`${QUIZ.answered} of ${n} answered. Keep going.`;
   }else{

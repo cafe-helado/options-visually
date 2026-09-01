@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Two Ways to Own the Same Thing — put-call parity, revcons and jelly rolls</title>
+<meta name="description" content="Put-call parity as a construction: synthetics, combos and straddles, carry and settlement, conversion/reversal pricing, jelly rolls, borrow risk, and a speed drill.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Two Ways to Own the Same Thing — put-call parity, revcons and jelly rolls">
+<meta property="og:description" content="Put-call parity as a construction: synthetics, combos and straddles, carry and settlement, conversion/reversal pricing, jelly rolls, borrow risk, and a speed drill.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 07 · Parity, Boxes and Rolls</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>The identity</span><i></i></a>
+  <a href="#c2"><span>The synthetic</span><i></i></a>
+  <a href="#c3"><span>Combo & straddle</span><i></i></a>
+  <a href="#c4"><span>Carry</span><i></i></a>
+  <a href="#c5"><span>Convert & reverse</span><i></i></a>
+  <a href="#c6"><span>The rate</span><i></i></a>
+  <a href="#c7"><span>Jelly rolls</span><i></i></a>
+  <a href="#c8"><span>Borrow</span><i></i></a>
+  <a href="#c9"><span>Drill</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 07</div>
+    <h1>Two ways to own the <em>same</em> thing</h1>
+    <p class="sub">Put-call parity is not an identity to memorize. It is a machine for building any one of stock, calls, puts and cash out of the other three — and the price of the machine is a number you can read off the screen and compare to your funding.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This page assumes page 01 for the greeks vocabulary but very little else. There is almost no calculus in it — parity is arithmetic, and the difficulty is entirely in the bookkeeping.</p>
+  <ol>
+    <li><b>Everything here is a construction.</b> Each chapter builds one instrument out of others and then prices the difference.</li>
+    <li><b>The numbers are live.</b> Both pricers below implement the desk formulas exactly, including the sign conventions that cause most of the errors.</li>
+    <li><b>Drill chapter 09 until it's automatic.</b> Solving for a missing leg under time pressure is a real interview question and a real desk skill.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>C, P</td><td>Call and put price, same strike and same expiry. Always the same pair unless stated.</td></tr>
+      <tr><td>S</td><td>Stock price.</td></tr>
+      <tr><td>K</td><td>Strike price.</td></tr>
+      <tr><td>r/c</td><td>Carry. The net cost of holding the position from trade settlement to expiry settlement: interest earned or paid, less dividends received. Quoted in dollars per share, not as a rate.</td></tr>
+      <tr><td>Combo</td><td>C − P. The synthetic forward, quoted as one number. Also called the synthetic or the risk reversal at the same strike.</td></tr>
+      <tr><td>Straddle</td><td>C + P at the same strike.</td></tr>
+      <tr><td>Revcon</td><td>Conversion or reversal. Long or short the combo against the opposite stock position.</td></tr>
+      <tr><td>Days</td><td>Actual calendar days from trade settlement to expiry settlement. ACT/360.</td></tr>
+      <tr><td>EFFR</td><td>Effective federal funds rate, the benchmark the implied rate is compared against.</td></tr>
+      <tr><td>ETB / HTB</td><td>Easy to borrow / hard to borrow. Determines which funding rate is the right comparison.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>One identity, and everything that falls out of it</h2>
+    <p class="dek">Parity is usually presented as a formula to check. It is better read as a statement that two portfolios are the same portfolio.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Buy a call and sell a put at the same strike and expiry. At expiry you will own the stock at K no matter what happens — if it finishes above, you exercise; if below, you are assigned. There is no outcome in which you do not end up long stock at K. That combination is therefore <b>not similar to</b> a forward on the stock. It <b>is</b> a forward on the stock.</p>
+    <p>Two things that are the same must cost the same, and the only difference between owning the stock today and agreeing to own it at expiry is the carry in between: the financing you pay or earn, less any dividends you would have collected. Write that down and you have parity:</p>
+    <div class="mline">C − P = S + r/c − K</div>
+    <p class="mread">Reads as: <b>the price of the synthetic minus the price of the actual is exactly the carry.</b> Nothing in it is a model — no volatility, no distribution, no assumption about how the stock moves.</p>
+    <p>That last point is worth pausing on, because it makes this page different from every other page in the series. Black–Scholes is a model and can be wrong. Parity is an <b>arbitrage relationship</b>: if it fails by more than transaction costs, you can construct a portfolio that takes in money today and can never lose. There is no view involved, no distributional assumption, and no volatility input. It holds for any process the stock could possibly follow.</p>
+    <p>Everything else on your screen follows from rearranging it. The combo is the left side. The straddle is the sum rather than the difference. And each of the four instruments can be written in terms of the other three.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Every identity, checked live</h3>
+          <span class="note">Move any input. The residual column stays at machine zero.</span>
+        </div>
+        <table class="idtab" id="idTab"></table>
+        <div class="figtop" style="margin:26px 0 6px"><h3>Solving for each leg</h3></div>
+        <table class="rot" id="solveTab"></table>
+      </div>
+      <div class="rail panel">
+        <h4>Inputs</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>These are not approximations that hold near the money or for short tenors. They are definitions rearranged, so the residuals are exactly zero for every input you can dial in — which is precisely why a parity violation is tradeable rather than debatable.</figcaption>
+  </figure>
+
+  <div class="derive">
+    <details class="derive" open style="margin-left:0;border-top:0;padding-top:0">
+      <summary>Proof — the four-line arbitrage argument</summary>
+      <div class="body">
+        <p>Build two portfolios today.</p>
+        <p><b>Portfolio A:</b> buy one call, sell one put, both struck at K. Cost: C − P.</p>
+        <p><b>Portfolio B:</b> buy the stock, borrow the present value of K. Cost: S − PV(K).</p>
+        <p>At expiry, whatever the stock does:</p>
+        <div class="mline">A pays S<sub>T</sub> − K &nbsp;&nbsp;·&nbsp;&nbsp; B pays S<sub>T</sub> − K</div>
+        <p class="mread">Reads as: <b>identical payoffs in every state of the world.</b> If S<sub>T</sub> &gt; K the call is exercised; if S<sub>T</sub> &lt; K the put is assigned. Either way you own stock at K.</p>
+        <p>Two portfolios with identical payoffs in every state must have identical prices today, or you buy the cheap one, sell the dear one, and hold to expiry with no residual risk. Setting the costs equal:</p>
+        <div class="mline">C − P = S − PV(K) = S + r/c − K</div>
+        <p class="mread">Reads as: <b>the difference between discounting K and simply subtracting it is the carry.</b> Writing it as "+ r/c − K" instead of "− PV(K)" is the desk convention, because r/c is the number actually being traded.</p>
+        <p><b>Where it breaks.</b> Three places, all real. American options can be exercised early, so the put leg of a conversion can be assigned before expiry and the relationship becomes an inequality rather than an equation. Dividends must be <em>announced</em> — an unexpected special dividend changes r/c after you have traded. And the short stock leg requires a borrow that can be recalled, which is chapter 08's subject and the single most common way this "riskless" trade loses money.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Parity requires no assumption about volatility. What does that actually buy you?</p>
+    <div class="opts">
+      <button>Nothing practical — you still need a model to trade options</button>
+      <button data-ok="1">A parity violation is an arbitrage rather than an opinion: it can be captured without being right about anything</button>
+      <button>It means options can be priced without knowing the stock price</button>
+      <button>It means implied volatility is unnecessary</button>
+    </div>
+    <div class="ans"><b>It converts a disagreement into a trade.</b> If your model says an option is cheap, you might be wrong about vol. If parity is violated, no view is required — you construct the box, hold it, and collect the difference regardless of what the stock does. That is why revcon desks are financing desks rather than volatility desks: they are not taking a position on the distribution, they are lending and borrowing money through the options market and competing on rate.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The synthetic, and what it costs to be wrong about carry</h2>
+    <p class="dek">Build stock out of options and watch it track. Then mis-mark the rate and watch the gap open by exactly as much as theory says it should.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A long call and a short put at the same strike is <b>synthetic long stock</b>. Its P&amp;L against spot is a straight line with slope one, identical to owning shares. The figure below draws both; at the correct carry they lie on top of each other and you cannot see two lines.</p>
+    <p>Now mis-price the carry. Drag the rate away from fair and the synthetic separates from the stock by a constant — not a widening wedge, a parallel shift. That shape matters: <b>a carry error is a level error, not a directional one.</b> You do not lose more when the stock moves against you; you lose the same amount in every state, which is exactly what makes it a financing trade rather than a market trade.</p>
+    <p>The size of that shift is what the whole revcon market competes over. On a $300 strike for 38 days, ten basis points of rate is about three cents of package. Desks fight over that because it is riskless if you have the borrow and the balance sheet.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Synthetic stock vs actual stock, at expiry</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Long stock</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Long call + short put</span>
+          </span>
+        </div>
+        <canvas id="cvSyn" height="300"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Mispricing, in dollars per share</h3></div>
+        <canvas id="cvGap" height="170"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Package</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The four synthetics are worth memorizing as a set: long call + short put = long stock; short call + long put = short stock; long stock + long put = long call; short stock + long call = long put. Any three of the four instruments manufacture the fourth, which is the entire content of this page.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>The combo and the straddle</h2>
+    <p class="dek">Difference and sum. Two numbers that between them contain both option prices.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Desks rarely quote a call and a put separately when trading them as a package. They quote the <b>combo</b> — the difference C − P — and the <b>straddle</b>, the sum C + P. Those two numbers carry exactly the same information as the two option prices, and converting between the representations is one line of algebra each way.</p>
+    <div class="mline">C = (Straddle + Combo) / 2 &nbsp;&nbsp;·&nbsp;&nbsp; P = (Straddle − Combo) / 2</div>
+    <p class="mread">Reads as: <b>average the sum and the difference to recover either leg.</b> Add them and the put cancels; subtract and the call cancels.</p>
+    <p>This is worth having automatic because it is how you sanity-check a screen. Given a straddle market and a combo market you can produce both option markets in your head, and if the resulting call or put disagrees with what is quoted, one of the three is stale.</p>
+    <p>The last identity on the desk sheet is the <b>buy-write</b>, and it carries a condition that is almost never written down:</p>
+    <div class="mline">C − intrinsic = P + r/c</div>
+    <p class="mread">Reads as: <b>a call's extrinsic value equals the put's value plus carry.</b> The condition: "intrinsic" here means the <em>signed</em> quantity S − K, not max(S − K, 0).</p>
+    <p>That distinction is not pedantry. With S = 90 and K = 95, using the signed amount the identity holds exactly; using true intrinsic, which floors at zero, the two sides come out 1.61 and 6.61. Desk usage always means the signed parity amount, and the identity is stated without the caveat because on a buy-write the call is normally in the money. Take the sheet literally on an out-of-the-money strike and you will get a wrong answer with no warning.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A straddle is quoted at 7.80 and the combo at 5.42. What is the call worth?</p>
+    <div class="opts">
+      <button>2.38, the difference</button>
+      <button data-ok="1">6.61, since (7.80 + 5.42) / 2</button>
+      <button>1.19, since (7.80 − 5.42) / 2</button>
+      <button>13.22, the sum</button>
+    </div>
+    <div class="ans"><b>6.61.</b> Average the sum and the difference. The third option, 1.19, is the <em>put</em> — and picking it is the most common slip, because the two formulas differ only in a sign and both look plausible. A useful check: the call must exceed the put whenever the combo is positive, since combo is C − P by definition.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>What r/c actually is</h2>
+    <p class="dek">Carry is two things netted against each other, over a period defined by settlement dates rather than trade dates.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Carry has exactly two components and one date convention, and nearly every pricing error is a mistake in one of the three.</p>
+    <p><b>Interest.</b> A conversion is long stock, which costs money to hold, so the converter is effectively lending. A reversal is short stock, which raises cash, so the reverser is borrowing. The interest component is that financing over the life of the trade, computed on the <em>strike</em> rather than the spot — because K is what the forward settles at.</p>
+    <p><b>Dividends.</b> Whoever is long the stock collects them, and the synthetic does not. Dividends therefore <em>subtract</em> from the package: a higher dividend means a lower or more negative revcon price at the same implied rate. Only dividends with an ex-date falling between trade settlement and expiry settlement count. One that goes ex before you settle is already in the stock price; one after expiry is somebody else's problem.</p>
+    <div class="mline">r/c = Interest − Dividends &nbsp;&nbsp;⟹&nbsp;&nbsp; C − P = Interest − Div + Comm</div>
+    <p class="mread">Reads as: <b>the package price is financing minus dividends, plus what the broker takes.</b> S and K have cancelled because you trade the synthetic against the stock at the same strike.</p>
+    <p><b>The dates.</b> This is where the errors live. The clock runs from <em>trade settlement</em> to <em>expiry settlement</em>, not from today to expiry Friday. Options settle T+1, so a Thursday trade settles Friday, but a Friday trade settles Monday — three calendar days. Expiry Friday settles the following Monday. A holiday anywhere in either window pushes the date out and adds a day of interest, and on a large strike a single day is real money.</p>
+    <p>The convention is <b>ACT/360</b>: actual calendar days, divided by 360. That 360 is not an approximation of the year, it is the money-market convention that SOFR and EFFR use, and it is what makes the resulting rate directly comparable to your funding.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Settlement calendar and day count</h3></div>
+        <div class="panel"><table class="rot" id="calTab"></table></div>
+        <div class="figtop" style="margin:24px 0 6px"><h3>What makes up the package price</h3></div>
+        <div class="bars" id="carryBars"></div>
+      </div>
+      <div class="rail panel">
+        <h4>Dates &amp; terms</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Move the trade date across a Friday and watch the day count jump by three rather than one. Move it across a holiday and watch it jump again. Every one of those days is interest you either earn or pay, and mis-dating the settlement is the most common way a revcon is quoted wrong.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why is the interest component computed on the strike K rather than on the stock price S?</p>
+    <div class="opts">
+      <button>Convention only — either works if you are consistent</button>
+      <button data-ok="1">Because the forward settles at K, so K is the amount actually being financed to expiry</button>
+      <button>Because K is always lower than S</button>
+      <button>Because dividends are quoted against the strike</button>
+    </div>
+    <div class="ans"><b>K is the financed amount.</b> The synthetic obliges you to pay K at expiry, so the present-value calculation discounts K — that is what appears in parity as PV(K), and the difference between K and PV(K) is the interest term. Using S instead would be a different trade, and on a strike far from spot it would be wrong by a lot. It also explains why the implied rate divides interest by K.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>The conversion and the reversal</h2>
+    <p class="dek">One formula. It works for both directions, any dividend, any strike, bid or offer. The direction changes only what you compare the answer to.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A <b>conversion</b> is long stock against a short combo: you buy shares, sell the call, buy the put. You end up flat the market and long a financing position — you have effectively lent money to expiry. A <b>reversal</b> is the mirror: short stock, long combo, and you have borrowed.</p>
+    <p>Both price off the same equation, and there are no special cases:</p>
+    <div class="mline">Interest = (C − P) + Div − Comm</div>
+    <p class="mread">Reads as: <b>back the financing out of the quoted package by adding back the dividend and removing the broker's cut.</b></p>
+    <p>The sign convention is where people go wrong, and it is worth stating flatly. <b>A bid enters negative, an offer enters positive.</b> The sign encodes the direction of your cash flow — on a bid you are paying for the package, on an offer you are collecting. Commission is different: it always subtracts, with no bid/offer distinction, because it is a cost either way. At the standard $0.25 per option that is <code>0.25 ÷ 100 × 2 = $0.005</code> per share across the two legs.</p>
+    <p>What the direction <em>does</em> change is the benchmark. A converter is lending, so the comparison is the short funding rate, conventionally EFFR minus 25 basis points, and the converter wants the implied rate <b>above</b> it. A reverser is borrowing, so the comparison is EFFR plus 25, and the reverser wants the implied rate <b>below</b> it. Same number, opposite verdict — which is why a screen that flags "cheap" without knowing your direction is useless.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Revcon pricer</h3>
+          <span class="note">Both directions: price to rate, and rate to price.</span>
+        </div>
+        <div class="dollars" id="rcOut"></div>
+        <div class="hedge" id="rcVerdict"></div>
+        <div class="figtop" style="margin:26px 0 6px"><h3>Implied rate against the package price</h3></div>
+        <canvas id="cvRate" height="240"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Trade</h4>
+        <div class="seg" style="margin-bottom:10px" role="group" aria-label="Direction">
+          <button id="rcConv" aria-pressed="true">Convert</button>
+          <button id="rcRev" aria-pressed="false">Reverse</button>
+        </div>
+        <div class="seg" style="margin-bottom:16px" role="group" aria-label="Side">
+          <button id="rcBid" aria-pressed="true">Bid</button>
+          <button id="rcOff" aria-pressed="false">Offer</button>
+        </div>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Load the presets below to reproduce three worked examples from a desk reference document. All three reconcile to the fourth decimal.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Three real cases. The first is dividend-dominant — the dividend exceeds the interest, so the package price is <b>negative</b> and the converter pays to put the trade on. Predict the sign before you load it.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-rc="a">Bid convert 0.36 · K25 · 17d · div 0.40</button>
+      <button class="act ghost" data-rc="b">Offer convert 0.3171 · K300 · 38d · div 0.95</button>
+      <button class="act ghost" data-rc="c">Bid reverse 0.015 · K10 · 39d · no div</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A convert prices out at an implied rate of 2.96%. EFFR is 3.64%. Is this a good trade?</p>
+    <div class="opts">
+      <button>Yes — you are earning a positive rate</button>
+      <button data-ok="1">No. Short funding is EFFR − 25bp = 3.39%, so you are lending at 43bp below your cost of funds</button>
+      <button>Yes, as long as the dividend is announced</button>
+      <button>Cannot say without knowing the volatility</button>
+    </div>
+    <div class="ans"><b>It is a pass.</b> A positive implied rate is not the test; beating your funding is. The converter lends at 2.96% while funding at 3.39% and loses 43 basis points for the privilege of tying up balance sheet. This is the single most common misreading of a revcon screen — the rate looks fine in isolation and is only meaningful against the correct side's funding benchmark.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Simple, compound, and which one the screen means</h2>
+    <p class="dek">Two conventions that agree to a basis point on short dates and diverge on long ones. Mixing them is a real error with a real size.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Having backed out the interest in dollars, you annualize it. There are two conventions and both are in daily use.</p>
+    <div class="mline">Simple = (Interest / K) × (360 / Days) × 100</div>
+    <p class="mread">Reads as: <b>what fraction of the strike did you earn, scaled up to a year.</b> No reinvestment.</p>
+    <div class="mline">Compound = 360 × ( (K / (K − Interest))<sup>1/Days</sup> − 1 ) × 100</div>
+    <p class="mread">Reads as: <b>what daily rate, compounded every day, produces that same dollar interest.</b></p>
+    <p>Under thirty days the two agree to well under a basis point — on the 17-day example they are 2.9647% and 2.9669%, a difference of about a fifth of a basis point. Past a few months the gap widens, and on a jelly roll spanning several months it is worth several basis points, which is more than the spread being competed over.</p>
+    <p><b>The trap.</b> Take a jelly roll priced with compound interest at exactly 4.00% and run it back through the simple-rate formula and you get 4.007%, not 4.000%. Nothing is broken — you asked a different question. But if the pricer quotes compound and the screen you compare against quotes simple, you are looking at a spread that is partly a units artifact. Fix the convention before you argue about the number.</p>
+    <p>One more asymmetry worth knowing: for positive rates compound sits slightly above simple, and for negative rates it sits slightly <em>closer to zero</em>. That is ordinary compounding behaviour and not a sign error in the pricer, but it surprises people the first time a negative implied rate comes back less negative under compounding.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your pricer shows a jelly roll implying 4.007% simple. A counterparty quotes the same structure at 4.000%. What is the most likely explanation?</p>
+    <div class="opts">
+      <button>They are showing you a better price</button>
+      <button data-ok="1">One side is quoting compound and the other simple — the difference is a convention artifact, not an edge</button>
+      <button>Their day count includes a holiday yours does not</button>
+      <button>They are using ACT/365</button>
+      <button>Rounding</button>
+    </div>
+    <div class="ans"><b>Convention mismatch.</b> That specific 0.7bp gap is exactly what you get running a compound-priced jelly roll through the simple-rate formula. A day-count difference is also possible and worth ruling out second — it would usually be larger. The general discipline: before treating a small rate difference as edge, confirm you are both on ACT/360, both on the same settlement dates, and both on the same compounding convention. Most apparent edge at this scale is one of those three.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Jelly rolls</h2>
+    <p class="dek">Two revcons in different expiries. The stock cancels, and what is left is the pure interest and dividend differential between two dates.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A <b>jelly roll</b> is a conversion in one expiry against a reversal in another, on the same underlying. The two stock legs are opposite and equal, so they net to nothing and you are left flat the market. What survives is the carry between the near expiry and the far one — a pure term-structure-of-financing trade, with no stock position and no volatility exposure.</p>
+    <p>The common use is rolling: you are carrying a conversion that is about to expire and you want the same position further out, so you reverse the near leg and convert the far one in a single package.</p>
+    <p><b>Price each leg independently.</b> This is the part that is often shortcut and should not be, because the near and far legs frequently have different strikes. Each leg is a standalone revcon with its own K and its own day count measured from the same trade settlement:</p>
+    <div class="mline">Leg = K × ( (1 + r/360)<sup>days</sup> − 1 ) − Div + Comm &nbsp;&nbsp;·&nbsp;&nbsp; JR = Far − Near</div>
+    <p class="mread">Reads as: <b>compute what each expiry's financing is worth on its own strike, then take the difference.</b></p>
+    <p>When both legs share a strike it collapses to the interest between the two expiry settlement dates, which is the version most people carry in their head. Note also that only dividends going ex <em>between</em> the two expiry settlements matter: anything before the near expiry affects both legs identically and cancels.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Jelly roll pricer</h3>
+          <span class="note">Independent legs, simple and compound, with the implied rate backed out both ways.</span>
+        </div>
+        <div class="dollars" id="jrOut"></div>
+        <div class="panel" style="margin-top:18px"><table class="rot" id="jrTab"></table></div>
+        <div class="figtop" style="margin:26px 0 6px"><h3>Jelly roll price against the rate</h3></div>
+        <canvas id="cvJR" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Legs</h4>
+        <div id="ctl7"></div>
+        <div class="kv" style="margin-top:20px" id="kv7"></div>
+      </div>
+    </div>
+    <figcaption>The line is almost straight but not quite — that curvature is the compounding, and it is what separates the two rate conventions on longer rolls.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Two worked examples from a desk reference. <b>Note:</b> the source document's hand-computed figures for these are slightly wrong — it prints 0.21569 and 0.53364, while the correct compound values are <b>0.21651</b> and <b>0.53790</b>. The pricing spreadsheet it cites was right; the hand arithmetic was not.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-jr="a">Mar 75 → Apr 70 · 4% · no div</button>
+      <button class="act ghost" data-jr="b">Mar 410 → Apr 410 · 4% · div 0.74</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">On a jelly roll, a dividend goes ex two days before the near expiry. How does it affect the price?</p>
+    <div class="opts">
+      <button>It reduces the jelly roll price by the dividend amount</button>
+      <button data-ok="1">Not at all — it falls before both expiry settlements, so it affects both legs equally and cancels in the difference</button>
+      <button>It doubles, since both legs are exposed</button>
+      <button>It only matters if the strikes differ</button>
+    </div>
+    <div class="ans"><b>It cancels.</b> Both legs are priced from the same trade settlement, so a dividend before the near expiry sits inside both periods and subtracts from both leg prices identically. The difference is unchanged. Only dividends going ex between near and far expiry settlement survive into the jelly roll price — which is exactly the window to check when you are pricing one, and a good reason to look at the dividend calendar rather than a single "annual dividend" field.</div>
+  </div>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Borrow, and why the riskless trade isn't</h2>
+    <p class="dek">Hard-to-borrow names break the benchmark, not the formula. And the borrow is the thing that actually loses money.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Everything so far assumed you can short the stock at a normal rate. When you cannot, nothing about the pricing changes — the formula is identical — but the number you compare against does. Instead of EFFR ± 25 basis points you use the actual borrow rate for that name, and the pricer needs a manual override for it.</p>
+    <p>This produces results that look alarming and are not. <b>Negative implied rates are ordinary on hard-to-borrow names.</b> A negative rate means the converter is paying to hold the trade, which makes sense when the cost of borrowing exceeds the interest earned on the short sale proceeds. The test is never whether the rate is positive. It is whether the rate beats <em>your</em> funding: a convert implying 12% against a 15% borrow is a three-point loss even though 12% sounds enormous.</p>
+    <p><b>Where the real risk lives.</b> A conversion is described as riskless and is not, and the gap is almost entirely the borrow. If the stock becomes harder to borrow after you put the trade on, your funding cost rises while the package price is fixed — you are locked into lending at a rate that was fair and no longer is. Worse, a <b>recall</b> forces you to buy in the short leg at whatever the market offers, which converts a financing trade into a directional one at the worst possible moment. This is the mechanism behind most of the memorable revcon losses, and it is not in any of the formulas above.</p>
+    <p>Two smaller ones worth naming. <b>Early exercise:</b> the options are American, so a short in-the-money put can be assigned before expiry, unwinding one leg and leaving you with a stock position you did not want — most likely just before an ex-dividend date. And <b>unannounced dividends:</b> parity requires knowing r/c, and a special dividend declared after you trade changes it retroactively against you.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long a conversion. The stock goes special and the borrow rate jumps from 0.5% to 18%. What happened to your position?</p>
+    <div class="opts">
+      <button>Nothing — you locked in the rate when you traded</button>
+      <button data-ok="1">The package price is fixed but your funding cost rose, so a fair trade is now a large loss you cannot unwind at the old level</button>
+      <button>You profit, since you are long the stock leg</button>
+      <button>Only the dividend assumption changes</button>
+    </div>
+    <div class="ans"><b>You are locked in on the wrong side of it.</b> The revcon fixed your <em>return</em>; it did not fix your <em>cost of funds</em>. When borrow spikes, everyone else's fair value for that package moves with it, so unwinding means paying the new level. This is the specific way "riskless arbitrage" produces real losses, and it is why a revcon book is monitored on borrow just as closely as on rate. A conversion is a lending trade with a short-stock leg attached, and the leg is where the risk is.</div>
+  </div>
+</section>
+
+<!-- ══════════ 09 ══════════ -->
+<section class="chapter" id="c9">
+  <div class="chead">
+    <div class="cnum">09</div>
+    <h2>Parity drill</h2>
+    <p class="dek">Solve for the missing variable. Randomized, tolerance-marked, working shown every time.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The identities are worth nothing until they are automatic. Every question below gives you three of the four quantities and asks for the fourth, or gives you a market and asks for the rate. Core covers parity and the combo/straddle conversions; Full adds revcon rates, day counts and jelly rolls.</p>
+    <p>Tolerance is ±1% on Core and ±0.5% on Full — tight, because these are arithmetic rather than estimates.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:150px"><span class="k">Difficulty</span>
+          <div class="seg" style="margin-top:5px;max-width:230px">
+            <button id="dEasy" aria-pressed="true">Core</button>
+            <button id="dHard" aria-pressed="false">Full</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>The identity sheet is reproduced below for reference. Cover it once you are past the first few.</figcaption>
+  </figure>
+
+  <figure>
+    <div class="panel">
+      <div class="figtop"><h3>Core identities</h3></div>
+      <table class="rot">
+        <tr><th>Name</th><th>Identity</th><th>Note</th></tr>
+        <tr><td>Parity</td><td>C − P = S + r/c − K</td><td>No model, no vol</td></tr>
+        <tr><td>Combo</td><td>Combo = C − P</td><td>The synthetic forward</td></tr>
+        <tr><td>Straddle</td><td>Straddle = C + P</td><td>Same strike</td></tr>
+        <tr><td>Solve C</td><td>C = (Straddle + Combo) / 2</td><td></td></tr>
+        <tr><td>Solve P</td><td>P = (Straddle − Combo) / 2</td><td></td></tr>
+        <tr><td>Buy/write</td><td>C − intrinsic = P + r/c</td><td>Signed S − K, not max(S−K,0)</td></tr>
+        <tr><td>Revcon</td><td>Interest = (C − P) + Div − Comm</td><td>Bid negative, offer positive</td></tr>
+        <tr><td>Simple rate</td><td>(Interest / K) × (360 / Days) × 100</td><td>ACT/360</td></tr>
+        <tr><td>Jelly roll</td><td>JR = Far leg − Near leg</td><td>Price legs independently</td></tr>
+      </table>
+    </div>
+  </figure>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Parity is an arbitrage relationship and holds regardless of how the stock moves — but it assumes European exercise, announced dividends, a stable borrow, and frictionless settlement. American options can be assigned early, specials get declared, borrow gets recalled, and settlement dates move for holidays. Every one of those is a way a riskless trade has actually lost money.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ═══════════ dates, settlement, day count ═══════════ */
+const HOL = new Set([
+"2026-01-01","2026-01-19","2026-02-16","2026-04-03","2026-05-25","2026-06-19",
+"2026-07-03","2026-09-07","2026-11-26","2026-12-25",
+"2027-01-01","2027-01-18","2027-02-15","2027-03-26","2027-05-31","2027-06-18",
+"2027-07-05","2027-09-06","2027-11-25","2027-12-24"]);
+const iso = d => d.toISOString().slice(0,10);
+const isBiz = d => d.getUTCDay()!==0 && d.getUTCDay()!==6 && !HOL.has(iso(d));
+function addBiz(d,n){const x=new Date(d.getTime());
+  while(n>0){x.setUTCDate(x.getUTCDate()+1); if(isBiz(x)) n--;} return x;}
+function nextBiz(d){const x=new Date(d.getTime()); while(!isBiz(x)) x.setUTCDate(x.getUTCDate()+1); return x;}
+const dayDiff=(a,b)=>Math.round((b-a)/86400000);
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const fmtD=d=>DOW[d.getUTCDay()]+" "+iso(d);
+/* settlement: T+1 business day, then roll to a business day */
+const settle=d=>nextBiz(addBiz(nextBiz(d),0)===nextBiz(d)?addBiz(d,1):addBiz(d,1));
+
+/* ═══════════ rate maths ═══════════ */
+const simpleRate=(I,K,d)=> d>0 ? (I/K)*(360/d)*100 : 0;
+const compRate=(I,K,d)=> (d>0 && K>I) ? 360*(-1+Math.pow(K/(K-I),1/d))*100 : NaN;
+const intFromSimple=(r,K,d)=> r/100*K*d/360;
+const intFromComp=(r,K,d)=> K*(Math.pow(1+r/100/360,d)-1);
+const legComp=(K,d,r,div,comm)=> K*(Math.pow(1+r/100/360,d)-1)-div+comm;
+const legSimple=(K,d,r,div,comm)=> r/100*K*d/360-div+comm;
+const money=x=>(x<0?"−$":"$")+Math.abs(x).toLocaleString(undefined,{maximumFractionDigits:4,minimumFractionDigits:4});
+
+/* ══════════════════════════════════════════════
+   HERO — a synthetic tracking a stock, exactly
+   ══════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById("heroCv");
+  let w,h,g,raf,live=[];
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);}
+  const N=170;
+  function spawn(){const sig=.2+Math.random()*.4;
+    return{p:gbm(1,(Math.random()-.45)*.3,sig,1,N),i:1,
+      off:(Math.random()-.5)*.045,a:.13+Math.random()*.16,sp:1+Math.floor(Math.random()*2)};}
+  const Y=v=>h/2-(v-1)*h*.62;
+  function frame(){
+    g.globalAlpha=.028;g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);g.globalAlpha=1;
+    if(live.length<11&&Math.random()<.08)live.push(spawn());
+    live.forEach(L=>{
+      for(let s=0;s<L.sp&&L.i<=N;s++,L.i++){
+        const x0=(L.i-1)/N*w,x1=L.i/N*w;
+        g.globalAlpha=L.a;g.lineWidth=1.1;g.strokeStyle=C("--grey");
+        g.beginPath();g.moveTo(x0,Y(L.p[L.i-1]));g.lineTo(x1,Y(L.p[L.i]));g.stroke();
+        g.globalAlpha=L.a*.95;g.lineWidth=.9;g.strokeStyle=C("--blue");
+        g.beginPath();g.moveTo(x0,Y(L.p[L.i-1])+L.off*h);g.lineTo(x1,Y(L.p[L.i])+L.off*h);g.stroke();
+      }
+      g.globalAlpha=1;
+    });
+    live=live.filter(L=>L.i<=N);
+    raf=requestAnimationFrame(frame);
+  }
+  function statics(){for(let k=0;k<48;k++){const L=spawn();
+    [[C("--grey"),0],[C("--blue"),L.off]].forEach(([col,off])=>{
+      g.strokeStyle=col;g.globalAlpha=L.a*.9;g.lineWidth=1;
+      g.beginPath();g.moveTo(0,Y(L.p[0])+off*h);
+      for(let i=1;i<=N;i++)g.lineTo(i/N*w,Y(L.p[i])+off*h);g.stroke();});}
+    g.globalAlpha=1;}
+  size(); if(RM)statics(); else frame();
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();live=[];if(RM)statics();else frame();},170);});
+})();
+
+/* ══════════════════════════════════════════════
+   01 — identities, checked live
+   ══════════════════════════════════════════════ */
+const s1={S:100,K:95,rc:0.42,Str:7.80};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"S1",k:"S",lbl:"S",name:"Stock",min:60,max:140,step:.5,fmt:v=>"$"+v.toFixed(2)},
+    {id:"K1",k:"K",lbl:"K",name:"Strike",min:60,max:140,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"rc1",k:"rc",lbl:"r/c",name:"Carry per share",min:-1.5,max:2.5,step:.01,fmt:v=>"$"+v.toFixed(2)},
+    {id:"St1",k:"Str",lbl:"Str",name:"Straddle",min:.5,max:30,step:.05,fmt:v=>"$"+v.toFixed(2)}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function draw(){
+    const Combo=s1.S+s1.rc-s1.K;
+    const Cc=(s1.Str+Combo)/2, Pp=(s1.Str-Combo)/2;
+    const signedIntr=s1.S-s1.K, trueIntr=Math.max(0,s1.S-s1.K);
+    const rows=[
+      ["C − P = S + r/c − K", Cc-Pp, Combo],
+      ["Combo = C − P", Combo, Cc-Pp],
+      ["Straddle = C + P", s1.Str, Cc+Pp],
+      ["C = (Str + Combo)/2", Cc, (s1.Str+Combo)/2],
+      ["P = (Str − Combo)/2", Pp, (s1.Str-Combo)/2],
+      ["C − (S−K) = P + r/c", Cc-signedIntr, Pp+s1.rc]
+    ];
+    let html="<tr><th>Identity</th><th>Left</th><th>Right</th><th>Residual</th></tr>";
+    rows.forEach(([n,a,b])=>{const d=Math.abs(a-b);
+      html+=`<tr><td>${n}</td><td>${a.toFixed(4)}</td><td>${b.toFixed(4)}</td>`+
+        `<td class="${d<1e-9?"ok":""}">${d<1e-12?"0":d.toExponential(1)}</td></tr>`;});
+    const lhsTrue=Cc-trueIntr, rhsTrue=Pp+s1.rc, bad=Math.abs(lhsTrue-rhsTrue);
+    html+=`<tr><td style="color:var(--verm)">…using max(S−K,0)</td><td>${lhsTrue.toFixed(4)}</td>`+
+      `<td>${rhsTrue.toFixed(4)}</td><td style="color:${bad>1e-9?"var(--verm)":"var(--moss)"}">`+
+      `${bad<1e-12?"0":bad.toFixed(4)}</td></tr>`;
+    document.getElementById("idTab").innerHTML=html;
+    document.getElementById("solveTab").innerHTML=
+      "<tr><th>Solve for</th><th>From</th><th>Value</th></tr>"+
+      [["Call","(Straddle + Combo) / 2",Cc],
+       ["Put","(Straddle − Combo) / 2",Pp],
+       ["Stock","C − P + K − r/c",Cc-Pp+s1.K-s1.rc],
+       ["Strike","S + r/c − (C − P)",s1.S+s1.rc-(Cc-Pp)],
+       ["Carry","C − P − S + K",Cc-Pp-s1.S+s1.K]
+      ].map(([a,b,v])=>`<tr><td>${a}</td><td>${b}</td><td>${v.toFixed(4)}</td></tr>`).join("");
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Combo",Combo.toFixed(4)],["Call",Cc.toFixed(4)],["Put",Pp.toFixed(4)],
+      ["Signed S−K",signedIntr.toFixed(2)],
+      ["True intrinsic",trueIntr.toFixed(2)],
+      ["Call is",s1.S>s1.K?"in the money":"out of the money"],
+      ["B/W caveat",s1.S>=s1.K?"identical":"DIVERGES"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   02 — the synthetic
+   ══════════════════════════════════════════════ */
+const s2={S:100,K:100,rc:0.55,mis:0};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"K2",k:"K",lbl:"K",name:"Strike",min:70,max:130,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"rc2",k:"rc",lbl:"r/c",name:"Fair carry",min:-1,max:3,step:.01,fmt:v=>"$"+v.toFixed(2)},
+    {id:"m2",k:"mis",lbl:"Δ",name:"Carry mismark",min:-.6,max:.6,step:.01,fmt:v=>(v>=0?"+$":"−$")+Math.abs(v).toFixed(2)}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function draw(){
+    const lo=s2.K*.75,hi=s2.K*1.25,xs=[],stk=[],syn=[];
+    const combo=s2.S+s2.rc-s2.K+s2.mis;
+    for(let i=0;i<180;i++){const x=lo+(hi-lo)*i/179;xs.push(x);
+      stk.push(x-s2.S);
+      syn.push((x-s2.K)-combo);}
+    const o=Fig(document.getElementById("cvSyn"),{h:300,x0:lo,x1:hi,
+      y0:Math.min(...stk,...syn)*1.12,y1:Math.max(...stk,...syn)*1.12,pad:{l:62}});
+    axes(o,v=>"$"+v.toFixed(0),v=>(v<0?"−$":"$")+Math.abs(v).toFixed(0),5,5);
+    clip(o,()=>{line(o,xs,stk,C("--grey"),3.2);line(o,xs,syn,C("--blue"),1.8);});
+    vline(o,s2.S,C("--ochre"),"spot",[2,4]);
+    const gap=xs.map(()=>-s2.mis);
+    const o2=Fig(document.getElementById("cvGap"),{h:170,x0:lo,x1:hi,
+      y0:-.7,y1:.7,pad:{l:62,b:22}});
+    axes(o2,v=>"$"+v.toFixed(0),v=>(v<0?"−$":"$")+Math.abs(v).toFixed(2),5,3);
+    clip(o2,()=>line(o2,xs,gap,Math.abs(s2.mis)<1e-9?C("--moss"):C("--verm"),2.4));
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Fair combo",(s2.S+s2.rc-s2.K).toFixed(4)],
+      ["Traded combo",combo.toFixed(4)],
+      ["P&L per share",(-s2.mis).toFixed(4)],
+      ["Per 100 contracts","$"+(-s2.mis*100*100).toFixed(0)],
+      ["Directional?","no — constant"],
+      ["10bp on K, 38d","$"+(0.001*s2.K*38/360).toFixed(4)]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   04 — settlement & carry decomposition
+   ══════════════════════════════════════════════ */
+const s4={off:0,K:100,rate:4.0,div:0.40,comm:.005,exp:30};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"o4",k:"off",lbl:"D",name:"Trade date offset",min:0,max:21,step:1,fmt:v=>"+"+v.toFixed(0)+"d"},
+    {id:"e4",k:"exp",lbl:"E",name:"Days to expiry",min:2,max:180,step:1,fmt:v=>v.toFixed(0)+"d"},
+    {id:"K4",k:"K",lbl:"K",name:"Strike",min:5,max:500,step:5,fmt:v=>"$"+v.toFixed(0)},
+    {id:"r4",k:"rate",lbl:"r",name:"Rate",min:0,max:10,step:.05,fmt:v=>v.toFixed(2)+"%"},
+    {id:"d4",k:"div",lbl:"Div",name:"Dividend",min:0,max:3,step:.01,fmt:v=>"$"+v.toFixed(2)}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const base=new Date(Date.UTC(2026,2,16));
+    const trade=new Date(base.getTime()+s4.off*86400000);
+    const tSet=settle(trade);
+    let expiry=new Date(trade.getTime()+s4.exp*86400000);
+    while(expiry.getUTCDay()!==5) expiry.setUTCDate(expiry.getUTCDate()+1);
+    const eSet=settle(expiry);
+    const days=dayDiff(tSet,eSet);
+    const interest=intFromSimple(s4.rate,s4.K,days);
+    const pkg=interest-s4.div+s4.comm;
+    document.getElementById("calTab").innerHTML=
+      "<tr><th>Event</th><th>Date</th><th></th></tr>"+
+      [["Trade date",fmtD(trade),isBiz(trade)?"":"not a business day"],
+       ["Trade settles",fmtD(tSet),"T+1, rolled for weekend/holiday"],
+       ["Expiry",fmtD(expiry),"third-Friday style"],
+       ["Expiry settles",fmtD(eSet),"following business day"],
+       ["Day count",days+" days","ACT/360"]
+      ].map(([a,b,c])=>`<tr><td>${a}</td><td>${b}</td><td class="dim">${c}</td></tr>`).join("");
+    const rows=[["Interest",interest,"--blue"],["Dividend",-s4.div,"--verm"],["Commission",s4.comm,"--ochre"]];
+    const mx=Math.max(...rows.map(r=>Math.abs(r[1])),Math.abs(pkg),1e-9);
+    const bar=(v,c)=>{const p=Math.abs(v)/mx*48;
+      return `<div class="trk"><div class="z"></div><i style="background:${C(c)};${
+        v>=0?`left:50%;width:${p}%`:`right:50%;width:${p}%`}"></i></div>`;};
+    document.getElementById("carryBars").innerHTML=
+      rows.map(([n,v,c])=>`<div class="brow"><span class="l"><i class="sw" style="background:${C(c)}"></i>${n}</span>${bar(v,c)}<span class="a ${v>=0?"pos":"neg"}">${v>=0?"+":""}${v.toFixed(4)}</span></div>`).join("")+
+      `<div class="brow tot"><span class="l">Package (C − P)</span>${bar(pkg,"--ink")}<span class="a ${pkg>=0?"pos":"neg"}">${pkg>=0?"+":""}${pkg.toFixed(4)}</span></div>`;
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Days",days],["Interest","$"+interest.toFixed(4)],
+      ["One extra day","$"+intFromSimple(s4.rate,s4.K,1).toFixed(4)],
+      ["Package","$"+pkg.toFixed(4)],
+      ["Sign",pkg>=0?"positive — collect":"negative — pay"],
+      ["Div dominant?",s4.div>interest?"yes":"no"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   05/06 — revcon pricer
+   ══════════════════════════════════════════════ */
+const s5={px:0.36,K:25,days:17,div:0.40,comm:.005,effr:3.64,conv:true,bid:true};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"p5",k:"px",lbl:"C−P",name:"Package price",min:0,max:5,step:.0001,fmt:v=>"$"+v.toFixed(4)},
+    {id:"K5",k:"K",lbl:"K",name:"Strike",min:5,max:500,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"d5",k:"days",lbl:"D",name:"Days (settle to settle)",min:1,max:400,step:1,fmt:v=>v.toFixed(0)},
+    {id:"v5",k:"div",lbl:"Div",name:"Dividend",min:0,max:5,step:.01,fmt:v=>"$"+v.toFixed(2)},
+    {id:"c5",k:"comm",lbl:"Cm",name:"Commission /share",min:0,max:.02,step:.0005,fmt:v=>"$"+v.toFixed(4)},
+    {id:"e5",k:"effr",lbl:"EFFR",name:"Benchmark",min:0,max:12,step:.01,fmt:v=>v.toFixed(2)+"%"}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function seg(a,b,set){const A=document.getElementById(a),B=document.getElementById(b);
+    A.addEventListener("click",()=>{set(true);A.setAttribute("aria-pressed",true);B.setAttribute("aria-pressed",false);draw();});
+    B.addEventListener("click",()=>{set(false);B.setAttribute("aria-pressed",true);A.setAttribute("aria-pressed",false);draw();});}
+  seg("rcConv","rcRev",v=>s5.conv=v); seg("rcBid","rcOff",v=>s5.bid=v);
+  window.setRC=o=>{Object.assign(s5,o);
+    document.getElementById("rcConv").setAttribute("aria-pressed",s5.conv);
+    document.getElementById("rcRev").setAttribute("aria-pressed",!s5.conv);
+    document.getElementById("rcBid").setAttribute("aria-pressed",s5.bid);
+    document.getElementById("rcOff").setAttribute("aria-pressed",!s5.bid);
+    SYNC["c5"].sync();draw();};
+  function draw(){
+    const signed=s5.bid?-s5.px:s5.px;
+    const I=signed+s5.div-s5.comm;
+    const rs=simpleRate(I,s5.K,s5.days), rc=compRate(I,s5.K,s5.days);
+    const fund=s5.conv?s5.effr-0.25:s5.effr+0.25;
+    const spread=s5.conv?rs-fund:fund-rs;
+    document.getElementById("rcOut").innerHTML=[
+      ["blue","Interest",money(I),"per share"],
+      ["","Simple rate",rs.toFixed(4)+"%","ACT/360"],
+      ["","Compound rate",(isFinite(rc)?rc.toFixed(4):"—")+"%","daily reinvest"],
+      ["ochre","Funding",fund.toFixed(2)+"%",s5.conv?"EFFR − 25bp (lending)":"EFFR + 25bp (borrowing)"],
+      [spread>=0?"moss":"verm","Spread",(spread>=0?"+":"")+(spread*100).toFixed(1)+" bp",s5.conv?"implied vs short funding":"funding vs implied"],
+      ["","Simple vs comp",isFinite(rc)?((rc-rs)*100).toFixed(2)+" bp":"—","convention gap"]
+    ].map(([c,k,v,s])=>`<div class="c ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join("");
+    document.getElementById("rcVerdict").innerHTML=
+      `<div class="big">${spread>=0?"Trade":"Pass"} — ${(Math.abs(spread)*100).toFixed(1)}bp ${spread>=0?"through":"behind"} funding</div>
+       <p>As a ${s5.conv?"converter you are <b>lending</b>, so you want the implied rate <b>above</b>":"reverser you are <b>borrowing</b>, so you want the implied rate <b>below</b>"}
+       the ${fund.toFixed(2)}% benchmark. Implied is ${rs.toFixed(3)}%.
+       ${I<0?" The interest is negative, so the package pays away. On a reversal this is often quoted as its <b>absolute</b> value — \"paying "+Math.abs(rs).toFixed(2)+"% to borrow\" — which is a different reading from the signed rate shown above and gives a different spread. Confirm which convention your desk means before comparing to funding.":""}</p>`;
+    const xs=[],ys=[],yc=[];
+    for(let i=0;i<160;i++){const p=-1+3*i/159;xs.push(p);
+      const ii=p+s5.div-s5.comm;
+      ys.push(simpleRate(ii,s5.K,s5.days));
+      yc.push(compRate(ii,s5.K,s5.days));}
+    const o=Fig(document.getElementById("cvRate"),{h:240,x0:-1,x1:2,
+      y0:Math.min(...ys)*1.1,y1:Math.max(...ys)*1.1,pad:{l:60}});
+    axes(o,v=>"$"+v.toFixed(1),v=>v.toFixed(0)+"%",5,4);
+    clip(o,()=>{line(o,xs,yc,C("--verm"),1.4,[4,3]);line(o,xs,ys,C("--blue"),2.1);});
+    vline(o,signed,C("--ochre"),"here");
+    const g=o.g;g.strokeStyle=C("--grey");g.setLineDash([3,3]);g.lineWidth=1;
+    const fy=Math.round(o.Y(fund))+.5;
+    if(fund>o.y0&&fund<o.y1){g.beginPath();g.moveTo(o.P.l,fy);g.lineTo(o.P.l+o.pw,fy);g.stroke();}
+    g.setLineDash([]);
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Side",s5.bid?"Bid (you pay)":"Offer (you collect)"],
+      ["Signed price",signed.toFixed(4)],
+      ["Interest",I.toFixed(5)],
+      ["Div dominant?",s5.div>Math.abs(signed)?"yes":"no"],
+      ["Simple",rs.toFixed(4)+"%"],
+      ["Compound",isFinite(rc)?rc.toFixed(4)+"%":"—"],
+      ["Break-even px",(intFromSimple(fund,s5.K,s5.days)-s5.div+s5.comm).toFixed(4)]
+    ]);
+  }
+  document.querySelectorAll("[data-rc]").forEach(b=>b.addEventListener("click",()=>{
+    const P={a:{px:0.36,K:25,days:17,div:0.40,comm:.005,conv:true,bid:true},
+             b:{px:0.3171,K:300,days:38,div:0.95,comm:0,conv:true,bid:false},
+             c:{px:0.015,K:10,days:39,div:0,comm:.005,conv:false,bid:true}}[b.dataset.rc];
+    window.setRC(P);
+    document.getElementById("rcOut").scrollIntoView({behavior:RM?"auto":"smooth",block:"center"});
+  }));
+})();
+
+/* ══════════════════════════════════════════════
+   07 — jelly roll pricer
+   ══════════════════════════════════════════════ */
+const s7={Kn:75,dn:3,Kf:70,df:31,rate:4.0,div:0,comm:0};
+(function(){
+  sliders(document.getElementById("ctl7"),[
+    {id:"Kn7",k:"Kn",lbl:"Kn",name:"Near strike",min:5,max:500,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"dn7",k:"dn",lbl:"dn",name:"Near days",min:1,max:200,step:1,fmt:v=>v.toFixed(0)},
+    {id:"Kf7",k:"Kf",lbl:"Kf",name:"Far strike",min:5,max:500,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"df7",k:"df",lbl:"df",name:"Far days",min:2,max:400,step:1,fmt:v=>v.toFixed(0)},
+    {id:"r7",k:"rate",lbl:"r",name:"Rate",min:0,max:12,step:.01,fmt:v=>v.toFixed(2)+"%"},
+    {id:"v7",k:"div",lbl:"Div",name:"Div between",min:0,max:5,step:.01,fmt:v=>"$"+v.toFixed(2)}
+  ],s7,()=>draw(),"c7");
+  window.draw7=draw;
+  function draw(){
+    const df=Math.max(s7.df,s7.dn+1);
+    const nC=legComp(s7.Kn,s7.dn,s7.rate,0,s7.comm);
+    const fC=legComp(s7.Kf,df,s7.rate,s7.div,s7.comm);
+    const nS=legSimple(s7.Kn,s7.dn,s7.rate,0,s7.comm);
+    const fS=legSimple(s7.Kf,df,s7.rate,s7.div,s7.comm);
+    const jrC=fC-nC, jrS=fS-nS;
+    const denom=s7.Kf*df/360-s7.Kn*s7.dn/360;
+    const impS=denom!==0?(jrC+s7.div-s7.comm)/denom*100:NaN;
+    document.getElementById("jrOut").innerHTML=[
+      ["blue","JR compound",money(jrC),"price each leg, difference"],
+      ["","JR simple",money(jrS),"same legs, simple interest"],
+      ["ochre","Compound − simple",((jrC-jrS)*100).toFixed(2)+"¢","the convention gap"],
+      ["moss","Implied simple",isFinite(impS)?impS.toFixed(4)+"%":"—","from the compound price"],
+      ["","Round-trip error",isFinite(impS)?((impS-s7.rate)*100).toFixed(2)+" bp":"—","not a bug — different question"],
+      ["","Same strike?",s7.Kn===s7.Kf?"yes":"no","different strikes need independent legs"]
+    ].map(([c,k,v,s])=>`<div class="c ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join("");
+    document.getElementById("jrTab").innerHTML=
+      "<tr><th>Leg</th><th>Formula</th><th>Compound</th><th>Simple</th></tr>"+
+      [["Near","K×((1+r/360)^d − 1)",nC,nS],
+       ["Far","… − Div + Comm",fC,fS],
+       ["Jelly roll","Far − Near",jrC,jrS]
+      ].map(([a,b,c,d])=>`<tr><td>${a}</td><td>${b}</td><td>${c.toFixed(5)}</td><td>${d.toFixed(5)}</td></tr>`).join("");
+    const xs=[],ys=[],yl=[];
+    for(let i=0;i<160;i++){const r=0+12*i/159;xs.push(r);
+      ys.push(legComp(s7.Kf,df,r,s7.div,s7.comm)-legComp(s7.Kn,s7.dn,r,0,s7.comm));
+      yl.push(legSimple(s7.Kf,df,r,s7.div,s7.comm)-legSimple(s7.Kn,s7.dn,r,0,s7.comm));}
+    const o=Fig(document.getElementById("cvJR"),{h:230,x0:0,x1:12,
+      y0:Math.min(...ys,...yl)*1.1,y1:Math.max(...ys,...yl)*1.1,pad:{l:64}});
+    axes(o,v=>v.toFixed(0)+"%",v=>"$"+v.toFixed(2),5,4);
+    clip(o,()=>{line(o,xs,yl,C("--grey"),1.4,[4,3]);line(o,xs,ys,C("--blue"),2.1);});
+    vline(o,s7.rate,C("--ochre"),"rate");
+    document.getElementById("kv7").innerHTML=kvHTML([
+      ["Near leg",nC.toFixed(5)],["Far leg",fC.toFixed(5)],
+      ["JR",jrC.toFixed(5)],
+      ["Days between",df-s7.dn],
+      ["Div window","near settle → far settle"],
+      ["Implied simple",isFinite(impS)?impS.toFixed(4)+"%":"—"],
+      ["Newton needed?",s7.Kn===s7.Kf?"no — closed form":"yes for compound"]
+    ]);
+  }
+  document.querySelectorAll("[data-jr]").forEach(b=>b.addEventListener("click",()=>{
+    const P={a:{Kn:75,dn:3,Kf:70,df:31,rate:4,div:0},
+             b:{Kn:410,dn:3,Kf:410,df:31,rate:4,div:0.74}}[b.dataset.jr];
+    Object.assign(s7,P);SYNC["c7"].sync();draw();
+    document.getElementById("jrOut").scrollIntoView({behavior:RM?"auto":"smooth",block:"center"});
+  }));
+})();
+
+/* ══════════════════════════════════════════════
+   09 — parity drill
+   ══════════════════════════════════════════════ */
+(function(){
+  const D={n:0,ok:0,streak:0,best:0,hard:false,cur:null,answered:false};
+  const ri=(a,b,st)=>{st=st||1;return Math.round((a+Math.random()*(b-a))/st)*st;};
+  const CORE=[
+    ()=>{const S=ri(40,200,5),K=ri(S-15,S+15,5)||S,rc=ri(-40,90)/100,P=ri(50,600)/100;
+      const C=P+S+rc-K;
+      return{k:"Solve the call",u:"dollars",a:C,
+        t:`S = <b>${S}</b>, K = <b>${K}</b>, r/c = <b>${rc.toFixed(2)}</b>, put = <b>${P.toFixed(2)}</b>. What is the call worth?`,
+        w:`Parity: C = P + S + r/c − K = ${P.toFixed(2)} + ${S} + ${rc.toFixed(2)} − ${K} = <code>${C.toFixed(2)}</code>.`};},
+    ()=>{const S=ri(40,200,5),K=ri(S-15,S+15,5)||S,rc=ri(-40,90)/100,C=ri(80,900)/100;
+      const P=C-S-rc+K;
+      return{k:"Solve the put",u:"dollars",a:P,
+        t:`S = <b>${S}</b>, K = <b>${K}</b>, r/c = <b>${rc.toFixed(2)}</b>, call = <b>${C.toFixed(2)}</b>. What is the put worth?`,
+        w:`Rearranged parity: P = C − S − r/c + K = ${C.toFixed(2)} − ${S} − ${rc.toFixed(2)} + ${K} = <code>${P.toFixed(2)}</code>.`};},
+    ()=>{const Str=ri(200,2000)/100,Cb=ri(-500,700)/100;
+      return{k:"Combo & straddle",u:"dollars",a:(Str+Cb)/2,
+        t:`Straddle is <b>${Str.toFixed(2)}</b> and the combo is <b>${Cb.toFixed(2)}</b>. What is the call?`,
+        w:`C = (Straddle + Combo)/2 = (${Str.toFixed(2)} + ${Cb.toFixed(2)})/2 = <code>${((Str+Cb)/2).toFixed(2)}</code>. The put would be the difference halved: ${((Str-Cb)/2).toFixed(2)}.`};},
+    ()=>{const Str=ri(200,2000)/100,Cb=ri(-500,700)/100;
+      return{k:"Combo & straddle",u:"dollars",a:(Str-Cb)/2,
+        t:`Straddle is <b>${Str.toFixed(2)}</b> and the combo is <b>${Cb.toFixed(2)}</b>. What is the put?`,
+        w:`P = (Straddle − Combo)/2 = (${Str.toFixed(2)} − ${Cb.toFixed(2)})/2 = <code>${((Str-Cb)/2).toFixed(2)}</code>. Subtracting is the put; adding is the call.`};},
+    ()=>{const S=ri(40,200,5),K=ri(S-25,S-5,5),rc=ri(5,80)/100,P=ri(30,400)/100;
+      const C=P+S+rc-K;
+      return{k:"Buy/write",u:"dollars",a:C-(S-K),
+        t:`S = <b>${S}</b>, K = <b>${K}</b> (call in the money), put = <b>${P.toFixed(2)}</b>, r/c = <b>${rc.toFixed(2)}</b>. What is the buy/write, i.e. the call's extrinsic value?`,
+        w:`B/W = C − (S−K) = P + r/c = ${P.toFixed(2)} + ${rc.toFixed(2)} = <code>${(P+rc).toFixed(2)}</code>. Note "intrinsic" here is the signed S−K, which is why the identity is stated for in-the-money calls.`};},
+  ];
+  const FULL=CORE.concat([
+    ()=>{const K=ri(10,300,5),d=ri(5,120),px=ri(-80,300)/100,div=ri(0,120)/100,cm=.005;
+      const I=px+div-cm;
+      return{k:"Implied rate",u:"percent",a:simpleRate(I,K,d),
+        t:`A revcon prints at <b>${px.toFixed(4)}</b> (already signed). K = <b>${K}</b>, <b>${d}</b> days, dividend <b>${div.toFixed(2)}</b>, commission 0.005. What is the simple implied rate?`,
+        w:`Interest = ${px.toFixed(4)} + ${div.toFixed(2)} − 0.005 = ${I.toFixed(5)}. Rate = (I/K)×(360/d)×100 = (${I.toFixed(5)}/${K})×(360/${d})×100 = <code>${simpleRate(I,K,d).toFixed(3)}%</code>.`};},
+    ()=>{const K=ri(10,300,5),d=ri(5,120),r=ri(50,900)/100,div=ri(0,120)/100,cm=.005;
+      const I=intFromSimple(r,K,d), px=I-div+cm;
+      return{k:"Rate to price",u:"dollars",a:px,
+        t:`You want to trade a revcon at <b>${r.toFixed(2)}%</b> simple. K = <b>${K}</b>, <b>${d}</b> days, dividend <b>${div.toFixed(2)}</b>, commission 0.005. Where is the package?`,
+        w:`Interest = r/100 × K × d/360 = ${I.toFixed(5)}. Package = Interest − Div + Comm = ${I.toFixed(5)} − ${div.toFixed(2)} + 0.005 = <code>${px.toFixed(4)}</code>.`};},
+    ()=>{const K=ri(20,400,10),dn=ri(1,20),df=dn+ri(20,90),r=ri(100,700)/100;
+      const jr=legSimple(K,df,r,0,0)-legSimple(K,dn,r,0,0);
+      return{k:"Jelly roll",u:"dollars",a:jr,
+        t:`Same-strike jelly roll, K = <b>${K}</b>. Near leg <b>${dn}</b> days, far leg <b>${df}</b> days, rate <b>${r.toFixed(2)}%</b> simple, no dividend. What is it worth?`,
+        w:`Same strike, so it is just the interest between the two settlements: r/100 × K × (df−dn)/360 = ${(r/100).toFixed(4)} × ${K} × ${df-dn}/360 = <code>${jr.toFixed(4)}</code>.`};},
+    ()=>{const K=ri(20,400,10),d=ri(10,120),r=ri(100,700)/100;
+      return{k:"One extra day",u:"dollars",a:intFromSimple(r,K,1),
+        t:`A holiday pushes settlement out by one day. K = <b>${K}</b>, rate <b>${r.toFixed(2)}%</b>. How much interest does that single day add?`,
+        w:`One day of interest = r/100 × K / 360 = ${(r/100).toFixed(4)} × ${K} / 360 = <code>${intFromSimple(r,K,1).toFixed(5)}</code>. Small per share, but on 1,000 contracts that is $${(intFromSimple(r,K,1)*100*1000).toFixed(0)}.`};},
+  ]);
+  function next(){
+    const bank=D.hard?FULL:CORE;
+    D.cur=bank[Math.floor(Math.random()*bank.length)]();D.answered=false;
+    document.getElementById("dKind").textContent=D.cur.k;
+    document.getElementById("dText").innerHTML=D.cur.t;
+    document.getElementById("dUnit").textContent=D.cur.u;
+    const i=document.getElementById("dInput");i.value="";i.disabled=false;
+    document.getElementById("drill").classList.remove("done");i.focus();
+  }
+  function stats(){document.getElementById("dScore").textContent=D.ok+" / "+D.n;
+    document.getElementById("dStreak").textContent=D.streak;
+    document.getElementById("dBest").textContent=D.best;}
+  function submit(){
+    if(D.answered)return;
+    const raw=document.getElementById("dInput").value.replace(/[$,%\s]/g,"");
+    if(raw===""||isNaN(+raw))return;
+    const got=+raw,want=D.cur.a,tol=D.hard?.005:.01;
+    const ok=Math.abs(got-want)<=Math.max(Math.abs(want)*tol,.005);
+    D.n++;D.answered=true;
+    if(ok){D.ok++;D.streak++;D.best=Math.max(D.best,D.streak);}else D.streak=0;
+    stats();
+    const v=document.getElementById("dVerdict");
+    v.className="vd "+(ok?"ok":"no");
+    v.textContent=ok?"Correct — "+want.toFixed(4):"Not quite. Answer: "+want.toFixed(4)+"  (you said "+got+")";
+    document.getElementById("dWork").innerHTML=D.cur.w;
+    document.getElementById("drill").classList.add("done");
+    document.getElementById("dInput").disabled=true;
+  }
+  document.getElementById("dSubmit").addEventListener("click",submit);
+  document.getElementById("dInput").addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();D.answered?next():submit();}});
+  document.getElementById("dNext").addEventListener("click",next);
+  document.getElementById("dSkip").addEventListener("click",()=>{D.streak=0;stats();next();});
+  const eb=document.getElementById("dEasy"),hb=document.getElementById("dHard");
+  eb.addEventListener("click",()=>{D.hard=false;eb.setAttribute("aria-pressed",true);hb.setAttribute("aria-pressed",false);next();});
+  hb.addEventListener("click",()=>{D.hard=true;hb.setAttribute("aria-pressed",true);eb.setAttribute("aria-pressed",false);next();});
+  stats();next();
+})();
+
+function drawAll(){draw1();draw2();draw4();draw5();draw7();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
