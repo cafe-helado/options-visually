@@ -89,15 +89,21 @@ Chapters
 
 ---
 
-## 04 · The Structure Zoo — two lenses on the same instrument
+## 04 · The Structure Zoo — two lenses on the same instrument  ✅ live (structures.html)
 
 **Spine:** an institution buys a *payoff*; a vol fund buys a *greek exposure*. The
 same structure gets two orthogonal descriptions. Show both panels at once.
 
-Signature: the **exposure fingerprint** — five bars per structure (vol level,
-realized-vs-implied, skew, term structure, vol convexity). A corporate's zero-cost
-collar and a vol fund's risk reversal have identical fingerprints with opposite sign.
-Same trade, two vocabularies, opposite sides of it.
+Signature as built: the exposure fingerprint — five bars (direction, realized, vol
+level, skew, vol convexity) normalised against a one-lot ATM straddle. Collar and risk
+reversal annihilate exactly: largest |sum| across all seven greeks is 0.00e+0.
+
+Unexpected find that became chapter 05: the lizards are CONDITIONAL structures. A jade
+lizard only removes upside risk when credit >= call-spread width. At 98 put / 102-104
+spread the credit is 3.796 against width 2 and it holds at every vol from 25% to 70%.
+At 92 put / 105-110 the credit is 2.357 against width 5 and it fails — that position is
+a short strangle with a capped call side, not a jade lizard. Narrow spreads and high vol
+make it hold; widening breaks it, which is the opposite of instinct.
 
 Chapters
 - What each side is solving for — worst case, budget, mandate, accounting treatment

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>The Same Trade, Read Twice — options structures from both sides</title>
+<meta name="description" content="Every options structure seen as a payoff and as a greek fingerprint: straddles through iron condors and lizards, why a collar and a risk reversal are one trade, and how structural flow shapes the surface.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Same Trade, Read Twice — options structures from both sides">
+<meta property="og:description" content="Every options structure seen as a payoff and as a greek fingerprint: straddles through iron condors and lizards, why a collar and a risk reversal are one trade, and how structural flow shapes the surface.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 04 · The Structure Zoo</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Two readings</span><i></i></a>
+  <a href="#c2"><span>The fingerprint</span><i></i></a>
+  <a href="#c3"><span>Same trade twice</span><i></i></a>
+  <a href="#c4"><span>The shelves</span><i></i></a>
+  <a href="#c5"><span>Lizards</span><i></i></a>
+  <a href="#c6"><span>Flow</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 04</div>
+    <h1>The same trade, read <em>twice</em></h1>
+    <p class="sub">A pension buys a payoff. A volatility fund buys an exposure. They can be on opposite sides of one ticket, describing it in vocabularies that share no words — and both be right.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This page needs <a href="black-scholes.html" style="color:var(--blue)">page 01</a> for the greeks and <a href="surface.html" style="color:var(--blue)">page 02</a> for skew and term structure, since half the fingerprint axes are surface exposures.</p>
+  <ol>
+    <li><b>Every structure appears twice.</b> Once as a shape you could draw for a client, once as a bar chart of what it is actually long and short.</li>
+    <li><b>Chapter 03 is the argument.</b> Two trades with different names, different clients and opposite signs turn out to be one instrument.</li>
+    <li><b>Chapter 05 is the correction.</b> The lizards are defined by a condition on the premium, not by their legs — and the condition frequently fails.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — the five fingerprint axes</summary>
+    <table class="ntab">
+      <tr><td>Direction</td><td>Delta. Whether the structure needs the underlying to go somewhere in particular.</td></tr>
+      <tr><td>Realized</td><td>Gamma. Long gamma profits from movement actually happening, and pays theta for the privilege.</td></tr>
+      <tr><td>Vol level</td><td>Vega. Exposure to the <em>price</em> of volatility repricing, whether or not anything moves.</td></tr>
+      <tr><td>Skew</td><td>Vanna. How the position's delta responds to a change in implied vol — the axis a smile acts on.</td></tr>
+      <tr><td>Vol convexity</td><td>Volga. Whether vega itself grows or shrinks as vol moves. Wings have it; the at-the-money does not.</td></tr>
+      <tr><td>Credit / debit</td><td>Whether the structure is entered for money received or money paid. Not a greek, but the first thing an institution asks.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Two readings of one ticket</h2>
+    <p class="dek">The payoff diagram and the greek profile describe the same object and answer different questions. Most confusion between desks is a vocabulary mismatch.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Ask a corporate treasurer why they put on a collar and you will hear about a board mandate, a budget of zero premium, and a worst case they can live with. Ask a volatility fund why they took the other side and you will hear that they were short skew at a level they liked and needed the vanna. Neither is being evasive. They are describing the same trade along different axes.</p>
+    <p>The <b>institutional</b> reading asks: what is my worst case, what does it cost, how does it book, and does it fit the mandate. The payoff diagram answers all four, which is why it is the diagram that ends up in the pitch.</p>
+    <p>The <b>volatility</b> reading asks: what am I long and short on the surface, what does it cost to carry, what happens when vol moves, and what will it take to hedge. The payoff diagram answers none of those, because it only describes expiry — and a vol fund rarely holds anything to expiry.</p>
+    <p>This page draws both, always together. Pick a structure below and you get the shape on the left and the exposure on the right. The claim the page is building toward is that the second view is the one that reveals when two differently-named trades are the same trade.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="chips" role="group" aria-label="Structure" id="szChips"></div>
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Payoff — the institutional view</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>At expiry</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Today</span>
+          </span>
+        </div>
+        <canvas id="cvPayoff" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px">
+          <h3>Greeks across spot — the volatility view</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--moss)"></i>Gamma</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Vega</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Theta</span>
+          </span>
+        </div>
+        <canvas id="cvGreeks" height="240"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Market</h4>
+        <div id="ctl1"></div>
+        <div class="figtop" style="margin:18px 0 8px"><h3>Legs</h3></div>
+        <table class="rot" id="legTab"></table>
+        <div class="kv" style="margin-top:18px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Notice how often two structures with visibly different payoff shapes have nearly identical greek profiles, and vice versa. The butterfly and the iron condor look like different animals on the left and are close cousins on the right — both short gamma, short vega, long theta, with the difference being where the risk sits rather than what kind of risk it is.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The fingerprint</h2>
+    <p class="dek">Five bars. Every structure on this page reduces to them, and structures that share a fingerprint are the same bet wearing different names.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A payoff diagram has one axis and cannot show what a position is long. Reduce a structure instead to what it holds along the five dimensions a surface actually has, and comparison becomes trivial.</p>
+    <p><b>Direction</b> is delta. <b>Realized</b> is gamma — does this profit from movement happening. <b>Vol level</b> is vega — does it profit from movement being <em>repriced</em>. <b>Skew</b> is vanna, the axis that page 02's smile acts along. <b>Vol convexity</b> is volga, whether your vega grows as vol grows.</p>
+    <p>Each bar below is normalized against the same greek on a one-lot at-the-money straddle, so the units are comparable across structures and across strikes. A straddle is by construction 1.0 on realized and 1.0 on vol level, which makes it a natural yardstick.</p>
+    <p>Two habits worth building from this figure. First, <b>read the sign before the size</b> — most structures are obvious once you know whether they are long or short each axis. Second, <b>notice what is near zero</b>. A butterfly is barely directional and barely skewed; almost all of it is a short-realized, short-vol bet concentrated in one place. That is a much more useful description than "long one, short two, long one."</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Exposure fingerprint</h3>
+          <span class="note">Normalized against a one-lot ATM straddle. Long is right, short is left.</span>
+        </div>
+        <div class="bars" id="fingerBars"></div>
+        <div class="figtop" style="margin:26px 0 6px"><h3>In dollars, for the size you would actually trade</h3></div>
+        <div class="dollars" id="fingerDollars"></div>
+      </div>
+      <div class="rail panel">
+        <h4>Size</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The fingerprint is deliberately blind to the payoff. Two structures can produce completely different diagrams for a client and identical fingerprints for a trader — which is the subject of the next chapter, and the reason a vol desk does not much care what a structure is called.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>The same trade, from both sides</h2>
+    <p class="dek">A corporate's zero-cost collar and a volatility fund's risk reversal are one instrument with the sign flipped. Not similar. Identical, to every decimal.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A concentrated shareholder wants downside protection and cannot pay for it, so they buy a put and sell a call to fund it. On the pitch it is a <b>collar</b>: a floor, a cap, zero premium, and a worst case the board can approve.</p>
+    <p>A volatility fund sees the other side and calls it a <b>risk reversal</b>: long the call, short the put, which on an equity surface means short the expensive downside and long the cheap upside. They are not thinking about floors. They are thinking that skew is too steep and they want to be paid to own that view.</p>
+    <p>Put both through the fingerprint and the numbers are exactly negatives of each other — delta, gamma, vega, theta, vanna and volga all sum to <b>zero to machine precision</b>. There is no sense in which these are two trades. There is one trade, and two descriptions of it that share almost no vocabulary.</p>
+    <p>Why this matters beyond being tidy: it tells you where the <em>price</em> of a collar comes from. The treasurer thinks they are buying insurance and paying for it with an upside cap. What they are actually doing is selling skew, and the level they receive is set by how steep the surface is that day. A collar that is zero-cost in a high-skew environment requires giving up far less upside than the same collar when skew is flat — a fact that is invisible in the payoff diagram and obvious in the fingerprint.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Collar and risk reversal, side by side</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>Risk reversal</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Collar, options only</span>
+          </span>
+        </div>
+        <div class="bars" id="mirrorBars"></div>
+        <div class="figtop" style="margin:26px 0 6px"><h3>Their payoffs, which look nothing alike</h3></div>
+        <canvas id="cvMirror" height="260"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Strikes</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The collar's payoff includes the shareholder's stock, which is why the shapes differ — but stock is pure delta with no gamma, vega or vanna, so it changes nothing on the axes that matter to the fund. Strip the stock and the two positions annihilate.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A treasurer says their zero-cost collar "cost nothing." What did it actually cost?</p>
+    <div class="opts">
+      <button>Nothing — the premiums offset exactly, which is the point</button>
+      <button data-ok="1">The upside above the cap, priced by the skew. Steeper skew means the same protection costs less foregone upside</button>
+      <button>Only the bid-offer on two legs</button>
+      <button>The dividend on the underlying shares</button>
+    </div>
+    <div class="ans"><b>They sold skew, and the price was upside.</b> Zero premium is an accounting statement, not an economic one — the put was paid for with a call, and the exchange rate between them is the skew. In a steep-skew environment the downside put is expensive relative to the upside call, so funding it requires selling a call further out and you keep more upside. The identical structure in a flat-skew name forces the cap much closer. This is exactly why the fund on the other side describes the trade as a skew position: that is the variable being traded, even though nobody in the meeting said the word.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>The two shelves</h2>
+    <p class="dek">What each side reaches for, and what the other side sees when they do.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Sorted by who typically initiates them, with the translation attached. Load any of them into the figure above to see both views.</p>
+  </div>
+
+  <figure>
+    <div class="panel">
+      <div class="figtop"><h3>The institutional shelf</h3><span class="note">Bought for a payoff shape</span></div>
+      <table class="rot">
+        <tr><th>Structure</th><th>Stated purpose</th><th>What the other side is buying</th></tr>
+        <tr><td>Covered call</td><td>Yield on a held position</td><td>Long vol, long gamma, cheap upside</td></tr>
+        <tr><td>Protective put</td><td>Floor under a holding</td><td>Short downside vol, short skew</td></tr>
+        <tr><td>Zero-cost collar</td><td>Protection with no premium</td><td>Long skew, long vanna</td></tr>
+        <tr><td>Cash-secured put</td><td>Entry price plus income</td><td>Long downside vol</td></tr>
+        <tr><td>Put spread collar</td><td>Cheaper protection, capped</td><td>Skew and wing exposure together</td></tr>
+        <tr><td>Overwriting programme</td><td>Systematic income</td><td>Persistent supply of upside vol</td></tr>
+      </table>
+    </div>
+  </figure>
+
+  <figure>
+    <div class="panel">
+      <div class="figtop"><h3>The volatility shelf</h3><span class="note">Traded for a greek exposure</span></div>
+      <table class="rot">
+        <tr><th>Structure</th><th>Axis it expresses</th><th>What it costs to hold</th></tr>
+        <tr><td>Straddle</td><td>Realized vs implied, purely</td><td>Maximum theta per unit of gamma</td></tr>
+        <tr><td>Strangle</td><td>Same, cheaper, with wing convexity</td><td>Less theta, needs a bigger move</td></tr>
+        <tr><td>Calendar</td><td>Term structure of vol</td><td>Front gamma against back vega</td></tr>
+        <tr><td>Risk reversal</td><td>Skew, directly</td><td>Delta you must hedge continuously</td></tr>
+        <tr><td>Butterfly</td><td>Local density at one strike</td><td>Pinned to a strike; dies if spot leaves</td></tr>
+        <tr><td>Ratio spread</td><td>Wing pricing, short convexity</td><td>Unbounded tail if the wing is wrong</td></tr>
+        <tr><td>Iron condor</td><td>Short vol with defined wings</td><td>Short gamma between the shorts</td></tr>
+      </table>
+    </div>
+  </figure>
+
+  <div class="prose">
+    <p>One structural asymmetry runs down both lists. The institutional shelf is dominated by <b>selling upside and buying downside</b> — overwriting programmes, collars, protective puts. The volatility shelf is where the other side of that accumulates. That imbalance is not a coincidence and it is chapter 06's subject.</p>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>The lizards, and the condition nobody states</h2>
+    <p class="dek">A jade lizard is not a set of legs. It is a set of legs plus an inequality, and the inequality fails more often than the name suggests.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The lizard family is usually introduced as leg recipes. A <b>jade lizard</b> is a short put plus a short call spread. A <b>big lizard</b> is a short straddle plus a long call. A <b>twisted sister</b> is the jade lizard's mirror — a short call plus a short put spread.</p>
+    <p>That description omits the entire point. What makes a jade lizard interesting is that it can have <b>no upside risk at all</b>, and it has that property only when:</p>
+    <div class="mline">total credit received ≥ width of the call spread</div>
+    <p class="mread">Reads as: <b>you must be paid at least as much as the most the call spread can ever lose.</b> If so, the worst upside outcome is a wash and everything above the short call is flat.</p>
+    <p>Whether that holds depends entirely on strikes and volatility, and it is easy to get wrong. A short 92 put against a 105/110 call spread collects <b>2.68</b> against a width of <b>5</b> — that is not a jade lizard, it is just a short strangle with a capped call side and real upside risk. Tighten to a 98 put against a 102/104 spread and the credit is <b>3.80</b> against a width of <b>2</b>, and the property holds at every volatility level from 25 to 70.</p>
+    <p>The general pattern: <b>narrow spreads and higher volatility make the condition hold; wide spreads break it.</b> Which is worth internalizing because it runs against instinct — the wider call spread feels safer, and it is precisely the version that reintroduces the risk the structure exists to remove.</p>
+    <p>The figure checks the condition live. Move the strikes and the verdict flips, and the payoff's right-hand tail lifts off the flat line the moment the inequality fails.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Does the condition hold?</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>P&amp;L at expiry</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Zero</span>
+          </span>
+        </div>
+        <canvas id="cvLizard" height="300"></canvas>
+        <div class="hedge" id="lizVerdict"></div>
+      </div>
+      <div class="rail panel">
+        <h4>Lizard</h4>
+        <div class="seg" style="margin-bottom:16px" role="group" aria-label="Which lizard">
+          <button id="lzJade" aria-pressed="true">Jade</button>
+          <button id="lzBig" aria-pressed="false">Big</button>
+          <button id="lzTwist" aria-pressed="false">Twisted</button>
+        </div>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>The lizards are the clearest case of a general rule: many named structures are named for a <em>property</em> that only holds under conditions on the premium. If you cannot state the condition, you cannot tell whether the thing you have on is the thing you meant to put on.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You widen a jade lizard's call spread from 102/104 to 102/112, keeping the same short put. What happens to the upside risk?</p>
+    <div class="opts">
+      <button>It falls — a wider spread gives the position more room</button>
+      <button data-ok="1">It appears. Width grows faster than the extra credit, so the credit no longer covers it and the structure stops being a jade lizard</button>
+      <button>Nothing changes; the short put dominates the risk</button>
+      <button>It becomes unlimited</button>
+    </div>
+    <div class="ans"><b>Widening breaks it.</b> Going from 2 wide to 10 wide adds eight points of potential loss and only a fraction of a point of credit, because the extra long call you are no longer buying was far out of the money and nearly worthless. The condition credit ≥ width fails and the upside tail reappears, capped at width minus credit. Not unlimited — the long call still caps it — but no longer zero, which is the property you were paying for. The instinct that wider is safer is exactly backwards here.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Where the surface comes from</h2>
+    <p class="dek">Page 02 showed the surface is skewed. This chapter is the argument that structural flow is a large part of why.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 04's two shelves are not symmetric. Run down the institutional list and nearly every entry does the same two things: <b>sells upside volatility</b> and <b>buys downside volatility</b>. Overwriting programmes sell calls, month after month, mechanically. Pension and insurance mandates buy puts. Collars do both at once. Structured note issuance leaves dealers with exposures they must hedge in the same direction.</p>
+    <p>None of these are opportunistic. They are mandates, and they recur regardless of where implied volatility is trading — an overwriting programme sells calls in January because it is January, not because calls look rich.</p>
+    <p>Persistent one-way flow has to be absorbed by somebody, and the price of absorbing it is the surface's shape. Downside strikes bid, upside strikes offered, is exactly what a persistent buyer of puts and seller of calls produces in a market where the other side must be paid to warehouse the risk.</p>
+    <p><b>How much of the skew this explains is genuinely contested</b>, and it would be dishonest to present flow as the whole story. Page 02 showed that jumps and correlated stochastic volatility each generate skew from pure modelling assumptions with no flow at all, and index skew persisted through decades with very different flow regimes. The honest position is that skew has several sufficient causes and the observed surface is their sum, with the mix varying by underlying and by tenor.</p>
+    <p>What is not contested is the trading implication, and it is the one worth taking from this page: <b>when you buy an option you are usually buying it from somebody whose reason has nothing to do with your reason.</b> The overwriter selling you a call has no view on volatility. The pension buying puts is not forecasting a crash. Treating every price as though it encodes a view is a good way to find edge that is not there — and treating persistent flow as though it were information is a good way to be on the wrong side of a mandate that will still be running next quarter.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>What a persistent overwriting and put-buying programme leaves behind</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Surface with no flow</span>
+            <span><i class="swl" style="background:var(--blue)"></i>With structural flow absorbed</span>
+          </span>
+        </div>
+        <canvas id="cvFlow" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Net dealer position by strike</h3></div>
+        <canvas id="cvFlowPos" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Flow</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>This is an illustration of a mechanism, not a calibration to data — the flow-to-skew mapping here is assumed, not measured. Treat it as a way to reason about which direction persistent flow pushes a surface, and not as a claim about how much of any real skew it accounts for.</figcaption>
+  </figure>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every structure here is priced on a flat surface at a single volatility, which understates the case: on a real skewed surface the put legs of these structures price off higher implied vols than the call legs, and several of the credit conditions in chapter 05 become easier to satisfy as a result. Structures are also shown at one expiry, so calendars and diagonals — which are term-structure trades — get a mention and not a fingerprint. The flow argument in chapter 06 is a mechanism, not a measurement.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ═══════════ structures ═══════════ */
+const MKT={S:100,vol:.30,days:45,r:.04,q:0,lots:10};
+/* leg = [isCall, strikeOffsetFn, qty] — strikes expressed relative to spot */
+const GROUPS=[
+ ["Single legs",[
+   ["Long call",   s=>[[1,s.S,1]]],
+   ["Short call",  s=>[[1,s.S,-1]]],
+   ["Long put",    s=>[[0,s.S,1]]],
+   ["Short put",   s=>[[0,s.S,-1]]]]],
+ ["Volatility",[
+   ["Straddle",    s=>[[1,s.S,1],[0,s.S,1]]],
+   ["Short straddle",s=>[[1,s.S,-1],[0,s.S,-1]]],
+   ["Strangle",    s=>[[1,r5(s.S*1.10),1],[0,r5(s.S*0.90),1]]]]],
+ ["Spreads",[
+   ["Call spread", s=>[[1,s.S,1],[1,r5(s.S*1.10),-1]]],
+   ["Put spread",  s=>[[0,s.S,1],[0,r5(s.S*0.90),-1]]],
+   ["Butterfly",   s=>[[1,r5(s.S*0.95),1],[1,s.S,-2],[1,r5(s.S*1.05),1]]],
+   ["Ratio spread",s=>[[1,s.S,1],[1,r5(s.S*1.10),-2]]]]],
+ ["Iron structures",[
+   ["Iron condor", s=>[[0,r5(s.S*0.85),1],[0,r5(s.S*0.95),-1],[1,r5(s.S*1.05),-1],[1,r5(s.S*1.15),1]]],
+   ["Iron butterfly",s=>[[0,r5(s.S*0.90),1],[0,s.S,-1],[1,s.S,-1],[1,r5(s.S*1.10),1]]]]],
+ ["Lizards",[
+   ["Jade lizard", s=>[[0,r5(s.S*0.98),-1],[1,r5(s.S*1.02),-1],[1,r5(s.S*1.04),1]]],
+   ["Big lizard",  s=>[[1,s.S,-1],[0,s.S,-1],[1,r5(s.S*1.05),1]]],
+   ["Twisted sister",s=>[[1,r5(s.S*1.05),-1],[0,r5(s.S*0.95),-1],[0,r5(s.S*0.92),1]]]]],
+ ["Skew",[
+   ["Risk reversal",s=>[[1,r5(s.S*1.10),1],[0,r5(s.S*0.90),-1]]],
+   ["Collar (options)",s=>[[0,r5(s.S*0.90),1],[1,r5(s.S*1.10),-1]]]]]
+];
+const r5=x=>Math.max(1,Math.round(x));
+const ALL={}; GROUPS.forEach(([,list])=>list.forEach(([n,f])=>ALL[n]=f));
+let SEL="Straddle";
+
+function legGreeks(legs){
+  const T=MKT.days/365;
+  let o={price:0,delta:0,gamma:0,vega:0,theta:0,vanna:0,volga:0};
+  legs.forEach(([cp,K,n])=>{
+    const g=bs(MKT.S,K,T,MKT.vol,MKT.r,MKT.q,cp===1);
+    for(const k in o)o[k]+=g[k]*n;});
+  return o;
+}
+const payoffAt=(legs,ST)=>legs.reduce((a,[cp,K,n])=>a+n*Math.max(0,cp===1?ST-K:K-ST),0);
+function valueAt(legs,ST,T){
+  return legs.reduce((a,[cp,K,n])=>a+n*bs(ST,K,Math.max(T,1e-9),MKT.vol,MKT.r,MKT.q,cp===1).price,0);
+}
+/* fingerprint, normalised against a one-lot ATM straddle */
+function fingerprint(legs){
+  const ref=legGreeks([[1,MKT.S,1],[0,MKT.S,1]]);
+  const o=legGreeks(legs);
+  const n=(a,b)=>Math.abs(b)>1e-12?a/Math.abs(b):0;
+  return [
+    ["Direction", n(o.delta,1), o.delta],
+    ["Realized",  n(o.gamma,ref.gamma), o.gamma],
+    ["Vol level", n(o.vega,ref.vega), o.vega],
+    ["Skew",      n(o.vanna,Math.abs(ref.vega)/8), o.vanna],
+    ["Vol convexity", n(o.volga,Math.abs(ref.vega)*4), o.volga]
+  ];
+}
+
+/* ══════════════════════════════════════════════
+   HERO — payoff shapes morphing
+   ══════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById("heroCv");
+  let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);}
+  const shapes=[
+    x=>Math.max(0,x-.15),
+    x=>Math.max(0,x-.15)+Math.max(0,-.15-x),
+    x=>Math.max(0,x-.1)-2*Math.max(0,x-.3),
+    x=>-Math.max(0,x-.25)-Math.max(0,-.25-x)+.25,
+    x=>Math.max(0,x+.35)-Math.max(0,x-.05)-.2
+  ];
+  function draw(ph,i,n){
+    const a=shapes[i%shapes.length], b=shapes[(i+1)%shapes.length];
+    const m=(Math.sin(ph+i*.7)+1)/2;
+    const base=h*(.24+.56*i/n);
+    g.strokeStyle=i%3===0?C("--verm"):C("--blue");
+    g.globalAlpha=.10+.16*(1-i/n);g.lineWidth=i%3===0?1.6:1.1;
+    g.beginPath();
+    for(let j=0;j<=110;j++){
+      const x=-1+2*j/110;
+      const y=base-((1-m)*a(x)+m*b(x))*h*.62;
+      j?g.lineTo((j/110)*w,y):g.moveTo(0,y);
+    }
+    g.stroke();g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;
+    g.globalAlpha=.030;g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);g.globalAlpha=1;
+    const ph=(ts-t0)/3400;
+    for(let i=0;i<9;i++)draw(ph,i,9);
+    raf=requestAnimationFrame(frame);}
+  function statics(){for(let i=0;i<9;i++)draw(.8,i,9);}
+  size();if(RM)statics();else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)statics();else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════════════════════════════════════════
+   01 + 02 — selector, payoff, greeks, fingerprint
+   ══════════════════════════════════════════════ */
+(function(){
+  const host=document.getElementById("szChips");
+  host.innerHTML=GROUPS.map(([g,list])=>
+    `<span style="font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);align-self:center;margin-right:2px">${g}</span>`+
+    list.map(([n])=>`<button data-sz="${n}" aria-pressed="${n===SEL}">${n}</button>`).join("")
+  ).join('<span style="width:100%;height:0"></span>');
+  host.querySelectorAll("[data-sz]").forEach(b=>b.addEventListener("click",()=>{
+    SEL=b.dataset.sz;
+    host.querySelectorAll("[data-sz]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.sz===SEL));
+    draw();}));
+
+  sliders(document.getElementById("ctl1"),[
+    {id:"S1",k:"S",lbl:"S",name:"Spot",min:20,max:300,step:5,fmt:v=>"$"+v.toFixed(0)},
+    {id:"v1",k:"vol",lbl:"σ",name:"Implied vol",min:.08,max:1.2,step:.01,fmt:pct},
+    {id:"d1",k:"days",lbl:"T",name:"Days to expiry",min:3,max:365,step:1,fmt:v=>v.toFixed(0)+"d"}
+  ],MKT,()=>draw(),"c1");
+  sliders(document.getElementById("ctl2"),[
+    {id:"L2",k:"lots",lbl:"N",name:"Contracts",min:1,max:200,step:1,fmt:v=>v.toFixed(0)}
+  ],MKT,()=>draw(),"c2");
+
+  window.draw1=draw;
+  function draw(){
+    const legs=ALL[SEL](MKT), T=MKT.days/365;
+    const o=legGreeks(legs), cost=o.price;
+    const lo=MKT.S*.6,hi=MKT.S*1.4,xs=[],exp=[],now=[];
+    for(let i=0;i<220;i++){const x=lo+(hi-lo)*i/219;xs.push(x);
+      exp.push(payoffAt(legs,x)-cost);
+      now.push(valueAt(legs,x,T)-cost);}
+    const f=Fig(document.getElementById("cvPayoff"),{h:300,x0:lo,x1:hi,
+      y0:Math.min(...exp,...now)*1.14,y1:Math.max(...exp,...now)*1.14||1,pad:{l:62}});
+    axes(f,v=>"$"+v.toFixed(0),v=>(v<0?"−$":"$")+Math.abs(v).toFixed(0),5,5);
+    clip(f,()=>{line(f,xs,exp,C("--grey"),2.4);line(f,xs,now,C("--blue"),1.9);});
+    vline(f,MKT.S,C("--ochre"),"spot",[2,4]);
+    legs.forEach(([,K])=>vline(f,K,C("--hair"),null,[2,4]));
+    // greek profiles
+    const gam=[],veg=[],the=[];
+    xs.forEach(x=>{
+      let a=0,b=0,c=0;
+      legs.forEach(([cp,K,n])=>{const gg=bs(x,K,T,MKT.vol,MKT.r,MKT.q,cp===1);
+        a+=gg.gamma*n;b+=gg.vega/100*n;c+=gg.theta/365*n;});
+      gam.push(a*100);veg.push(b);the.push(c);});
+    const g2=Fig(document.getElementById("cvGreeks"),{h:240,x0:lo,x1:hi,
+      y0:Math.min(0,...gam,...veg,...the)*1.15,y1:Math.max(0,...gam,...veg,...the)*1.15||1,pad:{l:62}});
+    axes(g2,v=>"$"+v.toFixed(0),v=>v.toFixed(2),5,4);
+    clip(g2,()=>{line(g2,xs,gam,C("--moss"),1.9);line(g2,xs,veg,C("--ochre"),1.9);
+      line(g2,xs,the,C("--verm"),1.9);});
+    vline(g2,MKT.S,C("--ochre"),null,[2,4]);
+    document.getElementById("legTab").innerHTML=
+      "<tr><th>Qty</th><th>Type</th><th>Strike</th></tr>"+
+      legs.map(([cp,K,n])=>`<tr><td style="color:${n>0?"var(--moss)":"var(--verm)"}">${n>0?"+":""}${n}</td><td>${cp===1?"call":"put"}</td><td>$${K}</td></tr>`).join("");
+    const maxG=Math.max(...exp), minG=Math.min(...exp);
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Structure",SEL],
+      ["Net premium",(cost>=0?"−$":"+$")+Math.abs(cost).toFixed(3)],
+      ["Debit or credit",cost>=0?"debit":"credit"],
+      ["Delta",o.delta.toFixed(4)],
+      ["Gamma",o.gamma.toFixed(5)],
+      ["Vega /pt",(o.vega/100).toFixed(4)],
+      ["Theta /day",(o.theta/365).toFixed(4)],
+      ["Max gain (shown)",maxG>1e4?"unbounded":"$"+maxG.toFixed(2)],
+      ["Max loss (shown)","$"+minG.toFixed(2)]
+    ]);
+    // fingerprint
+    const fp=fingerprint(legs);
+    const mx=Math.max(...fp.map(x=>Math.abs(x[1])),1e-9);
+    const bar=(v,col)=>{const p=Math.min(Math.abs(v)/mx*48,48);
+      return `<div class="trk"><div class="z"></div><i style="background:${col};${
+        v>=0?`left:50%;width:${p}%`:`right:50%;width:${p}%`}"></i></div>`;};
+    const cols=[C("--blue"),C("--moss"),C("--ochre"),C("--violet")||C("--grey"),C("--grey")];
+    document.getElementById("fingerBars").innerHTML=fp.map(([n,v],i)=>
+      `<div class="brow"><span class="l"><i class="sw" style="background:${cols[i]}"></i>${n}</span>${bar(v,cols[i])}<span class="a ${v>=0?"pos":"neg"}">${v>=0?"+":""}${v.toFixed(2)}</span></div>`).join("");
+    const M=MKT.lots*100;
+    const money=x=>(x<0?"−$":"$")+Math.abs(x).toLocaleString(undefined,{maximumFractionDigits:0});
+    document.getElementById("fingerDollars").innerHTML=[
+      ["blue","Delta",Math.round(o.delta*M).toLocaleString()+" sh","equivalent stock"],
+      ["moss","Gamma / 1%",Math.round(o.gamma*MKT.S*.01*M).toLocaleString()+" sh","delta gained on a 1% rally"],
+      ["ochre","Vega",money(o.vega/100*M)+"/pt","per vol point"],
+      ["verm","Theta",money(o.theta/365*M)+"/day","per calendar day"],
+      ["","Premium",money(-o.price*M),o.price>=0?"paid":"received"],
+      ["","Volga",(o.volga/10000*M).toFixed(0),"vega convexity"]
+    ].map(([c,k,v,s])=>`<div class="c ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join("");
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Contracts",MKT.lots],
+      ["Multiplier",100],
+      ["Notional delta",money(o.delta*M*MKT.S)],
+      ["Premium",money(-o.price*M)],
+      ["Theta / week",money(o.theta/365*M*7)],
+      ["Vega on 5 pts",money(o.vega/100*M*5)]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   03 — collar vs risk reversal
+   ══════════════════════════════════════════════ */
+const s3={pK:90,cK:110};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"p3",k:"pK",lbl:"Kp",name:"Put strike",min:60,max:99,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"c3",k:"cK",lbl:"Kc",name:"Call strike",min:101,max:145,step:1,fmt:v=>"$"+v.toFixed(0)}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  function draw(){
+    const rr=[[1,s3.cK,1],[0,s3.pK,-1]];
+    const col=[[0,s3.pK,1],[1,s3.cK,-1]];
+    const a=legGreeks(rr), b=legGreeks(col);
+    const rows=[["Price","price"],["Delta","delta"],["Gamma","gamma"],
+                ["Vega","vega"],["Theta","theta"],["Vanna","vanna"],["Volga","volga"]];
+    const mx=Math.max(...rows.map(([,k])=>Math.abs(a[k])),1e-9);
+    const bar=(v,col2)=>{const p=Math.abs(v)/mx*46;
+      return `<div class="trk"><div class="z"></div><i style="background:${col2};${
+        v>=0?`left:50%;width:${p}%`:`right:50%;width:${p}%`}"></i></div>`;};
+    document.getElementById("mirrorBars").innerHTML=rows.map(([n,k])=>
+      `<div class="brow"><span class="l"><i class="sw" style="background:${C("--blue")}"></i>${n}</span>${bar(a[k],C("--blue"))}<span class="a">${a[k].toFixed(4)}</span></div>
+       <div class="brow"><span class="l" style="color:var(--grey)"><i class="sw" style="background:${C("--verm")}"></i>…collar</span>${bar(b[k],C("--verm"))}<span class="a" style="color:var(--grey)">${b[k].toFixed(4)}</span></div>`).join("")+
+      `<div class="brow tot"><span class="l">Largest |sum|</span><div class="trk"><div class="z"></div></div><span class="a" style="color:var(--moss)">${
+        Math.max(...rows.map(([,k])=>Math.abs(a[k]+b[k]))).toExponential(1)}</span></div>`;
+    const lo=60,hi=145,xs=[],p1=[],p2=[];
+    for(let i=0;i<200;i++){const x=lo+(hi-lo)*i/199;xs.push(x);
+      p1.push(payoffAt(rr,x)-legGreeks(rr).price);
+      p2.push(payoffAt(col,x)-legGreeks(col).price+(x-MKT.S));}
+    const f=Fig(document.getElementById("cvMirror"),{h:260,x0:lo,x1:hi,
+      y0:Math.min(...p1,...p2)*1.12,y1:Math.max(...p1,...p2)*1.12,pad:{l:62}});
+    axes(f,v=>"$"+v.toFixed(0),v=>(v<0?"−$":"$")+Math.abs(v).toFixed(0),5,4);
+    clip(f,()=>{line(f,xs,p1,C("--blue"),2.1);line(f,xs,p2,C("--verm"),2.1);});
+    vline(f,MKT.S,C("--ochre"),"spot",[2,4]);
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["RR premium",a.price.toFixed(4)],
+      ["Collar premium",b.price.toFixed(4)],
+      ["Sum",(a.price+b.price).toExponential(1)],
+      ["RR vanna",a.vanna.toFixed(4)],
+      ["Collar vanna",b.vanna.toFixed(4)],
+      ["Zero-cost call K",(()=>{
+        for(let k=101;k<200;k++){const t=legGreeks([[0,s3.pK,1],[1,k,-1]]);
+          if(t.price<=0)return "$"+k;} return "—";})()],
+      ["Identical?",Math.max(...rows.map(([,k])=>Math.abs(a[k]+b[k])))<1e-9?"yes, exactly":"no"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   05 — lizards and their condition
+   ══════════════════════════════════════════════ */
+const s5={pK:98,cK:102,lK:104,vol:.30,days:45};
+let LZ="jade";
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"p5",k:"pK",lbl:"K₁",name:"Short put / short call",min:80,max:112,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"c5",k:"cK",lbl:"K₂",name:"Short spread leg",min:88,max:120,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"l5",k:"lK",lbl:"K₃",name:"Long spread leg",min:90,max:140,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"v5",k:"vol",lbl:"σ",name:"Implied vol",min:.10,max:1.0,step:.01,fmt:pct},
+    {id:"d5",k:"days",lbl:"T",name:"Days",min:5,max:120,step:1,fmt:v=>v.toFixed(0)+"d"}
+  ],s5,()=>draw(),"c5");
+  function seg(a,b,c){
+    [[a,"jade"],[b,"big"],[c,"twisted"]].forEach(([id,key])=>{
+      document.getElementById(id).addEventListener("click",()=>{
+        LZ=key;[a,b,c].forEach(x=>document.getElementById(x).setAttribute("aria-pressed",x===id));
+        draw();});});
+  }
+  seg("lzJade","lzBig","lzTwist");
+  window.draw5=draw;
+  function build(){
+    if(LZ==="jade") return {legs:[[0,s5.pK,-1],[1,s5.cK,-1],[1,s5.lK,1]],
+      width:Math.max(0,s5.lK-s5.cK), side:"upside"};
+    if(LZ==="big")  return {legs:[[1,MKT.S,-1],[0,MKT.S,-1],[1,s5.lK,1]],
+      width:Math.max(0,s5.lK-MKT.S), side:"upside"};
+    return {legs:[[1,s5.cK,-1],[0,s5.pK,-1],[0,s5.lK,1]],
+      width:Math.max(0,s5.pK-s5.lK), side:"downside"};
+  }
+  function draw(){
+    const {legs,width,side}=build();
+    const T=s5.days/365;
+    let credit=0;
+    legs.forEach(([cp,K,n])=>{credit-=n*bs(MKT.S,K,T,s5.vol,MKT.r,MKT.q,cp===1).price;});
+    const holds=credit>=width;
+    const lo=MKT.S*.55,hi=MKT.S*1.55,xs=[],pl=[];
+    for(let i=0;i<240;i++){const x=lo+(hi-lo)*i/239;xs.push(x);
+      pl.push(payoffAt(legs,x)+credit);}
+    const f=Fig(document.getElementById("cvLizard"),{h:300,x0:lo,x1:hi,
+      y0:Math.min(...pl)*1.15,y1:Math.max(...pl)*1.3||1,pad:{l:62}});
+    axes(f,v=>"$"+v.toFixed(0),v=>(v<0?"−$":"$")+Math.abs(v).toFixed(1),5,5);
+    const g=f.g;
+    g.strokeStyle=C("--grey");g.setLineDash([3,3]);g.lineWidth=1;
+    const zy=Math.round(f.Y(0))+.5;
+    g.beginPath();g.moveTo(f.P.l,zy);g.lineTo(f.P.l+f.pw,zy);g.stroke();g.setLineDash([]);
+    clip(f,()=>line(f,xs,pl,holds?C("--moss"):C("--blue"),2.3));
+    legs.forEach(([,K])=>vline(f,K,C("--hair"),null,[2,4]));
+    vline(f,MKT.S,C("--ochre"),"spot",[2,4]);
+    const tailPL=side==="upside"?pl[pl.length-1]:pl[0];
+    document.getElementById("lizVerdict").innerHTML=
+      `<div class="big" style="color:${holds?"var(--moss)":"var(--verm)"}">${holds?"Condition holds — no "+side+" risk":"Condition fails — "+side+" risk of $"+Math.abs(tailPL).toFixed(2)}</div>
+       <p>Credit received <b>${credit.toFixed(3)}</b> against a spread width of <b>${width.toFixed(0)}</b>.
+       ${holds?`Because the credit covers the width, everything beyond the short strike settles flat or better — the ${side} tail is genuinely gone.`
+              :`The credit falls <b>${(width-credit).toFixed(3)}</b> short of the width, so the ${side} tail reappears and is capped at that shortfall. Narrow the spread or raise the credit and it closes.`}</p>`;
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Lizard",LZ==="jade"?"Jade":LZ==="big"?"Big":"Twisted sister"],
+      ["Credit",credit.toFixed(4)],
+      ["Spread width",width.toFixed(0)],
+      ["Credit − width",(credit-width).toFixed(4)],
+      ["Condition",holds?"holds":"fails"],
+      [side+" tail P&L",tailPL.toFixed(3)],
+      ["Max profit","$"+Math.max(...pl).toFixed(2)],
+      ["Worst case","$"+Math.min(...pl).toFixed(2)]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   06 — flow illustration
+   ══════════════════════════════════════════════ */
+const s6={overwrite:1.0,putbuy:1.0,impact:.35};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"o6",k:"overwrite",lbl:"OW",name:"Call overwriting supply",min:0,max:2,step:.05,fmt:v=>v.toFixed(2)+"×"},
+    {id:"p6",k:"putbuy",lbl:"PB",name:"Put buying demand",min:0,max:2,step:.05,fmt:v=>v.toFixed(2)+"×"},
+    {id:"i6",k:"impact",lbl:"κ",name:"Assumed price impact",min:0,max:1,step:.02,fmt:v=>v.toFixed(2)}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  function draw(){
+    const S=MKT.S,lo=S*.7,hi=S*1.3,xs=[],flat=[],skewed=[],pos=[];
+    for(let i=0;i<160;i++){
+      const K=lo+(hi-lo)*i/159;xs.push(K);
+      const m=Math.log(K/S);
+      const base=.28;
+      // demand concentrated below, supply above
+      const dem=s6.putbuy*Math.exp(-Math.pow((m+.12)/.09,2));
+      const sup=s6.overwrite*Math.exp(-Math.pow((m-.10)/.09,2));
+      flat.push(base*100);
+      skewed.push((base+s6.impact*.10*(dem-sup))*100);
+      pos.push(sup-dem);
+    }
+    const f=Fig(document.getElementById("cvFlow"),{h:290,x0:lo,x1:hi,
+      y0:Math.min(...flat,...skewed)*.9,y1:Math.max(...flat,...skewed)*1.08,pad:{l:58}});
+    axes(f,v=>"$"+v.toFixed(0),v=>v.toFixed(0)+"%",5,4);
+    clip(f,()=>{line(f,xs,flat,C("--grey"),1.7,[5,4]);line(f,xs,skewed,C("--blue"),2.3);});
+    vline(f,S,C("--ochre"),"spot",[2,4]);
+    const f2=Fig(document.getElementById("cvFlowPos"),{h:190,x0:lo,x1:hi,
+      y0:Math.min(...pos)*1.2||-1,y1:Math.max(...pos)*1.2||1,pad:{l:58,b:22}});
+    axes(f2,v=>"$"+v.toFixed(0),v=>v.toFixed(1),5,3);
+    const g=f2.g,bw=f2.pw/160;
+    pos.forEach((p,i)=>{g.fillStyle=p>=0?C("--moss"):C("--verm");g.globalAlpha=.6;
+      g.fillRect(f2.X(xs[i])-bw/2,Math.min(f2.Y(p),f2.Y(0)),bw,Math.abs(f2.Y(p)-f2.Y(0)));});
+    g.globalAlpha=1;
+    const i90=xs.findIndex(k=>k>=S*.9), i110=xs.findIndex(k=>k>=S*1.1);
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Base vol","28.00%"],
+      ["90-strike vol",skewed[i90].toFixed(2)+"%"],
+      ["110-strike vol",skewed[i110].toFixed(2)+"%"],
+      ["90–110 skew",(skewed[i90]-skewed[i110]).toFixed(2)+" pts"],
+      ["Overwriting",s6.overwrite.toFixed(2)+"×"],
+      ["Put demand",s6.putbuy.toFixed(2)+"×"],
+      ["Illustration only","not calibrated"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw3();draw5();draw6();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
