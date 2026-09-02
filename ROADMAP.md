@@ -169,7 +169,7 @@ Two constraints on writing it
 
 ---
 
-## 06 · Executing the Hedge — algos, dark pools, ETFs
+## 06 · Executing the Hedge — algos, dark pools, ETFs  ✅ live (execution.html)
 
 **Spine:** page 01 proved replication works and never charged for it. Every rebalance
 is an order that pays a spread and moves the market. Put the bill back in.
@@ -190,10 +190,10 @@ Signature 1: the U-curve, with sliders for cost in bps and risk aversion. This i
 honest ending to page 01 chapter 06 — "hedge continuously" becomes a corner solution
 that is wrong as soon as trading costs anything.
 
-Signature 2: one parent order, five algos, simulated fills. Then a benchmark toggle —
-the same execution looks excellent against VWAP and terrible against arrival price.
-Choosing the benchmark chooses the verdict, which is why execution arguments never
-resolve.
+Signature 2 as built: one uniform execution buying into a rising market scores -0.00
+against interval VWAP (exactly on benchmark) and +1.47 against arrival. Same fills. One
+report says the algo did its job, the other says it cost a point and a half. VWAP
+forgives trend and punishes deviation; arrival punishes delay.
 
 Signature 3: dark pool adverse selection. Rest at the midpoint, get filled, and watch
 what happens next. Fills cluster right before adverse moves. Same lesson as page 05's

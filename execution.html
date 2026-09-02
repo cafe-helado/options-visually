@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>The Hedge That Costs Something — execution, dark venues and ETFs</title>
+<meta name="description" content="Transaction costs turn continuous hedging into a U-curve with an interior optimum. Impact versus timing risk, execution algorithms, why benchmarks disagree, dark-pool adverse selection, and ETF creation bands.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Hedge That Costs Something — execution, dark venues and ETFs">
+<meta property="og:description" content="Transaction costs turn continuous hedging into a U-curve with an interior optimum. Impact versus timing risk, execution algorithms, why benchmarks disagree, dark-pool adverse selection, and ETF creation bands.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 06 · Executing the Hedge</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>The bill</span><i></i></a>
+  <a href="#c2"><span>Impact vs risk</span><i></i></a>
+  <a href="#c3"><span>The algos</span><i></i></a>
+  <a href="#c4"><span>Benchmarks</span><i></i></a>
+  <a href="#c5"><span>Dark venues</span><i></i></a>
+  <a href="#c6"><span>ETFs</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 06</div>
+    <h1>The hedge that <em>costs</em> something</h1>
+    <p class="sub">Page 01 proved an option can be replicated and never charged you for a single trade. Put the bill back in and "hedge continuously" stops being a theorem and becomes a corner solution that is wrong in practice.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This page is a direct sequel to <a href="black-scholes.html#c6" style="color:var(--blue)">page 01, chapter 06</a> — the replication experiment. It assumes you have seen the hedging error fall like 1/√N and takes it from there.</p>
+  <ol>
+    <li><b>Chapter 01 is the whole argument.</b> Costs turn a monotone improvement into a U-curve with an interior optimum.</li>
+    <li><b>Chapter 04 is the one that changes how you read reports.</b> The same fills score differently depending on a benchmark somebody chose.</li>
+    <li><b>Impact parameters are assumptions, not measurements.</b> Every figure with impact in it has the coefficient on a slider and labelled as such.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>N</td><td>Number of rehedges over the option's life.</td></tr>
+      <tr><td>k</td><td>Round-trip cost as a fraction of traded notional. Five basis points is k = 0.0005.</td></tr>
+      <tr><td>λ</td><td>Risk aversion. How many units of cost you would pay to remove one unit of P&amp;L standard deviation.</td></tr>
+      <tr><td>η</td><td>Temporary impact coefficient. How much the price moves against you per unit of trading <em>rate</em>. An assumption.</td></tr>
+      <tr><td>Arrival</td><td>The price at the moment the order was released. The benchmark behind implementation shortfall.</td></tr>
+      <tr><td>Interval VWAP</td><td>Volume-weighted average price over the execution window. A benchmark that moves with the market.</td></tr>
+      <tr><td>NAV</td><td>An ETF's net asset value — the mark-to-market of the basket it holds.</td></tr>
+      <tr><td>AP</td><td>Authorised participant. The firm entitled to create and redeem ETF shares against the basket.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Putting the bill back in</h2>
+    <p class="dek">Page 01's replication chapter left one line off the invoice. Adding it inverts the conclusion.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Page 01 sold an option, hedged it mechanically, and measured what was left. The answer was clean: the hedging error has a standard deviation that falls like 1/√N, so more rebalancing is monotonically better and the continuous limit is exact. That result is correct and it is also missing something, because every one of those N rebalances is an order that crosses a spread.</p>
+    <p>Charge for them and two forces run in opposite directions. Hedging error still falls like 1/√N. But total turnover <b>rises</b> — each rebalance is smaller as N grows, yet there are more of them, and the sum grows toward √N. So the thing you are minimising is a sum of a decreasing term and an increasing one, which is the classic shape of a problem with an interior answer.</p>
+    <div class="mline">minimise &nbsp; E[cost] + λ · sd(P&amp;L)</div>
+    <p class="mread">Reads as: <b>trade off the money you know you will spend against the uncertainty you are trying to remove.</b> λ is how much you dislike the uncertainty.</p>
+    <p>At five basis points of cost and a moderate risk aversion, the objective bottoms out around <b>128 rehedges</b> over a ninety-day option. Hedge less and the residual risk dominates; hedge more and you are paying spread to remove risk you had already mostly removed. The curve is genuinely U-shaped and the minimum moves with both sliders — raise costs and it slides left, raise risk aversion and it slides right.</p>
+    <p>One honest note about the scaling. Cost approaches √N only <b>asymptotically</b> — between N = 128 and N = 512 the observed ratio is 1.76 against a predicted 2.0, because at low rebalance counts the initial hedge and the final unwind dominate the turnover and neither scales with N at all.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The two forces, and their sum</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Expected cost</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>λ × risk</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Total objective</span>
+          </span>
+        </div>
+        <canvas id="cvU" height="310"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Distribution of total P&amp;L at the chosen frequency</h3></div>
+        <canvas id="cvUdist" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Terms</h4>
+        <div id="ctl1"></div>
+        <div class="btnrow"><button class="act" id="run1">Resimulate</button></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Set costs to zero and the blue curve becomes monotone decreasing — page 01's world, where continuous hedging wins. Any positive cost creates the minimum. The practical reading: "how often should I hedge" has no answer until somebody states a cost and a risk aversion, and most disagreements about hedging frequency are really disagreements about λ.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your desk halves its commission rate. What happens to the optimal rehedge frequency?</p>
+    <div class="opts">
+      <button>It falls — cheaper trading means you need fewer hedges</button>
+      <button data-ok="1">It rises. Cheaper trading moves the cost curve down, so the minimum shifts toward more frequent hedging and less residual risk</button>
+      <button>It is unchanged; frequency depends only on gamma</button>
+      <button>It goes to infinity, since costs no longer matter</button>
+    </div>
+    <div class="ans"><b>It rises.</b> The optimum sits where the marginal cost of one more rebalance equals the marginal risk it removes. Cheapen the marginal cost and you can afford to buy more risk reduction before it stops being worth it. Only at exactly zero cost does it run to infinity — which is page 01's continuous limit, and the reason that result is a theorem about a frictionless market rather than advice.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>Impact against timing risk</h2>
+    <p class="dek">Every parent order faces the same trade-off, and it has the same shape as chapter 01 for the same reason.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Having decided to buy fifty thousand shares, you face a second problem that is structurally identical to the first. Trade it all now and you pay a large, <b>certain</b> impact cost — you are the only buyer and you walk the book. Trade it over the day and impact falls, but the price wanders while you work, and where it ends up is <b>uncertain</b>.</p>
+    <p>So it is cost against variance again: fast is expensive and predictable, slow is cheap and risky. The optimal trajectory is neither instant nor infinitely patient, and it depends on how much you dislike the uncertainty.</p>
+    <p>The figure shows mean slippage and its standard deviation as the order is sliced more finely. Slippage falls quickly at first and then flattens, while the standard deviation keeps shrinking — but both curves are dominated at the fast end by impact and at the slow end by price risk.</p>
+    <p><b>The impact coefficient is an assumption.</b> Real impact models are fitted to proprietary execution data, the parameters differ by name, size and regime, and any number printed here would be invented. It is on a slider and labelled, and the honest use of this figure is to reason about which direction things move rather than to read a number off it.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Slicing an order: cost, risk, and the total</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Mean slippage</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>λ × sd</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Total</span>
+          </span>
+        </div>
+        <canvas id="cvImpact" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Order</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The same shape as chapter 01, arising for the same reason: a certain cost that grows with urgency against an uncertain one that grows with patience. Recognising that these are one problem in two costumes is most of what execution theory has to offer.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>The menu</h2>
+    <p class="dek">Each algorithm optimises something. Knowing which thing is the entire skill.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Execution algorithms are not interchangeable and they are not ranked. Each is the solution to a stated objective, and picking one is choosing an objective, usually without saying so.</p>
+  </div>
+
+  <figure>
+    <div class="panel">
+      <table class="rot">
+        <tr><th>Algorithm</th><th>What it optimises</th><th>When it is the wrong tool</th></tr>
+        <tr><td>TWAP</td><td>Even participation across time</td><td>When volume is concentrated — you trade heavily when nobody is there</td></tr>
+        <tr><td>VWAP</td><td>Matching the volume-weighted average</td><td>When you have alpha; it guarantees you trade late in a trend</td></tr>
+        <tr><td>POV</td><td>A fixed share of whatever trades</td><td>When volume collapses, so does your fill rate — no completion guarantee</td></tr>
+        <tr><td>Implementation shortfall</td><td>Total cost against arrival price</td><td>When the order is large relative to the day; it front-loads into impact</td></tr>
+        <tr><td>Close / MOC</td><td>Matching the official closing print</td><td>Crowded, and a single auction is a single point of failure</td></tr>
+        <tr><td>Liquidity-seeking</td><td>Taking size when it appears</td><td>Signals urgency; pays the spread by construction</td></tr>
+        <tr><td>Pegged / midpoint</td><td>Never crossing the spread</td><td>Adverse selection — chapter 05</td></tr>
+      </table>
+    </div>
+    <figcaption>The recurring error is treating VWAP as a default. It is the correct choice when your objective genuinely is to be average, which is true for an index fund rebalancing and false for almost anyone hedging a position they have a view on.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>The benchmark decides the verdict</h2>
+    <p class="dek">One execution, two reports, two conclusions. This is why execution arguments never resolve.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Take a single set of fills — a uniform execution, buying steadily into a rising market. Score it two ways.</p>
+    <p>Against <b>interval VWAP</b>, it comes in at <b>−0.00</b>. Dead on benchmark. The report says the algorithm did precisely what it was asked to do.</p>
+    <p>Against <b>arrival price</b>, the same fills cost <b>1.47</b>. The report says the execution lost a point and a half against the price at which the decision was made.</p>
+    <p>Both numbers are correct. They answer different questions. VWAP asks "did you trade better than the market's average during your window," which is a question about execution skill with the market's path taken as given. Arrival asks "what did the whole process cost relative to the moment you decided," which includes the market moving away from you while you worked.</p>
+    <p>Neither is right in the abstract, and the choice is not innocent. <b>VWAP forgives trend and punishes deviation; arrival punishes delay.</b> A trader measured on VWAP is incentivised to spread out; the same trader measured on arrival is incentivised to hurry. Hand those two mandates to identical traders and you will get systematically different behaviour and each will be optimising correctly.</p>
+    <p>The practical rule: pick the benchmark that matches why you are trading. Hedging a delta you want gone is an arrival problem, because the risk started when you decided. Rebalancing an index is a VWAP problem, because being average <em>is</em> the objective.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Three schedules, two scorecards</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>vs arrival</span>
+            <span><i class="sw" style="background:var(--ochre)"></i>vs interval VWAP</span>
+          </span>
+        </div>
+        <div class="bars" id="benchBars"></div>
+        <div class="figtop" style="margin:26px 0 6px"><h3>The price path and where each schedule traded</h3></div>
+        <canvas id="cvBench" height="260"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Market</h4>
+        <div id="ctl4"></div>
+        <div class="btnrow"><button class="act" id="run4">New path</button></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Flip the trend to negative and the verdicts swap: patience now looks brilliant against arrival and unremarkable against VWAP. Nothing about the algorithms changed. The scorecard did.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are hedging a delta you want off the book today. Which benchmark should you be measured against?</p>
+    <div class="opts">
+      <button>VWAP, since it is the industry standard</button>
+      <button data-ok="1">Arrival, because the risk began when the decision was made and delay is a real cost you are trying to measure</button>
+      <button>The close, since that is where the book marks</button>
+      <button>Whichever is currently flattering</button>
+    </div>
+    <div class="ans"><b>Arrival.</b> The reason you are trading is to remove a risk that exists from the moment you decided, so any drift between decision and completion is part of what the hedge cost you — and that is exactly what an arrival benchmark captures and a VWAP benchmark discards. Measuring a hedge against VWAP rewards spreading the order out, which is precisely the behaviour that leaves you exposed for longer. The last answer is a joke with a serious edge to it: the benchmark should be fixed before the trade, because afterwards there is always one that flatters.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Dark venues and the fills you wish you had not got</h2>
+    <p class="dek">Resting at the midpoint saves the spread. The saving is not free, and what it costs is measurable.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A dark pool matches without displaying quotes, typically at the midpoint. The appeal is obvious: no spread paid, no information leaked by showing an order. The problem is subtler and it is about <em>who chooses to trade with you</em>.</p>
+    <p>When you rest passively, you do not decide when you get filled — your counterparty does. Uninformed flow crosses at random. <b>Informed flow crosses when it is right</b>, which is to say just before the price moves against you. So your fills are not a random sample of moments; they are selected toward the bad ones.</p>
+    <p>The simulation makes the bias legible. With no informed flow, the average price move immediately after your fills is <b>+0.00</b> — no bias, as it should be. Raise the informed share to 25% and the average post-fill move is <b>−0.20</b>; at 50% it is <b>−0.41</b>. You are not being unlucky. You are being selected.</p>
+    <p>This is the mirror of the market-maker's problem: page 05 of this series looks at the same phenomenon from the quoting side, where the defence is widening. Here, resting passively, the defences are different — minimum quantity constraints to avoid being pinged by small informed orders, venue selection based on measured post-fill drift, and simply accepting that a mid fill in size is sometimes a warning rather than a win.</p>
+    <p>The number worth carrying: <b>saving half a spread is not worth it if the post-fill drift exceeds half a spread</b>, and whether it does is an empirical question about the venue, measurable from your own fills.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Where the price goes right after your passive fills</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--grey)"></i>All fills</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Mean post-fill move</span>
+          </span>
+        </div>
+        <canvas id="cvDark" height="300"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Is the spread saving worth the selection?</h3></div>
+        <div class="dollars" id="darkOut"></div>
+      </div>
+      <div class="rail panel">
+        <h4>Venue</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>The distribution barely changes shape as informed flow rises — it shifts. That is what makes adverse selection hard to notice from a handful of fills and easy to measure from a few thousand: it is a small bias in the mean, not a visible change in the risk.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Hedging with the basket</h2>
+    <p class="dek">An ETF is a wrapper whose price is held to its contents by an arbitrage with a cost. That cost is the whole story.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Hedging index or sector exposure with an ETF is usually cheaper than trading the basket, and understanding why requires understanding creation and redemption.</p>
+    <p>An <b>authorised participant</b> can hand the fund a basket of the underlying shares and receive new ETF shares, or hand back ETF shares and receive the basket. That right is what pins the ETF price to its NAV. If the ETF trades above NAV, an AP buys the basket, creates shares, sells them, and pockets the difference — which pushes the premium back down.</p>
+    <p>The mechanism is not free, so it does not pin exactly. It creates a <b>band</b>: the price can wander from NAV by up to the cost of doing a creation before the arbitrage becomes worth executing. Inside the band, nothing happens. At the edge, APs step in.</p>
+    <p>Which gives the practical rule. When creation costs are low — a large liquid domestic equity ETF — the band is a couple of basis points and the ETF is effectively the basket. When creation costs are high — illiquid underlyings, different time zones, closed markets, credit instruments that do not trade — the band is wide, and the ETF's price is its own thing that happens to be related to NAV. Premiums and discounts in those products are not mispricings; they are the band doing its job.</p>
+    <p>One more consequence worth knowing: <b>ETF liquidity is inherited, not intrinsic</b>. A thin-looking ETF on a liquid basket can absorb size, because an AP can always create against the underlying. A thick-looking ETF on an illiquid basket cannot. Screen liquidity is the wrong number to look at; the basket's liquidity is the right one.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Price against NAV, with the creation band</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>ETF premium to NAV</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Creation / redemption band</span>
+          </span>
+        </div>
+        <canvas id="cvEtf" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Fund</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>Widen the creation cost and watch tracking loosen — the price stops being held and starts drifting with demand. This single parameter separates an ETF you can hedge with from one you have to think about, and it is why the same wrapper behaves so differently across asset classes.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">An ETF shows thin volume on screen but its underlying basket is highly liquid. Can you hedge size in it?</p>
+    <div class="opts">
+      <button>No — screen volume is the binding constraint</button>
+      <button data-ok="1">Usually yes. Liquidity is inherited from the basket, because an authorised participant can create shares against it</button>
+      <button>Only if you trade at the close</button>
+      <button>Only through a swap instead</button>
+    </div>
+    <div class="ans"><b>Liquidity is inherited.</b> A market maker quoting that ETF is not limited to the shares currently changing hands — they can take the other side and hedge in the basket, then create or redeem to square up. So the size you can do is set by the underlying, not by the ETF's own tape. The reverse is the trap worth remembering: an ETF with heavy screen volume on an illiquid basket looks tradeable and is not, because the arbitrage that would absorb your order is expensive to run.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every impact number on this page comes from an assumed coefficient, not a fitted one. Real impact is estimated from proprietary execution data, varies by name, size, time of day and regime, and is unstable enough that firms re-estimate it continuously. The figures here are for reasoning about direction and shape — which way the optimum moves when costs rise, why the two benchmarks disagree — and not for sizing anything. The dark-venue model is likewise a caricature with one parameter standing in for a large literature.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+const stat=a=>{const n=a.length,m=a.reduce((x,y)=>x+y,0)/n;
+  return{m,sd:Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/Math.max(1,n-1))};};
+
+/* ══════════ HERO — order slices filling over time ══════════ */
+(function(){
+  const cv=document.getElementById("heroCv");let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);}
+  function draw(ph,i,n){
+    const base=h*(.22+.58*i/n), urg=(i%3)/2;
+    g.strokeStyle=i%4===0?C("--verm"):C("--blue");
+    g.globalAlpha=.09+.15*(1-i/n);g.lineWidth=1.1;
+    g.beginPath();
+    for(let j=0;j<=100;j++){
+      const t=j/100;
+      const filled=1-Math.exp(-t*(2+urg*6));
+      const y=base-filled*h*.30+Math.sin(ph*1.4+t*7+i)*h*.012;
+      j?g.lineTo(t*w,y):g.moveTo(0,y);
+    }
+    g.stroke();
+    // tick marks where slices execute
+    for(let k=1;k<=8;k++){
+      const t=k/9, filled=1-Math.exp(-t*(2+urg*6));
+      const y=base-filled*h*.30;
+      g.globalAlpha=.14;g.fillStyle=i%4===0?C("--verm"):C("--blue");
+      g.fillRect(t*w-1,y-3,2,6);
+    }
+    g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;
+    g.globalAlpha=.030;g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);g.globalAlpha=1;
+    const ph=(ts-t0)/3800;for(let i=0;i<10;i++)draw(ph,i,10);
+    raf=requestAnimationFrame(frame);}
+  function statics(){for(let i=0;i<10;i++)draw(.5,i,10);}
+  size();if(RM)statics();else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)statics();else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════ 01 — the U-curve ══════════ */
+const s1={bps:5,lam:.5,vol:.28,days:90};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"k1",k:"bps",lbl:"k",name:"Round-trip cost",min:0,max:25,step:.5,fmt:v=>v.toFixed(1)+" bp"},
+    {id:"l1",k:"lam",lbl:"λ",name:"Risk aversion",min:0,max:3,step:.05,fmt:v=>v.toFixed(2)},
+    {id:"v1",k:"vol",lbl:"σ",name:"Volatility",min:.08,max:.9,step:.01,fmt:pct},
+    {id:"d1",k:"days",lbl:"T",name:"Days to expiry",min:15,max:250,step:5,fmt:v=>v.toFixed(0)+"d"}
+  ],s1,()=>{cache={};draw();},"c1");
+  let cache={};
+  const NS=[2,4,8,16,32,64,128,256,512];
+  function trial(N,k){
+    const S0=100,K=100,T=s1.days/365,sig=s1.vol,r=.045,mu=.08;
+    const dt=T/N,a=(mu-.5*sig*sig)*dt,b=sig*Math.sqrt(dt);
+    let x=Math.log(S0),S=S0;
+    const prem=bs(S0,K,T,sig,r,0,true).price;
+    let d=bs(S0,K,T,sig,r,0,true).delta;
+    let cash=prem-d*S0, cost=Math.abs(d)*S0*k;
+    cash-=cost;
+    for(let i=1;i<=N;i++){
+      x+=a+b*gauss();S=Math.exp(x);
+      cash*=Math.exp(r*dt);
+      const tau=T-i*dt;
+      if(tau>1e-9){const dn=bs(S,K,tau,sig,r,0,true).delta;
+        const tr=Math.abs(dn-d)*S;cash-=(dn-d)*S;cash-=tr*k;cost+=tr*k;d=dn;}
+    }
+    const liq=Math.abs(d)*S*k;
+    return {pnl:cash+d*S-Math.max(0,S-K)-liq, cost:cost+liq};
+  }
+  function measure(N){
+    if(cache[N])return cache[N];
+    const k=s1.bps/10000, P=[],Cst=[];
+    for(let i=0;i<900;i++){const t=trial(N,k);P.push(t.pnl);Cst.push(t.cost);}
+    const p=stat(P),c=stat(Cst);
+    return cache[N]={loss:-p.m, sd:p.sd, cost:c.m, pnl:P};
+  }
+  window.draw1=draw;
+  function draw(){
+    const res=NS.map(measure);
+    const lx=n=>Math.log2(n);
+    const costs=res.map(r=>r.cost), risks=res.map(r=>s1.lam*r.sd);
+    const tot=res.map((r,i)=>costs[i]+risks[i]);
+    const o=Fig(document.getElementById("cvU"),{h:310,x0:lx(2),x1:lx(512),
+      y0:0,y1:Math.max(...tot)*1.12,pad:{l:62}});
+    const g=o.g;
+    g.strokeStyle=C("--hair");g.fillStyle=C("--grey");g.textAlign="right";g.textBaseline="middle";
+    const st=nice(o.y1-o.y0,4);
+    for(let v=0;v<=o.y1;v+=st){const y=Math.round(o.Y(v))+.5;
+      g.globalAlpha=.5;g.beginPath();g.moveTo(o.P.l,y);g.lineTo(o.P.l+o.pw,y);g.stroke();g.globalAlpha=1;
+      g.fillText(v.toFixed(2),o.P.l-7,y);}
+    g.textAlign="center";g.textBaseline="top";
+    NS.forEach(n=>g.fillText(String(n),o.X(lx(n)),o.P.t+o.ph+7));
+    const X=NS.map(lx);
+    clip(o,()=>{line(o,X,costs,C("--verm"),1.9);line(o,X,risks,C("--ochre"),1.9);
+      line(o,X,tot,C("--blue"),2.6);});
+    let bi=0;tot.forEach((v,i)=>{if(v<tot[bi])bi=i;});
+    vline(o,lx(NS[bi]),C("--moss"),"optimum "+NS[bi]);
+    g.fillStyle=C("--blue");g.beginPath();g.arc(o.X(X[bi]),o.Y(tot[bi]),4.5,0,6.284);g.fill();
+    g.strokeStyle=C("--chalk");g.lineWidth=1.6;g.stroke();
+    // distribution at the optimum
+    const a=res[bi].pnl, lo=Math.min(...a),hi=Math.max(...a);
+    const NB=46,bins=new Int32Array(NB);
+    a.forEach(v=>{const kk=Math.floor((v-lo)/(hi-lo)*NB);if(kk>=0&&kk<NB)bins[kk]++;});
+    const mx=Math.max(1,...bins);
+    const o2=Fig(document.getElementById("cvUdist"),{h:200,x0:lo,x1:hi,y0:0,y1:mx*1.12,pad:{l:62,b:22}});
+    axes(o2,v=>(v>=0?"+":"")+v.toFixed(1),v=>v.toFixed(0),5,3);
+    const g2=o2.g,bw=o2.pw/NB;
+    for(let kk=0;kk<NB;kk++){if(!bins[kk])continue;
+      const c=lo+(kk+.5)/NB*(hi-lo);
+      g2.fillStyle=c>=0?C("--moss"):C("--verm");g2.globalAlpha=.78;
+      g2.fillRect(o2.P.l+kk*bw,o2.Y(bins[kk]),Math.max(bw-.6,1.5),o2.P.t+o2.ph-o2.Y(bins[kk]));}
+    g2.globalAlpha=1;vline(o2,0,C("--ink"),"zero",[3,3]);
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Optimal rehedges",NS[bi]],
+      ["Cost there",res[bi].cost.toFixed(4)],
+      ["Risk (sd)",res[bi].sd.toFixed(4)],
+      ["Objective",tot[bi].toFixed(4)],
+      ["sd × √N",(res[bi].sd*Math.sqrt(NS[bi])).toFixed(3)],
+      ["At N=2",tot[0].toFixed(4)],
+      ["At N=512",tot[tot.length-1].toFixed(4)]
+    ]);
+  }
+  document.getElementById("run1").addEventListener("click",()=>{cache={};draw();});
+})();
+
+/* ══════════ 02 — impact vs timing risk ══════════ */
+const s2={eta:2.0,sigma:1.2,lam:.5,qty:100};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"e2",k:"eta",lbl:"η",name:"Impact coefficient (assumed)",min:0,max:8,step:.1,fmt:v=>v.toFixed(1)},
+    {id:"g2",k:"sigma",lbl:"σ",name:"Price volatility",min:.1,max:4,step:.05,fmt:v=>v.toFixed(2)},
+    {id:"l2",k:"lam",lbl:"λ",name:"Risk aversion",min:0,max:3,step:.05,fmt:v=>v.toFixed(2)},
+    {id:"q2",k:"qty",lbl:"Q",name:"Order size (k shares)",min:10,max:500,step:10,fmt:v=>v.toFixed(0)+"k"}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  const NS=[1,2,4,8,16,32,64,128];
+  function run(n){
+    const Q=s2.qty*1000, dt=1/n, q=Q/n, eta=s2.eta*1e-6;
+    const a=[];
+    for(let t=0;t<700;t++){
+      let S=100,cost=0;
+      for(let i=0;i<n;i++){S+=s2.sigma*Math.sqrt(dt)*gauss();cost+=q*(S+eta*(q/dt));}
+      a.push(cost/Q-100);
+    }
+    return stat(a);
+  }
+  function draw(){
+    const res=NS.map(run);
+    const lx=n=>Math.log2(n);
+    const m=res.map(r=>r.m), rk=res.map(r=>s2.lam*r.sd), tot=res.map((r,i)=>m[i]+rk[i]);
+    const o=Fig(document.getElementById("cvImpact"),{h:300,x0:0,x1:lx(128),
+      y0:0,y1:Math.max(...tot)*1.12,pad:{l:62}});
+    const g=o.g;
+    g.strokeStyle=C("--hair");g.fillStyle=C("--grey");g.textAlign="right";g.textBaseline="middle";
+    const st=nice(o.y1,4);
+    for(let v=0;v<=o.y1;v+=st){const y=Math.round(o.Y(v))+.5;
+      g.globalAlpha=.5;g.beginPath();g.moveTo(o.P.l,y);g.lineTo(o.P.l+o.pw,y);g.stroke();g.globalAlpha=1;
+      g.fillText(v.toFixed(2),o.P.l-7,y);}
+    g.textAlign="center";g.textBaseline="top";
+    NS.forEach(n=>g.fillText(String(n),o.X(lx(n)),o.P.t+o.ph+7));
+    const X=NS.map(lx);
+    clip(o,()=>{line(o,X,m,C("--verm"),1.9);line(o,X,rk,C("--ochre"),1.9);line(o,X,tot,C("--blue"),2.6);});
+    let bi=0;tot.forEach((v,i)=>{if(v<tot[bi])bi=i;});
+    vline(o,lx(NS[bi]),C("--moss"),NS[bi]+" slices");
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Optimal slices",NS[bi]],
+      ["Mean slippage",m[bi].toFixed(4)],
+      ["sd of slippage",res[bi].sd.toFixed(4)],
+      ["Objective",tot[bi].toFixed(4)],
+      ["All at once",tot[0].toFixed(4)],
+      ["Finest slicing",tot[tot.length-1].toFixed(4)],
+      ["η is","an assumption"]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — benchmarks ══════════ */
+const s4={trend:3,vol:.6};
+let PATH=null;
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"t4",k:"trend",lbl:"μ",name:"Drift over the window",min:-6,max:6,step:.25,fmt:v=>(v>=0?"+":"")+v.toFixed(2)},
+    {id:"v4",k:"vol",lbl:"σ",name:"Noise",min:.1,max:2,step:.05,fmt:v=>v.toFixed(2)}
+  ],s4,()=>draw(),"c4");
+  const n=40;
+  function gen(){const dt=1/n;let S=100;const px=[],vol=[];
+    for(let i=0;i<n;i++){S+=s4.trend/n+s4.vol*Math.sqrt(dt)*gauss();px.push(S);vol.push(1+Math.random());}
+    return {px,vol};}
+  window.draw4=draw;
+  function draw(){
+    if(!PATH)PATH=gen();
+    const {px,vol}=PATH;
+    const arrival=px[0];
+    const vwap=px.reduce((a,p,i)=>a+p*vol[i],0)/vol.reduce((a,b)=>a+b,0);
+    const W={Urgent:px.map((_,i)=>Math.exp(-i/5)),
+             Uniform:px.map(()=>1),
+             Patient:px.map((_,i)=>Math.exp(-(n-1-i)/5))};
+    const avg=w=>px.reduce((a,p,i)=>a+p*w[i],0)/w.reduce((a,b)=>a+b,0);
+    const rows=Object.entries(W).map(([k,w])=>{const a=avg(w);
+      return [k,a-arrival,a-vwap,w];});
+    const mx=Math.max(...rows.flatMap(r=>[Math.abs(r[1]),Math.abs(r[2])]),1e-9);
+    const bar=(v,col)=>{const p=Math.abs(v)/mx*46;
+      return `<div class="trk"><div class="z"></div><i style="background:${col};${
+        v>=0?`left:50%;width:${p}%`:`right:50%;width:${p}%`}"></i></div>`;};
+    document.getElementById("benchBars").innerHTML=rows.map(([k,a,b])=>
+      `<div class="brow"><span class="l"><i class="sw" style="background:${C("--blue")}"></i>${k} · arrival</span>${bar(a,C("--blue"))}<span class="a ${a<=0?"pos":"neg"}">${a>=0?"+":""}${a.toFixed(3)}</span></div>
+       <div class="brow"><span class="l" style="color:var(--grey)"><i class="sw" style="background:${C("--ochre")}"></i>${k} · VWAP</span>${bar(b,C("--ochre"))}<span class="a ${b<=0?"pos":"neg"}">${b>=0?"+":""}${b.toFixed(3)}</span></div>`).join("");
+    const xs=px.map((_,i)=>i);
+    const o=Fig(document.getElementById("cvBench"),{h:260,x0:0,x1:n-1,
+      y0:Math.min(...px)*.998,y1:Math.max(...px)*1.002,pad:{l:62}});
+    axes(o,v=>v.toFixed(0),v=>"$"+v.toFixed(1),5,4);
+    clip(o,()=>line(o,xs,px,C("--ink"),2));
+    const g=o.g;
+    const cols=[C("--blue"),C("--moss"),C("--verm")];
+    rows.forEach(([k,,,w],ri)=>{
+      const tot=w.reduce((a,b)=>a+b,0);
+      w.forEach((wi,i)=>{const s=wi/tot;
+        g.fillStyle=cols[ri];g.globalAlpha=Math.min(.85,s*14);
+        g.beginPath();g.arc(o.X(i),o.Y(px[i])+(ri-1)*5,2.6,0,6.284);g.fill();});});
+    g.globalAlpha=1;
+    const gy=Math.round(o.Y(vwap))+.5;
+    g.strokeStyle=C("--ochre");g.setLineDash([4,3]);g.lineWidth=1.4;
+    g.beginPath();g.moveTo(o.P.l,gy);g.lineTo(o.P.l+o.pw,gy);g.stroke();
+    const ay=Math.round(o.Y(arrival))+.5;
+    g.strokeStyle=C("--blue");g.beginPath();g.moveTo(o.P.l,ay);g.lineTo(o.P.l+o.pw,ay);g.stroke();
+    g.setLineDash([]);
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Arrival","$"+arrival.toFixed(3)],
+      ["Interval VWAP","$"+vwap.toFixed(3)],
+      ["Close","$"+px[n-1].toFixed(3)],
+      ["Drift over window",(px[n-1]-arrival).toFixed(3)],
+      ["Uniform vs arrival",rows[1][1].toFixed(3)],
+      ["Uniform vs VWAP",rows[1][2].toFixed(3)],
+      ["Verdicts agree?",Math.sign(rows[1][1])===Math.sign(rows[1][2])?"yes":"NO"]
+    ]);
+  }
+  document.getElementById("run4").addEventListener("click",()=>{PATH=gen();draw();});
+})();
+
+/* ══════════ 05 — dark pool adverse selection ══════════ */
+const s5={informed:.25,edge:.8,noise:1.0,spread:.5};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"i5",k:"informed",lbl:"f",name:"Informed share of flow",min:0,max:1,step:.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"e5",k:"edge",lbl:"e",name:"Informed edge",min:0,max:2,step:.05,fmt:v=>v.toFixed(2)},
+    {id:"n5",k:"noise",lbl:"σ",name:"Background noise",min:.2,max:3,step:.05,fmt:v=>v.toFixed(2)},
+    {id:"s5s",k:"spread",lbl:"½s",name:"Half-spread saved",min:0,max:1.5,step:.02,fmt:v=>v.toFixed(2)}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function draw(){
+    const a=[];
+    for(let i=0;i<30000;i++){
+      const inf=Math.random()<s5.informed;
+      a.push((inf?-s5.edge:0)+s5.noise*gauss());
+    }
+    const st=stat(a);
+    const lo=-4*s5.noise-2, hi=4*s5.noise+2;
+    const NB=61,bins=new Int32Array(NB);
+    a.forEach(v=>{const k=Math.floor((v-lo)/(hi-lo)*NB);if(k>=0&&k<NB)bins[k]++;});
+    const mx=Math.max(1,...bins);
+    const o=Fig(document.getElementById("cvDark"),{h:300,x0:lo,x1:hi,y0:0,y1:mx*1.12,pad:{l:58}});
+    axes(o,v=>(v>=0?"+":"")+v.toFixed(1),v=>v.toFixed(0),5,4);
+    const g=o.g,bw=o.pw/NB;
+    for(let k=0;k<NB;k++){if(!bins[k])continue;
+      g.fillStyle=C("--grey");g.globalAlpha=.55;
+      g.fillRect(o.P.l+k*bw,o.Y(bins[k]),Math.max(bw-.6,1.5),o.P.t+o.ph-o.Y(bins[k]));}
+    g.globalAlpha=1;
+    vline(o,0,C("--ink"),"no drift",[3,3]);
+    vline(o,st.m,C("--verm"),"mean "+st.m.toFixed(3));
+    const net=s5.spread+st.m;
+    document.getElementById("darkOut").innerHTML=[
+      ["","Half-spread saved","+"+s5.spread.toFixed(3),"why you rested passively"],
+      ["verm","Mean post-fill drift",st.m.toFixed(3),"what selection costs"],
+      [net>=0?"moss":"verm","Net",(net>=0?"+":"")+net.toFixed(3),net>=0?"passive still wins":"you would do better crossing"],
+      ["","Informed share",(s5.informed*100).toFixed(0)+"%","of the flow you match against"],
+      ["","Fills simulated","30,000",""],
+      ["","Breakeven informed share",
+        s5.edge>1e-9?Math.min(100,(s5.spread/s5.edge*100)).toFixed(0)+"%":"—","where the saving is exactly eaten"]
+    ].map(([c,k,v,s])=>`<div class="c ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join("");
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Mean drift",st.m.toFixed(4)],
+      ["sd of drift",st.sd.toFixed(4)],
+      ["Half-spread",s5.spread.toFixed(3)],
+      ["Net edge",net.toFixed(4)],
+      ["Verdict",net>=0?"rest passively":"cross the spread"],
+      ["Bias ÷ noise",(Math.abs(st.m)/st.sd).toFixed(3)],
+      ["Fills to detect",st.m!==0?Math.ceil(Math.pow(2*st.sd/Math.abs(st.m),2)).toLocaleString():"—"]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — ETF band ══════════ */
+const s6={cost:5,demand:1.2,days:120};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"c6",k:"cost",lbl:"c",name:"Creation cost",min:.5,max:80,step:.5,fmt:v=>v.toFixed(1)+" bp"},
+    {id:"d6",k:"demand",lbl:"D",name:"Demand pressure",min:0,max:4,step:.05,fmt:v=>v.toFixed(2)+"×"},
+    {id:"n6",k:"days",lbl:"N",name:"Days shown",min:30,max:250,step:10,fmt:v=>v.toFixed(0)}
+  ],s6,()=>{P=null;draw();},"c6");
+  let P=null;
+  window.draw6=draw;
+  function draw(){
+    const n=Math.round(s6.days), c=s6.cost;
+    if(!P||P.length!==n){P=[];let x=0;
+      for(let i=0;i<n;i++){x=0.86*x+gauss();P.push(x);} }
+    const xs=[],prem=[],up=[],dn=[];
+    for(let i=0;i<n;i++){
+      let p=P[i]*s6.demand*8;
+      p=Math.max(-c,Math.min(c,p));
+      xs.push(i);prem.push(p);up.push(c);dn.push(-c);}
+    const lim=Math.max(c,Math.max(...prem.map(Math.abs)))*1.25;
+    const o=Fig(document.getElementById("cvEtf"),{h:290,x0:0,x1:n-1,y0:-lim,y1:lim,pad:{l:62}});
+    axes(o,v=>v.toFixed(0)+"d",v=>(v>=0?"+":"")+v.toFixed(0)+"bp",5,5);
+    clip(o,()=>{line(o,xs,up,C("--verm"),1.6,[5,4]);line(o,xs,dn,C("--verm"),1.6,[5,4]);
+      line(o,xs,prem,C("--blue"),2.1);});
+    const g=o.g;g.strokeStyle=C("--grey");g.setLineDash([2,4]);g.lineWidth=1;
+    const zy=Math.round(o.Y(0))+.5;
+    g.beginPath();g.moveTo(o.P.l,zy);g.lineTo(o.P.l+o.pw,zy);g.stroke();g.setLineDash([]);
+    const binding=prem.filter(p=>Math.abs(p)>=c-1e-9).length;
+    const st=stat(prem);
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Creation cost","±"+c.toFixed(1)+" bp"],
+      ["Mean premium",st.m.toFixed(2)+" bp"],
+      ["sd of premium",st.sd.toFixed(2)+" bp"],
+      ["Days at the band",binding+" / "+n],
+      ["Band binds",(binding/n*100).toFixed(0)+"% of days"],
+      ["Tracking",c<=5?"tight — trades as the basket":c<=25?"loose":"its own instrument"],
+      ["Liquidity","inherited from basket"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw4();draw5();draw6();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
