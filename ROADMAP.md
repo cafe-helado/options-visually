@@ -122,7 +122,7 @@ Chapters
 
 ---
 
-## 05 · The Market, Not the Model — options microstructure
+## 05 · The Market, Not the Model — options microstructure  ✅ live (microstructure.html)
 
 **Spine:** every price in pages 01–04 is a model output. A real option has a bid, an
 ask, a queue, and a counterparty who may know something you don't.
@@ -143,10 +143,11 @@ absurd, and why market makers quote in vol while screens display price.
 Signature 2: the pinning simulator with a price-impact slider, showing the effect
 emerge from nothing — and disappear again when flow is small relative to volume.
 
-Signature 3: quote a market yourself. Set a bid/ask in vol against incoming order flow
-that is part informed and part uninformed; get filled, hedged, and marked. Adverse
-selection is felt rather than defined — your fills land on the wrong side, and you can
-be right on vol and still lose. Widen and the losses stop along with the volume.
+Signature 3 as built: quote a market yourself. At a 0.20 vol-point half-width you get
+filled on 321 of 400 arrivals and lose 31.3. At 3.50 wide you make 2.41 per fill and
+trade six times. Interior optimum near 1.2. The informed SHARE of your fills rises as
+you widen — informed traders are the last to be deterred, so widening manages the size
+of adverse selection and never its composition.
 
 Chapters
 - Price quoting vs vol quoting — what a tick is worth, and why it varies by 300x
