@@ -6,6 +6,13 @@ Open any file directly in a browser and it runs.
 ```
 index.html            series landing page
 black-scholes.html    No. 01 — The Price of Uncertainty
+surface.html          No. 02 — The Shape of What We Don't Believe
+catalyst.html         No. 03 — One Number Holding Two Things
+structures.html       No. 04 — The Same Trade, Read Twice
+microstructure.html   No. 05 — Every Price Has Someone Behind It
+execution.html        No. 06 — The Hedge That Costs Something
+parity.html           No. 07 — Two Ways to Own the Same Thing
+early-exercise.html   No. 08 — A Decision Worth Exactly Nothing
 template.html         copy this to start a new page
 assets/
   lab.css             design system: tokens, typography, every component
@@ -31,40 +38,32 @@ python3 build.py
 
 Host the split files. Share the `dist/` ones.
 
-## Publishing to GitHub Pages
+## Publishing
 
-This folder is already a git repository with one commit on `main`. You only need to
-point it at a remote and push.
+Live at **https://cafe-helado.github.io/options-visually/**, served by GitHub Pages
+from the root of `main` in `github.com/cafe-helado/options-visually`.
 
-1. **Make an empty repo on GitHub.** github.com → New repository. Give it a name
-   (`options-visually` works). Do **not** tick "Add a README" — you already have one,
-   and an initialising commit will make the first push conflict.
+There is no CI and no build step, so publishing is a push:
 
-2. **Point this folder at it and push.** From inside this folder:
+```bash
+node check.js                          # never skip this
+git add -A && git commit -m "..."
+git push
+```
 
-   ```bash
-   git remote add origin https://github.com/<your-username>/options-visually.git
-   git push -u origin main
-   ```
+Pages redeploys on every push to `main` and is usually live in under a minute.
 
-   If you'd rather start the history yourself, delete the `.git` folder first and run
-   `git init -b main && git add -A && git commit -m "initial"` before the two commands
-   above.
+A few things that are load-bearing:
 
-3. **Turn on Pages.** In the repo: Settings → Pages → Source: *Deploy from a branch*,
-   Branch: `main`, folder: `/ (root)` → Save.
-
-4. **Wait a minute**, then open `https://<your-username>.github.io/options-visually/`.
-   The Actions tab shows the deploy if you want to watch it.
-
-To publish changes later: `git add -A && git commit -m "..." && git push`. Pages
-redeploys on every push to `main`.
-
-`.nojekyll` matters: without it GitHub runs Jekyll, which ignores files and folders
-beginning with an underscore. Keep it.
-
-Everything is relative-path linked, so it works at a subpath (`/options-visually/`)
-without configuration. For a custom domain, add a `CNAME` file containing the domain.
+- **`.nojekyll`** — without it GitHub runs Jekyll, which ignores files and folders
+  beginning with an underscore. Keep it.
+- **`.gitattributes`** — forces LF. `check.js` finds each page's script with a regex
+  expecting a bare LF after `<script>`, so a CRLF checkout makes it extract nothing
+  and skip every JavaScript check while still printing a pass.
+- **Relative paths everywhere**, so the site works at a subpath without configuration.
+  For a custom domain, add a `CNAME` file containing the domain.
+- **`dist/` is gitignored and is not what gets hosted.** The site serves the split
+  files so `assets/` caches across the series.
 
 ## Local preview
 
