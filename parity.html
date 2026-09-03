@@ -1070,7 +1070,7 @@ function jrNewton(JR,Kf,dF,Kn,dN,div,comm){
     document.getElementById("dText").innerHTML=D.cur.t;
     document.getElementById("dUnit").textContent=D.cur.u;
     const i=document.getElementById("dInput");i.value="";i.disabled=false;
-    document.getElementById("drill").classList.remove("done");i.focus();
+    document.getElementById("drill").classList.remove("done");focusSoft(i,document.getElementById("drill"));
   }
   function stats(){document.getElementById("dScore").textContent=D.ok+" / "+D.n;
     document.getElementById("dStreak").textContent=D.streak;

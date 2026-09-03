@@ -32,6 +32,7 @@ function stubDom() {
     getContext() { return new Proxy({}, { get: () => () => {} }); },
     clientWidth: 800, clientHeight: 400, width: 800, height: 400,
     scrollIntoView() {}, focus() {}, appendChild() {}, insertBefore() {},
+    getBoundingClientRect() { return { top: 0, left: 0, right: 800, bottom: 400, width: 800, height: 400 }; },
     parentNode: null, parentElement: null, dataset: {}
   });
   const stub = mk();

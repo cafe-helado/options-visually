@@ -2932,7 +2932,7 @@ const POS={
     const i=document.getElementById("dInput");
     i.value="";i.disabled=false;
     document.getElementById("drill").classList.remove("done");
-    i.focus();
+    focusSoft(i,document.getElementById("drill"));
   }
   function stats(){
     document.getElementById("dScore").textContent=D.ok+" / "+D.n;

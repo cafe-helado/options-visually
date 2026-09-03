@@ -138,6 +138,17 @@ function preset(key,patch,focusId){
   if(focusId){const el=document.getElementById(focusId);
     if(el)el.scrollIntoView({behavior:RM?"auto":"smooth",block:"center"});}
 }
+/* Focus an input only when the widget holding it is actually on screen, and
+   never let focus move the page. A drill renders its first question during boot,
+   and focusing an input fifteen thousand pixels down makes the browser scroll it
+   into view — with smooth scrolling, that is a slow ride to the bottom of the
+   page the moment it loads. Pass the container to test; the input itself works
+   too when there is no wrapper. */
+function focusSoft(el,within){
+  if(!el)return;
+  const b=(within||el).getBoundingClientRect();
+  if(b.top<window.innerHeight&&b.bottom>0)el.focus({preventScroll:true});
+}
 const kvHTML=rows=>rows.map(([k,v])=>`<span class="k">${k}</span><span class="v">${v}</span>`).join("");
 const pct=v=>(v*100).toFixed(1)+"%";
 const pct2=v=>(v*100).toFixed(2)+"%";

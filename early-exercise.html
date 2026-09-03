@@ -1668,6 +1668,7 @@ const s9 = { pror: 1, v: 0.09, tender: 100, S: 98.2, days: 120 };
     E("dUnit").textContent = cur.unit;
     E("dInput").value = "";
     E("drill").classList.remove("done");
+    focusSoft(E("dInput"), E("drill"));
   }
   function submit() {
     if (!cur || E("drill").classList.contains("done")) return;
