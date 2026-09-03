@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#EDF0EC">
-<title>Dispersion and Correlation — Options, visually</title>
+<title><span class="term" data-t="Dispersion" data-def="Selling index volatility against buying the components, or the reverse. Sized in variance so the volatility level cancels and what is left is a bet on correlation.">Dispersion</span> and Correlation — Options, visually</title>
 <meta name="description" content="Index variance is a weighted sum of single-name variances plus a correlation term. Trade the difference and you are trading correlation, whether you meant to or not.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Dispersion and Correlation — Options, visually">
@@ -160,7 +160,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">There is no correlation screen. What exists is an index option market and twenty single-name option markets, and the bridge between them is chapter 01's identity read from right to left. Fix every σ<sub>i</sub> at its implied volatility, fix σ<sub>I</sub> at the index's implied volatility, and there is exactly one ρ that makes the equation true. That number is <b>implied correlation</b>, and it is the closest thing the market has to a price for co-movement.</p>
+    <p class="lead">There is no correlation screen. What exists is an index option market and twenty single-name option markets, and the bridge between them is chapter 01's identity read from right to left. Fix every σ<sub>i</sub> at its implied volatility, fix σ<sub>I</sub> at the index's implied volatility, and there is exactly one ρ that makes the equation true. That number is <b><span class="term" data-t="Implied correlation" data-def="The single average correlation that makes the index formula reproduce the quoted index volatility. Inferred rather than observed, so it inherits every choice made in the inversion.">implied correlation</span></b>, and it is the closest thing the market has to a price for co-movement.</p>
     <p>The mapping is steep, which is the first practical thing to know. On our basket, an index quoted at <b>20%</b> implies <b>0.220</b>; at <b>25%</b> it implies <b>0.375</b>; at <b>28%</b> it implies <b>0.485</b>. Three volatility points of index move a correlation estimate by more than a tenth, so a stale index mark or a mismatched snapshot time produces a correlation number that is badly wrong while looking perfectly plausible.</p>
     <p>The second thing to know is that the inversion inherits every choice you made on the way in. Which expiry? Which strike — at-the-money volatility, or the variance strike from <a href="variance.html#c5" style="color:var(--blue)">page 09</a>, which carries a skew premium? Do you use all five hundred names or the top fifty as a proxy? Each answer produces a different implied correlation from the same market, and they do not agree to two decimal places. A quoted implied correlation without its recipe is not a number.</p>
     <p>The lower panel splits index variance into the part that survives no matter what — the diagonal — and the part that correlation controls. On a twenty-name basket the diagonal is small: at ρ = 0.3 it supplies about a tenth of index variance, and the rest is the correlation term. That is the mechanical reason index volatility is so sensitive to a parameter nobody observes.</p>
@@ -320,7 +320,7 @@
 
   <div class="check">
     <span class="lab">Check yourself</span>
-    <p class="q">A large bank stops issuing autocallables, cutting the supply of single-name volatility. All else equal, what happens to implied correlation?</p>
+    <p class="q">A large bank stops issuing <span class="term" data-t="Autocallables" data-def="Structured notes that pay a coupon and redeem early if the underlying stays above a barrier. Issuing them leaves the bank short single-name volatility, which is one half of the flow story.">autocallables</span>, cutting the supply of single-name volatility. All else equal, what happens to implied correlation?</p>
     <div class="opts">
       <button>Nothing — correlation is a property of the stocks, not of option supply</button>
       <button data-ok="1">It falls. Less single-name selling lifts component implied volatility, and with index implied unchanged the inversion returns a lower correlation</button>

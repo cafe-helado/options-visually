@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#EDF0EC">
-<title>Two Ways to Own the Same Thing — put-call parity, revcons and jelly rolls</title>
+<title>Two Ways to Own the Same Thing — put-call parity, revcons and <span class="term" data-t="Jelly roll" data-def="The calendar version of a conversion: a conversion in one expiry against a reversal in another. What you are left holding is the financing between the two dates.">jelly roll</span>s</title>
 <meta name="description" content="Put-call parity as a construction: synthetics, combos and straddles, carry and settlement, conversion/reversal pricing, jelly rolls, borrow risk, and a speed drill.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Two Ways to Own the Same Thing — put-call parity, revcons and jelly rolls">
@@ -154,7 +154,7 @@
   <div class="prose">
     <p class="lead">A long call and a short put at the same strike is <b>synthetic long stock</b>. Its P&amp;L against spot is a straight line with slope one, identical to owning shares. The figure below draws both; at the correct carry they lie on top of each other and you cannot see two lines.</p>
     <p>Now mis-price the carry. Drag the rate away from fair and the synthetic separates from the stock by a constant — not a widening wedge, a parallel shift. That shape matters: <b>a carry error is a level error, not a directional one.</b> You do not lose more when the stock moves against you; you lose the same amount in every state, which is exactly what makes it a financing trade rather than a market trade.</p>
-    <p>The size of that shift is what the whole revcon market competes over. On a $300 strike for 38 days, ten basis points of rate is about three cents of package. Desks fight over that because it is riskless if you have the borrow and the balance sheet.</p>
+    <p>The size of that shift is what the whole revcon market competes over. On a $300 strike for 38 days, ten basis points of rate is about three cents of package. Desks fight over that because it is riskless if you have the <span class="term" data-t="Borrow" data-def="The cost of locating and holding a short stock position. It is the term that turns a textbook arbitrage into a financed trade, and on hard-to-borrow names it dominates everything else.">borrow</span> and the balance sheet.</p>
   </div>
 
   <figure class="bleed">
@@ -191,7 +191,7 @@
 
   <div class="prose">
     <p class="lead">Run the same few thousand random price paths through three positions and look at what each one is worth at the end. Long stock gives you the distribution you expect — wide, roughly symmetric in logs, a real gamble. A short call delta-hedged sixty times gives you something much tighter, because that is what hedging does: page 01 measured the residual and found it falling like 1/√N, so more rebalancing buys a narrower distribution and it never quite reaches zero.</p>
-    <p>The conversion gives you a <b>vertical line</b>. Not a narrow distribution. Not a distribution with small standard deviation. A single value, achieved on every path, with no rebalancing and no model.</p>
+    <p>The <span class="term" data-t="Conversion" data-def="Long stock, long a put, short a call at the same strike and expiry. A position with no market risk at all — its P&L is a single number rather than a narrow distribution.">conversion</span> gives you a <b>vertical line</b>. Not a narrow distribution. Not a distribution with small standard deviation. A single value, achieved on every path, with no rebalancing and no model.</p>
     <p>That is worth sitting with, because it is easy to read the three panels as "risky, less risky, least risky" and miss that the third one is a different kind of object. The middle panel is literally <a href="black-scholes.html#c6" style="color:var(--blue)">page 01's replication experiment</a> replayed — same construction, same 1/√N residual. The delta hedge is an <b>approximation that improves with effort</b> — it needs a volatility input, it needs you to trade all day, and it is wrong if the vol you assumed was wrong. The conversion is an <b>identity</b>. It needs no vol input, no rebalancing, and no view. You set it up once and the arithmetic does the rest.</p>
     <p>So the question a revcon desk asks is never "where is the stock going" or even "what is realized vol going to be." It is only: <em>what rate did I lock, and what does my funding cost?</em> Everything on the rest of this page is machinery for answering that precisely.</p>
   </div>
@@ -220,6 +220,16 @@
     </div>
     <figcaption>Raise the volatility slider and watch the first two distributions widen while the third does not move at all. Raise the rehedge count and the middle one narrows, slowly, at the square-root rate. Nothing you can do to the market moves the blue line, because nothing in its construction referred to the market.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Raise the number of hedge steps and <b>predict</b> whether the conversion's distribution narrows the way the delta-hedged call's does. It does not — and that is the chapter.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"steps":6}' data-focus="cvDist">Hedge six times</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"steps":250}' data-focus="cvDist">Hedge every day</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"sig":0.8,"steps":60}' data-focus="cvDist">Much wilder stock</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -276,7 +286,7 @@
 
   <div class="prose">
     <p class="lead">Carry has exactly two components and one date convention, and nearly every pricing error is a mistake in one of the three.</p>
-    <p><b>Interest.</b> A conversion is long stock, which costs money to hold, so the converter is effectively lending. A reversal is short stock, which raises cash, so the reverser is borrowing. The interest component is that financing over the life of the trade, computed on the <em>strike</em> rather than the spot — because K is what the forward settles at.</p>
+    <p><b>Interest.</b> A conversion is long stock, which costs money to hold, so the converter is effectively lending. A <span class="term" data-t="Reversal" data-def="The opposite of a conversion: short stock, short a put, long a call at the same strike. What a desk puts on when the financing implied by the options is cheap rather than rich.">reversal</span> is short stock, which raises cash, so the reverser is borrowing. The interest component is that financing over the life of the trade, computed on the <em>strike</em> rather than the spot — because K is what the forward settles at.</p>
     <p><b>Dividends.</b> Whoever is long the stock collects them, and the synthetic does not. Dividends therefore <em>subtract</em> from the package: a higher dividend means a lower or more negative revcon price at the same implied rate. Only dividends with an ex-date falling between trade settlement and expiry settlement count. One that goes ex before you settle is already in the stock price; one after expiry is somebody else's problem.</p>
     <div class="mline">r/c = Interest − Dividends &nbsp;&nbsp;⟹&nbsp;&nbsp; C − P = Interest − Div + Comm</div>
     <p class="mread">Reads as: <b>the package price is financing minus dividends, plus what the broker takes.</b> S and K have cancelled because you trade the synthetic against the stock at the same strike.</p>
@@ -485,6 +495,16 @@
     </div>
     <figcaption>The line is almost straight but not quite — that curvature is the compounding, and it is what separates the two rate conventions on longer rolls.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Push the two expiries apart and <b>predict</b> which assumption the jelly roll becomes most sensitive to — the rate, or the dividend.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c7" data-patch='{"dn":3,"df":180}' data-focus="cvJR">Six months apart</button>
+      <button class="act ghost" data-preset="c7" data-patch='{"dn":3,"df":31}' data-focus="cvJR">Four weeks apart</button>
+      <button class="act ghost" data-preset="c7" data-patch='{"div":1.5,"df":180}' data-focus="cvJR">A big dividend in between</button>
+    </div>
+  </div>
+
 
   <div class="try">
     <span class="lab">Try this</span>
@@ -550,6 +570,16 @@
     </div>
     <figcaption>Raise the dividend and two things happen at once: more paths satisfy the early-exercise condition, and each assignment costs more. Push it far enough and the second mode carries more weight than the first — at which point the "arbitrage" is a coin flip on assignment, priced as though it were not.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Turn the dividend up until early assignment becomes likely and <b>predict</b> whether the riskless trade's distribution stays a single line.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c9" data-patch='{"div":0}' data-focus="cvBreak">No dividend</button>
+      <button class="act ghost" data-preset="c9" data-patch='{"div":1.5}' data-focus="cvBreak">A dividend worth taking</button>
+      <button class="act ghost" data-preset="c9" data-patch='{"div":1.5,"sig":0.15}' data-focus="cvBreak">Same dividend, calm stock</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -626,6 +656,94 @@
   </figure>
 </section>
 
+<!-- ══════════ quiz ══════════ -->
+<section class="chapter" id="cq">
+  <div class="chead">
+    <div class="cnum">11</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Six questions across the page.</p>
+  </div>
+
+  <div class="prose" style="margin-bottom:26px"><p>Answer without scrolling back. Each explanation names the chapter to revisit if it catches you.</p></div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">What is put–call parity actually for?</p>
+    <div class="opts">
+      <button>Checking that option prices are correct</button>
+      <button data-ok="1">Building instruments out of each other. It is a construction machine: stock, calls, puts and cash are four things any three of which make the fourth</button>
+      <button>Computing implied volatility</button>
+      <button>Pricing American options</button>
+    </div>
+    <div class="ans"><b>It is a machine for construction.</b> Reading it as an identity to verify misses everything the page is about — conversions, reversals, boxes and jelly rolls are all the same rearrangement applied twice.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 03</span>
+    <p class="q">A delta-hedged short call has a P&L standard deviation of 0.63. What does a conversion have?</p>
+    <div class="opts">
+      <button>About 0.1 — much narrower but still a distribution</button>
+      <button data-ok="1">Exactly 0.000000. It is not a narrow distribution, it is a single value on every path</button>
+      <button>About the same, since both are hedged</button>
+      <button>Larger, because it holds three instruments</button>
+    </div>
+    <div class="ans"><b>Zero, exactly.</b> Hedging is an approximation that improves with effort; a conversion is an identity that needs none. Plotting them side by side is the fastest way to feel the difference between the two ideas.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 05</span>
+    <p class="q">What is r/c on a revcon screen?</p>
+    <div class="opts">
+      <button>The risk-free rate</button>
+      <button data-ok="1">The implied financing rate the options market is charging to hold the position — which is not the risk-free rate and embeds borrow, dividends and the desk's own funding</button>
+      <button>The ratio of calls to puts</button>
+      <button>The return on capital</button>
+    </div>
+    <div class="ans"><b>An implied financing rate.</b> The whole point of the revcon market is that this number is observable and tradeable, and it frequently disagrees with any published rate.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 09</span>
+    <p class="q">Why is a 'riskless' arbitrage not riskless?</p>
+    <div class="opts">
+      <button>Because the model might be wrong</button>
+      <button data-ok="1">Because it has a funding desk attached. Borrow cost, hard-to-borrow recalls, early assignment on the American legs and pin risk are all real, and none of them appear in the identity</button>
+      <button>Because the options might not be exercised</button>
+      <button>Because volatility can change</button>
+    </div>
+    <div class="ans"><b>The identity is riskless; the position is financed.</b> Switch on early assignment and the vertical line splits in two — at a $1.50 dividend, 33% of paths get assigned and the mean falls to −0.40.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 04</span>
+    <p class="q">What is a combo?</p>
+    <div class="opts">
+      <button>A straddle with different strikes</button>
+      <button data-ok="1">Synthetic stock: long a call and short a put at the same strike, which has the same delta as the shares without holding them</button>
+      <button>A conversion without the stock leg</button>
+      <button>A box spread</button>
+    </div>
+    <div class="ans"><b>Synthetic stock.</b> It is parity's first and most useful rearrangement, and once you see it the conversion is just a combo traded against the actual shares.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 08</span>
+    <p class="q">Where does the financing assumption enter a jelly roll?</p>
+    <div class="opts">
+      <button>Only through the option prices</button>
+      <button data-ok="1">Through the rate and the dividend between the two expiries — those are the only things the structure is left holding once the market risk cancels</button>
+      <button>Through implied volatility</button>
+      <button>It does not; a jelly roll is model-free</button>
+    </div>
+    <div class="ans"><b>The rate and the dividends between the dates.</b> Everything else cancels, which is what makes the jelly roll a clean way to trade the forward financing curve rather than a view on the stock.</div>
+  </div>
+
+</section>
 </main>
 
 <footer>

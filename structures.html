@@ -163,7 +163,7 @@
 
   <div class="prose">
     <p class="lead">A concentrated shareholder wants downside protection and cannot pay for it, so they buy a put and sell a call to fund it. On the pitch it is a <b>collar</b>: a floor, a cap, zero premium, and a worst case the board can approve.</p>
-    <p>A volatility fund sees the other side and calls it a <b>risk reversal</b>: long the call, short the put, which on an equity surface means short the expensive downside and long the cheap upside. They are not thinking about floors. They are thinking that skew is too steep and they want to be paid to own that view.</p>
+    <p>A volatility fund sees the other side and calls it a <b><span class="term" data-t="Risk reversal" data-def="Long an out-of-the-money call and short an out-of-the-money put, or the reverse. A directional position financed by selling the other tail — and the vol fund's name for what a corporate calls a collar.">risk reversal</span></b>: long the call, short the put, which on an equity surface means short the expensive downside and long the cheap upside. They are not thinking about floors. They are thinking that skew is too steep and they want to be paid to own that view.</p>
     <p>Put both through the fingerprint and the numbers are exactly negatives of each other — delta, gamma, vega, theta, vanna and volga all sum to <b>zero to machine precision</b>. There is no sense in which these are two trades. There is one trade, and two descriptions of it that share almost no vocabulary.</p>
     <p>Why this matters beyond being tidy: it tells you where the <em>price</em> of a collar comes from. The treasurer thinks they are buying insurance and paying for it with an upside cap. What they are actually doing is selling skew, and the level they receive is set by how steep the surface is that day. A collar that is zero-cost in a high-skew environment requires giving up far less upside than the same collar when skew is flat — a fact that is invisible in the payoff diagram and obvious in the fingerprint.</p>
   </div>
@@ -190,6 +190,32 @@
     </div>
     <figcaption>The collar's payoff includes the shareholder's stock, which is why the shapes differ — but stock is pure delta with no gamma, vega or vanna, so it changes nothing on the axes that matter to the fund. Strip the stock and the two positions annihilate.</figcaption>
   </figure>
+  <details class="derive">
+    <summary>Derivation — why a collar and a risk reversal annihilate exactly</summary>
+    <div class="body">
+      <p>Write both positions in terms of the same three instruments and the result is arithmetic rather than insight.</p>
+      <div class="mline">collar = +stock − call(K<sub>c</sub>) + put(K<sub>p</sub>)</div>
+      <p class="mread">Reads as: <b>own the shares, sell the upside, buy the downside.</b> The corporate's description, in the corporate's units.</p>
+      <div class="mline">risk reversal = +call(K<sub>c</sub>) − put(K<sub>p</sub>)</div>
+      <p class="mread">Reads as: <b>buy the upside, sell the downside.</b> The fund's description, with no stock in it at all.</p>
+      <p>Add them and every option term cancels, leaving the stock.</p>
+      <div class="mline">collar + risk reversal = +stock</div>
+      <p class="mread">Reads as: <b>the two structures are the same instrument with the sign flipped, plus a share.</b> So every option greek — delta contribution, gamma, vega, vanna, volga, charm, theta — must sum to zero between them, because stock has none of them.</p>
+      <p>That is exactly what the figure shows: the largest absolute sum across all seven greeks is <b>0.00e+0</b>. It is not an approximation that holds near the money, and it does not decay with time or volatility. It is an identity.</p>
+      <p><b>Where it breaks.</b> Nowhere in the mathematics, and everywhere in the institution. The two sides face different margin treatment, different accounting, different tax and different mandates, so the identical exposure is not identically <em>ownable</em>. A corporate treasurer who is permitted to hold a collar against a shareholding is frequently not permitted to hold the risk reversal alone, even though the difference is one line of stock — and that regulatory asymmetry, rather than any disagreement about value, is a large part of why the flow is one-directional and why the surface ends up shaped the way chapter 06 describes.</p>
+    </div>
+  </details>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Move the put strike up toward the call strike and <b>predict</b> what happens to the fingerprint bars — which axis dies first?</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"pK":98,"cK":102}' data-focus="cvMirror">Tighten both strikes</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"pK":80,"cK":130}' data-focus="cvMirror">Widen them right out</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"pK":90,"cK":110}' data-focus="cvMirror">Back to the standard collar</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -248,7 +274,7 @@
   </figure>
 
   <div class="prose">
-    <p>One structural asymmetry runs down both lists. The institutional shelf is dominated by <b>selling upside and buying downside</b> — overwriting programmes, collars, protective puts. The volatility shelf is where the other side of that accumulates. That imbalance is not a coincidence and it is chapter 06's subject.</p>
+    <p>One structural asymmetry runs down both lists. The institutional shelf is dominated by <b>selling upside and buying downside</b> — <span class="term" data-t="Overwriting" data-def="Selling calls against stock you already own, usually as a standing programme rather than a view. One of the two structural flows that shapes the single-name surface.">overwriting</span> programmes, collars, protective puts. The volatility shelf is where the other side of that accumulates. That imbalance is not a coincidence and it is chapter 06's subject.</p>
   </div>
 </section>
 
@@ -257,7 +283,7 @@
   <div class="chead">
     <div class="cnum">05</div>
     <h2>The lizards, and the condition nobody states</h2>
-    <p class="dek">A jade lizard is not a set of legs. It is a set of legs plus an inequality, and the inequality fails more often than the name suggests.</p>
+    <p class="dek">A <span class="term" data-t="Jade lizard" data-def="A short put plus a short call spread, sized so the credit received covers the call spread's width. Done correctly it has no upside risk at all; done carelessly it is a short strangle with a lid.">jade lizard</span> is not a set of legs. It is a set of legs plus an inequality, and the inequality fails more often than the name suggests.</p>
   </div>
 
   <div class="prose">
@@ -296,6 +322,16 @@
     </div>
     <figcaption>The lizards are the clearest case of a general rule: many named structures are named for a <em>property</em> that only holds under conditions on the premium. If you cannot state the condition, you cannot tell whether the thing you have on is the thing you meant to put on.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Widen the call spread while leaving the put where it is. <b>Predict</b> at which width the credit stops covering it — and note that instinct says the opposite.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"pK":98,"cK":102,"lK":104}' data-focus="cvLizard">Narrow spread — it holds</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"pK":92,"cK":105,"lK":110}' data-focus="cvLizard">Wide spread — it fails</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"vol":0.7,"pK":92,"cK":105,"lK":110}' data-focus="cvLizard">Same wide spread, high vol</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -348,8 +384,106 @@
     </div>
     <figcaption>This is an illustration of a mechanism, not a calibration to data — the flow-to-skew mapping here is assumed, not measured. Treat it as a way to reason about which direction persistent flow pushes a surface, and not as a claim about how much of any real skew it accounts for.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Turn overwriting off entirely and leave put buying alone. <b>Predict</b> which side of the surface flattens.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c6" data-patch='{"overwrite":0}' data-focus="cvFlow">No call selling</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"putbuy":0}' data-focus="cvFlow">No put buying</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"overwrite":2.5,"putbuy":2.5}' data-focus="cvFlow">Both flows doubled</button>
+    </div>
+  </div>
+
 </section>
 
+<!-- ══════════ quiz ══════════ -->
+<section class="chapter" id="cq">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Six questions across the page.</p>
+  </div>
+
+  <div class="prose" style="margin-bottom:26px"><p>Answer without scrolling back. Each explanation names the chapter to revisit.</p></div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">An institution and a vol fund describe the same ticket completely differently. Who is right?</p>
+    <div class="opts">
+      <button>The vol fund — greeks are the objective description</button>
+      <button data-ok="1">Both. One is buying a payoff subject to a mandate and a budget; the other is buying a greek exposure. The descriptions are orthogonal, not competing</button>
+      <button>The institution, since they hold the underlying</button>
+      <button>Neither; the correct description is the payoff diagram</button>
+    </div>
+    <div class="ans"><b>Both, and that is the page's whole point.</b> The two readings are complete and non-overlapping — which is why the same structure can be simultaneously a hedge and a carry trade, and why the flow between them is so persistent.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 03</span>
+    <p class="q">What is a collar plus a risk reversal on the same strikes?</p>
+    <div class="opts">
+      <button>A straddle</button>
+      <button data-ok="1">Exactly one share of stock — every option leg cancels, so all seven greeks annihilate to zero</button>
+      <button>A box spread</button>
+      <button>Nothing; they are the same position</button>
+    </div>
+    <div class="ans"><b>A share of stock.</b> Since stock has no gamma, vega, vanna, volga or charm, every one of those must net to exactly zero between the two structures — measured at 0.00e+0 in the figure, not approximately.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 05</span>
+    <p class="q">When does a jade lizard actually have no upside risk?</p>
+    <div class="opts">
+      <button>Always — that is the definition of the structure</button>
+      <button data-ok="1">Only when the credit received covers the width of the call spread. Narrow spreads and high volatility make it hold; widening the spread breaks it</button>
+      <button>Only when the put is out of the money</button>
+      <button>Only at expiration</button>
+    </div>
+    <div class="ans"><b>Only when the credit covers the width.</b> This is the condition the name usually omits: at 98 put with a 102–104 spread the credit is 3.796 against a width of 2 and it holds at every volatility from 25% to 70%. At 92 put with a 105–110 spread the credit is 2.357 against a width of 5 and it does not — that position is a short strangle with a lid.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 05</span>
+    <p class="q">Which change makes a lizard <em>more</em> likely to hold?</p>
+    <div class="opts">
+      <button>Widening the call spread, since you collect more premium</button>
+      <button data-ok="1">Narrowing the call spread, and higher volatility. Both raise the credit relative to the width — which is the opposite of most people's instinct</button>
+      <button>Moving the put further out of the money</button>
+      <button>Longer time to expiry only</button>
+    </div>
+    <div class="ans"><b>Narrow it, and hope for high volatility.</b> Widening the spread raises the credit but raises the width faster, so the condition fails. This is the finding that became a whole chapter, because the instinct runs the wrong way.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 06</span>
+    <p class="q">Why does persistent institutional flow show up in the surface?</p>
+    <div class="opts">
+      <button>Because institutions are better informed</button>
+      <button data-ok="1">Because one-directional demand has to be absorbed by someone who charges for it. Overwriting offers calls and hedging bids puts, and the surface records the imbalance</button>
+      <button>Because index providers publish it</button>
+      <button>It does not; the surface is set by realized volatility</button>
+    </div>
+    <div class="ans"><b>Someone has to warehouse the imbalance.</b> This is the same mechanism page 10 uses to explain persistently rich implied correlation, and the same one page 05 uses for the spread: durable one-way flow becomes a price.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 02</span>
+    <p class="q">What does the exposure fingerprint normalise against?</p>
+    <div class="opts">
+      <button>The notional of the position</button>
+      <button data-ok="1">A one-lot at-the-money straddle, so that five structurally different trades can be compared on the same five axes</button>
+      <button>The underlying's realized volatility</button>
+      <button>The premium paid</button>
+    </div>
+    <div class="ans"><b>A one-lot at-the-money straddle.</b> Without a common denominator the axes are in incomparable units and the chart is decorative; with one, a collar and a risk reversal can be shown to be mirror images at a glance.</div>
+  </div>
+
+</section>
 </main>
 
 <footer>

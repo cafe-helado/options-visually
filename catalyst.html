@@ -110,6 +110,16 @@
     </div>
     <figcaption>Drag the event date and watch the step slide along the ramp. The lower panel is the number actually on your screen: it jumps the moment the event enters the window, then decays as the diffusive term catches up. Nothing about the stock changed — only how much time the same lump is being spread over.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the jump to zero and <b>predict</b> what happens to the accumulated variance path — does it become a straight line, or just lose its step?</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"J":0}' data-focus="cvAccum">No event at all</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"J":0.12}' data-focus="cvAccum">A very large event</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"sd":0.10,"J":0.08}' data-focus="cvAccum">Quiet stock, big event</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -163,6 +173,16 @@
     </div>
     <figcaption>The step is the whole point. A term structure built from weighted days has a discontinuity exactly at the event, and the size of the step is a direct readout of what the market thinks the event is worth. Reading that step is the next chapter.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Give the earnings day a weight of one — treat it as an ordinary day — and <b>predict</b> what the fair term structure does.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"evW":1}' data-focus="cvTermW">Earnings as a normal day</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"evW":6}' data-focus="cvTermW">A genuinely enormous print</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"wknd":0.6}' data-focus="cvTermW">Weekends that actually move</button>
+    </div>
+  </div>
+
 </section>
 
 <!-- ══════════ 03 ══════════ -->
@@ -206,6 +226,16 @@
     </div>
     <figcaption>Move the two chosen expiries anywhere on the curve and the recovered numbers barely change — which is the test that the decomposition is describing the data rather than fitting it. When the recovered σ<sub>d</sub> starts drifting with your choice of expiries, that is evidence of a second event, or of an event whose date you have wrong.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Move the two expiries closer together and <b>predict</b> whether the solve gets more or less stable.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"d1":14,"d2":21}' data-focus="cvStrip">Two nearby expiries</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"d1":7,"d2":120}' data-focus="cvStrip">Far apart</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"J":0.10}' data-focus="cvStrip">A much bigger event</button>
+    </div>
+  </div>
+
 
   <div class="derive">
     <details class="derive" open style="margin-left:0;border-top:0;padding-top:0">
@@ -237,8 +267,8 @@
   </div>
 
   <div class="prose">
-    <p class="lead">Having recovered J, converting it to dollars looks trivial — multiply by spot. But the number the market <em>quotes</em> as the implied move is usually derived from the straddle price, and that is a different quantity from a one-standard-deviation move. The gap is large and it is a constant, so it is worth getting right once.</p>
-    <p>Here is the fact. For a driftless lognormal, the price of an at-the-money straddle equals the <b>expected absolute move</b>:</p>
+    <p class="lead">Having recovered J, converting it to dollars looks trivial — multiply by spot. But the number the market <em>quotes</em> as the <span class="term" data-t="Implied move" data-def="The size of the move the option market is pricing for an event. Usually quoted from the straddle, which makes it an expected absolute move rather than a standard deviation.">implied move</span> is usually derived from the straddle price, and that is a different quantity from a one-standard-deviation move. The gap is large and it is a constant, so it is worth getting right once.</p>
+    <p>Here is the fact. For a driftless lognormal, the price of an at-the-money <span class="term" data-t="Straddle" data-def="A call and a put at the same strike. Its price is the market's expected absolute move, which is a smaller number than one standard deviation and gets confused with it constantly.">straddle</span> equals the <b>expected absolute move</b>:</p>
     <div class="mline">Straddle = E |S<sub>T</sub> − S₀| = √(2/π) · S · σ√T ≈ 0.7979 · S · σ√T</div>
     <p class="mread">Reads as: <b>a straddle costs exactly the average size of the move, ignoring direction.</b> Which makes sense — that is what it pays.</p>
     <p>A one-standard-deviation move is <code>S·σ√T</code>, with no 0.7979 in front. So the straddle-derived implied move is about <b>80% of a one-sigma move</b>, and the two get used interchangeably all the time. At 20 vol over 30 days on a $100 stock the straddle is <b>4.57</b> while one sigma is <b>5.73</b> — a 25% difference in a number people quote to two decimals.</p>
@@ -275,7 +305,7 @@
       <button>Yes, and the straddle buyer made money by definition</button>
       <button>No — moves always exceed the implied move</button>
     </div>
-    <div class="ans"><b>A single move above the implied move is the base case, not a miss.</b> The straddle price is a mean of absolute moves, and for a right-skewed distribution the majority of outcomes sit above the straddle-implied level while a minority of large ones pull the average up. Roughly 58% of moves exceed it. Judging an implied move from one print is like judging a coin from one flip — and note the second answer's caveat, because a straddle buyer can still lose on an 8% move if the vol crush costs more than the gamma gained, which is chapter 05.</div>
+    <div class="ans"><b>A single move above the implied move is the base case, not a miss.</b> The straddle price is a mean of absolute moves, and for a right-skewed distribution the majority of outcomes sit above the straddle-implied level while a minority of large ones pull the average up. Roughly 58% of moves exceed it. Judging an implied move from one print is like judging a coin from one flip — and note the second answer's caveat, because a straddle buyer can still lose on an 8% move if the <span class="term" data-t="Vol crush" data-def="The collapse in implied volatility immediately after a scheduled event. Not a mispricing correcting — the event variance has simply been used up and is no longer in the remaining life.">vol crush</span> costs more than the gamma gained, which is chapter 05.</div>
   </div>
 </section>
 
@@ -319,6 +349,16 @@
     </div>
     <figcaption>Set realized equal to implied and read the two statistics against each other: a mean at zero and a median well below it. That gap <em>is</em> the trade. Everything about how event vol feels to trade — and most of the behavioural errors around it — comes from the distance between those two numbers.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set your view of the event equal to the market's and <b>predict</b> whether the P&amp;L distribution becomes symmetric.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"ratio":1}' data-focus="cvPnl">Fairly priced</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"ratio":1.6}' data-focus="cvPnl">The market is way too high</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"ratio":0.6}' data-focus="cvPnl">The market is way too low</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -414,6 +454,94 @@
   </figure>
 </section>
 
+<!-- ══════════ quiz ══════════ -->
+<section class="chapter" id="cq">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Six questions across the page.</p>
+  </div>
+
+  <div class="prose" style="margin-bottom:26px"><p>Answer without scrolling back. Each explanation names the chapter to revisit if it catches you.</p></div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">Why does variance get added rather than volatility?</p>
+    <div class="opts">
+      <button>Convention — either works</button>
+      <button data-ok="1">Because variance is what accumulates along a path. Independent sources of movement add their squared contributions, so σ²T = σ_diff²·T + ΣJ² and volatilities do not add at all</button>
+      <button>Because volatility can be negative</button>
+      <button>Because variance is easier to compute</button>
+    </div>
+    <div class="ans"><b>Variance is the additive quantity.</b> That single fact is the whole page — it is what makes a two-expiry solve possible and what makes a kinked term structure go flat once one number is removed.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 03</span>
+    <p class="q">Two expiries, one event between them. What can you recover?</p>
+    <div class="opts">
+      <button>Only the average volatility</button>
+      <button data-ok="1">Both the diffusive volatility and the event's size, exactly. A 39.54% front and 29.05% back recover σ_diff = 25.000% and J = 6.000% from any pair</button>
+      <button>Neither, without a model of the event</button>
+      <button>Only the event size</button>
+    </div>
+    <div class="ans"><b>Both, exactly.</b> Two equations, two unknowns, and the equations are exact because variance is additive. The solve works from any pair of expiries that bracket the event.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 04</span>
+    <p class="q">At 20 volatility with 30 days to run, the straddle is 4.57 and one standard deviation is 5.73. Why the gap?</p>
+    <div class="opts">
+      <button>The straddle is mispriced</button>
+      <button data-ok="1">They are different quantities. A straddle prices the expected <em>absolute</em> move, which is √(2/π) ≈ 0.7979 of a standard deviation — a 25% gap in a number quoted to two decimals</button>
+      <button>The straddle excludes the risk-free rate</button>
+      <button>One is annualised and the other is not</button>
+    </div>
+    <div class="ans"><b>Expected absolute move versus standard deviation.</b> The 0.8 in the rule of thumb is √(2/π), and treating the implied move as a one-sigma number overstates the odds of staying inside it every single time.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 05</span>
+    <p class="q">A fairly priced earnings straddle. What does its P&amp;L distribution look like?</p>
+    <div class="opts">
+      <button>Symmetric around zero</button>
+      <button data-ok="1">Mean about zero, median about −0.93, and a win rate near 33%. Mostly small losses with occasional large wins</button>
+      <button>Positively skewed with a high win rate</button>
+      <button>Always negative, since implied exceeds realized</button>
+    </div>
+    <div class="ans"><b>Mean zero, median negative, wins one time in three.</b> The gap between mean and median is the whole behavioural problem with event volatility: a correctly priced trade feels wrong two-thirds of the time.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 02</span>
+    <p class="q">Why weight days rather than count them?</p>
+    <div class="opts">
+      <button>To account for interest accrual</button>
+      <button data-ok="1">Because days contribute unequally to variance. Weekends contribute almost nothing and an earnings day contributes three or four ordinary days' worth, so calendar time is the wrong clock</button>
+      <button>To handle holidays in different jurisdictions</button>
+      <button>Because implied volatility is quoted in trading days</button>
+    </div>
+    <div class="ans"><b>Days are not interchangeable units of variance.</b> Once you weight them the fair term structure falls straight out, and a curve that looked strangely kinked turns out to be exactly right.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 06</span>
+    <p class="q">Why is a calendar the natural expression of an event view?</p>
+    <div class="opts">
+      <button>Because it has no vega</button>
+      <button data-ok="1">Because the trade is about the front-versus-back relationship, which is precisely what the event creates. The calendar isolates the term-structure difference the event is responsible for</button>
+      <button>Because calendars have no directional risk</button>
+      <button>Because they are cheaper than straddles</button>
+    </div>
+    <div class="ans"><b>The event lives in the front-back relationship.</b> An outright straddle mixes the event with the diffusive volatility around it; the calendar is the structure that asks the question the analysis actually answered.</div>
+  </div>
+
+</section>
 </main>
 
 <footer>
@@ -524,7 +652,7 @@ const s1={sd:.25,J:.06,evDay:21,horizon:90};
 })();
 
 /* ══════════════════════════════════════════════
-   02 — vol days
+   02 — <span class="term" data-t="Vol days" data-def="Days weighted by how much variance each is expected to contribute. A weekend might count 0.2 and an earnings day 3 or 4, which is why calendar time is the wrong clock for options.">vol days</span>
    ══════════════════════════════════════════════ */
 const s2={ev:21,evW:4.0,wknd:.15,ref:.25,days:90};
 (function(){

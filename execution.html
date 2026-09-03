@@ -62,7 +62,7 @@
       <tr><td>k</td><td>Round-trip cost as a fraction of traded notional. Five basis points is k = 0.0005.</td></tr>
       <tr><td>λ</td><td>Risk aversion. How many units of cost you would pay to remove one unit of P&amp;L standard deviation.</td></tr>
       <tr><td>η</td><td>Temporary impact coefficient. How much the price moves against you per unit of trading <em>rate</em>. An assumption.</td></tr>
-      <tr><td>Arrival</td><td>The price at the moment the order was released. The benchmark behind implementation shortfall.</td></tr>
+      <tr><td>Arrival</td><td>The price at the moment the order was released. The benchmark behind <span class="term" data-t="Implementation shortfall" data-def="The gap between the price when you decided to trade and the price you actually got, including the cost of anything you failed to execute. The benchmark that charges you for hesitating.">implementation shortfall</span>.</td></tr>
       <tr><td>Interval VWAP</td><td>Volume-weighted average price over the execution window. A benchmark that moves with the market.</td></tr>
       <tr><td>NAV</td><td>An ETF's net asset value — the mark-to-market of the basket it holds.</td></tr>
       <tr><td>AP</td><td>Authorised participant. The firm entitled to create and redeem ETF shares against the basket.</td></tr>
@@ -111,6 +111,32 @@
     </div>
     <figcaption>Set costs to zero and the blue curve becomes monotone decreasing — page 01's world, where continuous hedging wins. Any positive cost creates the minimum. The practical reading: "how often should I hedge" has no answer until somebody states a cost and a risk aversion, and most disagreements about hedging frequency are really disagreements about λ.</figcaption>
   </figure>
+  <details class="derive">
+    <summary>Derivation — why the objective is U-shaped</summary>
+    <div class="body">
+      <p>Split the total into the two things that move in opposite directions as you rehedge more often.</p>
+      <div class="mline">hedging error sd ≈ c<sub>1</sub> / √N</div>
+      <p class="mread">Reads as: <b>the risk you fail to remove falls like one over the square root of the number of hedges.</b> This is page 01's replication result, unchanged.</p>
+      <p>Now the bill. Each rehedge trades a smaller amount as N grows — the delta moves less over a shorter interval — but there are more of them. The expected absolute delta change over a step of length T/N scales like √(T/N), so total turnover scales like N·√(1/N) = √N.</p>
+      <div class="mline">expected cost ≈ c<sub>2</sub> · k · √N</div>
+      <p class="mread">Reads as: <b>the money you spend grows like the square root of how often you trade.</b> Halving the interval does not double the bill, it multiplies it by about 1.41.</p>
+      <p>Add them with a risk aversion λ and differentiate. One term falls like N<sup>−1/2</sup> and the other rises like N<sup>1/2</sup>, so the sum has an interior minimum wherever their derivatives cancel.</p>
+      <div class="mline">N* ∝ (c<sub>1</sub>λ / c<sub>2</sub>k)<sup>2/3</sup></div>
+      <p class="mread">Reads as: <b>hedge more often when risk aversion is high and less often when trading is expensive, with both effects entering to the two-thirds power.</b> The exponent is why halving costs does not double the optimal frequency — it raises it by about 59%.</p>
+      <p><b>Where it breaks.</b> The √N cost scaling is asymptotic and the figure's own numbers say so: between N = 128 and N = 512 the observed ratio is 1.76 against a predicted 2.0, because at low rebalance counts the initial hedge and the final unwind dominate turnover and neither depends on N at all. The formula also assumes cost is proportional to size, which is the first thing that fails once your order is large relative to volume — at that point cost becomes convex in size and the optimum moves further left than this expression suggests.</p>
+    </div>
+  </details>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the round-trip cost to zero. <b>Predict</b> what happens to the blue objective curve before you press it — does the minimum move left, move right, or stop existing?</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"bps":0}' data-focus="cvU">Trading is free</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"bps":15,"lam":0.5}' data-focus="cvU">Fifteen basis points</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"bps":5,"lam":2.5}' data-focus="cvU">Same cost, much more risk-averse</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -161,6 +187,16 @@
     </div>
     <figcaption>The same shape as chapter 01, arising for the same reason: a certain cost that grows with urgency against an uncertain one that grows with patience. Recognising that these are one problem in two costumes is most of what execution theory has to offer.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Push the impact coefficient to its maximum and <b>predict</b> which way the optimal trajectory tilts — front-loaded, back-loaded, or flat — before you look.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"eta":6}' data-focus="cvImpact">Impact dominates</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"eta":0.3}' data-focus="cvImpact">Impact barely matters</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"eta":2.0,"sigma":3.0}' data-focus="cvImpact">Volatile underlying instead</button>
+    </div>
+  </div>
+
 </section>
 
 <!-- ══════════ 03 ══════════ -->
@@ -232,6 +268,16 @@
     </div>
     <figcaption>Flip the trend to negative and the verdicts swap: patience now looks brilliant against arrival and unremarkable against VWAP. Nothing about the algorithms changed. The scorecard did.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the trend to zero so the market drifts nowhere. <b>Predict</b> whether the two benchmarks still disagree, then turn the trend back up.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"trend":0}' data-focus="cvBench">No trend at all</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"trend":8}' data-focus="cvBench">A strong trend</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"trend":-6}' data-focus="cvBench">Trending against you</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -282,8 +328,18 @@
         <div class="kv" style="margin-top:20px" id="kv5"></div>
       </div>
     </div>
-    <figcaption>The distribution barely changes shape as informed flow rises — it shifts. That is what makes adverse selection hard to notice from a handful of fills and easy to measure from a few thousand: it is a small bias in the mean, not a visible change in the risk.</figcaption>
+    <figcaption>The distribution barely changes shape as informed flow rises — it shifts. That is what makes <span class="term" data-t="Adverse selection" data-def="Getting filled precisely because the person on the other side knew something. It is not a fee — it is the systematic tendency of your fills to happen just before the price moves against you.">adverse selection</span> hard to notice from a handful of fills and easy to measure from a few thousand: it is a small bias in the mean, not a visible change in the risk.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Take the informed fraction down to almost nothing. <b>Predict</b> what happens to the post-fill drift — does it flatten, or reverse?</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"informed":0.02}' data-focus="cvDark">Almost nobody is informed</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"informed":0.6}' data-focus="cvDark">A toxic venue</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"informed":0.25,"spread":1.5}' data-focus="cvDark">Wider lit spread</button>
+    </div>
+  </div>
+
 </section>
 
 <!-- ══════════ 06 ══════════ -->
@@ -296,7 +352,7 @@
 
   <div class="prose">
     <p class="lead">Hedging index or sector exposure with an ETF is usually cheaper than trading the basket, and understanding why requires understanding creation and redemption.</p>
-    <p>An <b>authorised participant</b> can hand the fund a basket of the underlying shares and receive new ETF shares, or hand back ETF shares and receive the basket. That right is what pins the ETF price to its NAV. If the ETF trades above NAV, an AP buys the basket, creates shares, sells them, and pockets the difference — which pushes the premium back down.</p>
+    <p>An <b><span class="term" data-t="Authorised participant" data-def="A firm entitled to create and redeem ETF shares against the underlying basket. The arbitrage that holds an ETF near its NAV runs through them.">authorised participant</span></b> can hand the fund a basket of the underlying shares and receive new ETF shares, or hand back ETF shares and receive the basket. That right is what pins the ETF price to its NAV. If the ETF trades above NAV, an AP buys the basket, creates shares, sells them, and pockets the difference — which pushes the premium back down.</p>
     <p>The mechanism is not free, so it does not pin exactly. It creates a <b>band</b>: the price can wander from NAV by up to the cost of doing a creation before the arbitrage becomes worth executing. Inside the band, nothing happens. At the edge, APs step in.</p>
     <p>Which gives the practical rule. When creation costs are low — a large liquid domestic equity ETF — the band is a couple of basis points and the ETF is effectively the basket. When creation costs are high — illiquid underlyings, different time zones, closed markets, credit instruments that do not trade — the band is wide, and the ETF's price is its own thing that happens to be related to NAV. Premiums and discounts in those products are not mispricings; they are the band doing its job.</p>
     <p>One more consequence worth knowing: <b>ETF liquidity is inherited, not intrinsic</b>. A thin-looking ETF on a liquid basket can absorb size, because an AP can always create against the underlying. A thick-looking ETF on an illiquid basket cannot. Screen liquidity is the wrong number to look at; the basket's liquidity is the right one.</p>
@@ -322,6 +378,16 @@
     </div>
     <figcaption>Widen the creation cost and watch tracking loosen — the price stops being held and starts drifting with demand. This single parameter separates an ETF you can hedge with from one you have to think about, and it is why the same wrapper behaves so differently across asset classes.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Raise the creation cost to its maximum and watch tracking loosen. <b>Predict</b> whether the premium wanders symmetrically around zero or develops a bias.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c6" data-patch='{"cost":25}' data-focus="cvEtf">An expensive basket</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"cost":1}' data-focus="cvEtf">A liquid domestic ETF</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"cost":12,"demand":2.5}' data-focus="cvEtf">Heavy one-way demand</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -336,6 +402,125 @@
   </div>
 </section>
 
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Where it breaks</h2>
+    <p class="dek">Every number on this page rests on an impact model, and impact is the least observable quantity in the whole series.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The U-curve, the optimal trajectory and the dark-venue simulation all share one input that nobody can measure directly. This chapter is about how much weight that input can carry.</p>
+    <p><b>Impact models are fitted, not observed.</b> You never see the price that would have prevailed had you not traded, so impact is inferred by comparing executions against a counterfactual that does not exist. Every estimate is therefore a model output conditioned on the sample of orders a firm happened to send, which is itself selected — you trade more when you think you can. The coefficient in this page's figures is a slider precisely because no honest version of it is a constant.</p>
+    <p><b>Slippage attribution is contentious.</b> Chapter 04 showed the same fills scoring on benchmark against interval VWAP and losing a point and a half against arrival. That is not a curiosity; it is the daily argument between a trading desk and the desk it trades for. Whoever picks the benchmark has picked the answer, and the choice is usually made by whichever side wrote the report.</p>
+    <p><b>The close is crowded.</b> A large share of daily volume prints in the closing auction, which makes it the cheapest place to trade and simultaneously the place where everyone else's order also is. Impact models calibrated on continuous trading understate what happens when a lot of correlated demand arrives in the same fifteen seconds, and the auction's price-formation mechanism is not the one the model assumes.</p>
+    <p><b>Costs are not linear in size.</b> The √N argument in chapter 01 assumed cost proportional to the amount traded. Beyond a few percent of daily volume that stops being true and cost becomes convex, which moves every optimum on this page to the left — hedge less often than the linear model says, because the marginal rebalance is more expensive than the average one.</p>
+    <p><b>And the hedge itself is a choice.</b> Chapter 06 hedged with an ETF, which introduces basis risk that none of the other figures price. A hedge that is cheap to execute and imperfectly correlated is not obviously better than one that is expensive and exact, and that trade-off is a portfolio question rather than an execution one.</p>
+    <p>What survives all of this is the shape of the arguments rather than the levels. Costs create an interior optimum; trading faster buys certainty and pays impact; benchmarks encode a view; dark fills are adversely selected; ETF tracking loosens with creation cost. Those conclusions are robust to the parameters. The specific numbers are illustrations, and this page has tried to keep every one of them on a slider so you can see how much they move.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your broker's transaction cost analysis shows your algo beating VWAP by three basis points every month for a year. What have you learned?</p>
+    <div class="opts">
+      <button>That the algo is good and should be used more</button>
+      <button data-ok="1">Very little on its own. VWAP forgives trend and punishes deviation, so a strategy that trades passively in a drifting market beats it structurally — the arrival-price number is the one that would tell you something</button>
+      <button>That the broker is measuring incorrectly</button>
+      <button>That your orders are too small to have impact</button>
+    </div>
+    <div class="ans"><b>Very little on its own.</b> Consistently beating a benchmark by a small margin is usually evidence about the benchmark rather than about the algorithm. The diagnostic is to score the same fills against arrival: if the two disagree persistently and in the same direction, you are measuring the interaction between your trading style and the benchmark's blind spot, not skill.</div>
+  </div>
+</section>
+
+<!-- ══════════ quiz ══════════ -->
+<section class="chapter" id="cq">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Six questions across the page.</p>
+  </div>
+
+  <div class="prose" style="margin-bottom:26px"><p>Answer without scrolling back. Each explanation names the chapter to revisit.</p></div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">Your desk halves its commissions. What happens to the optimal rehedge frequency?</p>
+    <div class="opts">
+      <button>It falls, since cheaper trading means fewer hedges are needed</button>
+      <button data-ok="1">It rises, but by less than double — the optimum moves with the two-thirds power, so halving costs raises it by about 59%</button>
+      <button>It exactly doubles</button>
+      <button>It is unchanged; frequency depends only on gamma</button>
+    </div>
+    <div class="ans"><b>It rises by about 59%.</b> The optimum sits where marginal cost equals marginal risk reduction, and both terms scale with fractional powers of N — which is why the answer is neither "unchanged" nor "double".</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 01</span>
+    <p class="q">At exactly zero trading cost, what is the optimal hedging frequency?</p>
+    <div class="opts">
+      <button>Still finite, because of discreteness</button>
+      <button data-ok="1">Infinite — this is page 01's continuous limit, and it is the corner solution that any positive cost destroys</button>
+      <button>Zero</button>
+      <button>Undefined</button>
+    </div>
+    <div class="ans"><b>Infinite.</b> Page 01's theorem is exactly the zero-cost corner of this page's problem, which is why "hedge continuously" is a statement about a frictionless market rather than advice.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 02</span>
+    <p class="q">Trading a large order faster does what to your risk?</p>
+    <div class="opts">
+      <button>Increases it, because impact is a risk</button>
+      <button data-ok="1">Reduces timing risk and increases certain impact cost — you are exchanging an uncertain loss for a known one</button>
+      <button>Leaves it unchanged; only the cost moves</button>
+      <button>Reduces both</button>
+    </div>
+    <div class="ans"><b>You swap uncertainty for a bill.</b> That trade is the whole content of execution scheduling, and where you want to sit on it depends on risk aversion exactly as in chapter 01.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">The same fills score on benchmark against interval VWAP and lose 1.47 against arrival. Which report is right?</p>
+    <div class="opts">
+      <button>The VWAP one, since it adjusts for market conditions</button>
+      <button data-ok="1">Both are arithmetically right. They measure different things: VWAP forgives trend and punishes deviation, arrival punishes delay</button>
+      <button>The arrival one, since it uses the decision price</button>
+      <button>Neither; the fills must be misrecorded</button>
+    </div>
+    <div class="ans"><b>Both are right and they answer different questions.</b> Pick the benchmark and you have picked the verdict, which is why the choice belongs in the mandate rather than in the report.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 05</span>
+    <p class="q">Why are midpoint dark fills adversely selected?</p>
+    <div class="opts">
+      <button>Because dark venues charge more</button>
+      <button data-ok="1">Because a resting midpoint order is most likely to be hit precisely when someone with better information wants the other side — the fills cluster before adverse moves</button>
+      <button>Because they execute more slowly</button>
+      <button>Because they are reported late</button>
+    </div>
+    <div class="ans"><b>You get filled when someone wants to trade with you.</b> That is the same adverse-selection argument as page 05's market-making simulation, viewed from the other side of the quote.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 06</span>
+    <p class="q">A thin-looking ETF sits on a highly liquid basket. Can you hedge size in it?</p>
+    <div class="opts">
+      <button>No — screen volume is the binding constraint</button>
+      <button data-ok="1">Usually yes. Liquidity is inherited from the basket, because an authorised participant can create shares against it</button>
+      <button>Only at the close</button>
+      <button>Only via a swap</button>
+    </div>
+    <div class="ans"><b>Liquidity is inherited, not intrinsic.</b> The trap is the reverse case: heavy screen volume on an illiquid basket looks tradeable and is not, because the arbitrage that would absorb your order is expensive to run.</div>
+  </div>
+
+</section>
 </main>
 
 <footer>

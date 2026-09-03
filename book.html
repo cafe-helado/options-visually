@@ -145,7 +145,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">A greek report is a description of the book at one point, expressed in derivatives. A scenario matrix is the book itself, evaluated at many points. The difference between them is the subject of this page, and the fastest way to see it is to compute both and subtract.</p>
+    <p class="lead">A greek report is a description of the book at one point, expressed in derivatives. A <span class="term" data-t="Scenario matrix" data-def="A grid of full repricings across spot and volatility. Unlike a greek report it does not degrade with distance from today's spot, which is why limits are set on it.">scenario matrix</span> is the book itself, evaluated at many points. The difference between them is the subject of this page, and the fastest way to see it is to compute both and subtract.</p>
     <p>The grid below moves spot across the columns and volatility down the rows and puts the full repriced P&amp;L in each cell. Every position is revalued from scratch at the new spot and the new volatility — no approximations, no local expansions. This is what the book would actually be worth.</p>
     <p>Then switch the display to <b>error</b> and you are looking at what a greek report would have missed. At the centre the errors are trivially small, which is exactly what "the greeks are a local approximation" means. Move to the corners and they are enormous: at spot +20% with volatility up 10 points, the book makes <b>$49,061</b> and the greek estimate is short by <b>$29,456</b> — the report would have predicted well under half the move.</p>
     <p>The asymmetry matters as much as the size. The errors are not symmetric in spot, because gamma is not constant, and they are not symmetric in volatility, because vega is not constant either. A book that looks balanced in the greeks can be strongly convex in one direction and concave in the other, and only the matrix shows it.</p>
@@ -212,7 +212,7 @@
     <p class="lead">"The greeks are a local approximation" is true and useless without a number attached. Here is the number. Take our book, move spot, and compare the full reprice against what delta and gamma predicted.</p>
     <p>At <b>1%</b> the book makes <b>$582</b> and the greeks predict <b>$578</b> — an error of <b>0.7%</b>, entirely negligible. At <b>2%</b> the error is <b>2.7%</b>. At <b>5%</b> it is <b>13.8%</b>: the book makes $3,589 and the estimate says $3,093. At <b>10%</b> the estimate captures barely two-thirds. At <b>20%</b> the book makes <b>$36,971</b> and the greeks predict <b>$15,436</b> — an error of <b>58%</b>, which is to say the report is wrong by more than it is right.</p>
     <p>The shape of that decay is the useful part. The error grows roughly like the cube of the move, because delta and gamma capture the first two terms of the expansion and the first thing they miss is the third. So halving the move you care about cuts the error by about eight, and doubling it multiplies the error by about eight. That is a fast enough exponent that the boundary between "greeks are fine" and "greeks are useless" is narrow, and it sits at a smaller move than most people assume.</p>
-    <p>The practical rule that falls out: use greeks for hedging decisions and daily attribution, where moves are small and the derivative is exactly what you want. Use the matrix for limits, stress and anything that gets escalated, where the moves are large by construction. Using a greek report to answer a stress question is the specific error, and it always errs in the direction of comfort — it under-predicts big moves in both directions, because it is missing the convexity that makes them big.</p>
+    <p>The practical rule that falls out: use greeks for hedging decisions and daily <span class="term" data-t="Attribution" data-def="Explaining yesterday's P&L with yesterday's greeks. The residual is a test of your marks and your model, and it is the first thing to read on a risk report.">attribution</span>, where moves are small and the derivative is exactly what you want. Use the matrix for limits, stress and anything that gets escalated, where the moves are large by construction. Using a greek report to answer a stress question is the specific error, and it always errs in the direction of comfort — it under-predicts big moves in both directions, because it is missing the convexity that makes them big.</p>
   </div>
 
   <figure class="bleed">
@@ -238,6 +238,21 @@
     </div>
     <figcaption>The lower panel is the one to remember. It is flat and near zero out to a couple of percent and then climbs steeply — there is a knee, and knowing roughly where your book's knee sits is what tells you when to stop quoting greeks and start running scenarios.</figcaption>
   </figure>
+  <details class="derive">
+    <summary>Derivation — why the error grows like the cube of the move</summary>
+    <div class="body">
+      <p>A greek report is the first two terms of a Taylor expansion of the book's value in spot.</p>
+      <div class="mline">V(S+h) = V(S) + Δh + ½Γh² + ⅙·(∂³V/∂S³)·h³ + …</div>
+      <p class="mread">Reads as: <b>value, plus delta times the move, plus half gamma times the move squared, plus a third-order term nobody reports.</b> Delta and gamma are the first two; everything after is what the report is missing.</p>
+      <p>So the error of a delta-plus-gamma estimate is the first term you dropped, and that term carries <b>h³</b>.</p>
+      <div class="mline">error ≈ ⅙ · speed · h³</div>
+      <p class="mread">Reads as: <b>the mistake grows with the cube of how far the market moved.</b> The third derivative of value with respect to spot is sometimes called speed, and it is largest where gamma is changing fastest — near the strikes.</p>
+      <p>A cubic law is steep. Doubling the move multiplies the error by roughly eight, so the transition from "the greeks are fine" to "the greeks are useless" happens over a surprisingly narrow band of move sizes. Our book's measured errors — 0.7% at 1%, 2.7% at 2%, 13.8% at 5%, 58.2% at 20% — grow faster than the cube because vega and its own curvature are also being left out once volatility moves.</p>
+      <p>That also explains the shape of the lower panel: it is flat and negligible out to a couple of percent and then turns upward sharply, because a cubic sitting under a linear-plus-quadratic term contributes essentially nothing until it suddenly contributes everything.</p>
+      <p><b>Where it breaks.</b> The expansion assumes the book's value is smooth in spot, and it is not. A digital or barrier payoff has a discontinuity in value or in delta, at which point no number of Taylor terms converges and the only honest answer is a full reprice — which is the practical argument for building the matrix out of repricings rather than out of higher-order greeks. The expansion also says nothing about paths: two scenarios that end at the same spot with the same volatility can imply very different hedging costs on the way, and a static matrix cell prices neither.</p>
+    </div>
+  </details>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -325,7 +340,7 @@
   <div class="prose">
     <p class="lead">Limits look like bureaucracy from a trading seat and like arithmetic from a risk seat, and both readings miss what they are for. A limit is a pre-committed answer to a question nobody can think clearly about while it is happening: how much are we prepared to lose in a scenario we have decided is plausible?</p>
     <p>They come in layers, and the layers exist because each one fails differently.</p>
-    <p><b>Greek limits</b> — maximum dollar delta, gamma cash, bucketed vega. Cheap to compute, easy to monitor continuously, and subject to exactly the failure of chapter 03: they describe the book near today's spot and say nothing about the corners. A book can sit inside every greek limit and still be carrying a scenario loss nobody has authorised.</p>
+    <p><b>Greek limits</b> — maximum dollar delta, gamma cash, <span class="term" data-t="Bucketed" data-def="Grouped by expiry (or by strike) rather than summed into one number. A net vega of zero across buckets of +1,000 and −1,000 is a term-structure position nobody approved.">bucketed</span> vega. Cheap to compute, easy to monitor continuously, and subject to exactly the failure of chapter 03: they describe the book near today's spot and say nothing about the corners. A book can sit inside every greek limit and still be carrying a scenario loss nobody has authorised.</p>
     <p><b>Scenario limits</b> — the worst cell of the matrix must be better than some number. This is the one that actually binds, because it is computed from full repricings and therefore does not degrade with move size. Its weakness is that it only covers the scenarios in the grid.</p>
     <p><b>Stress limits</b> — named historical or hypothetical events, deliberately chosen because they hurt rather than because they are likely, and usually including a correlation-goes-to-one case for the reasons on <a href="dispersion.html#c5" style="color:var(--blue)">page 10</a>.</p>
     <p>The figure makes the first layer's weakness concrete. Adjust the position sizes until every greek sits inside its limit, then look at the worst cell of the matrix. It is entirely possible — and on this book, easy — to be green on every greek and red on the scenario, because the greeks are measuring the middle of the grid and the limit that matters lives in a corner.</p>

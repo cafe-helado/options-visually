@@ -63,7 +63,7 @@
       <tr><td>Adverse selection</td><td>The tendency for your fills to arrive precisely when your quote is wrong, because that is when informed traders choose to trade.</td></tr>
       <tr><td>Open interest</td><td>Contracts outstanding. Distinct from volume, and a better guide to where risk sits.</td></tr>
       <tr><td>Dealer gamma</td><td>The net gamma held by market makers, inferred rather than observed.</td></tr>
-      <tr><td>Pinning</td><td>The tendency of a stock to finish near a strike with large open interest on expiration.</td></tr>
+      <tr><td>Pinning</td><td>The tendency of a stock to finish near a strike with large <span class="term" data-t="Open interest" data-def="The number of contracts currently outstanding, as opposed to volume, which counts what traded today. Open interest is the position the market is carrying; volume is the churn.">open interest</span> on expiration.</td></tr>
       <tr><td>Price impact</td><td>How much a given amount of buying or selling moves the price. Estimated, regime-dependent, and the key parameter of chapter 05.</td></tr>
     </table>
   </details>
@@ -106,6 +106,30 @@
     </div>
     <figcaption>The curve is essentially 1/vega, and vega collapses in the wings and toward expiry — so the cost of a tick explodes exactly where options are cheapest. That inversion is why the cheapest options are the most expensive to trade.</figcaption>
   </figure>
+  <details class="derive">
+    <summary>Derivation — why one tick is worth 300 times more on one option than another</summary>
+    <div class="body">
+      <p>A quoted price and a quoted volatility are the same information in different units. The exchange rate between them is vega.</p>
+      <div class="mline">Δσ = Δprice / vega</div>
+      <p class="mread">Reads as: <b>to convert a price move into a volatility move, divide by how much the option's price changes per volatility point.</b> Everything about this chapter is that one division.</p>
+      <p>So the volatility value of a fixed tick is not a property of the tick. It is a property of the denominator, and vega collapses in exactly the situations where the tick does not.</p>
+      <div class="mline">vega = S·e<sup>−qT</sup>·n(d<sub>1</sub>)·√T</div>
+      <p class="mread">Reads as: <b>vega is large when there is time left and the option is near the money, and vanishes otherwise.</b> The √T kills short expiries; the n(d₁) kills far strikes.</p>
+      <p>Both factors shrink together on a short-dated out-of-the-money option, so the denominator becomes tiny while the numerator stays fixed at one cent. That is the whole explanation for the 0.04-versus-11.57 figure in the table: the numerator never changed.</p>
+      <p><b>Where it breaks.</b> The conversion assumes there <em>is</em> an implied volatility to move — that the quoted price sits inside the no-arbitrage bounds and the option has enough value to invert. On the deepest, shortest options the price is essentially all intrinsic and the implied volatility is barely identified, so a one-tick move can imply an enormous volatility change or none at all depending on rounding. At that point the vol quote is an artefact of the price grid rather than a measurement, which is why desks stop quoting those series in volatility and start quoting them in cents.</p>
+    </div>
+  </details>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the expiry to seven days and drag the strike far out of the money. <b>Predict</b> roughly how many volatility points one cent is worth before you read it — most people are out by a factor of ten.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"days":7,"vol":0.6}' data-focus="cvTick">Seven days, high vol</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"days":180,"vol":0.3}' data-focus="cvTick">Six months, calm</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"days":7,"tick":0.05}' data-focus="cvTick">Nickel ticks on a weekly</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -153,6 +177,16 @@
     </div>
     <figcaption>The components are illustrative weights rather than measured ones — no desk publishes this decomposition. What is not illustrative is the ordering: on most options, edge is the smallest term, which is why market making is a volume business and why a small change in fees or hedging cost moves quoted spreads visibly.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Take toxicity to zero — imagine a market with no informed traders at all. <b>Predict</b> whether the spread collapses to nothing, and if not, what is left.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"tox":0}' data-focus="cvSpread">Nobody is informed</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"tox":1}' data-focus="cvSpread">Everybody might be</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"liq":0.2,"tox":0.5}' data-focus="cvSpread">Illiquid underlying</button>
+    </div>
+  </div>
+
 </section>
 
 <!-- ══════════ 03 ══════════ -->
@@ -168,7 +202,7 @@
     <p>You quote a two-sided market some number of vol points wide around your fair value. Flow arrives. <b>Uninformed traders</b> hit your quote because they want the option — the tighter you are, the more of them you win. <b>Informed traders</b> only trade when your quote is wrong by more than their edge, which means every fill from them is a fill you did not want.</p>
     <p>Quote too tight and the arithmetic is brutal. At a 0.20 vol-point half-width you get filled on <b>321</b> of 400 arrivals and lose <b>31.3</b> — you are winning enormous volume and most of the volume that matters is picking you off. Widen and volume collapses while P&amp;L per fill climbs; at 3.50 wide you make <b>2.41 per fill</b> and only trade six times.</p>
     <p>The optimum sits in between, around <b>1.2 vol points</b> in these settings, and it is the same shape as page 06's execution problem viewed from the other side of the trade — a quantity you want more of, against a cost that grows with getting it.</p>
-    <p>Watch the informed percentage column as you widen. It <em>rises</em>: informed traders are the last to be deterred, because they only trade when they have an edge big enough to cross your spread. You cannot widen your way out of adverse selection, only price it.</p>
+    <p>Watch the informed percentage column as you widen. It <em>rises</em>: informed traders are the last to be deterred, because they only trade when they have an edge big enough to cross your spread. You cannot widen your way out of <span class="term" data-t="Adverse selection" data-def="The cost of being filled by someone who knew more than you. It is not a fee — it is the systematic tendency of your fills to happen just before the price moves against you.">adverse selection</span>, only price it.</p>
   </div>
 
   <figure class="bleed">
@@ -195,6 +229,16 @@
     </div>
     <figcaption>Push the informed share up and the whole curve sinks — at high enough toxicity there is no width that makes money, which is precisely the state a market maker withdraws in. "The market went wide" is usually this, not a preference.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Quote absurdly tight — a tenth of a volatility point — and <b>predict</b> whether you make money on volume. Then widen until you barely trade.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"width":0.1}' data-focus="cvMM">Far too tight</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"width":1.2}' data-focus="cvMM">Near the optimum</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"width":3.5}' data-focus="cvMM">Far too wide</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -242,8 +286,18 @@
         <div class="kv" style="margin-top:20px" id="kv4"></div>
       </div>
     </div>
-    <figcaption>Illustrative shapes, but the concentration is real and it is stronger than most people expect: the top handful of strikes routinely carry the majority of a chain's open interest, which is what makes the pinning mechanism in chapter 06 possible at all.</figcaption>
+    <figcaption>Illustrative shapes, but the concentration is real and it is stronger than most people expect: the top handful of strikes routinely carry the majority of a chain's open interest, which is what makes the <span class="term" data-t="Pinning" data-def="A stock finishing unusually close to a strike on expiration. One mechanism is dealers hedging a long gamma position, which mechanically buys weakness and sells strength.">pinning</span> mechanism in chapter 06 possible at all.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Concentrate the open interest hard into the front month and <b>predict</b> what happens to everything outside it.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"conc":2.5}' data-focus="cvLiq">Heavily concentrated</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"conc":0.4}' data-focus="cvLiq">Evenly spread</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"skewOI":0.9}' data-focus="cvLiq">Put-heavy open interest</button>
+    </div>
+  </div>
+
 </section>
 
 <!-- ══════════ 05 ══════════ -->
@@ -286,6 +340,16 @@
     </div>
     <figcaption>Drag impact to zero and the three distributions collapse onto each other. That is the honest headline: dealer gamma is a mechanism with a threshold, and whether any particular market is above the threshold is a question about volumes rather than about options.</figcaption>
   </figure>
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Drop the price impact toward zero, keeping dealer gamma large. <b>Predict</b> whether pinning survives on positioning alone.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"impact":0.00002}' data-focus="cvPin">Impact almost nil</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"impact":0.0012}' data-focus="cvPin">Impact well above threshold</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"gamma":-4000,"impact":0.0006}' data-focus="cvPin">Dealers short gamma instead</button>
+    </div>
+  </div>
+
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -340,6 +404,163 @@
   </figure>
 </section>
 
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>What a market maker's day actually optimizes</h2>
+    <p class="dek">Not the direction of the stock. Inventory, and the price of being wrong about it.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The popular picture of a market maker is someone with a view who trades on it. The real job is closer to the opposite: quote both sides, try to end the day with as little position as possible, and get paid the spread for the service. The optimisation is over <b>inventory</b>, not over price.</p>
+    <p>That changes what the quotes are for. A market maker who is long too much does not simply hedge and carry on — they <b>skew</b>: they move both bid and offer down, so that selling becomes more likely and buying less likely, and the position drifts back toward flat on its own. The skew is the inventory control, and it is why the mid-price you observe is not the market maker's estimate of fair value. It is fair value plus a position adjustment you cannot see.</p>
+    <p>Three consequences follow, and each explains something that looks irrational from outside.</p>
+    <p><b>The quote moves when nothing happened.</b> A market can reprice by a tick with no trade in the underlying and no news, because someone's inventory changed. Reading that as information is a mistake, and it is a common one.</p>
+    <p><b>Size is priced separately from price.</b> The quote you see is for the quoted size. Asking for ten times that is a different trade with a different price, because it moves the maker's inventory ten times as far and the skew has to pay for it.</p>
+    <p><b>Widening is a position statement.</b> A maker who has been picked off repeatedly on one side widens that side specifically. An asymmetric market is usually a maker telling you what they already own.</p>
+    <p>The figure runs a day. Orders arrive, the maker quotes with a skew proportional to inventory, and the position wanders. Turn the inventory aversion up and the position hugs zero while the spread capture falls, because skewing away from the market costs you fills. Turn it down and you capture more spread and end the day with a position you did not choose — and the P&amp;L standard deviation, which is the number a risk manager cares about, grows with it.</p>
+    <p>The result is the same shape as page 06's U-curve and page 05's own quoting simulation: an interior optimum between two costs that run in opposite directions. It is worth noticing how often that shape has turned up in this series, because it is what almost every real trading decision looks like once both sides of it are priced.</p>
+  </div>
+
+  <div class="mline">quote mid = fair value − k · inventory</div>
+  <p class="mread">Reads as: <b>the price you are shown is the maker's estimate of value, shifted by how much they already own.</b> k is how aggressively they want the position gone.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>One day of inventory, with and without skewing</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>With inventory skew</span>
+            <span><i class="swl" style="background:var(--grey)"></i>No skew</span>
+          </span>
+        </div>
+        <canvas id="cvInv" height="270"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Spread captured against end-of-day risk</h3></div>
+        <canvas id="cvInvT" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The maker</h4>
+        <div id="ctlInv"></div>
+        <div class="btnrow"><button class="act" id="runInv">Run the day again</button></div>
+        <div class="kv" style="margin-top:20px" id="kvInv"></div>
+      </div>
+    </div>
+    <figcaption>The lower panel is the trade-off, and the two ends of it are both bad. At zero aversion you capture the most spread and go home with a position whose overnight risk dwarfs it. At high aversion your inventory is beautifully flat and you have barely traded. The desk lives in the middle, and where exactly depends on how much capital is behind it.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set inventory aversion to zero and <b>predict</b> whether the day's spread capture or the end-of-day position risk grows faster as you turn it back up.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cinv" data-patch='{"aversion":0}' data-focus="cvInv" data-then="runInv">Quote flat, never skew</button>
+      <button class="act ghost" data-preset="cinv" data-patch='{"aversion":0.9}' data-focus="cvInv" data-then="runInv">Obsessively flat</button>
+      <button class="act ghost" data-preset="cinv" data-patch='{"aversion":0.25}' data-focus="cvInv" data-then="runInv">A working desk</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A market maker's quote drops a tick with no trade in the underlying and no news. What is the most likely explanation?</p>
+    <div class="opts">
+      <button>They have received information you have not</button>
+      <button data-ok="1">Their inventory changed. Quotes carry a skew proportional to position, so the mid moves when the maker's book moves — with no view about value at all</button>
+      <button>An error in their pricing model</button>
+      <button>The underlying's implied volatility fell</button>
+    </div>
+    <div class="ans"><b>Their inventory changed.</b> The observed mid is fair value plus a position adjustment, and the adjustment is invisible from outside. Treating every quote move as information is how people end up chasing a market that is only trying to go home flat — and it is the reason a single maker's mid is a worse estimate of fair value than the consensus across several.</div>
+  </div>
+</section>
+
+<!-- ══════════ quiz ══════════ -->
+<section class="chapter" id="cq">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Questions across the page.</p>
+  </div>
+
+  <div class="prose" style="margin-bottom:26px"><p>Answer without scrolling back. Each explanation names the chapter to revisit.</p></div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">One cent on a 180-day at-the-money option is 0.04 vol points. Roughly what is it on a 7-day 5-delta?</p>
+    <div class="opts">
+      <button>About the same — a cent is a cent</button>
+      <button data-ok="1">About 11.6 volatility points, because vega has collapsed and the tick has not</button>
+      <button>About 0.4 volatility points</button>
+      <button>It cannot be computed</button>
+    </div>
+    <div class="ans"><b>About 11.6 points — nearly 300 times more.</b> The tick is fixed in price and wildly variable in volatility, because the conversion divides by vega and vega vanishes for short-dated far strikes.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">What is left in a bid–offer spread if no trader is informed?</p>
+    <div class="opts">
+      <button>Nothing — the spread collapses to zero</button>
+      <button data-ok="1">Hedge cost, inventory risk, fees and the maker's required edge. Adverse selection is one component of four, not the whole spread</button>
+      <button>Only exchange fees</button>
+      <button>Only the tick size</button>
+    </div>
+    <div class="ans"><b>Most of it survives.</b> Adverse selection is the component people name because it is the interesting one, but a maker still has to hedge, carry inventory, pay fees and earn something.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">You widen your quoted market. What happens to the share of your fills that are informed?</p>
+    <div class="opts">
+      <button>It falls, since fewer people trade with you</button>
+      <button data-ok="1">It rises. Informed traders are the last to be deterred by a wider spread, so widening manages the size of adverse selection but never its composition</button>
+      <button>It is unchanged</button>
+      <button>It falls to zero once you are wide enough</button>
+    </div>
+    <div class="ans"><b>It rises.</b> This is the counterintuitive result from the quoting simulation: widening filters out uninformed flow first, because the informed trader's edge still clears the wider spread. You trade less and a larger fraction of what remains is against you.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 05</span>
+    <p class="q">Under what condition does dealer gamma actually pin a stock?</p>
+    <div class="opts">
+      <button>Whenever dealers are long gamma</button>
+      <button data-ok="1">Only when hedging flow is large relative to normal volume — below that price-impact threshold the effect vanishes into the noise entirely</button>
+      <button>Only on quarterly expirations</button>
+      <button>Whenever open interest exceeds daily volume</button>
+    </div>
+    <div class="ans"><b>Only above a flow-size threshold.</b> The narrative is usually stated without this condition, and the condition is what makes it a claim rather than a story. Below it the simulated effect disappears completely.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 06</span>
+    <p class="q">A stock settles one cent in the money against a strike you are short. What is the risk?</p>
+    <div class="opts">
+      <button>One cent per share</button>
+      <button data-ok="1">A position-level exposure — you are assigned and short the shares over the weekend, with overnight risk hundreds of times the intrinsic exchanged</button>
+      <button>None; the option expires worthless</button>
+      <button>Only the transaction cost of closing</button>
+    </div>
+    <div class="ans"><b>A position, not a cent.</b> Page 08 puts the numbers on it: $20 of intrinsic against roughly $3,800 of weekend risk on ten contracts. Expiry closes the option, not the stock position it delivers.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 07</span>
+    <p class="q">Why does a market maker skew their quotes?</p>
+    <div class="opts">
+      <button>To express a view on direction</button>
+      <button data-ok="1">To manage inventory. Moving both sides shifts the probability of buying versus selling, which pulls the position back toward flat without needing a hedge</button>
+      <button>To comply with quoting obligations</button>
+      <button>To widen the spread without appearing to</button>
+    </div>
+    <div class="ans"><b>Inventory management.</b> The mid you observe is fair value plus a position adjustment, which is why a maker's quote can move with no news and why asking for size is a different trade from the one on the screen.</div>
+  </div>
+
+</section>
 </main>
 
 <footer>
@@ -687,7 +908,77 @@ const s5={impact:.0006,gamma:4000,steps:80,noise:.35};
   ],s5,()=>{draw();},"c6");
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();}
+
+/* ══════════ 07 — a market maker's day, optimising inventory ══════════ */
+const sInv={aversion:0.25,arrivals:300,edge:0.9,vol:0.30};
+(function(){
+  sliders(document.getElementById("ctlInv"),[
+    {id:"aInv",k:"aversion",lbl:"k",name:"Inventory aversion",min:0,max:1,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"bInv",k:"arrivals",lbl:"N",name:"Orders arriving",min:50,max:800,step:10,fmt:v=>v.toFixed(0)},
+    {id:"cInv",k:"edge",lbl:"e",name:"Half-spread earned",min:.1,max:2.5,step:.05,fmt:v=>v.toFixed(2)},
+    {id:"dInv",k:"vol",lbl:"σ",name:"Underlying vol",min:.1,max:.9,step:.01,fmt:pct}
+  ],sInv,()=>run(),"cinv");
+  let sim=null;
+  function day(k){
+    const N=Math.round(sInv.arrivals);
+    let inv=0,cap=0;const path=[0];
+    const sd=sInv.vol/Math.sqrt(252)/Math.sqrt(N);
+    for(let i=0;i<N;i++){
+      /* skew shifts the probability of buying vs selling */
+      const p=0.5-k*Math.max(-1,Math.min(1,inv/25))*0.5;
+      const buy=Math.random()<p;
+      inv += buy?1:-1;
+      cap += sInv.edge;
+      path.push(inv);
+    }
+    return {inv,cap,path};
+  }
+  function run(){
+    const a=day(sInv.aversion), b=day(0);
+    const sweep=[];
+    for(let i=0;i<=20;i++){
+      const k=i/20;
+      let sc=0,si=0,n=6;
+      for(let m=0;m<n;m++){const d=day(k);sc+=d.cap;si+=d.inv*d.inv;}
+      sweep.push({k,cap:sc/n,risk:Math.sqrt(si/n)*100*sInv.vol/Math.sqrt(252)});
+    }
+    sim={a,b,sweep};draw();
+  }
+  document.getElementById("runInv").addEventListener("click",run);
+  window.drawInv=()=>{sim?draw():run();};
+  function draw(){
+    const {a,b,sweep}=sim;
+    const N=a.path.length-1;
+    let lo=0,hi=0;
+    a.path.concat(b.path).forEach(v=>{lo=Math.min(lo,v);hi=Math.max(hi,v);});
+    const o=Fig(document.getElementById("cvInv"),{h:270,x0:0,x1:N,y0:lo-3,y1:hi+3,pad:{l:54}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(0),5,4);
+    clip(o,()=>{
+      line(o,[0,N],[0,0],C("--grey"),1.2,[3,3]);
+      line(o,b.path.map((_,i)=>i),b.path,C("--grey"),1.6);
+      line(o,a.path.map((_,i)=>i),a.path,C("--blue"),2.4);
+    });
+    const sx=sweep.map(s=>s.k), sc=sweep.map(s=>s.cap), sr=sweep.map(s=>s.risk);
+    const o2=Fig(document.getElementById("cvInvT"),{h:200,x0:0,x1:1,y0:0,y1:Math.max(Math.max.apply(null,sc),Math.max.apply(null,sr))*1.15,pad:{l:54}});
+    axes(o2,v=>v.toFixed(2),v=>v.toFixed(0),5,4);
+    clip(o2,()=>{
+      line(o2,sx,sc,C("--moss"),2.4);
+      line(o2,sx,sr,C("--verm"),2.4);
+    });
+    vline(o2,sInv.aversion,C("--ink"),"k");
+    document.getElementById("kvInv").innerHTML=kvHTML([
+      ["Inventory aversion",sInv.aversion.toFixed(2)],
+      ["Orders",String(Math.round(sInv.arrivals))],
+      ["End inventory (skewed)",a.inv.toFixed(0)],
+      ["End inventory (no skew)",b.inv.toFixed(0)],
+      ["Spread captured",a.cap.toFixed(0)],
+      ["Overnight risk on that position",(Math.abs(a.inv)*100*sInv.vol/Math.sqrt(252)).toFixed(0)],
+      ["Capture / risk",Math.abs(a.inv)>0?(a.cap/(Math.abs(a.inv)*100*sInv.vol/Math.sqrt(252))).toFixed(2):"—"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();drawInv();}
 LAB.boot(drawAll);
 
 </script>
