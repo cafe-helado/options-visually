@@ -254,25 +254,74 @@ Chapters
 
 ---
 
-## 08 · Early Exercise and Assignment
+## 08 · A Decision Worth Exactly Nothing  ✅ live (early-exercise.html)
 
 **Spine:** the American premium is the value of a decision, and most of the time that
 value is zero. Knowing exactly when it is not is a real edge and is mostly arithmetic.
 
-Signature: the exercise boundary as a live curve you can drag a dividend across —
-watch the optimal-exercise region appear and vanish.
+Signature as built: American and European priced in the *same* CRR tree, with a residual
+panel underneath. Across 600 cases — spot 60 to 180, expiries one month to two years,
+vol 15% to 60%, rates 0% to 10% — the worst gap is **1.85e-13**. The panel does not lift
+off the axis for any slider. Switch the contract to a put and it lifts immediately.
 
-Chapters
-- Why an American call on a non-dividend payer is never exercised early — and the
-  one-line proof
-- Dividends change that — the boundary condition, and the screen you run the night
-  before an ex-date
-- American puts are different — rates, not dividends, drive it
-- Assignment mechanics — random allocation, what actually lands in your account
-- Pin risk on expiration and the do-not-exercise decision
-- Corporate actions — adjusted deliverables, ratio changes, merger elections, and why
-  the greeks survive a clean ratio adjustment but not a composition change
-- Tender offers and 14e-4 — the compliance edge nobody writes about
+The unifier that turned out to organise the whole page: **exercising early costs exactly
+the option's time value**, and parity splits time value into two named pieces.
+
+    time value  =  K(1 - e^-r.tau)  +  p(S)
+                   interest floor     insurance
+
+Checked live against the pricer; worst residual over 1,728 ITM cases is **4.42e-14**.
+Every chapter is then the same subtraction with a different quantity on the left:
+a dividend (03), the interest on the strike (04), a tender premium (09).
+
+Second signature: the call rule is **exact** — after the ex-date there are no more
+dividends, so the surviving call is European and parity prices it with no approximation.
+The put rule is not, and the page shows the gap. The one-line European test overshoots
+the tree's true boundary by **6.9 to 9.5 points of spot** at three to six months, in the
+direction that over-exercises. Use it to rule out, never to rule in.
+
+Verified numbers
+- The interest floor is a hard filter needing no vol and no spot: on a 100 strike at
+  4.5%, a dividend must clear 8.6c at a week, 36.9c at a month, $1.10 at three months.
+  The breakeven dividend decays *to* the floor and never below it — at 45 days it is
+  4.36 at S=104, 1.27 at S=112, 0.5541 at S=140 against a floor of 0.5533.
+- Put early-exercise premium is made of rates: on a 1y 100-strike put at 30 vol, S=80,
+  it is 0.000 at r=0, 1.439 at 4.5% (7.2% of the European), 5.090 at 12% (34%). At zero
+  rates the boundary does not exist at any time remaining.
+- Volatility moves the put boundary the opposite way to instinct: 87 at 15 vol, 42 at
+  60 vol, nine months out at 4.5%.
+- Assignment is binomial, not proportional. Short 50 contracts into a 40% exercise
+  fraction: 2,000 shares expected, sd 346, and only a **33.5%** chance of landing within
+  one contract of the mean.
+- Pin risk quantified: settle at 100.02 short ten 100-strike calls and you collect $20
+  of intrinsic against $2,205 of one-day and $3,820 of weekend risk — **191x**.
+- Ratio adjustments preserve everything. A 2:1 split moves position value, dollar delta,
+  gamma cash and vega with residual 0.00e+0 (3:2 gives -9.09e-13); only share delta
+  scales. Black-Scholes is homogeneous of degree one, so a split is a change of units.
+- A composition change does not. An all-cash deal at $85 on a stock at $84 sends the
+  6-month 90 call from 7.80 to **zero** and the 85 call from 9.85 to zero, while the
+  70 call falls 18.48 to 14.67 and vega goes to zero everywhere. The stock goes up and
+  every call on it goes down.
+- Tender offers are the third exercise trigger and reuse the same equation with the
+  tender premium in the dividend's place. Deal vol collapses, so the insurance half of
+  the hurdle vanishes and the floor is nearly the whole cost — which is why tenders
+  produce early exercise so reliably.
+
+Chapters as built
+- The right to exercise early is worth zero — the residual panel, and the one-line proof
+- Exercising early costs exactly the time value — the identity table, interest + insurance
+- Only a dividend can pay for it — the boundary S*(tau), draggable, and the hard filter
+- The put runs on interest instead — the tree boundary against the shortcut that overshoots
+- The screen you run the night before — a live chain, sorted by edge, with dollars at stake
+- Assignment is a lottery you are already in — the binomial and its dollar consequence
+- Twenty dollars of intrinsic, two thousand of risk — pin risk and exercise by exception
+- A ratio change survives; a composition change does not — corporate actions
+- The third reason nobody writes down — tender offers and the net-long requirement
+- Drills — interest floor, exercise edge, expected assignment, adjusted strikes
+
+Constraint honoured throughout: the mathematics is checked numerically, the market
+plumbing (auto-exercise thresholds, allocation method, tender rules) is labelled as
+convention, dated, and taught as mechanism rather than rulebook.
 
 ---
 

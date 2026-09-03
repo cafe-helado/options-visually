@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Early Exercise and Assignment — Options, visually</title>
+<meta name="description" content="The American premium is the value of a decision, and almost always that value is exactly zero. The exercise boundary, dividend capture, assignment as a lottery, pin risk, corporate actions and tender offers.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Early Exercise and Assignment — Options, visually">
+<meta property="og:description" content="The American premium is the value of a decision, and almost always that value is exactly zero. The exercise boundary, dividend capture, assignment as a lottery, pin risk, corporate actions and tender offers.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 08 · Early Exercise and Assignment</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Worth nothing</span><i></i></a>
+  <a href="#c2"><span>What it costs</span><i></i></a>
+  <a href="#c3"><span>The boundary</span><i></i></a>
+  <a href="#c4"><span>The put</span><i></i></a>
+  <a href="#c5"><span>The screen</span><i></i></a>
+  <a href="#c6"><span>Assignment</span><i></i></a>
+  <a href="#c7"><span>Pin risk</span><i></i></a>
+  <a href="#c8"><span>Corporate actions</span><i></i></a>
+  <a href="#c9"><span>Tenders</span><i></i></a>
+  <a href="#c10"><span>Drills</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 08</div>
+    <h1>A decision worth <em>exactly</em> nothing</h1>
+    <p class="sub">An American option carries a right its European twin does not: exercise it whenever you like. Priced across six hundred cases, that right is worth 0.0000000000002. Knowing the handful of situations where it suddenly isn't is most of what this subject is.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">Almost everything on this page falls out of one equation, and that equation is put–call parity wearing a different hat. If you have read <a href="parity.html" style="color:var(--blue)">page 07</a> you already have it; if not, chapter 02 derives what you need in four lines.</p>
+  <ol>
+    <li><b>Chapters 01 and 02 are the whole argument.</b> Exercising early costs you the option's time value, always, exactly. Everything after that is a catalogue of the things that can be worth more than time value, and there are only three.</li>
+    <li><b>The call rule is exact; the put rule is not.</b> Chapter 03's criterion is arithmetic you can do on a phone. Chapter 04's needs a tree, and it shows how badly the phone version misses.</li>
+    <li><b>Chapters 06 and 07 are where the money actually goes.</b> The theory says which options should be exercised. Assignment says which of yours were, and that is a lottery with a standard deviation.</li>
+    <li><b>Market plumbing is dated and provisional.</b> Auto-exercise thresholds, allocation methods and tender rules are conventions, not mathematics. They are labelled where they appear.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>K</td><td>Strike. The price you pay (call) or receive (put) on exercise.</td></tr>
+      <tr><td>τ</td><td>Time remaining <em>after</em> the decision point, in years. Not time to the decision — time from it to expiry.</td></tr>
+      <tr><td>D</td><td>The cash dividend going ex, per share. The only ordinary thing that can pay for exercising a call early.</td></tr>
+      <tr><td>p(S)</td><td>The European put struck at K with τ left. On this page it is not a trade, it is a <em>price tag</em> — the value of the insurance you throw away by exercising.</td></tr>
+      <tr><td>K(1−e<sup>−rτ</sup>)</td><td>The interest floor. What it costs to hand over the strike today instead of at expiry.</td></tr>
+      <tr><td>S*</td><td>The critical spot. Above it, exercising into the ex-date wins; below it, holding wins.</td></tr>
+      <tr><td>Boundary</td><td>For a put, the curve of spot prices below which immediate exercise is optimal. It moves with time remaining.</td></tr>
+      <tr><td>Exercise by exception</td><td>The clearing house exercising in-the-money options automatically unless told not to. Currently at one cent in the money.</td></tr>
+      <tr><td>Deliverable</td><td>What one contract actually delivers. Normally 100 shares. After a corporate action, whatever the adjustment memo says.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>The right to exercise early is worth zero</h2>
+    <p class="dek">Not small. Not usually negligible. Zero, to the last bit a double can hold — for a call on a stock that pays no dividend.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">An American option can be exercised at any moment up to expiry; a European one only at expiry. The American clearly has more rights, so it should cost more. Price both in the same binomial tree, on a stock that pays no dividend, and the difference is not merely small — it is zero at every spot, every volatility, every level of rates.</p>
+    <p>Six hundred cases, spanning spot from 60 to 180 against a 100 strike, expiries from a month to two years, volatility from 15% to 60%, and rates from zero to ten percent. The largest gap anywhere in that grid is <b>1.85 × 10<sup>−13</sup></b>, which is not a small number so much as a rounding artefact of arithmetic on floating point. The extra right is genuinely worthless.</p>
+    <p>The reason is one line, and it is worth having before the figure. If you exercise a call you receive <span class="term" data-t="Intrinsic value" data-def="What the option is worth if exercised right now: S − K for a call. The floor under its price, never the whole of it.">S − K</span>. If instead you sell the call to somebody else, you receive at least <b>S − Ke<sup>−rτ</sup></b>, because no call can trade below that without opening an arbitrage. And since <b>Ke<sup>−rτ</sup> &lt; K</b> whenever rates are positive, that is strictly <em>more</em> than <b>S − K</b>. Selling beats exercising. Always.</p>
+    <p>So the right is never used, and a right that is never used is worth nothing. Notice the argument never mentioned volatility, moneyness or time — which is why the residual panel below stays pinned to zero no matter which slider you drag.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>American and European, priced in the same tree</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>European</span>
+            <span><i class="swl" style="background:var(--verm)"></i>American</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Intrinsic</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>American minus European — the value of the extra right</h3></div>
+        <canvas id="cv1d" height="170"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The contract</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>The lower panel is the entire chapter. Drag anything — volatility to 60%, rates to 10%, expiry out to two years — and it does not lift off the axis, because the two curves above it are not close, they are the same curve. Switch the contract to a put and it lifts immediately, which is chapter 04.</figcaption>
+  </figure>
+
+  <div class="mline">c ≥ S − Ke<sup>−rτ</sup> &gt; S − K</div>
+  <p class="mread">Reads as: <b>a call is always worth more alive than dead.</b> The market will pay you the strike's discount for it; exercising throws that discount away.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set rates to zero. The inequality above collapses from strict to weak — exercise stops being strictly worse and becomes merely never better. <b>Predict</b>: does the residual panel finally lift off zero?</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"r":0}' data-focus="cv1d">Set rates to zero</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"r":0.045,"v":0.6,"T":2}' data-focus="cv1d">Back to normal, high vol</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long a deep in-the-money call on a non-dividend payer, delta 0.99, with three months left. You want the stock. What is the cheapest way to get it?</p>
+    <div class="opts">
+      <button>Exercise — at delta 0.99 the option is a stock substitute and the time value is gone</button>
+      <button data-ok="1">Sell the call and buy the stock. Even at delta 0.99 the call holds the interest on the strike, and exercising donates it</button>
+      <button>It makes no difference; the two are identical by parity</button>
+      <button>Exercise, because holding a 0.99-delta option wastes margin</button>
+    </div>
+    <div class="ans"><b>Sell the call and buy the stock.</b> "The time value is gone" is the misconception this whole page exists to kill. At delta 0.99 the <em>insurance</em> component is gone — the put is worth essentially nothing — but the other component is not. You still hold the right to pay K three months from now instead of today, and on a 100 strike at 4.5% that is worth about $1.10 per share. Exercising hands it to whoever is short. The one genuine argument on the other side is financing, and it points the same way: a long call ties up less capital than long stock, which is a reason to keep the call, not to exercise it.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — why the bound holds, and the assumptions in it</summary>
+    <div class="body">
+      <p>Consider two portfolios. The first is one call plus <b>Ke<sup>−rτ</sup></b> in cash. The second is one share.</p>
+      <div class="mline">at expiry: &nbsp; max(S<sub>T</sub> − K, 0) + K &nbsp; vs &nbsp; S<sub>T</sub></div>
+      <p class="mread">Reads as: <b>the call-plus-cash portfolio is never worth less than the share.</b> If the stock finishes above the strike they are equal; if below, the cash alone beats it.</p>
+      <p>A portfolio that is never worth less at expiry cannot be worth less today, or you would buy it, sell the share, and bank the difference. So <b>c + Ke<sup>−rτ</sup> ≥ S</b>, which rearranges to the bound. Since a call is also never negative, we can write it as <b>c ≥ max(S − Ke<sup>−rτ</sup>, 0)</b>.</p>
+      <p>Now compare with what exercise pays, <b>S − K</b>. Because <b>Ke<sup>−rτ</sup> &lt; K</b> for any positive rate and any positive time, the bound sits strictly above the exercise value. Not approximately above — strictly, everywhere, with a gap of exactly <b>K(1 − e<sup>−rτ</sup>)</b>, which is the number chapter 02 names.</p>
+      <p><b>Where it breaks.</b> Three places, and each is a later chapter. The argument assumed the share pays nothing over the option's life, which chapter 03 removes. It assumed rates are positive, and at exactly zero the strict inequality becomes weak. And it assumed the only thing you can do with a share is hold it, which chapter 09 removes when a tender offer makes shares temporarily worth more than their own market price. Outside those three, this is not a heuristic. It is a theorem, and the residual panel is what a theorem looks like when you plot it.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>Exercising early costs exactly the time value</h2>
+    <p class="dek">And time value has exactly two ingredients. Naming them turns every question on this page into subtraction.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 01 proved that exercising a call early is a mistake, but it did not price the mistake. It should, because the moment a dividend appears the question becomes quantitative: is what I gain by owning the share today larger than what I give up? The answer is clean enough to be surprising. What you give up is the option's <b>time value</b>, precisely, with no residual and no approximation.</p>
+    <p>Time value is the part of the price that is not intrinsic: <b>c − (S − K)</b> for a call that is in the money. Take put–call parity, <b>c − p = S − Ke<sup>−rτ</sup></b>, and rearrange it into that expression. Two terms fall out, and they are worth naming, because they are the two reasons anybody ever hesitates.</p>
+    <p>The first is the <span class="term" data-t="Interest floor" data-def="K(1−e^−rτ). The value of paying the strike at expiry instead of today. Independent of spot and volatility — the same number for a 5-delta call and a 99-delta call.">interest floor</span>, <b>K(1 − e<sup>−rτ</sup>)</b>: exercising means paying the strike now rather than later, and money now is worth more than money later. The second is the <b>put</b>, <b>p(S)</b>: holding the call means keeping a floor under your downside, and exercising converts you into a shareholder with no floor at all. Insurance and interest. That is the whole of time value.</p>
+    <p>The identity below is checked live against the Black–Scholes price. Drag any slider and the residual column stays at the tenth decimal — across 1,728 test cases the worst it ever got was <b>4.4 × 10<sup>−14</sup></b>. This matters more than it looks. It means you never need an option pricer to decide whether to exercise. You need a put quote, which is already on the screen in front of you.</p>
+  </div>
+
+  <div class="mline">time value &nbsp;=&nbsp; K(1 − e<sup>−rτ</sup>) &nbsp;+&nbsp; p(S)</div>
+  <p class="mread">Reads as: <b>what you throw away by exercising is the interest on the strike plus the insurance you were carrying.</b> Everything else on this page is a question about whether something is bigger than this.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The two ingredients, across moneyness</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--ochre)"></i>Interest floor</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Insurance (the put)</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Total time value</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Checked against the pricer, at the marked spot</h3></div>
+        <table class="idtab" id="idTab"></table>
+      </div>
+      <div class="rail panel">
+        <h4>The contract</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Notice what the ochre band does as you move right: nothing. The interest floor is flat in spot — the same number for an option that will certainly be exercised and one that certainly won't. The blue band carries the whole moneyness story, and it dies off deep in the money. That is why deep options are the ones exercised early: their time value has shrunk to just the floor, and the floor is the smallest hurdle a dividend ever has to clear.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Push spot to 180 on a 100 strike. The blue band vanishes and total time value collapses onto the ochre line. <b>Predict</b> the number it lands on before you look — then triple the volatility and see whether it moves.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"S":180,"v":0.28}' data-focus="cv2">Go deep in the money</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"S":180,"v":0.75}' data-focus="cv2">Now triple the volatility</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Two 100-strike calls, same 45 days to expiry, same stock. One is quoted on a 20 volatility, the other on a 60. Whose interest floor is bigger?</p>
+    <div class="opts">
+      <button>The 60-vol one — higher volatility means more time value</button>
+      <button>The 20-vol one, since low volatility means the strike is more likely to be paid</button>
+      <button data-ok="1">Identical. K(1−e<sup>−rτ</sup>) contains no volatility term, no spot, and no distribution at all</button>
+      <button>It depends on which is further in the money</button>
+    </div>
+    <div class="ans"><b>Identical, and that is the useful part.</b> The floor is pure discounting: strike, rate, time. Volatility and spot enter time value only through the put. This is what makes the night-before screen in chapter 05 a two-column sort rather than a modelling exercise — you can rule out most of a chain using a number that needs no volatility input at all, and only then price the survivors.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — four lines from parity</summary>
+    <div class="body">
+      <p>Start with put–call parity for European options on a non-dividend payer.</p>
+      <div class="mline">c − p = S − Ke<sup>−rτ</sup></div>
+      <p class="mread">Reads as: <b>a call minus a put is stock financed to expiry.</b> Page 07 builds this from scratch; here we only rearrange it.</p>
+      <p>Solve for the call, then subtract the intrinsic value <b>S − K</b>, which is what exercise would pay.</p>
+      <div class="mline">c − (S − K) = p + S − Ke<sup>−rτ</sup> − S + K</div>
+      <p class="mread">Reads as: <b>time value equals the put plus whatever is left of the strike terms.</b> The two spot terms cancel, which is why the answer contains no spot except through the put.</p>
+      <div class="mline">time value = p + K(1 − e<sup>−rτ</sup>)</div>
+      <p class="mread">Reads as: <b>insurance plus interest, and nothing else.</b></p>
+      <p><b>Where it breaks.</b> The parity relation used here is the European one, so <b>p</b> must be a European put value — not the American put quoted on the screen beside it, which is worth more, and chapter 04 shows by how much. For short-dated options on a liquid name the difference is pennies and the screen quote is fine. For a long-dated put on a high-rate, low-volatility name it is not, and substituting the quote will make you exercise calls you should have kept. The second failure is the dividend the derivation assumed away: once the stock pays one before expiry, parity itself picks up a term — which is precisely what makes the next chapter possible.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>Only a dividend can pay for it</h2>
+    <p class="dek">And most dividends can't. There is a floor a dividend must clear before exercise is possible at any spot, on any stock, at any volatility.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A dividend is the one ordinary thing that makes owning the share today better than owning the right to it. If you hold the stock through the ex-date you collect <b>D</b>; if you hold the call you do not, and the stock drops by roughly <b>D</b> underneath you. So on exactly one day in the option's life — the last moment before the stock goes ex — the calculation of chapter 02 has something on the other side of it.</p>
+    <p>Exercise then and you gain <b>D</b>. You give up the time value, which chapter 02 priced. Set gain against cost and the rule is one line of arithmetic with no pricer in it.</p>
+  </div>
+
+  <div class="mline">exercise into the ex-date &nbsp;⟺&nbsp; D &gt; K(1 − e<sup>−rτ</sup>) + p(S − D)</div>
+  <p class="mread">Reads as: <b>take the dividend only if it beats the interest you give up plus the insurance you give up.</b> τ is the time from the ex-date to expiry, and the put is valued at the ex-dividend price because that is what the stock will be worth the moment after.</p>
+
+  <div class="prose">
+    <p>This rule is <em>exact</em>, and the reason is chapter 01. After the ex-date there are no more dividends, so from that instant the American call is a European call and the only comparison that matters is the one above. This is a genuine closed form, not an approximation — which is unusual enough in American option pricing to be worth saying out loud, and it is why the call side of this subject is arithmetic while the put side needs a tree.</p>
+    <p>Two consequences fall straight out. The first is a hard filter. Because <b>p</b> is never negative, no dividend below the interest floor can ever be worth taking — not on the deepest call in the chain, not on the least volatile stock in the market. On a 100 strike at 4.5% rates, that floor is <b>8.6 cents</b> with a week to run, <b>36.9 cents</b> with a month, and <b>$1.10</b> with three months. A quarterly dividend of twenty cents against a three-month expiry is not a close call; it is not a call at all.</p>
+    <p>The second is what the boundary curve does. Solve the rule for the spot at which it just balances and you get <b>S*</b>, the critical price: exercise above it, hold below it. As the ex-date moves closer to expiry, τ shrinks, both terms on the right shrink, and <b>S*</b> falls toward the strike. As the ex-date moves earlier, <b>S*</b> runs away upward and then simply ceases to exist — there is no spot high enough, because the insurance term dies but the interest floor does not.</p>
+    <p>Drag the dividend in the figure and watch the region appear. At <b>D = 0.20</b> with 28 volatility there is a sliver of exercise territory inside two weeks of expiry and nothing beyond it. At <b>D = 2.40</b> the region has swallowed most of the panel and a call only 2.4% in the money should be exercised with a month to run.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The exercise region, as a dividend moves across it</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>S* — exercise above</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Strike</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Your spot</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="320"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>At your spot and your ex-date: what you gain, what you give up</h3></div>
+        <canvas id="cv3w" height="150"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The situation</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Watch the shaded region, not the curve. Below about forty cents of dividend it detaches from the right-hand edge entirely and there is no spot, however high, at which exercising is right — the curve stops existing rather than going off the top of the chart. That discontinuity is the interest floor doing its work, and it is the single most useful thing on this page for clearing a screen quickly.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the dividend to 30 cents with 60 days to expiry. <b>Predict</b> where S* sits — 130? 200? Then look: the curve is not there at all. Now walk the ex-date in to 10 days without touching the dividend.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"D":0.30,"days":60}' data-focus="cv3">Thirty cents, sixty days</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"D":0.30,"days":10}' data-focus="cv3">Same dividend, ten days</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"D":2.40,"days":30,"S":103}' data-focus="cv3w">A dividend that pays</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A stock at 118 pays a 55-cent dividend tomorrow. You are long the 100-strike calls, and there are four months to expiry. Rates are 4.5%. Do you exercise?</p>
+    <div class="opts">
+      <button>Yes — the calls are 18% in the money, so the time value is negligible</button>
+      <button data-ok="1">No, and you can rule it out without a pricer: the interest floor alone is about $1.49, nearly three times the dividend</button>
+      <button>Yes, if the 100-strike put is quoted below 55 cents</button>
+      <button>Only if the stock's volatility is under 20</button>
+    </div>
+    <div class="ans"><b>No, and the floor settles it before you look at anything else.</b> K(1−e<sup>−rτ</sup>) with K = 100, r = 4.5% and τ = 4/12 is $1.4888. The dividend is 55 cents. Since the put can only add to the hurdle, no volatility assumption and no put quote can rescue this. The third answer is the tempting one because it uses the right equation — it just forgets that the equation has two terms on the right, and here the term people ignore is three times the size of the one they check.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — the rule, and why it is exact rather than approximate</summary>
+    <div class="body">
+      <p>Stand at the instant before the stock goes ex. Spot is <b>S</b>. You have two choices.</p>
+      <p><b>Exercise.</b> You pay <b>K</b>, receive the share worth <b>S</b>, and hold it through the ex-date, so you also collect <b>D</b>. But collecting <b>D</b> is not a gain relative to the share price — the share drops to <b>S − D</b> and you hold <b>D</b> in cash, so your position is worth <b>S − K</b>. That is the exercise value, as usual.</p>
+      <p><b>Hold.</b> A moment later the stock is at <b>S − D</b> and you own a call with <b>τ</b> to run on a stock that will pay nothing more. By chapter 01 that call is European, so parity prices it exactly.</p>
+      <div class="mline">c(S − D) = (S − D) − Ke<sup>−rτ</sup> + p(S − D)</div>
+      <p class="mread">Reads as: <b>the surviving call is worth the ex-dividend stock, financed, plus the put.</b> No inequality and no approximation — the option really is European from here.</p>
+      <p>Exercising is better exactly when its value exceeds the surviving call's.</p>
+      <div class="mline">S − K &gt; S − D − Ke<sup>−rτ</sup> + p(S − D)</div>
+      <p class="mread">Reads as: <b>compare the two numbers directly.</b> The spot terms cancel, leaving only strike, dividend and put.</p>
+      <div class="mline">D &gt; K(1 − e<sup>−rτ</sup>) + p(S − D)</div>
+      <p class="mread">Reads as: <b>the dividend has to beat interest plus insurance.</b> The same two ingredients as chapter 02, now with something on the other side of the scale.</p>
+      <p><b>Where it breaks.</b> The exactness rests on there being no further dividend after this one, which is false for most of the year on most dividend payers — with two ex-dates left the option is not European after the first, and the honest version is a tree. In practice the rule stays close because the second dividend's effect on the surviving call is small compared with the first decision, but "close" is not "exact" and the distinction matters at the boundary. The other soft spot is <b>D</b> itself: you are using an announced dividend for a date that has not happened, and the stock does not always drop by the full amount on the ex-date. Tax treatment, index rebalancing and simple noise all move it, and the drop is only <em>on average</em> the dividend.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>The put runs on interest instead</h2>
+    <p class="dek">Same equation, roles swapped. The put's early-exercise value is made of rates, and at zero rates it does not exist.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Everything so far has been about calls, where the thing you gain by exercising early is a dividend and the thing you lose is interest. For puts both halves swap. Exercising a put means receiving <b>K</b> today rather than at expiry — you <em>gain</em> the interest — and it means giving up a call and any dividend you would have collected by not being short the share.</p>
+    <p>Write it in the same shape as chapter 03 and the symmetry is exact.</p>
+  </div>
+
+  <div class="mline">exercise the put &nbsp;⟸&nbsp; K(1 − e<sup>−rτ</sup>) &gt; D + c(S)</div>
+  <p class="mread">Reads as: <b>take the strike early only if the interest on it beats the dividends and the upside you are handing back.</b> Note the single arrow: unlike chapter 03 this is a necessary condition, not an exact one.</p>
+
+  <div class="prose">
+    <p>Two things follow immediately. First, set <b>r = 0</b> and the left side is zero while the right side cannot be negative — so a put on a non-dividend payer is never exercised early in a zero-rate world, and the American put collapses onto the European one. The figure shows this as a boundary that simply is not drawn: at zero rates there is no spot, at any time remaining, where exercise wins.</p>
+    <p>Second, turn rates up and the premium becomes large fast. On a 100-strike one-year put at 30 volatility with spot at 80, the early-exercise right is worth <b>nothing</b> at zero rates, <b>1.44</b> at 4.5% — 7.2% of the option's value — and <b>5.09</b> at 12%, which is a third of the European price again. This is not a rounding term. A firm marking American puts with a European model in a high-rate regime is marking them wrong by a visible amount.</p>
+    <p>Now the part that separates this chapter from the last one. The arrow above points one way on purpose. The condition compares exercising now against <em>holding to expiry</em>, but you have a third option — hold for a while and exercise later — and that option is worth something. So passing the test is necessary for exercise to be optimal but not sufficient, and the boundary it produces sits <b>above</b> the true one. Measured against a 900-step tree, the shortcut overshoots by <b>6.9 to 9.5 points</b> of spot at three to six months, consistently, across every rate tested.</p>
+    <p>That is a large error and it has a usable shape: the shortcut over-exercises. Use it to rule options <em>out</em> — if the quick test fails, exercise is definitely wrong — and never to rule one in. Ruling in needs the tree, and the figure draws the tree's answer.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The put's exercise boundary against time remaining</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>True boundary (tree)</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>The one-line shortcut</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Strike</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="310"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>What the early-exercise right is worth, against rates</h3></div>
+        <canvas id="cv4p" height="180"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The contract</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>The gap between the two curves is the point. The ochre line is the arithmetic you can do in your head and it is wrong by seven to nine points of spot in the direction that costs you money — it tells you to exercise while the tree says keep holding. Slide rates to zero and both curves disappear, which is the cleanest statement of what a put's American premium is actually made of.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Take rates to zero and watch both boundaries vanish. Then <b>predict</b> what raising volatility does to the boundary at 8% rates — does a more volatile stock make you exercise sooner or later? — and check.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"r":0}' data-focus="cv4">Zero rates</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"r":0.08,"v":0.15}' data-focus="cv4">High rates, low vol</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"r":0.08,"v":0.60}' data-focus="cv4">High rates, high vol</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Volatility on your name doubles overnight. You are long a deep in-the-money American put that you had been planning to exercise. What happens to the exercise boundary?</p>
+    <div class="opts">
+      <button>It rises — more volatility means more chance of the stock falling further, so exercise sooner</button>
+      <button data-ok="1">It falls sharply. The call you give up is worth more now, so the stock has to be far lower before abandoning it makes sense</button>
+      <button>It is unchanged; the boundary depends only on rates and time</button>
+      <button>It rises to the strike, since a volatile stock could rebound above K</button>
+    </div>
+    <div class="ans"><b>It falls, and by a lot.</b> At 4.5% rates with nine months left, the boundary is 87 at 15 volatility and 42 at 60 volatility — the same option, the same rates, a boundary in a completely different place. The term you are giving up is <b>c(S)</b>, the upside you still own, and volatility is what makes that upside valuable. The first answer confuses the reason you own the put with the reason you would kill it: more volatility is exactly why you should keep the optionality rather than convert it into cash.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — the swap, and why the put has no closed form</summary>
+    <div class="body">
+      <p>Exercising a put pays <b>K − S</b>. Holding it, if we pretend for a moment it is European with a dividend <b>D</b> to come, is worth <b>p</b>, and parity with a dividend gives:</p>
+      <div class="mline">c − p = S − De<sup>−rt<sub>d</sub></sup> − Ke<sup>−rτ</sup></div>
+      <p class="mread">Reads as: <b>a call minus a put is the stock less the dividends you don't get, financed to expiry.</b> The dividend term is what the call holder forgoes and the put holder is spared.</p>
+      <p>Rearranging for the put's time value, <b>p − (K − S)</b>, gives the mirror of chapter 02.</p>
+      <div class="mline">p − (K − S) = c(S) + De<sup>−rt<sub>d</sub></sup> − K(1 − e<sup>−rτ</sup>)</div>
+      <p class="mread">Reads as: <b>the put's time value is the upside you keep, plus the dividends you avoid, minus the interest you are not yet earning on the strike.</b> That last term is negative, which is the whole reason early exercise is ever possible.</p>
+      <p>Exercise beats holding-to-expiry exactly when that time value is negative, which is the condition in the chapter. But the American put's continuation value is not the European price — it is the European price plus the value of the exercise decisions still ahead of you, and that quantity has no closed form. The free boundary and the option value have to be solved for together, which is what the tree does by working backwards from expiry.</p>
+      <p><b>Where it breaks.</b> The tree's boundary is only as good as its assumptions, and two matter here. It assumes constant volatility, while the real boundary depends on the volatility you will face <em>after</em> the decision, which nobody knows. And it assumes you can hold the position — a put you are long is your decision, but the boundary is also being used to guess whether the person long the put against your short will exercise, and they may be margin-constrained, taxed differently, or simply not paying attention. Chapter 06 is about the gap between what should be exercised and what is.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>The screen you run the night before</h2>
+    <p class="dek">Two columns, one sort, and a number at the bottom that is usually larger than people expect.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The theory in chapters 02 and 03 becomes a job the afternoon before an ex-date. You have long calls across a chain; some should be exercised by five o'clock and the rest should not; and the cost of getting it wrong in either direction is real money that nobody will ever tell you about, because an unexercised call does not generate a trade confirmation saying what you lost.</p>
+    <p>The screen is the rule from chapter 03, applied strike by strike, with the put quote taken off the market rather than modelled. Three columns: the dividend on the left, the hurdle in the middle, the difference on the right. Sort by the difference. Everything positive is an exercise notice.</p>
+    <p>The table below is live. It builds the hurdle from the interest floor plus a put valued on a skewed surface, so the low strikes carry the higher volatilities the way a real chain does. What to watch is where the line falls: at a stock of 112.40 with a $1.42 dividend and 38 days to run, the 100 strike clears by <b>21 cents</b> and the 105 strike misses by <b>79 cents</b>. The boundary between "exercise" and "hold" runs between two adjacent strikes, and it moves several strikes if you change the dividend by a few cents.</p>
+    <p>Which is the practical warning. The rule of thumb people carry — "exercise the ones where the dividend is bigger than the put" — is the right equation with the interest floor deleted from it, and on that chain it moves the line by a full strike. The floor is small in absolute terms and it is decisive precisely because the decision is decided near zero.</p>
+    <p>The bottom line adds up what is at stake. Across the strikes that clear, at a hundred contracts each, this chain is worth <b>$28,407</b> to get right, on positions whose total value is a small multiple of that. This is the highest ratio of dollars-to-effort anywhere in options operations, which is why it is a checklist item rather than a judgement call.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>The chain, sorted by edge</h3></div>
+        <table class="wtab" id="screenTab"></table>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Dividend against hurdle, strike by strike</h3></div>
+        <canvas id="cv5" height="240"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Tomorrow morning</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>The rows flip one at a time as you drag the dividend, and they flip in strike order — deepest first, because that is where time value is smallest. Delete the interest floor from the hurdle, using the shortcut version, and watch how many extra rows turn green: those are the exercises that look right and are not.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the dividend to 1.42 and count the green rows. Now switch the hurdle to the shortcut that ignores interest. <b>Predict</b> how many extra rows go green before you press it.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"D":1.42,"floorOn":1}' data-focus="screenTab">The correct hurdle</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"D":1.42,"floorOn":0}' data-focus="screenTab">Drop the interest floor</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You run the screen and the 105 strike misses by two cents. The dividend is confirmed, but the stock rallies 3% in the last hour of trading. What happens to that row?</p>
+    <div class="opts">
+      <button>Nothing — the dividend and the strike are both unchanged</button>
+      <button data-ok="1">It flips to exercise. A rally cuts the put value, which is the only part of the hurdle that moves with spot</button>
+      <button>It moves further from exercising, since the calls are worth more now</button>
+      <button>It flips only if implied volatility also falls</button>
+    </div>
+    <div class="ans"><b>It flips to exercise.</b> The hurdle is interest plus insurance, and only the insurance moves with spot. A rally pushes the put further out of the money, the hurdle drops, and a row that missed by two cents clears. This is why the screen is run late rather than at lunchtime: the dividend side is fixed by announcement but the hurdle side is live until the close, and the marginal strike can change hands in the last twenty minutes.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Assignment is a lottery you are already in</h2>
+    <p class="dek">The theory says which contracts should be exercised. Which of <em>yours</em> were is drawn at random, and the draw has a standard deviation.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Everything up to here has been written from the long side, where exercise is a decision. From the short side it is not a decision, it is weather. Someone somewhere exercised, and a chain of allocations decides whether it lands on you.</p>
+    <p>The mechanism has two stages. Exercise notices arrive at the clearing house, which allocates them across the clearing members who are short that contract — historically at random, in proportion to short open interest. Each member then allocates its share across its own customers, by a method it must disclose and apply consistently: usually random, sometimes first-in-first-out. Neither stage looks at you specifically, and neither can be predicted or appealed.</p>
+    <p>The practical consequence is that your assignment is a <span class="term" data-t="Binomial" data-def="The distribution of the number of successes in N independent trials each with probability p. Here: N contracts short, each with the same chance of being assigned.">binomial draw</span>, not a number. Short ten contracts into an event where 40% of the open interest exercises, and you expect four. You get exactly four about a quarter of the time. You get nothing 0.6% of the time and you get seven or more 5.5% of the time.</p>
+    <p>Scale it up and the proportional spread narrows but the absolute one does not. Short fifty contracts at the same 40%, and you expect 2,000 shares delivered against you with a standard deviation of <b>346 shares</b>. The chance of landing within a single contract of your expectation is <b>33.5%</b> — so two times in three, the hedge you put on the night before is wrong by more than a hundred shares, in a direction you find out about the next morning.</p>
+    <p>This is the part that turns a clean theory chapter into an operational one. You cannot hedge the assignment, because you learn it after the market has moved. What you can do is size the residual: know the distribution, know the overnight volatility of the name, and know what the tail of that convolution costs. That product is the real risk of being short options into an ex-date, and it is not on any greek report.</p>
+  </div>
+
+  <div class="mline">P(k of N assigned) = C(N,k) · p<sup>k</sup> · (1−p)<sup>N−k</sup></div>
+  <p class="mread">Reads as: <b>each contract you are short is an independent coin, and p is the fraction of the open interest that exercised.</b> The mean is Np and the standard deviation is √(Np(1−p)) — the second number is the one nobody quotes.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>How many of yours get assigned</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Probability</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Expected</span>
+          </span>
+        </div>
+        <canvas id="cv6" height="270"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>The share position you wake up with, against the one you hedged for</h3></div>
+        <canvas id="cv6b" height="180"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your short</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>Push the position to two hundred contracts and watch the top panel turn into a smooth bell while the bottom panel — the dollars — gets wider, not narrower. Diversification across contracts tightens the <em>fraction</em> assigned and does nothing at all to the dollar uncertainty, because the position grew at the same rate.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the exercise fraction to 100% — everyone who could exercise did. <b>Predict</b> the standard deviation of your assignment before you press it.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c6" data-patch='{"frac":1}' data-focus="cv6">Everybody exercises</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"frac":0.5,"N":50}' data-focus="cv6">A genuine coin flip, fifty contracts</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are short 100 calls into an ex-date and you calculate that exercising is clearly correct for the holders. How should you hedge?</p>
+    <div class="opts">
+      <button>Buy 10,000 shares — assignment is certain, so hedge the whole thing</button>
+      <button>Do nothing; assignment is random so it averages out</button>
+      <button data-ok="1">Hedge close to the full amount, but size the position knowing the residual is a distribution — a slice of the open interest never exercises, however clear the arithmetic</button>
+      <button>Buy 5,000 shares, since half of any binomial lands either side</button>
+    </div>
+    <div class="ans"><b>Hedge for the expectation and size for the spread.</b> The correct exercise fraction is never 100% in practice — some holders are asleep, some are constrained, some have tax reasons, and some simply do not run the screen from chapter 05. That is the same fact from the other side: the money left on the table by non-exercisers is money that lands on somebody short, at random. The second answer is the dangerous one, because "it averages out" is true across many ex-dates and irrelevant on this one, which is the only one you are exposed to tonight.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Twenty dollars of intrinsic, two thousand of risk</h2>
+    <p class="dek">Pin risk is not about the option expiring at the strike. It is about not knowing your stock position until Monday.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">An option that finishes a cent in the money is exercised automatically. One that finishes a cent out of the money is not. The clearing house applies the threshold mechanically — <span class="term" data-t="Exercise by exception" data-def="The clearing house exercises everything at or beyond a fixed in-the-money threshold unless the holder files a contrary instruction. The threshold is a convention that has changed over time; it currently sits at one cent.">exercise by exception</span>, currently at one cent — so the difference between a two-cent-in and a two-cent-out settlement is the difference between being short a thousand shares over the weekend and being flat.</p>
+    <p>Take the arithmetic literally. You are short ten 100-strike calls and the stock settles at <b>100.02</b>. Those calls are exercised against you, and you are short a thousand shares from Friday's close. The intrinsic value that changed hands is two cents a share: <b>$20</b>. The overnight risk you have just been handed, on a 35-volatility name, has a standard deviation of <b>$2,205</b> for one trading day and <b>$3,820</b> across a three-day weekend.</p>
+    <p>That ratio — <b>110 to 1</b> for a day, <b>191 to 1</b> for a weekend — is what pin risk actually is. Not the chance of a strange settlement, but the fact that a rounding-level economic difference determines a position-level exposure, and you learn which one you got after the market has closed.</p>
+    <p>It gets worse where it should get better. At a settlement of exactly the strike, holders' behaviour is genuinely unpredictable: the option is worth nothing either way, so some file exercise notices and some do not, and your assignment is a draw from chapter 06 with an exercise fraction nobody can estimate. Your Monday position is somewhere between flat and short a thousand shares, and there is no calculation that narrows it.</p>
+    <p>The defences are all operational rather than clever. Trade out of the position before the close instead of letting it settle — pay the spread and know your position. File a <b>do-not-exercise</b> instruction on longs you do not want, which is the one lever you actually control. Or close the offsetting stock so that either outcome leaves you flat rather than one of them leaving you long and the other short. What you cannot do is model your way out, because the uncertainty is in other people's paperwork.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Monday's P&amp;L, as a function of Friday's last cent</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Assigned</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Not assigned</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Intrinsic exchanged</span>
+          </span>
+        </div>
+        <canvas id="cv7" height="280"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Where you actually end up, simulated</h3></div>
+        <canvas id="cv7d" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Expiration</h4>
+        <div id="ctl7"></div>
+        <div class="btnrow"><button class="act" id="run7">Resimulate</button></div>
+        <div class="kv" style="margin-top:20px" id="kv7"></div>
+      </div>
+    </div>
+    <figcaption>The grey line is what the settlement is worth; the coloured spread is what it exposes you to. They are drawn on the same axis on purpose, and the grey line is nearly invisible next to them. Move the settlement across the strike by two cents and the entire distribution jumps between two modes — that discontinuity, not the width of either mode, is the thing being managed.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Put the settlement exactly on the strike and set the exercise fraction to something you cannot know — say 50%. <b>Predict</b> whether the outcome distribution is one hump or two.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c7" data-patch='{"settle":100,"frac":0.5}' data-focus="cv7d" data-then="run7">Settle exactly on the strike</button>
+      <button class="act ghost" data-preset="c7" data-patch='{"settle":100.02,"frac":1}' data-focus="cv7d" data-then="run7">Two cents in the money</button>
+      <button class="act ghost" data-preset="c7" data-patch='{"settle":99.98,"frac":0}' data-focus="cv7d" data-then="run7">Two cents out</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long 10 calls struck at 100 and the stock is settling around 100.01. You do not want the shares. What is the cheapest correct action?</p>
+    <div class="opts">
+      <button>Nothing — a one-cent option is worthless, so it will not be exercised</button>
+      <button data-ok="1">File a do-not-exercise instruction, or sell the calls before the close. Left alone they will be auto-exercised and you own a thousand shares on Monday</button>
+      <button>Buy puts at the same strike to neutralise the position</button>
+      <button>Short a thousand shares now to pre-hedge the exercise</button>
+    </div>
+    <div class="ans"><b>File the instruction, or trade out.</b> Exercise by exception means the default is exercise, and the default does not care that the option is worth a cent. The first answer is the expensive one and it is the most commonly held: "worthless" describes the option's value, not its deliverable, and the deliverable is $100,000 of stock. The fourth answer looks prudent and is actively bad — if the stock ticks down a cent in the closing auction you are not assigned, and you are now short a thousand shares you chose deliberately.</div>
+  </div>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>A ratio change survives; a composition change does not</h2>
+    <p class="dek">Splits rescale everything and break nothing. A cash merger leaves the contract intact and every greek in it dead.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Corporate actions adjust option contracts, and the adjustments fall into two categories that behave completely differently. The first kind changes the <em>ratio</em>: how many shares one contract delivers and at what strike. The second changes the <em>composition</em>: what the deliverable is made of. The first is invisible to your risk. The second annihilates it.</p>
+    <p>Take a two-for-one split. The strike halves, the deliverable stays at 100 shares, and you hold twice as many contracts. Every per-share number changes and every position-level number does not. A 100-strike call on a $120 stock worth <b>25.2795</b> becomes two 50-strike calls on a $60 stock worth <b>12.6398</b> each. Position value, dollar delta, gamma cash and vega all come through with a residual of exactly zero. Share delta doubles, which is correct — twice as many shares at half the price.</p>
+    <p>Odd ratios work identically, they just look worse. A three-for-two split leaves you one contract with a <b>150-share</b> deliverable struck at <b>66.667</b>, and the position value comes through with a residual of <b>−9 × 10<sup>−13</sup></b>. The identity table below computes both sides live; drag anything and the residual column stays at the floor. The reason is that Black–Scholes is homogeneous of degree one in spot and strike — scale both by the same factor and the price scales with them — so a ratio adjustment is a change of units and nothing more.</p>
+    <p>Now the other kind. A cash merger at $85 replaces the deliverable with $8,500 in cash. The contract survives, the expiry survives, and the option becomes a claim on a fixed amount of money. Volatility no longer enters, because there is nothing left to be volatile.</p>
+    <p>The consequence is a table people find hard to believe. Announce an all-cash deal at $85 on a stock trading $84 with six months and a 40 volatility, and the stock goes <em>up</em> — while every call on it goes down. The 90-strike call, worth <b>7.80</b>, becomes worthless: the deliverable will never exceed $85, so the strike will never be reached, regardless of the five and a half months remaining. The at-the-money 85 call goes from <b>9.85</b> to zero on the same logic. Even the deep 70-strike falls from <b>18.48</b> to <b>14.67</b>, because its price contained time value and time value requires uncertainty. Vega is zero on every line.</p>
+    <p>Nothing was mispriced and nothing was adjusted incorrectly. The contracts do exactly what their terms say. The lesson is that greeks describe a deliverable, not a contract, and when the deliverable stops being a random variable the greeks stop existing — which is a different and much more abrupt failure than the ones the rest of this series deals in.</p>
+  </div>
+
+  <div class="mline">c(λS, λK, τ, σ, r) = λ · c(S, K, τ, σ, r)</div>
+  <p class="mread">Reads as: <b>double the stock and the strike together and the option price doubles.</b> A ratio adjustment picks λ so that value is preserved, which is why it can be done mechanically and why no greek notices.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>A ratio adjustment, both sides computed live</h3></div>
+        <table class="idtab" id="adjTab"></table>
+        <div class="figtop" style="margin:24px 0 6px">
+          <h3>An all-cash deal, across the chain</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Before the announcement</span>
+            <span><i class="swl" style="background:var(--verm)"></i>After</span>
+          </span>
+        </div>
+        <canvas id="cv8" height="250"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The action</h4>
+        <div id="ctl8"></div>
+        <div class="kv" style="margin-top:20px" id="kv8"></div>
+      </div>
+    </div>
+    <figcaption>In the upper table the residual column is the claim. In the lower chart, look at where the two curves cross — they don't. Every strike is worth less after the announcement even though the stock is worth more, and the strikes above the deal price go to exactly zero rather than to something small. Raise the deal price through the chain and watch the cliff move.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the deal price to 85 and look at the 90 strike. Now raise the deal price to 95 and <b>predict</b> what happens to the 100 strike before you look.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c8" data-patch='{"deal":85}' data-focus="cv8">A deal at 85</button>
+      <button class="act ghost" data-preset="c8" data-patch='{"deal":95}' data-focus="cv8">A deal at 95</button>
+      <button class="act ghost" data-preset="c8" data-patch='{"ratio":1.5}' data-focus="adjTab">Three-for-two instead</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your name announces an all-cash acquisition at a large premium. You are short the far out-of-the-money calls. What happened to your risk?</p>
+    <div class="opts">
+      <button>It got much worse — the stock gapped up through your strikes</button>
+      <button data-ok="1">It went to zero, if the strikes are above the deal price. The deliverable is now fixed cash and those calls can never pay</button>
+      <button>It is unchanged; the contracts were adjusted to preserve value</button>
+      <button>It depends on the implied volatility after the announcement</button>
+    </div>
+    <div class="ans"><b>It went to zero — assuming the deal is all cash and your strikes sit above the deal price.</b> This is the one situation in the whole series where a short option position becomes riskless rather than merely cheap. The trap in the first answer is real, though: it is the right answer for a <em>stock-for-stock</em> deal, where the deliverable becomes shares of the acquirer and remains perfectly volatile. "Cash or stock" is the question to ask before anything else, and in an election deal you may not know for weeks.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — why scaling preserves the greeks, and what the adjustment cannot fix</summary>
+    <div class="body">
+      <p>Black–Scholes depends on spot and strike only through their ratio and through a single multiplicative factor. Scale both by λ and every <b>d</b> term is unchanged, because <b>ln(λS/λK) = ln(S/K)</b>.</p>
+      <div class="mline">d<sub>1</sub>(λS, λK) = d<sub>1</sub>(S, K)</div>
+      <p class="mread">Reads as: <b>moneyness is a ratio, and a split does not change a ratio.</b> Everything downstream of d₁ and d₂ therefore survives untouched.</p>
+      <p>The price is a sum of terms each carrying one factor of spot or strike, so it scales linearly. Delta, being a derivative of a linear-homogeneous function, is unchanged; gamma picks up 1/λ per share and the deliverable picks up λ, so gamma cash is preserved; vega scales like price.</p>
+      <p>Multiply through by the new deliverable and contract count, which the adjustment sets to <b>1/λ</b> of the old exposure per contract, and every position-level number returns to where it started. That is the whole content of a ratio adjustment: it is a change of units chosen to make λ cancel.</p>
+      <p><b>Where it breaks.</b> Three ways, and none of them is arithmetic. Rounding: strikes are published to a fixed number of decimals, so a three-for-two adjustment produces a strike that is not exactly two-thirds, and on a large position the difference is real money. Non-standard deliverables: an adjusted contract may deliver cash plus shares plus a stub of something else, and it no longer nets against the standard contract on the same name — which quietly destroys the spread you thought you had on. And liquidity: adjusted series stop being quoted properly, because market makers price the standard deliverable and the adjusted one is a different instrument wearing a familiar ticker. The greeks survive; the ability to trade out of the position frequently does not.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 09 ══════════ -->
+<section class="chapter" id="c9">
+  <div class="chead">
+    <div class="cnum">09</div>
+    <h2>The third reason, and the one nobody writes down</h2>
+    <p class="dek">A tender offer makes shares temporarily worth more than their own market price. Options are not shares, and that gap is the only bridge.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 01 said a call is never exercised early on a non-dividend payer, and chapter 03 gave the one exception. There is a second, and it does not appear in textbooks because it is a rule of securities regulation rather than a result in mathematics.</p>
+    <p>When a company or a bidder makes a <b>tender offer</b> — an offer to buy shares directly from holders at a stated price — the tendering rules require the person tendering to be <span class="term" data-t="Net long" data-def="Owning the shares outright, net of anything you have sold or are obliged to deliver. The requirement exists to stop the same shares being tendered several times over by different people.">net long</span> the shares at the time of tender. This is the short tender rule, and its point is to prevent the same shares being offered up more than once. A long call is not a long share. It is a right to buy one, and rights do not tender.</p>
+    <p>So a holder of in-the-money calls who wants to participate has exactly one route: exercise, take delivery, and tender the stock — and the deadline for that decision is the tender's expiry, which is typically weeks away and has nothing to do with when the options expire. The result is early exercise driven by neither dividends nor rates.</p>
+    <p>The economics use the same equation as everything else on this page. What you gain is the tender premium: the deal price less what the stock trades at, which is a gap that exists only because the market prices in the chance the deal fails. What you give up is, as always, the time value.</p>
+  </div>
+
+  <div class="mline">exercise and tender &nbsp;⟺&nbsp; (tender price − S) &gt; K(1 − e<sup>−rτ</sup>) + p(S)</div>
+  <p class="mread">Reads as: <b>the same test as the dividend chapter, with the tender premium in the dividend's place.</b> The right-hand side has not changed at all, which is the point — there is only ever one hurdle.</p>
+
+  <div class="prose">
+    <p>Put numbers on it. A stock was trading 88; an all-cash tender at 100 is announced and closes in three weeks; the stock now trades 98.20, the discount reflecting deal risk and the wait. You hold 70-strike calls with four months left. Implied volatility has collapsed toward 9, because the stock is now a bet on a binary event rather than a business.</p>
+    <p>The hurdle is the time value, which at those parameters is <b>1.028</b> per share — and note that it is almost entirely the interest floor, since the put on a deal stock at a 30-point premium is worth essentially nothing. The gain is <b>1.80</b>, the gap between the tender price and the market. Exercise and tender wins by 77 cents a share, which on a hundred contracts is $7,700 for filing paperwork on time.</p>
+    <p>The general shape is worth carrying: deal stocks have crushed volatility, and crushed volatility means the insurance half of the hurdle disappears, which leaves the interest floor as almost the entire cost of exercising. That is the smallest the hurdle ever gets, and it is why tender situations produce early exercise so reliably.</p>
+    <p>Two warnings, both important. The mechanism above is the durable part; the specifics are not. Tender rules, the treatment of options in a tender, proration in partial offers, and what happens to unexercised contracts after a deal closes are all governed by the offer document and the prevailing rulebook, and they change. And in a <b>partial</b> tender only a fraction of the shares you tender are accepted, so the gain must be multiplied by an expected proration factor you will not know until after the deadline — which turns a clean inequality into an estimate. Read the offer, not the formula.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Gain against hurdle, when a deal is on the table</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--moss)"></i>Gain</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Interest floor</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Insurance</span>
+          </span>
+        </div>
+        <canvas id="cv9" height="230"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Where the decision flips, across strikes</h3></div>
+        <canvas id="cv9b" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The offer</h4>
+        <div id="ctl9"></div>
+        <div class="kv" style="margin-top:20px" id="kv9"></div>
+      </div>
+    </div>
+    <figcaption>Drag volatility up from 9 and watch the blue segment grow until it swallows the gain — the same trade stops working when the market stops believing the deal. That is the honest reading of this chapter: exercising into a tender is profitable precisely when the deal is nearly certain, which is exactly when everyone else is doing it too.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the proration factor to 40%, as in a partial tender for less than half the company. <b>Predict</b> whether the 70 strike still clears.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c9" data-patch='{"pror":1,"v":0.09}' data-focus="cv9">A full tender, deal believed</button>
+      <button class="act ghost" data-preset="c9" data-patch='{"pror":0.4,"v":0.09}' data-focus="cv9">Only 40% accepted</button>
+      <button class="act ghost" data-preset="c9" data-patch='{"pror":1,"v":0.35}' data-focus="cv9">Full tender, deal doubted</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why can't you simply tender against your long calls and exercise afterwards, once you know how many shares were accepted?</p>
+    <div class="opts">
+      <button>You can — it is standard practice and the broker handles it</button>
+      <button data-ok="1">The tendering rules require you to be net long the shares at the time of tender, and a call is a right to buy rather than ownership</button>
+      <button>Because the option's expiry always falls before the tender deadline</button>
+      <button>Because exercising after the tender closes would be a wash sale</button>
+    </div>
+    <div class="ans"><b>The net-long requirement.</b> A call gives you a claim on shares, not shares, and tendering what you do not own is exactly what the rule exists to prevent. This is why the decision has to be made <em>before</em> the tender deadline and therefore before you know the proration outcome — you convert first and find out second, which is what makes the arithmetic an expected value rather than a certainty. The fourth answer invents a tax rule; the real constraint is a securities one, and it is about the sequence rather than the treatment.</div>
+  </div>
+</section>
+
+<!-- ══════════ 10 ══════════ -->
+<section class="chapter" id="c10">
+  <div class="chead">
+    <div class="cnum">10</div>
+    <h2>Drill it, then check yourself</h2>
+    <p class="dek">The arithmetic on this page is only useful at speed, on a Tuesday afternoon, with twenty names to clear.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Every decision on this page is subtraction, and subtraction you have to think about is subtraction you will skip when there are forty rows on the screen and an hour before the deadline. The generator below produces randomized questions across the four things you actually need cold: the interest floor, the exercise edge, expected assignment, and adjusted strikes.</p>
+    <p>Answers are numeric with a tolerance band, because the skill is estimating fast rather than computing exactly. Aim for a streak of ten. The working is shown every time, right or wrong.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:150px"><span class="k">Difficulty</span>
+          <div class="seg" style="margin-top:5px;max-width:230px">
+            <button id="dEasy" aria-pressed="true">Core</button>
+            <button id="dHard" aria-pressed="false">Full</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>Core asks for the interest floor and expected assignment, where a 5% band is plenty. Full adds the exercise edge and adjusted strikes and tightens to three cents, because the edge question is decided near zero and a 5% band on a number close to zero means nothing.</figcaption>
+  </figure>
+
+  <div class="prose" style="margin-top:46px">
+    <p>Eight questions across the whole page. Each explanation names the chapter to revisit if it catches you.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 8</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">Rates are exactly zero and the stock pays no dividend. Is an American call worth more than a European one?</p>
+    <div class="opts">
+      <button>Yes — the right to exercise always has some value</button>
+      <button data-ok="1">No. They are equal, and at zero rates exercise stops being strictly worse and becomes merely never better</button>
+      <button>Yes, but only for in-the-money strikes</button>
+      <button>No, because American options cannot be exercised early on equities</button>
+    </div>
+    <div class="ans"><b>Equal.</b> The bound c ≥ S − Ke<sup>−rτ</sup> becomes c ≥ S − K, so exercising captures exactly the bound rather than falling short of it. There is still no gain, so the extra right is still worth nothing. The last answer is a factual error worth naming: listed equity options are American, and that is exactly why this page exists.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">What are the two components of a call's time value?</p>
+    <div class="opts">
+      <button>Volatility value and drift value</button>
+      <button data-ok="1">The interest on the strike, K(1−e<sup>−rτ</sup>), plus the value of the put at the same strike</button>
+      <button>Gamma value and theta value</button>
+      <button>Extrinsic value and intrinsic value</button>
+    </div>
+    <div class="ans"><b>Interest plus insurance.</b> It comes straight out of parity, holds to 4 × 10<sup>−14</sup>, and it is what makes the exercise decision a subtraction you can do with a put quote. The last answer is the common muddle: extrinsic value <em>is</em> time value, so that option says time value equals time value plus intrinsic.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">A stock pays a 30-cent dividend. Rates are 4.5%, the strike is 100, and there are 90 days from the ex-date to expiry. At what spot does exercising become correct?</p>
+    <div class="opts">
+      <button>Around 115</button>
+      <button>Around 140</button>
+      <button data-ok="1">At no spot. The interest floor alone is $1.10, so the dividend cannot clear the hurdle however deep the call is</button>
+      <button>Any spot above the strike</button>
+    </div>
+    <div class="ans"><b>No spot at all.</b> This is the filter that clears most of a screen in seconds: compare the dividend with K(1−e<sup>−rτ</sup>) before doing anything else, because the put can only add to the hurdle. Chapter 03's figure shows the boundary curve ceasing to exist rather than running off the top of the chart, and this is that.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">What drives early exercise of an American put on a non-dividend payer?</p>
+    <div class="opts">
+      <button>Volatility — high volatility makes exercise attractive</button>
+      <button data-ok="1">Interest rates. You exercise to receive the strike early, and at zero rates the exercise region does not exist at any spot or maturity</button>
+      <button>Dividends, in the same way as for calls</button>
+      <button>Time decay, which erodes the put faster near expiry</button>
+    </div>
+    <div class="ans"><b>Rates.</b> At 4.5% the early-exercise right on a one-year 100-strike put with spot at 80 is worth 1.44; at 12% it is 5.09, a third of the European price. At zero it is worth nothing. Volatility works in the opposite direction to the first answer — it raises the call you give up, which pushes the boundary <em>down</em>.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 04</span>
+    <p class="q">The one-line test says exercise your put below 85. A binomial tree says 78. Which do you follow?</p>
+    <div class="opts">
+      <button>The one-line test — closed forms are exact and trees have discretisation error</button>
+      <button data-ok="1">The tree. The shortcut ignores the option to wait and exercise later, so it always overshoots — here by seven points of spot</button>
+      <button>Split the difference at around 81</button>
+      <button>Either; a seven-point difference is within model error</button>
+    </div>
+    <div class="ans"><b>The tree.</b> The shortcut compares exercising now against holding to expiry, which is not your only alternative — you can also hold and exercise later, and that right is worth something. So the test is necessary but not sufficient, and the boundary it draws sits above the true one by 6.9 to 9.5 points across every rate tested. Use it to rule out, never to rule in.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 06</span>
+    <p class="q">You are short 50 contracts and 40% of the open interest exercises. How confident should you be about your resulting share position?</p>
+    <div class="opts">
+      <button>Certain — 40% of 50 is 20 contracts, so 2,000 shares</button>
+      <button data-ok="1">Expect 2,000 shares with a standard deviation of about 346, and only a one-in-three chance of landing within a contract of that</button>
+      <button>Completely uncertain; assignment is arbitrary and cannot be modelled</button>
+      <button>Certain to be assigned on all 50, since exercise is all-or-nothing per strike</button>
+    </div>
+    <div class="ans"><b>2,000 ± 346 shares.</b> Allocation is random across the short open interest, so your assignment is a binomial draw rather than a proportion. The mean is the number you hedge to; the standard deviation is the risk you carry overnight, and it is the number that never appears on a greek report.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 7 · chapter 07</span>
+    <p class="q">Short 10 calls struck at 100, stock settles at 100.02, name trades on a 35 volatility. Roughly what have you taken on over a three-day weekend?</p>
+    <div class="opts">
+      <button>About $20 — the intrinsic value of the settlement</button>
+      <button data-ok="1">About $3,800 of standard deviation on a short thousand-share position, in exchange for $20 of intrinsic</button>
+      <button>Nothing; the position is closed at expiry by definition</button>
+      <button>About $200, since the option was nearly worthless</button>
+    </div>
+    <div class="ans"><b>Roughly $3,800 against $20.</b> A ratio of 191 to 1. Pin risk is not the risk of a strange settlement — it is that a rounding-level economic difference hands you a position-level exposure that you learn about after the close. The third answer is the one that costs people money: expiry closes the option, not the stock position it delivers.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 8 · chapter 08</span>
+    <p class="q">An all-cash acquisition at $85 is announced on a stock trading $84. What happens to the six-month 90-strike calls?</p>
+    <div class="opts">
+      <button>They rally, since the stock gapped toward the strike</button>
+      <button data-ok="1">They go to zero. The deliverable becomes fixed cash, so the strike can never be reached and volatility no longer enters</button>
+      <button>They are adjusted so that their value is preserved</button>
+      <button>They hold their value until the deal actually closes</button>
+    </div>
+    <div class="ans"><b>Zero.</b> The stock goes up and every call on it goes down, including the deep ones, because their prices contained time value and time value requires uncertainty. Nothing was mispriced — greeks describe a deliverable, and this deliverable stopped being a random variable. Note that the answer flips entirely for a stock-for-stock deal, where the deliverable becomes acquirer shares and stays volatile.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Two kinds of statement appear on this page and they should not be trusted equally. The mathematics — the zero American premium, the time-value identity, the exact ex-date criterion, the scaling result — is checked numerically and holds to the precision of the arithmetic. The market plumbing is convention: exercise-by-exception thresholds, random allocation, contract adjustment policy, and tender rules are set by clearing houses, exchanges and regulators, they differ between products and jurisdictions, and they change. Everything here is dated to the time of writing and stated as mechanism rather than rulebook. Before acting on the operational chapters, check the current contract specifications and the offer document. The exercise fractions and price-impact assumptions in the simulations are illustrative parameters on sliders, not measurements.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ══════════ shared numerics ══════════
+   One CRR lattice, priced American and European in the same backward pass,
+   so the residual in chapter 01 is a statement about exercise policy and
+   never about discretisation. */
+function powers(u, N) {
+  const P = new Float64Array(2 * N + 1);
+  P[N] = 1;
+  for (let i = 1; i <= N; i++) { P[N + i] = P[N + i - 1] * u; P[N - i] = P[N - i + 1] / u; }
+  return P;
+}
+function tree2(S, K, T, v, r, N, cp) {
+  const dt = T / N, u = Math.exp(v * Math.sqrt(dt)), d = 1 / u;
+  const p = (Math.exp(r * dt) - d) / (u - d), disc = Math.exp(-r * dt);
+  const P = powers(u, N);
+  const A = new Float64Array(N + 1), E = new Float64Array(N + 1);
+  for (let j = 0; j <= N; j++) {
+    const St = S * P[N + (2 * j - N)];
+    const iv = Math.max(0, cp ? St - K : K - St);
+    A[j] = iv; E[j] = iv;
+  }
+  for (let i = N - 1; i >= 0; i--) {
+    for (let j = 0; j <= i; j++) {
+      E[j] = disc * (p * E[j + 1] + (1 - p) * E[j]);
+      let a = disc * (p * A[j + 1] + (1 - p) * A[j]);
+      const St = S * P[N + (2 * j - i)];
+      const ex = Math.max(0, cp ? St - K : K - St);
+      if (ex > a) a = ex;
+      A[j] = a;
+    }
+  }
+  return { am: A[0], eu: E[0] };
+}
+/* American put boundary against time remaining. Seeded below the strike so the
+   node grid straddles the boundary at small i; the answer is seed-independent. */
+function putBoundary(K, T, v, r, N) {
+  const S0 = K * 0.62;
+  const dt = T / N, u = Math.exp(v * Math.sqrt(dt)), d = 1 / u;
+  const p = (Math.exp(r * dt) - d) / (u - d), disc = Math.exp(-r * dt);
+  const P = powers(u, N);
+  const val = new Float64Array(N + 1), bnd = new Array(N + 1).fill(null);
+  for (let j = 0; j <= N; j++) val[j] = Math.max(0, K - S0 * P[N + (2 * j - N)]);
+  bnd[N] = K;
+  const tol = 1e-10 * K;
+  for (let i = N - 1; i >= 0; i--) {
+    let b = null;
+    for (let j = 0; j <= i; j++) {
+      const c = disc * (p * val[j + 1] + (1 - p) * val[j]);
+      const S = S0 * P[N + (2 * j - i)], ex = K - S;
+      if (ex > c + tol) { val[j] = ex; if (b === null || S > b) b = S; } else val[j] = c;
+    }
+    bnd[i] = b;
+  }
+  return { bnd, dt, N };
+}
+const amPut = (S, K, T, v, r, N) => tree2(S, K, T, v, r, N, false).am;
+const floorOf = (K, r, tau) => K * (1 - Math.exp(-r * tau));
+const money = v => (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+function binomPmf(N, p) {
+  const out = new Float64Array(N + 1);
+  let c = 1;
+  for (let k = 0; k <= N; k++) {
+    out[k] = c * Math.pow(p, k) * Math.pow(1 - p, N - k);
+    c = c * (N - k) / (k + 1);
+  }
+  return out;
+}
+function bars(o, xs, ys, col, wfrac) {
+  const g = o.g, w = (o.pw / Math.max(1, xs.length)) * (wfrac || 0.7);
+  g.save(); g.fillStyle = col;
+  for (let i = 0; i < xs.length; i++) {
+    const x = o.X(xs[i]), y = o.Y(ys[i]), y0 = o.Y(0);
+    g.fillRect(x - w / 2, Math.min(y, y0), Math.max(w, 1), Math.abs(y0 - y));
+  }
+  g.restore();
+}
+function band(o, xs, lo, hi, col, alpha) {
+  const g = o.g; g.save(); g.globalAlpha = alpha === undefined ? 0.16 : alpha; g.fillStyle = col;
+  g.beginPath(); g.moveTo(o.X(xs[0]), o.Y(lo[0]));
+  for (let i = 1; i < xs.length; i++) g.lineTo(o.X(xs[i]), o.Y(lo[i]));
+  for (let i = xs.length - 1; i >= 0; i--) g.lineTo(o.X(xs[i]), o.Y(hi[i]));
+  g.closePath(); g.fill(); g.restore();
+}
+
+/* ══════════ HERO — a lattice with an exercise region that comes and goes ══════════ */
+(function () {
+  const cv = document.getElementById("heroCv");
+  let w, h, g, raf, t0 = 0;
+  function size() {
+    const dpr = window.devicePixelRatio || 1;
+    w = cv.clientWidth; h = cv.clientHeight;
+    cv.width = w * dpr; cv.height = h * dpr;
+    g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  const N = 26;
+  function draw(ph) {
+    g.fillStyle = C("--chalk"); g.fillRect(0, 0, w, h);
+    const K = 100, v = 0.30, r = 0.05, T = 1;
+    const D = 0.55 + 2.6 * (0.5 + 0.5 * Math.sin(ph));      // the dividend breathing
+    const dt = T / N, u = Math.exp(v * Math.sqrt(dt));
+    const padL = w * 0.06, padR = w * 0.06, padT = h * 0.14, padB = h * 0.14;
+    const gw = w - padL - padR, gh = h - padT - padB;
+    const lo = K / Math.pow(u, N), hi = K * Math.pow(u, N);
+    const X = i => padL + (i / N) * gw;
+    const Y = S => padT + gh - (Math.log(S / lo) / Math.log(hi / lo)) * gh;
+    // lattice
+    g.strokeStyle = C("--grey"); g.globalAlpha = 0.16; g.lineWidth = 0.7;
+    for (let i = 0; i < N; i++) for (let j = 0; j <= i; j++) {
+      const S = K * Math.pow(u, 2 * j - i);
+      g.beginPath();
+      g.moveTo(X(i), Y(S));
+      g.lineTo(X(i + 1), Y(S * u)); g.moveTo(X(i), Y(S)); g.lineTo(X(i + 1), Y(S / u));
+      g.stroke();
+    }
+    g.globalAlpha = 1;
+    // nodes, with the exercise region lit
+    for (let i = 0; i <= N; i++) {
+      const tau = T - i * dt;
+      for (let j = 0; j <= i; j++) {
+        const S = K * Math.pow(u, 2 * j - i);
+        if (S < lo || S > hi) continue;
+        const hurdle = floorOf(K, r, tau) + bs(S - D, K, Math.max(tau, 1e-6), v, r, 0, false).price;
+        const live = S > K && D > hurdle;
+        g.beginPath(); g.arc(X(i), Y(S), live ? 3.1 : 1.5, 0, 6.2832);
+        g.fillStyle = live ? C("--verm") : C("--blue");
+        g.globalAlpha = live ? 0.85 : 0.24;
+        g.fill();
+      }
+    }
+    g.globalAlpha = 1;
+    // strike
+    g.strokeStyle = C("--ink"); g.globalAlpha = 0.25; g.setLineDash([4, 4]); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, Y(K)); g.lineTo(w - padR, Y(K)); g.stroke();
+    g.setLineDash([]); g.globalAlpha = 1;
+  }
+  function frame(ts) { if (!t0) t0 = ts; draw((ts - t0) / 2600); raf = requestAnimationFrame(frame); }
+  size();
+  if (RM) draw(1.2); else raf = requestAnimationFrame(frame);
+  let t; window.addEventListener("resize", () => {
+    clearTimeout(t); t = setTimeout(() => {
+      cancelAnimationFrame(raf); size(); t0 = 0;
+      if (RM) draw(1.2); else raf = requestAnimationFrame(frame);
+    }, 170);
+  });
+})();
+
+/* ══════════ 01 — the premium that is not there ══════════ */
+const s1 = { v: 0.28, r: 0.045, T: 0.75, cp: 1 };
+(function () {
+  sliders(document.getElementById("ctl1"), [
+    { id: "a1", k: "cp", lbl: "", name: "Contract", min: 0, max: 1, step: 1, fmt: v => v ? "Call" : "Put" },
+    { id: "b1", k: "v", lbl: "σ", name: "Volatility", min: .1, max: .6, step: .01, fmt: pct },
+    { id: "c1r", k: "r", lbl: "r", name: "Rates", min: 0, max: .10, step: .002, fmt: pct2 },
+    { id: "d1", k: "T", lbl: "T", name: "Years to expiry", min: .08, max: 2, step: .02, fmt: v => v.toFixed(2) + "y" }
+  ], s1, () => draw(),"c1");
+  window.draw1 = draw;
+  function draw() {
+    const K = 100, N = 150, cp = s1.cp > .5;
+    const xs = [], am = [], eu = [], iv = [], df = [];
+    for (let i = 0; i <= 44; i++) {
+      const S = 55 + i * (135 / 44);
+      const t = tree2(S, K, s1.T, s1.v, s1.r, N, cp);
+      xs.push(S); am.push(t.am); eu.push(t.eu);
+      iv.push(Math.max(0, cp ? S - K : K - S)); df.push(t.am - t.eu);
+    }
+    let hi = 0; for (const y of am) hi = Math.max(hi, y);
+    const o = Fig(document.getElementById("cv1"), { h: 290, x0: 55, x1: 190, y0: 0, y1: Math.max(6, hi * 1.08), pad: { l: 52 } });
+    axes(o, v => v.toFixed(0), v => v.toFixed(0), 5, 4);
+    clip(o, () => {
+      line(o, xs, iv, C("--grey"), 1.2, [4, 3]);
+      line(o, xs, eu, C("--blue"), 3.4);
+      line(o, xs, am, C("--verm"), 1.6, [6, 4]);
+    });
+    vline(o, K, C("--ochre"), "K");
+
+    const mx = Math.max(1e-13, Math.max.apply(null, df.map(Math.abs)));
+    const tiny = mx < 1e-6;
+    const lim = Math.max(mx * 1.4, tiny ? 1e-12 : 0.4);
+    const o2 = Fig(document.getElementById("cv1d"), { h: 170, x0: 55, x1: 190, y0: 0, y1: lim, pad: { l: 52 } });
+    axes(o2, v => v.toFixed(0), v => tiny ? v.toExponential(0) : v.toFixed(2), 5, 3);
+    clip(o2, () => line(o2, xs, df, C("--moss"), 2.6));
+    vline(o2, K, C("--ochre"), "K");
+
+    const atm = tree2(100, K, s1.T, s1.v, s1.r, N, cp);
+    document.getElementById("kv1").innerHTML = kvHTML([
+      ["Contract", cp ? "American call" : "American put"],
+      ["Tree steps", String(N)],
+      ["At the money", "S = 100"],
+      ["European", atm.eu.toFixed(6)],
+      ["American", atm.am.toFixed(6)],
+      ["Worst gap on the grid", mx.toExponential(2)],
+      ["Verdict", cp ? "the right is worthless" : "the right has value"]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — time value is interest plus insurance ══════════ */
+const s2 = { S: 118, K: 100, v: 0.28, r: 0.045, days: 60 };
+(function () {
+  sliders(document.getElementById("ctl2"), [
+    { id: "a2", k: "S", lbl: "S", name: "Spot", min: 92, max: 200, step: .5, fmt: v => v.toFixed(1) },
+    { id: "b2", k: "v", lbl: "σ", name: "Volatility", min: .08, max: .9, step: .01, fmt: pct },
+    { id: "c2r", k: "r", lbl: "r", name: "Rates", min: 0, max: .1, step: .002, fmt: pct2 },
+    { id: "d2", k: "days", lbl: "τ", name: "Days to expiry", min: 5, max: 365, step: 5, fmt: v => v.toFixed(0) + "d" }
+  ], s2, () => draw(),"c2");
+  window.draw2 = draw;
+  function draw() {
+    const K = s2.K, tau = s2.days / 365;
+    const fl = floorOf(K, s2.r, tau);
+    const xs = [], f = [], put = [], tv = [];
+    for (let i = 0; i <= 120; i++) {
+      const S = K * (0.92 + i * (1.15 / 120));
+      xs.push(S); f.push(fl);
+      const p = bs(S, K, tau, s2.v, s2.r, 0, false).price;
+      put.push(fl + p);
+      tv.push(bs(S, K, tau, s2.v, s2.r, 0, true).price - Math.max(0, S - K));
+    }
+    const hi = Math.max.apply(null, tv) * 1.12;
+    const o = Fig(document.getElementById("cv2"), { h: 300, x0: xs[0], x1: xs[xs.length - 1], y0: 0, y1: Math.max(hi, fl * 2), pad: { l: 52 } });
+    axes(o, v => v.toFixed(0), v => v.toFixed(2), 5, 4);
+    clip(o, () => {
+      band(o, xs, xs.map(() => 0), f, C("--ochre"), .28);
+      band(o, xs, f, put, C("--blue"), .2);
+      line(o, xs, f, C("--ochre"), 2);
+      line(o, xs, put, C("--blue"), 1.6);
+      line(o, xs, tv, C("--verm"), 2.6, [7, 4]);
+    });
+    vline(o, Math.min(Math.max(s2.S, xs[0]), xs[xs.length - 1]), C("--ink"), "S");
+    vline(o, K, C("--grey"), "K");
+
+    const S = s2.S;
+    const c = bs(S, K, tau, s2.v, s2.r, 0, true).price;
+    const p = bs(S, K, tau, s2.v, s2.r, 0, false).price;
+    const timeval = c - Math.max(0, S - K), rhs = fl + p, res = timeval - rhs;
+    document.getElementById("idTab").innerHTML =
+      '<tr><th>Quantity</th><th>From the pricer</th><th>From the identity</th><th>Residual</th></tr>' +
+      [["Call time value", timeval, rhs],
+      ["Interest floor  K(1−e^−rτ)", fl, fl],
+      ["Insurance  p(S)", p, p],
+      ["Call price", c, Math.max(0, S - K) + rhs]]
+        .map(row => '<tr><td>' + row[0] + '</td><td>' + row[1].toFixed(8) + '</td><td>' + row[2].toFixed(8) +
+          '</td><td class="ok">' + Math.abs(row[1] - row[2]).toExponential(1) + '</td></tr>').join("");
+
+    document.getElementById("kv2").innerHTML = kvHTML([
+      ["Spot / strike", S.toFixed(1) + " / " + K],
+      ["Call price", c.toFixed(4)],
+      ["Intrinsic", Math.max(0, S - K).toFixed(4)],
+      ["Time value", timeval.toFixed(4)],
+      [" interest floor", fl.toFixed(4)],
+      [" insurance", p.toFixed(4)],
+      ["Identity residual", Math.abs(res).toExponential(1)],
+      ["Floor as % of TV", timeval > 1e-9 ? pct(fl / timeval) : "—"]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — the exercise boundary a dividend opens up ══════════ */
+const s3 = { D: 1.10, days: 45, S: 112, v: 0.28, r: 0.045 };
+(function () {
+  const K = 100;
+  function critical(tau, v, r, D) {
+    const g = S => D - (floorOf(K, r, tau) + bs(S - D, K, tau, v, r, 0, false).price);
+    if (g(K * 30) < 0) return null;
+    let lo = K * 0.5, hi = K * 30;
+    if (g(lo) > 0) return lo;
+    for (let i = 0; i < 90; i++) { const m = (lo + hi) / 2; if (g(m) > 0) hi = m; else lo = m; }
+    return hi;
+  }
+  sliders(document.getElementById("ctl3"), [
+    { id: "a3", k: "D", lbl: "D", name: "Dividend", min: 0.05, max: 4, step: .05, fmt: v => "$" + v.toFixed(2) },
+    { id: "b3", k: "days", lbl: "τ", name: "Ex-date to expiry", min: 3, max: 150, step: 1, fmt: v => v.toFixed(0) + "d" },
+    { id: "c3s", k: "S", lbl: "S", name: "Spot", min: 96, max: 150, step: .5, fmt: v => v.toFixed(1) },
+    { id: "d3", k: "v", lbl: "σ", name: "Volatility", min: .1, max: .8, step: .01, fmt: pct }
+  ], s3, () => draw(),"c3");
+  window.draw3 = draw;
+  function draw() {
+    const xs = [], ys = [], top = [];
+    const YMAX = 165;
+    for (let i = 0; i <= 90; i++) {
+      const dd = 3 + i * (150 / 90), tau = dd / 365;
+      const sc = critical(tau, s3.v, s3.r, s3.D);
+      xs.push(dd); ys.push(sc === null ? NaN : sc); top.push(YMAX);
+    }
+    const o = Fig(document.getElementById("cv3"), { h: 320, x0: 3, x1: 153, y0: 92, y1: YMAX, pad: { l: 52 } });
+    axes(o, v => v.toFixed(0) + "d", v => v.toFixed(0), 5, 4);
+    clip(o, () => {
+      // shade the exercise region: above S*, where S* exists
+      const g = o.g; g.save(); g.globalAlpha = .15; g.fillStyle = C("--verm");
+      let run = null;
+      for (let i = 0; i <= xs.length; i++) {
+        const ok = i < xs.length && isFinite(ys[i]);
+        if (ok && run === null) run = i;
+        if (!ok && run !== null) {
+          g.beginPath(); g.moveTo(o.X(xs[run]), o.Y(ys[run]));
+          for (let j = run; j < i; j++) g.lineTo(o.X(xs[j]), o.Y(ys[j]));
+          for (let j = i - 1; j >= run; j--) g.lineTo(o.X(xs[j]), o.Y(YMAX));
+          g.closePath(); g.fill(); run = null;
+        }
+      }
+      g.restore();
+      line(o, xs, xs.map(() => K), C("--grey"), 1.2, [4, 3]);
+      line(o, xs, ys, C("--verm"), 2.8);
+      line(o, xs, xs.map(() => s3.S), C("--blue"), 1.6, [6, 4]);
+    });
+    vline(o, s3.days, C("--ink"), "your τ");
+
+    const tau = s3.days / 365;
+    const fl = floorOf(K, s3.r, tau);
+    const put = bs(s3.S - s3.D, K, tau, s3.v, s3.r, 0, false).price;
+    const hurdle = fl + put, edge = s3.D - hurdle;
+    const o2 = Fig(document.getElementById("cv3w"), { h: 150, x0: 0, x1: 3, y0: 0, y1: Math.max(s3.D, hurdle) * 1.3, pad: { l: 52 } });
+    axes(o2, () => "", v => v.toFixed(2), 3, 3);
+    (function () {
+      const g = o2.g, bw = o2.pw / 3 * 0.5;
+      const put1 = x => o2.X(x) - bw / 2;
+      g.fillStyle = C("--moss"); g.fillRect(put1(0.5), o2.Y(s3.D), bw, o2.Y(0) - o2.Y(s3.D));
+      g.fillStyle = C("--ochre"); g.fillRect(put1(1.5), o2.Y(fl), bw, o2.Y(0) - o2.Y(fl));
+      g.fillStyle = C("--blue"); g.fillRect(put1(1.5), o2.Y(hurdle), bw, o2.Y(0) - o2.Y(put));
+      g.fillStyle = C("--ink"); g.font = "10px 'IBM Plex Mono', monospace"; g.textAlign = "center";
+      g.textBaseline = "bottom";
+      g.fillText("gain  " + s3.D.toFixed(2), o2.X(0.5), o2.Y(s3.D) - 5);
+      g.fillText("hurdle  " + hurdle.toFixed(2), o2.X(1.5), o2.Y(hurdle) - 5);
+      g.fillStyle = edge > 0 ? C("--moss") : C("--verm");
+      g.font = "600 13px 'IBM Plex Mono', monospace";
+      g.fillText((edge > 0 ? "EXERCISE  +" : "HOLD  ") + edge.toFixed(3), o2.X(2.5), o2.Y(0) - o2.ph * 0.45);
+    })();
+
+    const sc = critical(tau, s3.v, s3.r, s3.D);
+    document.getElementById("kv3").innerHTML = kvHTML([
+      ["Strike", String(K)],
+      ["Dividend", "$" + s3.D.toFixed(2)],
+      ["Interest floor", fl.toFixed(4)],
+      ["Insurance p(S−D)", put.toFixed(4)],
+      ["Hurdle", hurdle.toFixed(4)],
+      ["Edge per share", edge.toFixed(4)],
+      ["Critical spot S*", sc === null ? "does not exist" : sc.toFixed(2)],
+      ["Clears the floor?", s3.D > fl ? "yes" : "no — rule out"]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — the put, and how badly the shortcut misses ══════════ */
+const s4 = { r: 0.045, v: 0.30, T: 1, S: 80 };
+(function () {
+  const K = 100;
+  sliders(document.getElementById("ctl4"), [
+    { id: "a4", k: "r", lbl: "r", name: "Rates", min: 0, max: .12, step: .002, fmt: pct2 },
+    { id: "b4", k: "v", lbl: "σ", name: "Volatility", min: .1, max: .7, step: .01, fmt: pct },
+    { id: "c4t", k: "T", lbl: "T", name: "Years to expiry", min: .25, max: 2, step: .05, fmt: v => v.toFixed(2) + "y" },
+    { id: "d4", k: "S", lbl: "S", name: "Spot", min: 55, max: 105, step: .5, fmt: v => v.toFixed(1) }
+  ], s4, () => draw(),"c4");
+  window.draw4 = draw;
+  function draw() {
+    const N = 420, o0 = putBoundary(K, s4.T, s4.v, s4.r, N);
+    const xs = [], tree = [], quick = [];
+    for (let i = 0; i <= 70; i++) {
+      const tau = s4.T * (0.02 + i * (0.96 / 70));
+      const idx = Math.max(0, Math.min(N, Math.round((s4.T - tau) / o0.dt)));
+      const b = o0.bnd[idx];
+      xs.push(tau); tree.push(b === null ? NaN : b);
+      if (s4.r <= 1e-9) { quick.push(NaN); continue; }
+      let lo = 1, hi = K;
+      for (let k = 0; k < 60; k++) {
+        const m = (lo + hi) / 2;
+        if (floorOf(K, s4.r, tau) > bs(m, K, tau, s4.v, s4.r, 0, true).price) lo = m; else hi = m;
+      }
+      quick.push(lo > 1.5 ? lo : NaN);
+    }
+    const o = Fig(document.getElementById("cv4"), { h: 310, x0: 0, x1: s4.T, y0: 30, y1: 108, pad: { l: 52 } });
+    axes(o, v => v.toFixed(2) + "y", v => v.toFixed(0), 5, 4);
+    clip(o, () => {
+      line(o, xs, xs.map(() => K), C("--grey"), 1.2, [4, 3]);
+      const g = o.g; g.save(); g.globalAlpha = .13; g.fillStyle = C("--verm");
+      let run = null;
+      for (let i = 0; i <= xs.length; i++) {
+        const ok = i < xs.length && isFinite(tree[i]);
+        if (ok && run === null) run = i;
+        if (!ok && run !== null) {
+          g.beginPath(); g.moveTo(o.X(xs[run]), o.Y(tree[run]));
+          for (let j = run; j < i; j++) g.lineTo(o.X(xs[j]), o.Y(tree[j]));
+          for (let j = i - 1; j >= run; j--) g.lineTo(o.X(xs[j]), o.Y(30));
+          g.closePath(); g.fill(); run = null;
+        }
+      }
+      g.restore();
+      line(o, xs, quick, C("--ochre"), 1.8, [6, 4]);
+      line(o, xs, tree, C("--verm"), 2.8);
+      line(o, xs, xs.map(() => s4.S), C("--blue"), 1.4, [3, 3]);
+    });
+
+    const rs = [], prem = [], eur = [];
+    for (let i = 0; i <= 22; i++) {
+      const r = i * (0.12 / 22);
+      const a = amPut(s4.S, K, s4.T, s4.v, r, 190);
+      const e = bs(s4.S, K, s4.T, s4.v, r, 0, false).price;
+      rs.push(r); prem.push(a - e); eur.push(e);
+    }
+    const hi2 = Math.max(0.5, Math.max.apply(null, prem) * 1.15);
+    const o2 = Fig(document.getElementById("cv4p"), { h: 180, x0: 0, x1: 0.12, y0: 0, y1: hi2, pad: { l: 52 } });
+    axes(o2, v => (v * 100).toFixed(0) + "%", v => v.toFixed(2), 5, 3);
+    clip(o2, () => line(o2, rs, prem, C("--verm"), 2.6));
+    vline(o2, s4.r, C("--ink"), "r");
+
+    const A = amPut(s4.S, K, s4.T, s4.v, s4.r, 420);
+    const E = bs(s4.S, K, s4.T, s4.v, s4.r, 0, false).price;
+    const idxNow = Math.max(0, Math.min(N, Math.round((s4.T - s4.T * 0.5) / o0.dt)));
+    const bHalf = o0.bnd[idxNow];
+    document.getElementById("kv4").innerHTML = kvHTML([
+      ["American put", A.toFixed(4)],
+      ["European put", E.toFixed(4)],
+      ["Early-exercise right", (A - E).toFixed(4)],
+      [" as % of European", E > 1e-9 ? pct((A - E) / E) : "—"],
+      ["Boundary at half life", bHalf === null ? "none — never exercise" : bHalf.toFixed(2)],
+      ["Your spot", s4.S.toFixed(1)],
+      ["Exercise now?", (bHalf !== null && s4.S <= bHalf) ? "inside the region" : "hold"]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — the night-before screen ══════════ */
+const s5 = { D: 1.42, S: 112.40, days: 38, floorOn: 1, v: 0.31 };
+(function () {
+  const KS = [85, 90, 95, 100, 105, 110, 115];
+  sliders(document.getElementById("ctl5"), [
+    { id: "a5", k: "D", lbl: "D", name: "Dividend", min: 0.05, max: 3, step: .01, fmt: v => "$" + v.toFixed(2) },
+    { id: "b5", k: "S", lbl: "S", name: "Spot", min: 95, max: 135, step: .1, fmt: v => v.toFixed(2) },
+    { id: "c5d", k: "days", lbl: "τ", name: "Days to expiry", min: 3, max: 120, step: 1, fmt: v => v.toFixed(0) + "d" },
+    { id: "d5", k: "floorOn", lbl: "", name: "Hurdle", min: 0, max: 1, step: 1, fmt: v => v ? "correct" : "no interest" }
+  ], s5, () => draw(),"c5");
+  window.draw5 = draw;
+  function draw() {
+    const tau = s5.days / 365, r = 0.045;
+    const rows = [], xs = [], hur = [], div = [];
+    let tot = 0, n = 0;
+    KS.forEach(K => {
+      const v = s5.v + (100 - K) / 100 * 0.55 * 0.31;
+      const put = bs(s5.S - s5.D, K, tau, v, r, 0, false).price;
+      const fl = floorOf(K, r, tau) * (s5.floorOn ? 1 : 0);
+      const h = fl + put, edge = s5.D - h;
+      if (edge > 0) { tot += edge; n++; }
+      rows.push([K, v, put, fl, h, edge]);
+      xs.push(K); hur.push(h); div.push(s5.D);
+    });
+    document.getElementById("screenTab").innerHTML =
+      '<tr><th>Strike</th><th>Vol</th><th>Put</th><th>Interest</th><th>Hurdle</th><th>D − hurdle</th><th>Action</th></tr>' +
+      rows.map(x => '<tr><td>' + x[0] + '</td><td>' + (x[1] * 100).toFixed(1) + '</td><td>' + x[2].toFixed(3) +
+        '</td><td>' + x[3].toFixed(3) + '</td><td>' + x[4].toFixed(3) +
+        '</td><td style="color:' + (x[5] > 0 ? "var(--moss)" : "var(--verm)") + '">' + x[5].toFixed(3) +
+        '</td><td style="color:' + (x[5] > 0 ? "var(--moss)" : "var(--grey)") + '">' + (x[5] > 0 ? "EXERCISE" : "hold") + '</td></tr>').join("");
+
+    const hi = Math.max(Math.max.apply(null, hur), s5.D) * 1.15;
+    const o = Fig(document.getElementById("cv5"), { h: 240, x0: 82, x1: 118, y0: 0, y1: hi, pad: { l: 52 } });
+    axes(o, v => v.toFixed(0), v => v.toFixed(2), 5, 4);
+    clip(o, () => {
+      bars(o, xs, hur, C("--blue"), .45);
+      line(o, [82, 118], [s5.D, s5.D], C("--moss"), 2.4);
+    });
+    document.getElementById("kv5").innerHTML = kvHTML([
+      ["Spot", s5.S.toFixed(2)],
+      ["Dividend", "$" + s5.D.toFixed(2)],
+      ["Days to expiry", s5.days + "d"],
+      ["Hurdle", s5.floorOn ? "interest + put" : "put only"],
+      ["Strikes clearing", n + " of " + KS.length],
+      ["Total edge / share", tot.toFixed(4)],
+      ["At 100 contracts each", money(tot * 100 * 100)]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — assignment as a binomial draw ══════════ */
+const s6 = { N: 50, frac: 0.4, S: 100, vol: 0.32 };
+(function () {
+  sliders(document.getElementById("ctl6"), [
+    { id: "a6", k: "N", lbl: "N", name: "Contracts short", min: 5, max: 200, step: 5, fmt: v => v.toFixed(0) },
+    { id: "b6", k: "frac", lbl: "p", name: "Fraction exercising", min: 0, max: 1, step: .01, fmt: pct },
+    { id: "c6s", k: "S", lbl: "S", name: "Spot", min: 20, max: 300, step: 5, fmt: v => v.toFixed(0) },
+    { id: "d6", k: "vol", lbl: "σ", name: "Overnight vol", min: .1, max: .9, step: .01, fmt: pct }
+  ], s6, () => draw(),"c6");
+  window.draw6 = draw;
+  function draw() {
+    const N = Math.round(s6.N), p = s6.frac;
+    const pm = binomPmf(N, p), mean = N * p, sd = Math.sqrt(N * p * (1 - p));
+    const lo = Math.max(0, Math.floor(mean - 4 * sd - 1)), hi = Math.min(N, Math.ceil(mean + 4 * sd + 1));
+    const xs = [], ys = [];
+    for (let k = lo; k <= hi; k++) { xs.push(k); ys.push(pm[k]); }
+    const o = Fig(document.getElementById("cv6"), { h: 270, x0: lo - .5, x1: hi + .5, y0: 0, y1: Math.max.apply(null, ys) * 1.15, pad: { l: 54 } });
+    axes(o, v => v.toFixed(0), v => (v * 100).toFixed(0) + "%", 6, 4);
+    clip(o, () => bars(o, xs, ys, C("--blue"), .74));
+    vline(o, mean, C("--ochre"), "E[k]");
+
+    // dollar consequence: mis-hedge x overnight move, as a mixture of normals
+    const sig = s6.S * s6.vol * Math.sqrt(1 / 252);
+    const lim = Math.max(1, (3 * sd + 1) * 100 * sig * 2.2);
+    const gx = [], gy = [];
+    for (let i = 0; i <= 200; i++) {
+      const x = -lim + i * (2 * lim / 200);
+      let d = 0;
+      for (let k = lo; k <= hi; k++) {
+        const w = Math.abs(k - mean) * 100 * sig;
+        if (w < 1e-9) continue;
+        d += pm[k] * npdf(x / w) / w;
+      }
+      gx.push(x); gy.push(d);
+    }
+    const o2 = Fig(document.getElementById("cv6b"), { h: 180, x0: -lim, x1: lim, y0: 0, y1: Math.max(1e-9, Math.max.apply(null, gy) * 1.15), pad: { l: 54 } });
+    axes(o2, v => money(v), () => "", 5, 3);
+    clip(o2, () => line(o2, gx, gy, C("--verm"), 2.4));
+    vline(o2, 0, C("--grey"), "hedged");
+
+    let within = 0;
+    for (let k = Math.ceil(mean - 1); k <= Math.floor(mean + 1); k++) if (k >= 0 && k <= N) within += pm[k];
+    const exact = Number.isInteger(mean) ? pm[mean] : 0;
+    document.getElementById("kv6").innerHTML = kvHTML([
+      ["Short", N + " contracts"],
+      ["Expected assignment", mean.toFixed(1) + " contracts"],
+      [" in shares", (mean * 100).toFixed(0)],
+      ["Standard deviation", sd.toFixed(2) + " contracts"],
+      [" in shares", (sd * 100).toFixed(0)],
+      ["P(exactly the mean)", Number.isInteger(mean) ? pct(exact) : "—"],
+      ["P(within 1 contract)", pct(within)],
+      ["Overnight sd of error", money(sd * 100 * sig)]
+    ]);
+  }
+})();
+
+/* ══════════ 07 — pin risk ══════════ */
+const s7 = { settle: 100.02, frac: 1, N: 10, vol: 0.35, days: 3 };
+(function () {
+  const K = 100;
+  sliders(document.getElementById("ctl7"), [
+    { id: "a7", k: "settle", lbl: "S", name: "Friday settlement", min: 99.85, max: 100.15, step: .01, fmt: v => v.toFixed(2) },
+    { id: "b7", k: "frac", lbl: "p", name: "Fraction exercising", min: 0, max: 1, step: .05, fmt: pct },
+    { id: "c7n", k: "N", lbl: "N", name: "Contracts short", min: 1, max: 60, step: 1, fmt: v => v.toFixed(0) },
+    { id: "d7", k: "vol", lbl: "σ", name: "Volatility", min: .1, max: .9, step: .01, fmt: pct },
+    { id: "e7", k: "days", lbl: "d", name: "Days to Monday", min: 1, max: 4, step: 1, fmt: v => v.toFixed(0) + "d" }
+  ], s7, () => { run(); },"c7");
+  const eff = st => st >= K + 0.01 ? s7.frac : (st > K ? s7.frac * 0.5 : 0);
+  let sim = null;
+  function run() {
+    const N = Math.round(s7.N), sig = s7.settle * s7.vol * Math.sqrt(s7.days / 252);
+    const p = eff(s7.settle), M = 4000, out = new Float64Array(M);
+    for (let i = 0; i < M; i++) {
+      let k = 0;
+      for (let j = 0; j < N; j++) if (Math.random() < p) k++;
+      const move = gauss() * sig;
+      out[i] = -(k * 100) * ((s7.settle + move) - K);
+    }
+    sim = out; draw();
+  }
+  document.getElementById("run7").addEventListener("click", run);
+  window.draw7 = () => { if (!sim) run(); else draw(); };
+  function draw() {
+    const N = Math.round(s7.N);
+    const xs = [], risk = [], intr = [];
+    for (let i = 0; i <= 120; i++) {
+      const st = 99.85 + i * (0.30 / 120);
+      const p = eff(st), sig = st * s7.vol * Math.sqrt(s7.days / 252);
+      xs.push(st); risk.push(p * N * 100 * sig); intr.push(p * N * 100 * Math.abs(st - K));
+    }
+    const hi = Math.max(1, Math.max.apply(null, risk) * 1.18);
+    const o = Fig(document.getElementById("cv7"), { h: 280, x0: 99.85, x1: 100.15, y0: 0, y1: hi, pad: { l: 62 } });
+    axes(o, v => v.toFixed(2), v => money(v), 4, 4);
+    clip(o, () => {
+      const g = o.g; g.save(); g.globalAlpha = .12; g.fillStyle = C("--ochre");
+      g.fillRect(o.X(K), o.P.t, o.X(K + 0.01) - o.X(K), o.ph); g.restore();
+      line(o, xs, risk, C("--verm"), 2.8);
+      line(o, xs, intr, C("--grey"), 2);
+      line(o, xs.filter(x => x <= K), xs.filter(x => x <= K).map(() => 0), C("--moss"), 3);
+    });
+    vline(o, K, C("--ink"), "K");
+    vline(o, s7.settle, C("--blue"), "settle");
+
+    const m = sim.reduce((a, b) => a + b, 0) / sim.length;
+    const sd = Math.sqrt(sim.reduce((a, b) => a + (b - m) * (b - m), 0) / sim.length);
+    const lo = m - 4 * sd - 1, hh = m + 4 * sd + 1, B = 46, ct = new Array(B).fill(0);
+    for (let i = 0; i < sim.length; i++) {
+      const b = Math.floor((sim[i] - lo) / ((hh - lo) / B));
+      if (b >= 0 && b < B) ct[b]++;
+    }
+    const bx = [], by = [];
+    for (let i = 0; i < B; i++) { bx.push(lo + (i + .5) * ((hh - lo) / B)); by.push(ct[i] / sim.length); }
+    const o2 = Fig(document.getElementById("cv7d"), { h: 190, x0: lo, x1: hh, y0: 0, y1: Math.max(1e-6, Math.max.apply(null, by) * 1.15), pad: { l: 62 } });
+    axes(o2, v => money(v), () => "", 5, 3);
+    clip(o2, () => bars(o2, bx, by, C("--verm"), .85));
+    vline(o2, 0, C("--grey"), "flat");
+
+    const sig = s7.settle * s7.vol * Math.sqrt(s7.days / 252);
+    const p = eff(s7.settle);
+    const intrinsic = p * N * 100 * Math.abs(s7.settle - K);
+    const rk = p * N * 100 * sig;
+    document.getElementById("kv7").innerHTML = kvHTML([
+      ["Settlement", s7.settle.toFixed(2)],
+      ["Auto-exercised?", s7.settle >= K + 0.01 ? "yes" : (s7.settle > K ? "unknowable" : "no")],
+      ["Expected assignment", (p * N).toFixed(1) + " of " + N],
+      ["Shares delivered", (p * N * 100).toFixed(0)],
+      ["Intrinsic exchanged", money(intrinsic)],
+      ["Overnight sd", money(rk)],
+      ["Risk / intrinsic", intrinsic > 1 ? (rk / intrinsic).toFixed(0) + "×" : "∞"],
+      ["Simulated sd", money(sd)]
+    ]);
+  }
+})();
+
+/* ══════════ 08 — corporate actions ══════════ */
+const s8 = { ratio: 2, deal: 85, S: 84, v: 0.40, days: 182 };
+(function () {
+  sliders(document.getElementById("ctl8"), [
+    { id: "a8", k: "ratio", lbl: "n", name: "Split ratio (n-for-1)", min: 1.25, max: 4, step: .25, fmt: v => v.toFixed(2) + ":1" },
+    { id: "b8", k: "deal", lbl: "†", name: "Cash deal price", min: 70, max: 120, step: 1, fmt: v => "$" + v.toFixed(0) },
+    { id: "c8s", k: "S", lbl: "S", name: "Spot before", min: 60, max: 115, step: 1, fmt: v => v.toFixed(0) },
+    { id: "d8", k: "v", lbl: "σ", name: "Volatility before", min: .1, max: .9, step: .01, fmt: pct }
+  ], s8, () => draw(),"c8");
+  window.draw8 = draw;
+  function draw() {
+    const r = 0.045, T = s8.days / 365, lam = 1 / s8.ratio;
+    const S0 = 120, K0 = 100, v = 0.35;
+    const a = bs(S0, K0, T, v, r, 0, true);
+    const b = bs(S0 * lam, K0 * lam, T, v, r, 0, true);
+    const del0 = 100 * a.delta * S0, del1 = (100 / lam) * b.delta * (S0 * lam);
+    const val0 = 100 * a.price, val1 = (100 / lam) * b.price;
+    const gam0 = 100 * a.gamma * S0 * S0 * .01, gam1 = (100 / lam) * b.gamma * (S0 * lam) * (S0 * lam) * .01;
+    const veg0 = 100 * a.vega * .01, veg1 = (100 / lam) * b.vega * .01;
+    document.getElementById("adjTab").innerHTML =
+      '<tr><th>Position measure</th><th>Before</th><th>After</th><th>Residual</th></tr>' +
+      [["Position value", val0, val1], ["Dollar delta", del0, del1],
+      ["Gamma cash, per 1%", gam0, gam1], ["Vega, per vol point", veg0, veg1]]
+        .map(x => '<tr><td>' + x[0] + '</td><td>' + x[1].toFixed(6) + '</td><td>' + x[2].toFixed(6) +
+          '</td><td class="ok">' + Math.abs(x[1] - x[2]).toExponential(1) + '</td></tr>').join("") +
+      '<tr><td>Share delta (per contract set)</td><td>' + (100 * a.delta).toFixed(4) + '</td><td>' +
+      ((100 / lam) * b.delta).toFixed(4) + '</td><td>scales by ' + s8.ratio.toFixed(2) + '×</td></tr>';
+
+    const KS = [], before = [], after = [];
+    for (let K = 60; K <= 120; K += 2.5) {
+      KS.push(K);
+      before.push(bs(s8.S, K, T, s8.v, r, 0, true).price);
+      after.push(Math.exp(-r * T) * Math.max(s8.deal - K, 0));
+    }
+    const hi = Math.max(Math.max.apply(null, before), Math.max.apply(null, after)) * 1.12;
+    const o = Fig(document.getElementById("cv8"), { h: 250, x0: 60, x1: 120, y0: 0, y1: Math.max(1, hi), pad: { l: 54 } });
+    axes(o, v => v.toFixed(0), v => v.toFixed(1), 5, 4);
+    clip(o, () => {
+      line(o, KS, before, C("--blue"), 2.8);
+      line(o, KS, after, C("--verm"), 2.4);
+    });
+    vline(o, s8.deal, C("--ochre"), "deal");
+    vline(o, s8.S, C("--grey"), "spot");
+
+    const K90 = bs(s8.S, 90, T, s8.v, r, 0, true);
+    document.getElementById("kv8").innerHTML = kvHTML([
+      ["Split", s8.ratio.toFixed(2) + " for 1"],
+      ["New strike on a 100", (100 / s8.ratio).toFixed(4)],
+      ["New deliverable", (100 * s8.ratio).toFixed(1) + " sh"],
+      ["Worst residual", Math.max(Math.abs(val0 - val1), Math.abs(del0 - del1), Math.abs(veg0 - veg1)).toExponential(1)],
+      ["—", "—"],
+      ["Deal price", "$" + s8.deal.toFixed(0)],
+      ["90 call before", K90.price.toFixed(4)],
+      ["90 call after", (Math.exp(-r * T) * Math.max(s8.deal - 90, 0)).toFixed(4)],
+      ["Vega after", "0.0000"]
+    ]);
+  }
+})();
+
+/* ══════════ 09 — tender offers ══════════ */
+const s9 = { pror: 1, v: 0.09, tender: 100, S: 98.2, days: 120 };
+(function () {
+  const r = 0.045;
+  sliders(document.getElementById("ctl9"), [
+    { id: "a9", k: "pror", lbl: "π", name: "Proration accepted", min: .1, max: 1, step: .05, fmt: pct },
+    { id: "b9", k: "v", lbl: "σ", name: "Volatility after news", min: .04, max: .6, step: .01, fmt: pct },
+    { id: "c9t", k: "tender", lbl: "T", name: "Tender price", min: 90, max: 120, step: 1, fmt: v => "$" + v.toFixed(0) },
+    { id: "d9", k: "S", lbl: "S", name: "Spot now", min: 85, max: 118, step: .1, fmt: v => v.toFixed(2) },
+    { id: "e9", k: "days", lbl: "τ", name: "Days to expiry", min: 20, max: 300, step: 5, fmt: v => v.toFixed(0) + "d" }
+  ], s9, () => draw(),"c9");
+  window.draw9 = draw;
+  const hurdleAt = K => {
+    const tau = s9.days / 365;
+    return { fl: floorOf(K, r, tau), put: bs(s9.S, K, tau, s9.v, r, 0, false).price };
+  };
+  function draw() {
+    const K = 70, h = hurdleAt(K), gain = Math.max(0, (s9.tender - s9.S)) * s9.pror;
+    const tot = h.fl + h.put;
+    const o = Fig(document.getElementById("cv9"), { h: 230, x0: 0, x1: 3, y0: 0, y1: Math.max(gain, tot) * 1.32 + .05, pad: { l: 56 } });
+    axes(o, () => "", v => v.toFixed(2), 3, 4);
+    (function () {
+      const g = o.g, bw = o.pw / 3 * 0.5, at = x => o.X(x) - bw / 2;
+      g.fillStyle = C("--moss"); g.fillRect(at(0.5), o.Y(gain), bw, o.Y(0) - o.Y(gain));
+      g.fillStyle = C("--ochre"); g.fillRect(at(1.5), o.Y(h.fl), bw, o.Y(0) - o.Y(h.fl));
+      g.fillStyle = C("--blue"); g.fillRect(at(1.5), o.Y(tot), bw, o.Y(0) - o.Y(h.put));
+      g.fillStyle = C("--ink"); g.textAlign = "center"; g.textBaseline = "bottom";
+      g.font = "10px 'IBM Plex Mono', monospace";
+      g.fillText("gain  " + gain.toFixed(3), o.X(0.5), o.Y(gain) - 5);
+      g.fillText("hurdle  " + tot.toFixed(3), o.X(1.5), o.Y(tot) - 5);
+      g.fillStyle = gain > tot ? C("--moss") : C("--verm");
+      g.font = "600 13px 'IBM Plex Mono', monospace";
+      g.fillText((gain > tot ? "TENDER  +" : "HOLD  ") + (gain - tot).toFixed(3), o.X(2.5), o.Y(0) - o.ph * .45);
+    })();
+
+    const KS = [], edge = [];
+    for (let k = 50; k <= 110; k += 2.5) {
+      const hh = hurdleAt(k);
+      KS.push(k); edge.push(gain - hh.fl - hh.put);
+    }
+    const lo = Math.min.apply(null, edge), hi = Math.max.apply(null, edge);
+    const o2 = Fig(document.getElementById("cv9b"), { h: 200, x0: 50, x1: 110, y0: Math.min(-.2, lo * 1.1), y1: Math.max(.2, hi * 1.2), pad: { l: 56 } });
+    axes(o2, v => v.toFixed(0), v => v.toFixed(2), 5, 4);
+    clip(o2, () => {
+      line(o2, KS, edge.map(() => 0), C("--grey"), 1.2, [4, 3]);
+      line(o2, KS, edge, C("--blue"), 2.8);
+    });
+    vline(o2, s9.S, C("--ochre"), "spot");
+
+    document.getElementById("kv9").innerHTML = kvHTML([
+      ["Tender price", "$" + s9.tender.toFixed(0)],
+      ["Spot", s9.S.toFixed(2)],
+      ["Premium available", (s9.tender - s9.S).toFixed(3)],
+      ["× proration", gain.toFixed(3)],
+      ["Interest floor (70K)", h.fl.toFixed(4)],
+      ["Insurance (70K)", h.put.toFixed(4)],
+      ["Hurdle", tot.toFixed(4)],
+      ["Edge / share", (gain - tot).toFixed(4)],
+      ["On 100 contracts", money((gain - tot) * 100 * 100)]
+    ]);
+  }
+})();
+
+/* ══════════ 10 — the drill generator ══════════ */
+(function () {
+  let hard = false, score = 0, asked = 0, streak = 0, best = 0, cur = null;
+  const E = id => document.getElementById(id);
+  function make() {
+    const R = Math.random;
+    const kinds = hard ? [0, 1, 2, 3] : [0, 2];
+    const t = kinds[Math.floor(R() * kinds.length)];
+    const K = [25, 30, 40, 50, 60, 75, 80, 90, 100, 110, 120, 150, 180, 200][Math.floor(R() * 14)];
+    const days = [3, 5, 7, 10, 14, 21, 28, 35, 45, 60, 75, 90, 120][Math.floor(R() * 13)];
+    const r = [0.01, 0.02, 0.03, 0.04, 0.045, 0.05, 0.055, 0.06][Math.floor(R() * 8)];
+    const tau = days / 365, fl = floorOf(K, r, tau);
+    if (t === 0) return {
+      kind: "Interest floor", unit: "$ / share", a: fl, tol: Math.max(0.01, fl * (hard ? .03 : .05)),
+      q: "Strike <b>" + K + "</b>, <b>" + days + "</b> days to expiry, rates <b>" + (r * 100).toFixed(1) + "%</b>. What must a dividend clear before early exercise is possible at any spot?",
+      w: "K(1 − e^−rτ) = " + K + " × (1 − e^−" + r + "×" + tau.toFixed(4) + ") = <b>" + fl.toFixed(4) + "</b>. The quick version, K·r·τ, gives " + (K * r * tau).toFixed(4) + " — close enough to sort a screen with."
+    };
+    if (t === 1) {
+      const v = 0.15 + R() * 0.55, S = K * (1.01 + R() * 0.28), D = fl * (0.4 + R() * 3.2);
+      const put = bs(S - D, K, tau, v, r, 0, false).price, edge = D - fl - put;
+      return {
+        kind: "Exercise edge", unit: "$ / share", a: edge, tol: 0.03,
+        q: "Stock <b>" + S.toFixed(2) + "</b>, strike <b>" + K + "</b>, <b>" + days + "</b> days left, rates <b>" + (r * 100).toFixed(1) + "%</b>. A dividend of <b>" + D.toFixed(2) + "</b> goes ex tomorrow and the " + K + " put is offered at <b>" + put.toFixed(2) + "</b>. What is the edge per share from exercising?",
+        w: "D − K(1−e^−rτ) − put = " + D.toFixed(3) + " − " + fl.toFixed(3) + " − " + put.toFixed(3) + " = <b>" + edge.toFixed(3) + "</b>. " + (edge > 0 ? "Positive — exercise." : "Negative — hold. Note the interest floor alone was " + fl.toFixed(3) + ".")
+      };
+    }
+    if (t === 2) {
+      const N = [5, 10, 20, 25, 40, 50, 75, 100, 150, 200][Math.floor(R() * 10)];
+      const p = [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8][Math.floor(R() * 10)];
+      return {
+        kind: "Expected assignment", unit: "shares", a: N * p * 100, tol: Math.max(1, N * p * 100 * (hard ? .003 : .005)),
+        q: "You are short <b>" + N + "</b> contracts. <b>" + (p * 100).toFixed(0) + "%</b> of the open interest exercises overnight. How many shares should you expect to be assigned?",
+        w: N + " × " + p + " × 100 = <b>" + (N * p * 100).toFixed(0) + "</b> shares, with a standard deviation of " + (Math.sqrt(N * p * (1 - p)) * 100).toFixed(0) + " shares. The mean is what you hedge to; the deviation is what you carry overnight."
+      };
+    }
+    const num = [2, 3, 3, 4, 5][Math.floor(R() * 5)], den = [1, 2, 1, 3, 4][Math.floor(R() * 5)];
+    const ns = K * den / num;
+    return {
+      kind: "Adjusted strike", unit: "$", a: ns, tol: Math.max(0.01, ns * .005),
+      q: "A <b>" + num + "-for-" + den + "</b> split is declared and your <b>" + K + "</b> strike is adjusted. What is the new strike?",
+      w: "New strike = old × den/num = " + K + " × " + den + "/" + num + " = <b>" + ns.toFixed(4) + "</b>. The deliverable moves the other way, to " + (100 * num / den).toFixed(2) + " shares (or the contract count multiplies, when it divides cleanly)."
+    };
+  }
+  function next() {
+    cur = make();
+    E("dKind").textContent = cur.kind;
+    E("dText").innerHTML = cur.q;
+    E("dUnit").textContent = cur.unit;
+    E("dInput").value = "";
+    E("drill").classList.remove("done");
+  }
+  function submit() {
+    if (!cur || E("drill").classList.contains("done")) return;
+    const raw = parseFloat(String(E("dInput").value).replace(/[$,\s]/g, ""));
+    asked++;
+    const ok = isFinite(raw) && Math.abs(raw - cur.a) <= cur.tol;
+    if (ok) { score++; streak++; if (streak > best) best = streak; } else streak = 0;
+    E("dVerdict").textContent = ok ? "CORRECT" : ("NOT QUITE — the answer is " + cur.a.toFixed(cur.unit === "shares" ? 0 : 4));
+    E("dVerdict").className = "vd " + (ok ? "ok" : "no");
+    E("dWork").innerHTML = cur.w;
+    E("dScore").textContent = score + " / " + asked;
+    E("dStreak").textContent = String(streak);
+    E("dBest").textContent = String(best);
+    E("drill").classList.add("done");
+  }
+  E("dSubmit").addEventListener("click", submit);
+  E("dInput").addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+  E("dNext").addEventListener("click", next);
+  E("dSkip").addEventListener("click", () => { streak = 0; E("dStreak").textContent = "0"; next(); });
+  E("dEasy").addEventListener("click", () => {
+    hard = false; E("dEasy").setAttribute("aria-pressed", "true"); E("dHard").setAttribute("aria-pressed", "false"); next();
+  });
+  E("dHard").addEventListener("click", () => {
+    hard = true; E("dHard").setAttribute("aria-pressed", "true"); E("dEasy").setAttribute("aria-pressed", "false"); next();
+  });
+  window.drawDrill = next;
+})();
+
+function drawAll() {
+  draw1(); draw2(); draw3(); draw4(); draw5(); draw6(); draw7(); draw8(); draw9(); drawDrill();
+}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

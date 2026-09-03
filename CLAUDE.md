@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. Seven pages live, four planned.
+no dependencies. Eight pages live, three planned.
 
 ## Before you change anything
 
@@ -36,6 +36,8 @@ script, compute the numbers, then write the sentence. Doing this caught:
   spread width — which became a whole chapter (page 04)
 - a benchmark demonstration where both algorithms agreed, defeating the point,
   until the case was re-derived (page 06)
+- an interest floor quoted as $1.47 when it is $1.49, caught by a harness that
+  recomputes every number in the prose from the code that ships (page 08)
 
 If a number appears in the text, it was computed first. Where a figure rests on an
 assumption that cannot be measured — price impact, dealer positioning, spread
@@ -110,7 +112,22 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Pages 08 (early exercise and assignment), 09 (variance and the log contract),
-10 (dispersion and correlation) and 11 (the book). `ROADMAP.md` has the spine and
-signature interaction for each. Page 08 is the one with no good treatment anywhere
-online and can be written largely from desk knowledge rather than research.
+Pages 09 (variance and the log contract), 10 (dispersion and correlation) and 11
+(the book). `ROADMAP.md` has the spine and signature interaction for each.
+
+## Two traps this repo has already fallen into twice
+
+**`check.js` can pass vacuously.** It finds the page script with a regex that expects
+an opening `<script>` followed by a bare LF, so a file written with CRLF line endings
+extracts an empty string and
+*every* JavaScript check silently skips — the page "passes" having been barely read.
+`mkpage.py` now writes with `newline=""` to keep LF. If a page passes suspiciously
+fast, confirm the extraction matched before believing it.
+
+**Grid items blow out the layout on phones.** A `.split` column defaults to
+`min-width:auto`, so a wide child — a `.tblwrap` holding a 440px table — widens the
+column past the viewport. Because `body` sets `overflow-x:hidden`, the result is not
+a sideways scroll but silent *clipping*: ~60px of the control rail became unreachable
+on a 390px screen, on five of the seven pages, for months. `lab.css` now sets
+`.split>*{min-width:0}`. When adding a figure, check `documentElement.scrollWidth`
+against `clientWidth` at 360px before shipping.
