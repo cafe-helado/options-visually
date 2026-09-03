@@ -74,6 +74,14 @@ python3 -m http.server 8000     # then open http://localhost:8000
 
 Opening the file directly with `file://` also works, since there are no fetches.
 
+## Scripts
+
+| script | what it does |
+|---|---|
+| `node check.js` | Pre-flight every page. Run before every commit — it is the only safety net. |
+| `python3 mkpage.py body.html script.js out.html "Title" "Description"` | Assemble a page from fragments. |
+| `python3 build.py` | Inline assets into `dist/` for standalone distribution. |
+
 ## Adding a page
 
 1. `cp template.html surface.html`
@@ -87,7 +95,19 @@ Opening the file directly with `file://` also works, since there are no fetches.
 
 ## Verify before publishing
 
-There is no build step, so nothing catches mistakes for you. Run these:
+There is no build step, so nothing catches mistakes for you. Run:
+
+```bash
+node check.js                 # every page
+node check.js surface.html    # one page
+```
+
+It checks parsing against the engine, missing and duplicate element ids, broken
+internal links, equations without a plain-English reading, self-marking questions with
+no answer, presets naming unregistered slider groups, and executes every page under a
+stubbed DOM to catch runtime errors a parse check would miss.
+
+<details><summary>The equivalent one-liners, if you want them individually</summary>
 
 ```bash
 # 1. does the page parse together with the engine?
@@ -133,3 +153,4 @@ was backwards. If a number appears in the text, compute it first.
 Canvas heights shrink automatically on narrow screens via `cvh()`, which `Fig` applies,
 and axis tick density drops so labels don't collide. If you size a canvas manually
 rather than through `Fig`, wrap the height in `cvh()` yourself.
+</details>
