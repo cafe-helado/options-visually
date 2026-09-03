@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Variance and the Log Contract — Options, visually</title>
+<meta name="description" content="Variance is replicable with a static strip of options; volatility is not. The log contract, the 1/K-squared strip, why the wings are a third of the trade, and what VIX actually is.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Variance and the Log Contract — Options, visually">
+<meta property="og:description" content="Variance is replicable with a static strip of options; volatility is not. The log contract, the 1/K-squared strip, why the wings are a third of the trade, and what VIX actually is.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 09 · Variance and the Log Contract</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>The square</span><i></i></a>
+  <a href="#c2"><span>The log contract</span><i></i></a>
+  <a href="#c3"><span>The strip</span><i></i></a>
+  <a href="#c4"><span>The wings</span><i></i></a>
+  <a href="#c5"><span>What it pays</span><i></i></a>
+  <a href="#c6"><span>VIX</span><i></i></a>
+  <a href="#c7"><span>Where it breaks</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 09</div>
+    <h1>Only one of them is <em>tradeable</em></h1>
+    <p class="sub">Variance can be manufactured out of a fixed basket of options bought today and never touched again. Volatility — its own square root — cannot. Everything difficult about this subject descends from that one asymmetry.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This page needs <a href="black-scholes.html#c6" style="color:var(--blue)">page 01's replication chapter</a> and the smile vocabulary from <a href="surface.html" style="color:var(--blue)">page 02</a>. It adds one genuinely new piece of machinery: static replication, where a payoff is built once from options and then left alone.</p>
+  <ol>
+    <li><b>Chapter 02 is the load-bearing one.</b> Delta-hedge one particular contract and your profit <em>is</em> the realized variance — not approximately, not on average, but on every path.</li>
+    <li><b>Chapter 04 is the one that will surprise you.</b> Cut the strike range to 92%–108% and a 25% variance swap prices at 17.4%. The wings you would never bother quoting are a third of the contract.</li>
+    <li><b>Variance and volatility are different trades.</b> Chapter 01 puts a number on the gap and chapter 05 explains who pays it.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>σ<sub>R</sub></td><td>Realized volatility over the contract's life, annualised. What actually happened.</td></tr>
+      <tr><td>σ<sub>R</sub>²</td><td>Realized variance. The quantity that is replicable, and the one contracts are written on.</td></tr>
+      <tr><td>K<sub>var</sub></td><td>The fair variance strike, quoted as a volatility. The square root of the fair variance, not a volatility forecast.</td></tr>
+      <tr><td>F</td><td>The forward, S·e<sup>rT</sup>. The strip is built around it, not around spot.</td></tr>
+      <tr><td>Log contract</td><td>A payoff proportional to ln(S<sub>T</sub>/F). Its delta hedge accumulates realized variance and nothing else.</td></tr>
+      <tr><td>1/K²</td><td>The weight each option gets in the strip. Not a fudge — it falls out of the second derivative of the log payoff.</td></tr>
+      <tr><td>Vega notional</td><td>How variance swaps are actually sized: dollars per volatility point at the strike, rather than per unit of variance.</td></tr>
+      <tr><td>ν</td><td>Vol of vol. How uncertain the realized volatility is, which is what makes variance and volatility diverge.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>The square is not a detail</h2>
+    <p class="dek">A variance swap and a volatility swap on the same underlying, over the same window, do not have the same fair value. The gap is Jensen's inequality, and it is large.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">People say "volatility" and write down variance, and most of the time nothing goes wrong. It goes wrong here. Variance is the square of volatility, squaring is a convex function, and the expectation of a convex function is not the function of the expectation. So the fair strike of a contract paying realized <em>variance</em> sits strictly above the square of the fair strike of one paying realized <em>volatility</em> — on the same underlying, over the same window, with nothing else different.</p>
+    <p>The size of the gap is set by how uncertain the volatility itself is. If you knew realized vol would be exactly 25%, the two contracts would be identical and the gap would be zero. Put some <span class="term" data-t="Vol of vol" data-def="How much the realized volatility itself varies. It is the second-order uncertainty: not how much the stock moves, but how uncertain you are about how much it will move.">uncertainty</span> around that 25% and the gap opens immediately.</p>
+    <p>The figure draws realized volatility as a distribution centred on 25 and reports both numbers. At a vol-of-vol of <b>0.4</b> the mean volatility is still 25.0% but the square root of mean variance is <b>27.1%</b> — a gap of <b>2.08 volatility points</b>. Push vol-of-vol to <b>0.6</b> and the gap is <b>4.93 points</b>, which is not a rounding difference, it is most of a trade.</p>
+    <p>This matters in one direction more than the other. Someone short a variance swap is short that convexity: their losses grow with the square of how wrong they were, while their gains are capped by volatility not being able to fall below zero. That asymmetry is the whole risk profile of the product and chapter 05 returns to it.</p>
+  </div>
+
+  <div class="mline">E[σ<sub>R</sub>²] &gt; (E[σ<sub>R</sub>])² &nbsp;&nbsp;whenever σ<sub>R</sub> is uncertain</div>
+  <p class="mread">Reads as: <b>the average of the squares beats the square of the average.</b> The two are equal only when there is nothing to average over — that is, when you already know the answer.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Realized volatility as a distribution, and the two fair strikes</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Distribution of σ<sub>R</sub></span>
+            <span><i class="swl" style="background:var(--moss)"></i>E[σ<sub>R</sub>] — vol swap</span>
+            <span><i class="swl" style="background:var(--verm)"></i>√E[σ<sub>R</sub>²] — var swap</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>The convexity gap, against vol of vol</h3></div>
+        <canvas id="cv1b" height="180"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The window</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Notice the two markers separating as you raise vol of vol, and notice that only one of them moves. The mean of the distribution stays pinned at the centre while the variance strike walks to the right, because the right tail is being squared and the left tail cannot go below zero. That one-sidedness is why the product is quoted the way it is.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set vol of vol to zero. <b>Predict</b> what happens to the two markers, then raise it to 0.8 and read the gap.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"nu":0}' data-focus="cv1">Certainty</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"nu":0.8}' data-focus="cv1">Maximum doubt</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A dealer quotes you a variance swap at 25 and a volatility swap on the same window at 25. Which is cheaper for you to buy?</p>
+    <div class="opts">
+      <button>They are the same trade quoted two ways</button>
+      <button data-ok="1">The variance swap, because its fair strike is above the volatility swap's — quoting them equal means the variance swap is being sold below fair value</button>
+      <button>The volatility swap, since variance is riskier</button>
+      <button>Impossible to say without knowing realized volatility</button>
+    </div>
+    <div class="ans"><b>The variance swap.</b> Its fair strike carries the convexity premium — 2.08 points at a vol of vol of 0.4 — so a variance swap quoted at the volatility swap's level is being handed to you cheap. The last answer is the tempting one, because it sounds appropriately humble, but the comparison is between two <em>fair values</em> today and does not require knowing the outcome.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>One contract whose hedge pays exactly the variance</h2>
+    <p class="dek">Not approximately, and not on average. On every path, to five decimals.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Page 01 delta-hedged a call and found a residual that shrank with effort but never vanished. Here is a payoff that behaves completely differently. Take the <b>log contract</b> — a claim paying <b>−(2/T)·ln(S<sub>T</sub>/S<sub>0</sub>)</b> at expiry — delta-hedge it mechanically, and add up the money at the end. The answer is the realized variance of the path. Every time.</p>
+    <p>The figure runs a few thousand paths and plots each one's hedged P&amp;L against the realized variance it actually delivered. The result is not a cloud with a trend through it, it is a <b>line</b>: the correlation between the two is <b>0.99998</b> at 10 volatility and still <b>0.99966</b> at 45. Mean hedged P&amp;L matches mean realized variance to five decimal places.</p>
+    <p>The reason is a single structural fact. A delta-hedged option's P&amp;L over a small step is <b>½·S²Γ·(realized − implied)</b> — the gamma rent from page 01. That expression is weighted by <span class="term" data-t="Dollar gamma" data-def="S²Γ. The gamma exposure measured in money rather than in shares-per-dollar. It is what decides how much a delta hedge earns from a move of a given percentage size.">dollar gamma</span>, which for a normal option is a bump centred on the strike — so an ordinary option pays you for movement <em>near its strike</em> and almost nothing for movement far away. The log contract's dollar gamma is <b>constant</b>. It pays the same for a 1% move wherever the stock happens to be, which is precisely what "measure the variance" means.</p>
+    <p>So the log contract is not one instrument among many. It is the unique payoff that turns a delta hedge into a variance meter, and everything in the rest of this page is an attempt to build it out of things that actually trade.</p>
+  </div>
+
+  <div class="mline">hedged P&amp;L &nbsp;=&nbsp; σ<sub>R</sub>² &nbsp;&nbsp;&nbsp; because &nbsp; S²Γ &nbsp;is constant</div>
+  <p class="mread">Reads as: <b>a contract that pays the same for a percentage move at any price level accumulates exactly the sum of squared percentage moves.</b> Constant dollar gamma is the whole trick.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Hedged P&amp;L against realized variance, one dot per path</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Paths</span>
+            <span><i class="swl" style="background:var(--verm)"></i>y = x</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="300"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Dollar gamma: an ordinary call against the log contract</h3></div>
+        <canvas id="cv2b" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The experiment</h4>
+        <div id="ctl2"></div>
+        <div class="btnrow"><button class="act" id="run2">Resimulate</button></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The lower panel is the explanation for the upper one. The call's dollar gamma is a hill — it measures movement only where it is standing. The log contract's is a flat line, so it measures movement everywhere equally, and "everywhere equally" is the definition of variance. Raise the hedge count and the dots tighten onto the diagonal; drop it to twelve and they scatter, because you are now sampling the variance rather than measuring it.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Drop the number of hedges to 12 and <b>predict</b> whether the dots move off the line in a biased direction or just spread around it.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"n":12}' data-focus="cv2" data-then="run2">Twelve hedges</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"n":252}' data-focus="cv2" data-then="run2">Daily</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why can't you build a variance meter out of a single at-the-money straddle, delta-hedged?</p>
+    <div class="opts">
+      <button>You can — a hedged straddle is the standard way to trade variance</button>
+      <button data-ok="1">Its dollar gamma is a hill centred on the strike, so it measures movement near the strike and ignores movement far from it. The measurement depends on where the stock goes, not just how much it moves</button>
+      <button>Because a straddle has no vega</button>
+      <button>Because straddles cannot be delta-hedged</button>
+    </div>
+    <div class="ans"><b>The dollar gamma is not flat.</b> A hedged straddle is a perfectly good <em>approximation</em> to a variance position while spot stays near the strike, which is why it is used that way in practice, and it decays into something else entirely once the stock trends away. The whole point of the 1/K² strip in chapter 03 is to add up enough hills to make a flat surface.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — why constant dollar gamma means variance</summary>
+    <div class="body">
+      <p>Hold a payoff <b>f(S)</b> and hedge its delta continuously. Itô says the value change splits into a delta piece, which the hedge cancels, and a curvature piece, which it does not.</p>
+      <div class="mline">d(hedged) = ½ · f″(S) · S²σ² dt</div>
+      <p class="mread">Reads as: <b>what survives the hedge is curvature multiplied by the size of the move squared.</b> This is page 01's gamma rent with the implied leg removed.</p>
+      <p>Now choose <b>f(S) = −(2/T)·ln(S)</b>. Differentiating twice gives <b>f″(S) = (2/T)/S²</b>, so the <b>S²</b> cancels exactly.</p>
+      <div class="mline">½ · (2/T)/S² · S²σ² dt = (σ²/T) dt</div>
+      <p class="mread">Reads as: <b>the price level drops out and you are left accumulating variance per unit time.</b> Integrate over the life and the total is the realized variance.</p>
+      <p>That cancellation is the entire subject. It happens for the logarithm and for nothing else, which is why the log contract has a name.</p>
+      <p><b>Where it breaks.</b> Itô's lemma assumes the path is continuous. A jump moves the stock a finite distance with no intervening hedge, so the hedge does not cancel the delta piece and the log contract stops measuring quadratic variation — chapter 07 puts a number on it. Discrete hedging causes scatter but no bias, which is the difference the try-this box above is asking you to notice. And the derivation says nothing about how you would <em>own</em> <b>f(S)</b>, which is the next chapter's problem.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>Building it out of things that trade</h2>
+    <p class="dek">Nobody lists a log contract. You assemble one from ordinary options weighted by 1/K², and then never touch it again.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The log payoff is a curve, and the only curves you can buy are made of options. Any twice-differentiable payoff can be written exactly as a fixed portfolio of calls and puts, with each strike weighted by the payoff's second derivative there. For the log contract that second derivative is <b>(2/T)/K²</b> — so the weight on the option struck at K is proportional to <b>1/K²</b>, and that is where the famous weighting comes from. It is not a convention or an approximation. It is the curvature of a logarithm.</p>
+    <p>What makes this different from every other hedge in the series is that it is <b>static</b>. You buy the strip once, at inception, and you do not rebalance it. Page 01's replication needed continuous attention and still left a residual; page 06 charged you for that attention. Here the options portfolio is fixed at the start and the only ongoing work is the delta hedge, which is the part that does the measuring.</p>
+    <p>The figure builds the strip in front of you. Start with a handful of strikes and the assembled payoff is a jagged approximation with visible corners; add strikes and the corners round off onto the smooth log curve. In numbers, on a chain running from 40% to 250% of the forward against a true 25% volatility: strikes every <b>$40</b> recover <b>22.35%</b>, every <b>$10</b> recover <b>25.02%</b>, and every <b>$2.50</b> recover <b>25.00%</b>. Twenty-one strikes is already enough to be within two basis points.</p>
+    <p>That convergence is fast and it is the reassuring half of the story. The alarming half is the next chapter, because none of those numbers survive if you shorten the <em>range</em> rather than the spacing.</p>
+  </div>
+
+  <div class="mline">strip weight at strike K &nbsp;∝&nbsp; ΔK / K²</div>
+  <p class="mread">Reads as: <b>buy more of the low strikes and less of the high ones, in proportion to one over the strike squared.</b> A $50 option gets sixteen times the weight of a $200 one.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The strip's payoff converging onto the log contract</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Assembled strip</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Log contract</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Individual options</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="320"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Recovered volatility against strike spacing</h3></div>
+        <canvas id="cv3b" height="185"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The chain</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Watch the corners rather than the overall shape — the strip is already roughly right with six strikes, and what the extra strikes buy is the removal of kinks between them. Each kink is a place where your replication is a straight line and the true payoff is curved, which is exactly where a variance measurement goes missing.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Take the spacing out to $40 and count the corners. <b>Predict</b> whether a coarse strip over-measures or under-measures variance before you read the number.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"spacing":40}' data-focus="cv3">Five strikes</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"spacing":5}' data-focus="cv3">Every five dollars</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why does the strip need no rebalancing when page 01's replication did?</p>
+    <div class="opts">
+      <button>Because variance swaps are cash-settled</button>
+      <button data-ok="1">Because the option portfolio reproduces the payoff's curvature exactly and for all time — only the delta hedge moves, and that is the part doing the measuring</button>
+      <button>Because the 1/K² weights update themselves as spot moves</button>
+      <button>Because the strip has no gamma</button>
+    </div>
+    <div class="ans"><b>The curvature is matched exactly, once.</b> A payoff decomposed into options by its own second derivative is not an approximation that decays — the identity holds at every spot and every time, so the basket is bought and left. This is what "static replication" means and it is the genuinely new machinery on this page. The third answer describes something that would be very convenient and does not exist: the weights are fixed at inception.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>The wings are not a detail either</h2>
+    <p class="dek">Cut the strike range to 92%–108% and a 25 variance swap prices at 17.4. The strikes nobody wants to quote are a third of the contract.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 03 showed the strip converging quickly in the number of strikes. It is easy to read that as "the replication is robust" and it is the wrong lesson, because the quantity that matters is not how <em>finely</em> the strikes are spaced but how <em>far</em> they extend.</p>
+    <p>Hold the spacing at $5 and pull the range in. From 40%–250% of the forward the strip recovers <b>24.97%</b> against a true 25%. Narrow it to 75%–140% and you get <b>23.69%</b>. Narrow again to 85%–120% — still a wider range than many single-name chains actually quote — and you get <b>20.81%</b>, low by <b>16.8%</b>. At 92%–108% the answer is <b>17.42%</b>, low by <b>30.3%</b>, on a contract that was supposed to be replicable.</p>
+    <p>The reason is the <b>1/K²</b> weight, which is doing something people consistently underestimate. Low strikes get enormous weight — a 50 strike carries sixteen times the weight of a 200 strike — and while each of those options is individually cheap, there are a lot of them and the weighting is aggressive. Break the total down by where it comes from and the at-the-money region between 90% and 110% supplies only <b>50.7%</b> of the variance. The band from 70% to 90% supplies <b>22.9%</b>, and everything below 70% another <b>3.5%</b>.</p>
+    <p>So roughly a quarter of a variance swap's value lives in strikes below 90%, in options that are individually near-worthless, frequently untradeable in size, and quoted on a volatility that is largely a market-maker's opinion. That is the practical fragility of the product, and it is why the honest version of "variance is replicable" carries the words "given a continuum of strikes" in front of it.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Where a variance swap's value actually comes from</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Share of total variance</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="250"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Recovered volatility as the range is truncated</h3></div>
+        <canvas id="cv4b" height="210"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The listed range</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Drag the lower bound alone and watch the recovered volatility fall much faster than dragging the upper bound by the same amount. The asymmetry is the 1/K² weight: truncating the downside removes heavily weighted options, truncating the upside removes lightly weighted ones. A variance swap is, structurally, mostly a position in the put wing.</figcaption>
+  </figure>
+
+  <div class="mline">σ<sub>R</sub>² ≈ (2e<sup>rT</sup>/T) · Σ (ΔK/K²) · O(K)</div>
+  <p class="mread">Reads as: <b>add up every out-of-the-money option, each weighted by one over its strike squared.</b> O(K) means the put below the forward and the call above it — always the out-of-the-money side, because that is the one that trades.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the range to 85%–120%, which is a plausible listed chain on a mid-cap. <b>Predict</b> the recovered volatility, then read it. Then move only the lower bound to 60%.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"lo":0.85,"hi":1.2}' data-focus="cv4b">A realistic chain</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"lo":0.6,"hi":1.2}' data-focus="cv4b">Extend the put wing only</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"lo":0.85,"hi":2}' data-focus="cv4b">Extend the call wing only</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A market maker quotes you a variance swap on a name whose listed options stop at 85% and 120% of spot. What have they actually sold you?</p>
+    <div class="opts">
+      <button>A variance swap — the replication is exact, that is the point of the product</button>
+      <button data-ok="1">A truncated approximation plus their own view on the unlisted wings, worth about 17% of the contract at that range. The wing risk did not disappear; it moved onto their book</button>
+      <button>A volatility swap in disguise</button>
+      <button>Nothing tradeable; the contract cannot be written</button>
+    </div>
+    <div class="ans"><b>An approximation plus somebody's wing mark.</b> The contract is perfectly writable and it is exactly as hedgeable as the strikes available to hedge it. Whatever the strip cannot reach is warehoused risk, priced from a model rather than a market — which is why variance swaps on illiquid underlyings are quoted wide and why they behave badly in exactly the moves that were supposed to make them pay.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>What the contract actually pays</h2>
+    <p class="dek">Quoted in volatility points, settled in variance, and convex in a direction that matters enormously to whoever is short.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A variance swap is quoted as a volatility — "we'll trade var at 25" — and settles on variance. The payoff is the difference of the squares, scaled by a notional, and that mismatch between the quoting convention and the settlement convention is where most of the practical confusion lives.</p>
+    <p>Because nobody wants to think in units of variance, the market sizes these in <b>vega notional</b>: the amount you make or lose for the first volatility point of difference. Variance notional is then vega notional divided by twice the strike. The consequence is that the first point behaves like a normal vega position and every subsequent point pays more than the one before.</p>
+    <p>Run the numbers on a 25 strike with $100,000 of vega notional. Realized comes in at 26 and you make about $100,000. At 30, a five-point miss, you make roughly <b>$550,000</b> — not five times the one-point figure but five and a half. At 45 you make <b>$2.8 million</b>. On the other side, realized at 20 loses you about <b>$450,000</b> and realized at 10 loses <b>$1.05 million</b>, which is where the asymmetry shows: volatility cannot go below zero, so the short's losses are unbounded while the long's are capped at the strike.</p>
+    <p>One more thing the strip explains rather than assumes. The fair variance strike is not the at-the-money volatility — it is an average over the whole surface with 1/K² weights, so <b>skew pushes it up</b>. On a 25% at-the-money vol, a skew of <b>−0.10</b> gives a variance strike of <b>25.74%</b>, and a skew of <b>−0.25</b> gives <b>30.44%</b>. That five-and-a-half-point premium is not a forecast that the stock will be more volatile. It is the put wing being expensive, mechanically loaded into a single number.</p>
+  </div>
+
+  <div class="mline">payoff = N<sub>vega</sub> · (σ<sub>R</sub>² − K<sub>var</sub>²) / (2·K<sub>var</sub>)</div>
+  <p class="mread">Reads as: <b>you are paid the difference of the squares, sized so that the first volatility point is worth your vega notional.</b> The division by twice the strike is purely the unit conversion that makes the quote readable.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Payoff against realized volatility, and a linear vega position for comparison</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Variance swap</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Straight vega</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="280"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>The fair strike against skew</h3></div>
+        <canvas id="cv5b" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The trade</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>The gap between the curve and the straight line is the convexity, and it is the reason the product exists. Long variance, it is a gift: you are paid more per point the further you are right. Short variance, it is the whole risk, and it arrives precisely in the scenario — a violent move — where you are least able to do anything about it.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set skew to −0.25 and read the fair strike against the 25% at-the-money volatility. <b>Predict</b> whether the gap grows or shrinks as you flatten the skew toward zero.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"skew":-0.25}' data-focus="cv5b">Steep skew</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"skew":0}' data-focus="cv5b">Flat surface</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">The at-the-money vol is 25 and the variance strike is 30.4. What is the market saying?</p>
+    <div class="opts">
+      <button>That it expects realized volatility of 30.4</button>
+      <button data-ok="1">Almost nothing about the expected level. The 5.4-point gap is the skew being mechanically averaged in by the 1/K² weights — the put wing is expensive, and a variance strike is an average over the whole surface</button>
+      <button>That the market expects a jump</button>
+      <button>That variance swaps are mispriced relative to options</button>
+    </div>
+    <div class="ans"><b>It is a statement about the surface's shape, not its level.</b> This is the single most common misreading of a variance quote, and it has a real consequence: comparing a variance strike to an at-the-money volatility and calling the difference "the variance risk premium" double-counts the skew. Strip the skew contribution out first, or you are measuring the smile and calling it a forecast.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>VIX is this, implemented</h2>
+    <p class="dek">Not a forecast, not a sentiment gauge. A 30-day variance strip with a published rulebook.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The index everyone quotes as "the fear gauge" is the calculation from chapter 03 run on a fixed schedule. It takes out-of-the-money options on two expiries bracketing 30 days, weights each by <b>ΔK/K²</b>, adds them up, interpolates between the two expiries to land exactly on 30 days, and reports the square root as an annualised percentage. There is no model in it, no volatility forecast, and no opinion.</p>
+    <p>Three consequences follow directly from the chapters above, and each explains something people find puzzling about the index.</p>
+    <p>First, <b>it is a variance strike, so it carries the skew premium.</b> VIX sits above at-the-money 30-day implied volatility essentially always, and the gap widens when skew steepens. That is chapter 05's 5.4 points, not the market becoming more afraid.</p>
+    <p>Second, <b>it inherits the truncation problem.</b> The rulebook stops including strikes once it meets two consecutive zero bids, so the effective wing of the strip is set by what happens to be quoted that morning. In a stressed market more deep puts get bids, the strip extends, and the index rises partly because more of the tail became visible.</p>
+    <p>Third, <b>it is a strike, not an asset.</b> You cannot hold VIX. What trades is a futures contract on where the index will be, which is a different thing with its own term structure and its own roll — and that is the source of the long-run behaviour of every product built on top of it.</p>
+    <p>The figure runs the calculation on a synthetic chain so you can watch the index move for structural reasons rather than emotional ones: steepen the skew and it rises with volatility unchanged; truncate the quoted wing and it falls with everything else held fixed.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The 30-day strip, and the index it produces</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Weighted contribution ΔK/K²·O(K)</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Forward</span>
+          </span>
+        </div>
+        <canvas id="cv6" height="270"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>This morning's chain</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>The bars are what the index is actually made of. Notice how much of the total sits to the left of the forward even though those options are the cheap ones — that is the 1/K² weight, and it is why the index responds so strongly to the put wing being bid.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Thirty-day at-the-money implied volatility is unchanged on the day, but the index is up two points. What is the most likely explanation?</p>
+    <div class="opts">
+      <button>The market's volatility forecast rose without options repricing</button>
+      <button data-ok="1">Skew steepened, or bids appeared in deeper puts and extended the strip. Both raise a 1/K²-weighted average without moving the at-the-money option</button>
+      <button>The calculation is wrong</button>
+      <button>Interest rates moved</button>
+    </div>
+    <div class="ans"><b>The wing repriced.</b> The index is a weighted average across the whole surface, so it can move a long way with the at-the-money option untouched — and on a lot of days that is exactly what happens. Reading the index as a level of fear rather than as an average of a shape is the most common mistake made about it.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Where it breaks</h2>
+    <p class="dek">The replication is exact under one assumption that markets violate on their most important days.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 02's derivation used Itô's lemma, and Itô's lemma assumes the price path is continuous. A jump moves the stock a finite distance in no time, with no opportunity to rebalance in between, and the neat cancellation that made the log contract a variance meter does not survive it.</p>
+    <p>The consequence is a bias with a definite sign. The log contract prices <b>−(2/T)·E[ln(S<sub>T</sub>/F)]</b>, and under jumps that quantity is no longer the expected quadratic variation. On a 20% diffusive volatility with one expected jump a year of <b>−20%</b>, true quadratic variation corresponds to <b>29.97%</b> while the strip prices <b>29.38%</b> — the replication is <b>0.59 volatility points light</b>. With a half-yearly <b>−30%</b> jump the gap widens to <b>1.10 points</b>. The strip under-hedges a downward-jumping stock, and it does so exactly when the contract is paying out most.</p>
+    <p>Three more failures worth naming, none of them exotic.</p>
+    <p><b>Discreteness.</b> The contract settles on daily closing returns, not on a continuous integral. That introduces sampling error with no bias, which the chapter 02 figure shows directly when you drop the hedge count.</p>
+    <p><b>Caps.</b> Most single-name variance swaps are sold with a cap, usually at two and a half times the strike. That cap makes the payoff no longer variance — it is a variance swap minus a call on variance — and the replication chapter no longer applies to the capped part. The cap exists because of everything above.</p>
+    <p><b>Liquidity in the wing.</b> Chapter 04's arithmetic assumed you could buy every strike at the quoted price. In the move that makes a variance swap pay, the put wing gaps and widens simultaneously, so the hedge you needed becomes expensive precisely when you need to put it on.</p>
+    <p>None of this makes the product unsound. It makes the phrase "variance is perfectly replicable" a statement about a model rather than about a market, and the gap between those two is the entire job.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>What the strip prices against what actually happens, with jumps</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>True quadratic variation</span>
+            <span><i class="swl" style="background:var(--blue)"></i>What the log contract prices</span>
+          </span>
+        </div>
+        <canvas id="cv7" height="270"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The jump</h4>
+        <div id="ctl7"></div>
+        <div class="kv" style="margin-top:20px" id="kv7"></div>
+      </div>
+    </div>
+    <figcaption>The two curves separate as the jump gets larger and more negative, and they separate in the direction that hurts a hedger. Notice also that upward jumps of the same size do <em>not</em> produce the same gap — the logarithm is asymmetric, which is the same asymmetry that makes the put wing dominate chapter 04.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long a variance swap, hedged with the replicating strip. The stock gaps down 25% overnight on a takeover collapse. What happens?</p>
+    <div class="opts">
+      <button>Nothing unusual — you are long variance and variance went up</button>
+      <button data-ok="1">You make money, but less than the realized variance suggests. The strip prices the log contract, and under a jump that is not quite quadratic variation — the gap runs to about a point of volatility</button>
+      <button>You lose money, since jumps are not variance</button>
+      <button>The position is unaffected until expiry</button>
+    </div>
+    <div class="ans"><b>You make money, and you under-collect.</b> Being long variance through a crash is the right side of the trade and the replication still leaves a gap, because the argument that made it exact assumed the price never skipped. This is the honest reason variance swaps on single names carry caps and wide bid–offers: the product's one structural weakness shows up in the one scenario that defines it.</div>
+  </div>
+</section>
+
+<!-- ══════════ QUIZ ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Six questions across the page. Each explanation names the chapter to revisit.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">When are a variance swap and a volatility swap worth the same?</p>
+    <div class="opts">
+      <button>When the underlying is an index rather than a single name</button>
+      <button data-ok="1">Only when realized volatility is known in advance. Any uncertainty about it opens a convexity gap — 2.08 volatility points at a vol of vol of 0.4</button>
+      <button>When the surface is flat</button>
+      <button>They are always worth the same; the difference is a quoting convention</button>
+    </div>
+    <div class="ans"><b>Only under certainty.</b> A flat surface removes the skew premium of chapter 05 but does nothing to Jensen — the gap here is about uncertainty in the outcome, not about the shape of today's smile.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">What makes the log contract special?</p>
+    <div class="opts">
+      <button>It has no delta</button>
+      <button data-ok="1">Its dollar gamma is constant, so a delta hedge earns the same for a percentage move at any price level — which is what makes the accumulated P&amp;L equal realized variance</button>
+      <button>It can be exercised early</button>
+      <button>It has no exposure to the volatility surface</button>
+    </div>
+    <div class="ans"><b>Constant dollar gamma.</b> Ordinary options have a dollar-gamma hill centred on their strike, so they measure movement only where they are standing. The logarithm is the one payoff whose second derivative cancels the S² and leaves a flat meter.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">Where does the 1/K² weighting come from?</p>
+    <div class="opts">
+      <button>It is an empirical fit that matches variance swap prices well</button>
+      <button data-ok="1">From the second derivative of the log payoff. Any payoff decomposes into options weighted by its own curvature, and for −ln(S) that curvature is 1/S²</button>
+      <button>From the fact that low-strike options are cheaper</button>
+      <button>From the risk-neutral density</button>
+    </div>
+    <div class="ans"><b>It is the curvature of a logarithm.</b> The static replication result says a twice-differentiable payoff equals a fixed portfolio of options weighted by its second derivative at each strike. Everything else about the weight is a consequence.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">Which change damages the replication more: doubling the strike spacing, or halving the strike range?</p>
+    <div class="opts">
+      <button>Doubling the spacing — fewer strikes means a worse approximation</button>
+      <button data-ok="1">Halving the range, by a wide margin. Going from $5 to $10 spacing costs about 6 basis points; pulling the range from 40–250% to 92–108% costs 758 basis points</button>
+      <button>They damage it equally</button>
+      <button>Neither, provided the at-the-money strike is included</button>
+    </div>
+    <div class="ans"><b>The range, and it is not close.</b> Convergence in spacing is fast and convergence in range is slow, which is the opposite of most people's intuition and the reason variance products are fragile on names with thin wings.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 05</span>
+    <p class="q">Realized volatility comes in at 10 against a 25 strike. You were short $100,000 of vega notional. Roughly what did you make?</p>
+    <div class="opts">
+      <button>About $1.5 million — fifteen points at $100,000 a point</button>
+      <button data-ok="1">About $1.05 million. The convexity that hurts the short on the upside helps it on the downside, so fifteen points down pays less than fifteen points at the linear rate</button>
+      <button>About $100,000</button>
+      <button>Nothing — variance swaps only pay on upside moves</button>
+    </div>
+    <div class="ans"><b>About $1.05 million.</b> The payoff is in the difference of squares, so the same number of points is worth less further below the strike and more further above it. That asymmetry is the entire risk profile: bounded gains, unbounded losses.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 07</span>
+    <p class="q">Why do single-name variance swaps usually carry a cap?</p>
+    <div class="opts">
+      <button>Regulation requires it</button>
+      <button data-ok="1">Because the replication fails exactly where the payoff is largest — jumps break the log-contract argument and the wing becomes untradeable in a crash, so the short is selling a risk they cannot hedge</button>
+      <button>To make the product cheaper for the buyer</button>
+      <button>Because realized variance cannot be measured above a certain level</button>
+    </div>
+    <div class="ans"><b>Because the tail is the unhedgeable part.</b> A cap converts the contract into a variance swap minus a call on variance, which is an admission that the replication argument stops working in the scenario the contract is really about.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every figure on this page assumes European options on a single underlying with no dividends, deterministic rates, and — except where chapter 07 removes it — a continuous price path. The jump numbers come from a Merton model with one jump size, which is a caricature of a real tail. Vol of vol in chapter 01 is a parameter on a slider, not a measurement. Real variance swap documentation specifies the return definition, the observation schedule, the treatment of missing days, the cap, and what happens on a corporate action, and every one of those clauses moves the fair value by more than the modelling questions discussed here.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ══════════ shared numerics ══════════ */
+const erT = (r,T)=>Math.exp(r*T);
+
+/* the strike ladder a real chain offers: fixed spacing over a listed range */
+function ladder(F, spacing, lo, hi){
+  const Ks=[];
+  for(let K=Math.ceil(F*lo/spacing)*spacing; K<=F*hi+1e-9; K+=spacing) if(K>0) Ks.push(K);
+  return Ks;
+}
+/* fair variance from an out-of-the-money strip, weighted dK/K^2 */
+function stripVar(S,T,r,volFn,Ks){
+  if(Ks.length<2) return 0;
+  const F=S*erT(r,T);
+  let sum=0;
+  for(let i=0;i<Ks.length;i++){
+    const K=Ks[i];
+    const dK = i===0 ? Ks[1]-Ks[0] : i===Ks.length-1 ? Ks[i]-Ks[i-1] : (Ks[i+1]-Ks[i-1])/2;
+    const v=volFn(K);
+    const o = K<F ? bs(S,K,T,v,r,0,false).price : bs(S,K,T,v,r,0,true).price;
+    sum += (dK/(K*K))*o;
+  }
+  return 2*erT(r,T)*sum/T;
+}
+const stripVol=(S,T,r,volFn,Ks)=>Math.sqrt(Math.max(0,stripVar(S,T,r,volFn,Ks)));
+/* a skewed surface: vol rises as strike falls, linear in log-moneyness */
+const skewSurf=(atm,skew,F)=>K=>Math.max(0.03, atm + skew*Math.log(K/F));
+/* payoff of the log contract, and of the assembled strip, in payoff space */
+const logPayoff=(S,F,T)=>-(2/T)*Math.log(S/F);
+function stripPayoff(S,F,T,Ks){
+  let v=0;
+  for(let i=0;i<Ks.length;i++){
+    const K=Ks[i];
+    const dK = i===0 ? Ks[1]-Ks[0] : i===Ks.length-1 ? Ks[i]-Ks[i-1] : (Ks[i+1]-Ks[i-1])/2;
+    const w=(2/T)*dK/(K*K);
+    v += w*(K<F ? Math.max(0,K-S) : Math.max(0,S-K));
+  }
+  return v;
+}
+function bars2(o,xs,ys,col,wfrac){
+  const g=o.g,w=(o.pw/Math.max(1,xs.length))*(wfrac||0.7);
+  g.save();g.fillStyle=col;
+  for(let i=0;i<xs.length;i++){
+    const x=o.X(xs[i]),y=o.Y(ys[i]),y0=o.Y(0);
+    g.fillRect(x-w/2,Math.min(y,y0),Math.max(w,1),Math.abs(y0-y));
+  }
+  g.restore();
+}
+function dots(o,xs,ys,col,rad,alpha){
+  const g=o.g;g.save();g.fillStyle=col;g.globalAlpha=alpha===undefined?0.35:alpha;
+  for(let i=0;i<xs.length;i++){
+    const x=o.X(xs[i]),y=o.Y(ys[i]);
+    if(x<o.P.l||x>o.P.l+o.pw||y<o.P.t||y>o.P.t+o.ph)continue;
+    g.beginPath();g.arc(x,y,rad||1.6,0,6.2832);g.fill();
+  }
+  g.restore();
+}
+const money=v=>(v<0?"−$":"$")+Math.abs(v).toLocaleString("en-US",{maximumFractionDigits:0});
+
+/* ══════════ HERO — options stacking into a logarithm ══════════ */
+(function(){
+  const cv=document.getElementById("heroCv");
+  let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  function draw(ph){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    const F=100,T=1;
+    const n=6+Math.round(24*(0.5+0.5*Math.sin(ph)));       // strikes breathing in and out
+    const Ks=ladder(F,(F*2.1)/n,0.35,2.4);
+    const padL=w*0.06,padR=w*0.06,padT=h*0.20,padB=h*0.22;
+    const gw=w-padL-padR,gh=h-padT-padB;
+    const x0=35,x1=210;
+    const X=S=>padL+(S-x0)/(x1-x0)*gw;
+    let yMax=0;
+    for(let S=x0;S<=x1;S+=2)yMax=Math.max(yMax,Math.abs(logPayoff(S,F,T)));
+    const Y=v=>padT+gh/2-(v/(yMax*1.1))*(gh/2);
+    // the individual options, faint
+    g.lineWidth=0.9;
+    for(const K of Ks){
+      const dK=(F*2.1)/n, wgt=(2/T)*dK/(K*K);
+      g.strokeStyle=K<F?C("--verm"):C("--blue");g.globalAlpha=0.20;
+      g.beginPath();
+      for(let S=x0;S<=x1;S+=2){
+        const v=wgt*(K<F?Math.max(0,K-S):Math.max(0,S-K));
+        S===x0?g.moveTo(X(S),Y(v)):g.lineTo(X(S),Y(v));
+      }
+      g.stroke();
+    }
+    g.globalAlpha=1;
+    // the assembled strip
+    g.strokeStyle=C("--ink");g.lineWidth=2.2;g.globalAlpha=0.85;g.beginPath();
+    for(let S=x0;S<=x1;S+=1.5){
+      const v=stripPayoff(S,F,T,Ks);
+      S===x0?g.moveTo(X(S),Y(v)):g.lineTo(X(S),Y(v));
+    }
+    g.stroke();
+    // the log contract it is converging on
+    g.strokeStyle=C("--moss");g.lineWidth=1.4;g.setLineDash([5,4]);g.globalAlpha=0.9;g.beginPath();
+    for(let S=x0;S<=x1;S+=1.5){
+      const v=logPayoff(S,F,T)+ (2/T)*0; // shifted to sit with the strip
+      S===x0?g.moveTo(X(S),Y(v)):g.lineTo(X(S),Y(v));
+    }
+    g.stroke();g.setLineDash([]);g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;draw((ts-t0)/3400);raf=requestAnimationFrame(frame);}
+  size();if(RM)draw(1.6);else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)draw(1.6);else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════ 01 — variance is not volatility ══════════ */
+const s1={nu:0.40,base:0.25};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"a1",k:"base",lbl:"σ",name:"Centre of the distribution",min:.08,max:.6,step:.01,fmt:pct},
+    {id:"b1",k:"nu",lbl:"ν",name:"Vol of vol",min:0,max:.9,step:.01,fmt:v=>v.toFixed(2)}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function stats(nu,base){
+    // lognormal around base: E[v]=base, E[v^2]=base^2 e^{nu^2}
+    return {Evol:base, Evar:base*base*Math.exp(nu*nu)};
+  }
+  function draw(){
+    const {Evol,Evar}=stats(s1.nu,s1.base), kvar=Math.sqrt(Evar);
+    const hi=Math.max(kvar*1.9,s1.base*2.2);
+    const xs=[],ys=[];
+    for(let i=0;i<=220;i++){
+      const v=1e-4+i*(hi/220);
+      // lognormal density with median base*e^{-nu^2/2}
+      const mu=Math.log(s1.base)-0.5*s1.nu*s1.nu;
+      const d=s1.nu<1e-6?0:Math.exp(-Math.pow(Math.log(v)-mu,2)/(2*s1.nu*s1.nu))/(v*s1.nu*Math.sqrt(2*Math.PI));
+      xs.push(v);ys.push(d);
+    }
+    const ymax=Math.max(1e-9,Math.max.apply(null,ys))*1.15;
+    const o=Fig(document.getElementById("cv1"),{h:290,x0:0,x1:hi,y0:0,y1:ymax,pad:{l:50}});
+    axes(o,v=>(v*100).toFixed(0)+"%",()=>"",5,3);
+    clip(o,()=>{
+      if(s1.nu<1e-6){
+        line(o,[s1.base,s1.base],[0,ymax],C("--blue"),3);
+      } else {
+        const g=o.g;g.save();g.globalAlpha=.22;g.fillStyle=C("--blue");
+        g.beginPath();g.moveTo(o.X(xs[0]),o.Y(0));
+        for(let i=0;i<xs.length;i++)g.lineTo(o.X(xs[i]),o.Y(ys[i]));
+        g.lineTo(o.X(xs[xs.length-1]),o.Y(0));g.closePath();g.fill();g.restore();
+        line(o,xs,ys,C("--blue"),2);
+      }
+    });
+    vline(o,Evol,C("--moss"),"E[σ]");
+    vline(o,kvar,C("--verm"),"√E[σ²]");
+
+    const nx=[],ny=[];
+    for(let i=0;i<=90;i++){const nu=i*(0.9/90);nx.push(nu);
+      ny.push((Math.sqrt(s1.base*s1.base*Math.exp(nu*nu))-s1.base)*100);}
+    const o2=Fig(document.getElementById("cv1b"),{h:180,x0:0,x1:.9,y0:0,y1:Math.max(1,Math.max.apply(null,ny)*1.12),pad:{l:50}});
+    axes(o2,v=>v.toFixed(2),v=>v.toFixed(1),5,3);
+    clip(o2,()=>line(o2,nx,ny,C("--verm"),2.6));
+    vline(o2,s1.nu,C("--ink"),"ν");
+
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Vol swap strike",pct2(Evol)],
+      ["Var swap strike",pct2(kvar)],
+      ["Convexity gap",((kvar-Evol)*100).toFixed(2)+" vol pts"],
+      ["  as % of strike",pct((kvar-Evol)/Evol)],
+      ["Vol of vol",s1.nu.toFixed(2)],
+      ["Equal?",s1.nu<1e-6?"yes — no uncertainty":"no, and never"]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — the log contract's hedge IS the variance ══════════ */
+const s2={n:63,sig:0.30,paths:900};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"a2",k:"sig",lbl:"σ",name:"True volatility",min:.08,max:.7,step:.01,fmt:pct},
+    {id:"b2",k:"n",lbl:"N",name:"Hedges over the life",min:6,max:252,step:1,fmt:v=>v.toFixed(0)},
+    {id:"c2p",k:"paths",lbl:"M",name:"Paths",min:200,max:2500,step:100,fmt:v=>v.toFixed(0)}
+  ],s2,()=>run(),"c2");
+  let sim=null;
+  function run(){
+    const T=1,n=Math.round(s2.n),M=Math.round(s2.paths);
+    const px=[],py=[];
+    for(let m=0;m<M;m++){
+      let S=100,hedge=0,qv=0;
+      const dt=T/n,sq=Math.sqrt(dt);
+      for(let i=0;i<n;i++){
+        const delta=-(2/T)/S;
+        const S1=S*Math.exp(-0.5*s2.sig*s2.sig*dt+s2.sig*sq*gauss());
+        hedge += -delta*(S1-S);
+        const lr=Math.log(S1/S); qv+=lr*lr;
+        S=S1;
+      }
+      const payoff=-(2/T)*Math.log(S/100);
+      px.push(qv/T); py.push(payoff+hedge);
+    }
+    sim={px,py}; draw();
+  }
+  document.getElementById("run2").addEventListener("click",run);
+  window.draw2=()=>{sim?draw():run();};
+  function draw(){
+    const {px,py}=sim;
+    let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<px.length;i++){lo=Math.min(lo,px[i],py[i]);hi=Math.max(hi,px[i],py[i]);}
+    const pad=(hi-lo)*0.08||0.01; lo=Math.max(0,lo-pad); hi=hi+pad;
+    const o=Fig(document.getElementById("cv2"),{h:300,x0:lo,x1:hi,y0:lo,y1:hi,pad:{l:58}});
+    axes(o,v=>v.toFixed(3),v=>v.toFixed(3),4,4);
+    clip(o,()=>{
+      line(o,[lo,hi],[lo,hi],C("--verm"),2);
+      dots(o,px,py,C("--blue"),1.7,.30);
+    });
+    // correlation and mean gap
+    const n=px.length;
+    const mx=px.reduce((a,b)=>a+b,0)/n, my=py.reduce((a,b)=>a+b,0)/n;
+    let c=0,a=0,b=0,mad=0;
+    for(let i=0;i<n;i++){c+=(px[i]-mx)*(py[i]-my);a+=(px[i]-mx)**2;b+=(py[i]-my)**2;mad+=Math.abs(py[i]-px[i]);}
+    const corr=c/Math.sqrt(a*b);
+
+    // dollar gamma comparison
+    const xs=[],gc=[],gl=[];
+    for(let i=0;i<=180;i++){
+      const S=45+i*(170/180);
+      const o1=bs(S,100,0.5,s2.sig,0.02,0,true);
+      xs.push(S); gc.push(o1.gamma*S*S); gl.push(2/1);
+    }
+    const hi2=Math.max(Math.max.apply(null,gc),2)*1.15;
+    const o2=Fig(document.getElementById("cv2b"),{h:190,x0:45,x1:215,y0:0,y1:hi2,pad:{l:58}});
+    axes(o2,v=>v.toFixed(0),v=>v.toFixed(1),5,3);
+    clip(o2,()=>{
+      line(o2,xs,gc,C("--ochre"),2.4);
+      line(o2,xs,gl,C("--moss"),2.6);
+    });
+    vline(o2,100,C("--grey"),"K");
+
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Paths",String(n)],
+      ["Hedges",String(Math.round(s2.n))],
+      ["Mean realized variance",mx.toFixed(5)],
+      ["Mean hedged P&L",my.toFixed(5)],
+      ["Difference",(my-mx).toFixed(6)],
+      ["Correlation",corr.toFixed(6)],
+      ["Mean |error| per path",(mad/n).toFixed(5)],
+      ["σ² for reference",(s2.sig*s2.sig).toFixed(5)]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — the strip ══════════ */
+const s3={spacing:10,sig:0.25,lo:0.4,hi:2.5};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"a3",k:"spacing",lbl:"ΔK",name:"Strike spacing",min:1,max:40,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"b3",k:"sig",lbl:"σ",name:"True volatility",min:.08,max:.6,step:.01,fmt:pct}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  function draw(){
+    const S=100,T=1,r=0.02,F=S*erT(r,T);
+    const Ks=ladder(F,s3.spacing,s3.lo,s3.hi);
+    const xs=[],strip=[],logc=[];
+    for(let i=0;i<=200;i++){
+      const x=F*0.45+i*(F*1.7/200);
+      xs.push(x); strip.push(stripPayoff(x,F,T,Ks)); logc.push(logPayoff(x,F,T)+2/T*Math.log(1));
+    }
+    // shift the log contract so both share the tangency at F
+    const off=stripPayoff(F,F,T,Ks)-logPayoff(F,F,T);
+    const logs=logc.map(v=>v+off);
+    let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<xs.length;i++){lo=Math.min(lo,strip[i],logs[i]);hi=Math.max(hi,strip[i],logs[i]);}
+    const o=Fig(document.getElementById("cv3"),{h:320,x0:xs[0],x1:xs[xs.length-1],y0:lo-0.05,y1:hi+0.05,pad:{l:54}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(2),5,4);
+    clip(o,()=>{
+      // the individual options that make it up
+      for(let i=0;i<Ks.length;i++){
+        const K=Ks[i];
+        const dK = i===0?Ks[1]-Ks[0]:i===Ks.length-1?Ks[i]-Ks[i-1]:(Ks[i+1]-Ks[i-1])/2;
+        const w=(2/T)*dK/(K*K);
+        const ys=xs.map(x=>w*(K<F?Math.max(0,K-x):Math.max(0,x-K))+lo-0.05);
+        line(o,xs,ys,C("--grey"),1,null,0.42);
+      }
+      line(o,xs,logs,C("--verm"),2.8,[6,4]);
+      line(o,xs,strip,C("--blue"),2.4);
+    });
+    vline(o,F,C("--ochre"),"F");
+
+    const sx=[],sy=[];
+    for(const sp of [40,30,20,15,10,7.5,5,4,3,2.5,2,1.5,1]){
+      sx.push(sp);
+      sy.push(stripVol(S,T,r,()=>s3.sig,ladder(F,sp,s3.lo,s3.hi))*100);
+    }
+    const o2=Fig(document.getElementById("cv3b"),{h:185,x0:0,x1:41,y0:s3.sig*100*0.75,y1:s3.sig*100*1.12,pad:{l:54}});
+    axes(o2,v=>"$"+v.toFixed(0),v=>v.toFixed(1),5,3);
+    clip(o2,()=>{
+      line(o2,[0,41],[s3.sig*100,s3.sig*100],C("--moss"),1.6,[4,3]);
+      line(o2,sx,sy,C("--blue"),2.6);
+    });
+    vline(o2,s3.spacing,C("--ink"),"ΔK");
+
+    const rec=stripVol(S,T,r,()=>s3.sig,Ks);
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Listed range",(s3.lo*100).toFixed(0)+"% – "+(s3.hi*100).toFixed(0)+"%"],
+      ["Spacing","$"+s3.spacing.toFixed(0)],
+      ["Strikes in the strip",String(Ks.length)],
+      ["True volatility",pct2(s3.sig)],
+      ["Recovered",pct2(rec)],
+      ["Miss",((rec-s3.sig)*10000).toFixed(1)+" bp"],
+      ["Weight ratio 50 vs 200","16 : 1"]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — the wings ══════════ */
+const s4={lo:0.85,hi:1.20,sig:0.25};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"a4",k:"lo",lbl:"↓",name:"Lowest strike listed",min:.3,max:.98,step:.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"b4",k:"hi",lbl:"↑",name:"Highest strike listed",min:1.02,max:2.6,step:.02,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"c4s",k:"sig",lbl:"σ",name:"True volatility",min:.1,max:.6,step:.01,fmt:pct}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  const BUCKETS=[[0.05,0.7,"<70%"],[0.7,0.9,"70–90"],[0.9,1.1,"90–110"],[1.1,1.4,"110–140"],[1.4,5,">140%"]];
+  function draw(){
+    const S=100,T=1,r=0.02,F=S*erT(r,T);
+    const total=stripVar(S,T,r,()=>s4.sig,ladder(F,1,0.05,5));
+    const xs=[],ys=[],labs=[];
+    BUCKETS.forEach((b,i)=>{
+      const part=stripVar(S,T,r,()=>s4.sig,ladder(F,1,b[0],b[1]));
+      // recompute as a pure contribution: sum only that band's terms
+      let sum=0; const Ks=ladder(F,1,b[0],b[1]);
+      for(let j=0;j<Ks.length;j++){
+        const K=Ks[j], dK=1;
+        const o=K<F?bs(S,K,T,s4.sig,r,0,false).price:bs(S,K,T,s4.sig,r,0,true).price;
+        sum+=(dK/(K*K))*o;
+      }
+      xs.push(i); ys.push(100*(2*erT(r,T)*sum/T)/total); labs.push(b[2]);
+    });
+    const o=Fig(document.getElementById("cv4"),{h:250,x0:-0.6,x1:BUCKETS.length-0.4,y0:0,y1:Math.max.apply(null,ys)*1.2,pad:{l:54,b:34}});
+    axes(o,()=>"",v=>v.toFixed(0)+"%",1,4);
+    clip(o,()=>bars2(o,xs,ys,C("--blue"),0.6));
+    (function(){const g=o.g;g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+      g.font="9.5px 'IBM Plex Mono', monospace";
+      labs.forEach((l,i)=>g.fillText(l,o.X(i),o.P.t+o.ph+8));
+      g.fillStyle=C("--ink");g.textBaseline="bottom";g.font="10px 'IBM Plex Mono', monospace";
+      ys.forEach((v,i)=>g.fillText(v.toFixed(1)+"%",o.X(i),o.Y(v)-5));
+      g.restore();})();
+
+    // recovered vol as the range is pulled in, both sides
+    const tx=[],ty=[];
+    for(let i=0;i<=40;i++){
+      const t=i/40;                                     // 0 = wide, 1 = tight
+      const lo=0.4+(0.92-0.4)*t, hi=2.5-(2.5-1.08)*t;
+      tx.push(100*(1-t)); ty.push(stripVol(S,T,r,()=>s4.sig,ladder(F,5,lo,hi))*100);
+    }
+    const o2=Fig(document.getElementById("cv4b"),{h:210,x0:0,x1:100,y0:s4.sig*100*0.6,y1:s4.sig*100*1.1,pad:{l:54}});
+    axes(o2,v=>v.toFixed(0)+"%",v=>v.toFixed(1),5,4);
+    clip(o2,()=>{
+      line(o2,[0,100],[s4.sig*100,s4.sig*100],C("--moss"),1.6,[4,3]);
+      line(o2,tx,ty,C("--verm"),2.8);
+    });
+
+    const Ks=ladder(F,5,s4.lo,s4.hi);
+    const rec=stripVol(S,T,r,()=>s4.sig,Ks);
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Listed range",(s4.lo*100).toFixed(0)+"% – "+(s4.hi*100).toFixed(0)+"%"],
+      ["Strikes ($5 apart)",String(Ks.length)],
+      ["True volatility",pct2(s4.sig)],
+      ["Recovered",pct2(rec)],
+      ["Miss",((rec-s4.sig)*10000).toFixed(0)+" bp"],
+      ["  relative",pct((rec-s4.sig)/s4.sig)],
+      ["Below 90% supplies",(ys[0]+ys[1]).toFixed(1)+"%"]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — what the contract pays ══════════ */
+const s5={strike:0.25,vega:100000,skew:-0.10};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"a5",k:"strike",lbl:"K",name:"Variance strike",min:.1,max:.6,step:.01,fmt:pct},
+    {id:"b5",k:"vega",lbl:"N",name:"Vega notional",min:10000,max:500000,step:10000,fmt:v=>"$"+(v/1000).toFixed(0)+"k"},
+    {id:"c5k",k:"skew",lbl:"β",name:"Skew",min:-.4,max:.1,step:.01,fmt:v=>v.toFixed(2)}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  /* vega notional is dollars per volatility POINT, so the difference of squares
+     is taken in points. In decimals it comes out a hundred times too small. */
+  const payoff=(sr,K,N)=>N*((sr*100)**2-(K*100)**2)/(2*(K*100));
+  function draw(){
+    const K=s5.strike,N=s5.vega;
+    const xs=[],py=[],lin=[];
+    for(let i=0;i<=200;i++){
+      const sr=i*(K*2.4/200);
+      xs.push(sr); py.push(payoff(sr,K,N)); lin.push(N*(sr-K)*100/100);
+    }
+    const lo=Math.min.apply(null,py), hi=Math.max.apply(null,py);
+    const o=Fig(document.getElementById("cv5"),{h:280,x0:0,x1:K*2.4,y0:lo*1.1,y1:hi*1.05,pad:{l:66}});
+    axes(o,v=>(v*100).toFixed(0)+"%",v=>money(v),5,4);
+    clip(o,()=>{
+      line(o,xs,lin,C("--grey"),1.8,[5,4]);
+      line(o,xs,py,C("--blue"),2.8);
+    });
+    vline(o,K,C("--ochre"),"K");
+
+    const kx=[],ky=[],ka=[];
+    for(let i=0;i<=50;i++){
+      const sk=-0.4+i*(0.5/50);
+      const S=100,T=1,r=0.02,F=S*erT(r,T);
+      kx.push(sk);
+      ky.push(stripVol(S,T,r,skewSurf(0.25,sk,F),ladder(F,1,0.05,5))*100);
+      ka.push(25);
+    }
+    const o2=Fig(document.getElementById("cv5b"),{h:190,x0:-0.4,x1:0.1,y0:22,y1:Math.max(35,Math.max.apply(null,ky)*1.06),pad:{l:66}});
+    axes(o2,v=>v.toFixed(2),v=>v.toFixed(0)+"%",5,4);
+    clip(o2,()=>{
+      line(o2,kx,ka,C("--moss"),1.8,[4,3]);
+      line(o2,kx,ky,C("--verm"),2.6);
+    });
+    vline(o2,s5.skew,C("--ink"),"β");
+
+    const S=100,T=1,r=0.02,F=S*erT(r,T);
+    const kv=stripVol(S,T,r,skewSurf(0.25,s5.skew,F),ladder(F,1,0.05,5));
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Strike",pct2(K)],
+      ["Vega notional",money(N)],
+      ["Variance notional",money(N/(2*K*100))+" per pt²"],
+      ["Realized "+((K+0.01)*100).toFixed(0)+"%",money(payoff(K+0.01,K,N))],
+      ["Realized "+((K+0.05)*100).toFixed(0)+"%",money(payoff(K+0.05,K,N))],
+      ["Realized "+((K+0.20)*100).toFixed(0)+"%",money(payoff(K+0.20,K,N))],
+      ["Realized "+(Math.max(0,K-0.05)*100).toFixed(0)+"%",money(payoff(Math.max(0,K-0.05),K,N))],
+      ["Realized 0%",money(payoff(0,K,N))],
+      ["—","—"],
+      ["ATM vol","25.00%"],
+      ["Fair var strike",pct2(kv)],
+      ["Skew premium",((kv-0.25)*100).toFixed(2)+" pts"]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — VIX as an implementation ══════════ */
+const s6={skew:-0.15,wing:0.6,atm:0.20};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"a6",k:"atm",lbl:"σ",name:"30-day at-the-money",min:.08,max:.5,step:.01,fmt:pct},
+    {id:"b6",k:"skew",lbl:"β",name:"Skew",min:-.4,max:0,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"c6w",k:"wing",lbl:"↓",name:"How far the bids reach",min:.5,max:.95,step:.01,fmt:v=>(v*100).toFixed(0)+"%"}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  function draw(){
+    const S=100,T=30/365,r=0.02,F=S*erT(r,T);
+    const Ks=ladder(F,2.5,s6.wing,1.35);
+    const vf=skewSurf(s6.atm,s6.skew,F);
+    const xs=[],ys=[];
+    for(let i=0;i<Ks.length;i++){
+      const K=Ks[i];
+      const dK=i===0?Ks[1]-Ks[0]:i===Ks.length-1?Ks[i]-Ks[i-1]:(Ks[i+1]-Ks[i-1])/2;
+      const o=K<F?bs(S,K,T,vf(K),r,0,false).price:bs(S,K,T,vf(K),r,0,true).price;
+      xs.push(K); ys.push((dK/(K*K))*o*2*erT(r,T)/T);
+    }
+    const o=Fig(document.getElementById("cv6"),{h:270,x0:Ks[0]-3,x1:Ks[Ks.length-1]+3,y0:0,y1:Math.max(1e-6,Math.max.apply(null,ys))*1.18,pad:{l:60}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(3),5,4);
+    clip(o,()=>bars2(o,xs,ys,C("--blue"),0.68));
+    vline(o,F,C("--ochre"),"F");
+
+    const idx=stripVol(S,T,r,vf,Ks);
+    let belowF=0,tot=0;
+    for(let i=0;i<xs.length;i++){tot+=ys[i];if(xs[i]<F)belowF+=ys[i];}
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["30-day ATM vol",pct2(s6.atm)],
+      ["Skew",s6.skew.toFixed(2)],
+      ["Bids reach down to",(s6.wing*100).toFixed(0)+"%"],
+      ["Strikes included",String(Ks.length)],
+      ["Index",pct2(idx)],
+      ["Index − ATM",((idx-s6.atm)*100).toFixed(2)+" pts"],
+      ["Share from puts",pct(belowF/tot)]
+    ]);
+  }
+})();
+
+/* ══════════ 07 — where it breaks ══════════ */
+const s7={lam:1,jump:-0.20,sig:0.20};
+(function(){
+  sliders(document.getElementById("ctl7"),[
+    {id:"a7",k:"sig",lbl:"σ",name:"Diffusive volatility",min:.05,max:.5,step:.01,fmt:pct},
+    {id:"b7",k:"lam",lbl:"λ",name:"Jumps per year",min:0,max:3,step:.1,fmt:v=>v.toFixed(1)},
+    {id:"c7j",k:"jump",lbl:"J",name:"Jump size",min:-.5,max:.3,step:.01,fmt:v=>(v*100).toFixed(0)+"%"}
+  ],s7,()=>draw(),"c7");
+  window.draw7=draw;
+  const qvVol=(sig,lam,J)=>Math.sqrt(sig*sig+lam*Math.pow(Math.log(1+J),2));
+  const logVol=(sig,lam,J)=>Math.sqrt(Math.max(0,sig*sig+2*lam*(J-Math.log(1+J))));
+  function draw(){
+    const xs=[],qv=[],lc=[];
+    for(let i=0;i<=120;i++){
+      const J=-0.5+i*(0.8/120);
+      if(J<=-0.99)continue;
+      xs.push(J*100); qv.push(qvVol(s7.sig,s7.lam,J)*100); lc.push(logVol(s7.sig,s7.lam,J)*100);
+    }
+    const hi=Math.max(Math.max.apply(null,qv),Math.max.apply(null,lc))*1.1;
+    const o=Fig(document.getElementById("cv7"),{h:270,x0:-50,x1:30,y0:Math.max(0,s7.sig*100*0.8),y1:hi,pad:{l:56}});
+    axes(o,v=>v.toFixed(0)+"%",v=>v.toFixed(0)+"%",5,4);
+    clip(o,()=>{
+      line(o,xs,qv,C("--verm"),2.8);
+      line(o,xs,lc,C("--blue"),2.4,[6,4]);
+    });
+    vline(o,s7.jump*100,C("--ink"),"J");
+
+    const a=qvVol(s7.sig,s7.lam,s7.jump), b=logVol(s7.sig,s7.lam,s7.jump);
+    document.getElementById("kv7").innerHTML=kvHTML([
+      ["Diffusive vol",pct2(s7.sig)],
+      ["Jump intensity",s7.lam.toFixed(1)+" / yr"],
+      ["Jump size",(s7.jump*100).toFixed(0)+"%"],
+      ["True QV",pct2(a)],
+      ["Strip prices",pct2(b)],
+      ["Replication gap",((b-a)*100).toFixed(3)+" pts"],
+      ["Direction",b<a?"strip is light":"strip is rich"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

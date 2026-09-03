@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. Eight pages live, three planned.
+no dependencies. All eleven pages live.
 
 ## Before you change anything
 
@@ -38,6 +38,9 @@ script, compute the numbers, then write the sentence. Doing this caught:
   until the case was re-derived (page 06)
 - an interest floor quoted as $1.47 when it is $1.49, caught by a harness that
   recomputes every number in the prose from the code that ships (page 08)
+- a variance swap payoff coded in decimals when vega notional is dollars per
+  volatility *point* — a clean 100x error that surfaced only because the prose
+  carried independently computed numbers to check against (page 09)
 
 If a number appears in the text, it was computed first. Where a figure rests on an
 assumption that cannot be measured — price impact, dealer positioning, spread
@@ -112,8 +115,9 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Pages 09 (variance and the log contract), 10 (dispersion and correlation) and 11
-(the book). `ROADMAP.md` has the spine and signature interaction for each.
+Nothing unbuilt — all eleven pages are live. Work from here is depth rather than
+coverage. `ROADMAP.md` records what each page actually shipped, including the
+verified numbers.
 
 ## Two traps this repo has already fallen into twice
 

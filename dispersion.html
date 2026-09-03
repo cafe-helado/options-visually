@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Dispersion and Correlation — Options, visually</title>
+<meta name="description" content="Index variance is a weighted sum of single-name variances plus a correlation term. Trade the difference and you are trading correlation, whether you meant to or not.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dispersion and Correlation — Options, visually">
+<meta property="og:description" content="Index variance is a weighted sum of single-name variances plus a correlation term. Trade the difference and you are trading correlation, whether you meant to or not.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 10 · Dispersion and Correlation</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Not the average</span><i></i></a>
+  <a href="#c2"><span>Implied correlation</span><i></i></a>
+  <a href="#c3"><span>The trade</span><i></i></a>
+  <a href="#c4"><span>Why it is rich</span><i></i></a>
+  <a href="#c5"><span>Where it breaks</span><i></i></a>
+  <a href="#c6"><span>Check yourself</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 10</div>
+    <h1>Correlation, whether you <em>meant</em> to or not</h1>
+    <p class="sub">Twenty stocks averaging 39% volatility, bundled into an index, produce an index that can be anything from 9% to 39% depending on one number nobody quotes directly. Trade the index against its own members and that number is the only thing you own.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This page needs the smile vocabulary from <a href="surface.html" style="color:var(--blue)">page 02</a> and the variance machinery from <a href="variance.html" style="color:var(--blue)">page 09</a> — dispersion is almost always traded in variance rather than volatility, for reasons chapter 03 makes concrete.</p>
+  <ol>
+    <li><b>Chapter 01 is one line of algebra</b> and the rest of the page is consequences. Index variance is a weighted double sum, and the off-diagonal terms all carry a correlation.</li>
+    <li><b>Implied correlation is not quoted; it is inferred.</b> Chapter 02 backs it out of an index price, which means it inherits every assumption in that inversion.</li>
+    <li><b>The trade is short correlation whatever you call it.</b> Chapter 03 shows the P&amp;L is a straight line in realized correlation, crossing zero exactly at the implied level.</li>
+    <li><b>Chapter 05 is the one that matters.</b> Correlation is bounded above by one, and it gets there in precisely the scenario the position cannot survive.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>w<sub>i</sub></td><td>Index weight of name i. On this page they sum to one.</td></tr>
+      <tr><td>σ<sub>i</sub></td><td>Volatility of name i. Implied when pricing, realized when settling.</td></tr>
+      <tr><td>σ<sub>I</sub></td><td>Index volatility. Never the weighted average of the σ<sub>i</sub> unless correlation is exactly one.</td></tr>
+      <tr><td>ρ</td><td>The average pairwise correlation. A single number standing in for a whole matrix, which is the page's central simplification.</td></tr>
+      <tr><td>ρ<sub>imp</sub></td><td>Implied correlation: the ρ that makes the formula reproduce the quoted index volatility.</td></tr>
+      <tr><td>Dispersion</td><td>Selling index volatility and buying the components, or the reverse. A bet on ρ wearing a costume.</td></tr>
+      <tr><td>Idiosyncratic</td><td>The part of a name's variance that does not survive being averaged into an index. It is the diagonal of the double sum.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>An index is not the average of its parts</h2>
+    <p class="dek">Twenty names averaging 39% volatility make an index of 9% or 39%, and the whole range is one parameter.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Take twenty stocks, equally weighted, with volatilities running from 22% to 56% — an average of <b>39.10%</b>. What is the volatility of the index they form? The question has no answer until you say how they move together, and the range of possible answers is enormous.</p>
+    <p>The algebra is a double sum. Index variance adds up every pair of names, each pair contributing its two weights, its two volatilities, and the correlation between them. The <b>n</b> terms where a name meets itself carry a correlation of one and cannot be diversified. The <b>n²−n</b> terms where two different names meet carry the correlation between them, and those are the terms that do all the work.</p>
+    <p>Run the extremes. At <b>ρ = 0</b> every cross term vanishes and only the diagonal survives, giving an index volatility of <b>9.05%</b> — a fifth of the average name, purely from averaging away independent noise. At <b>ρ = 1</b> every term survives at full weight and the index volatility is <b>exactly 39.10%</b>, the weighted average, which is also the mathematical ceiling. At a realistic <b>ρ = 0.30</b> the index sits at <b>22.71%</b>.</p>
+    <p>So an index option is not a bet on its members' volatility. It is a bet on their volatility <em>and</em> on how much of it survives aggregation, and the second half is much larger than people expect. Between ρ = 0.15 and ρ = 0.50 — an unremarkable range — index volatility moves from 17.29% to 28.38%, with every single-name volatility held perfectly fixed.</p>
+    <p>The lower panel checks that this is not just algebra. It simulates twenty genuinely correlated price paths, measures the realized volatility of the basket they produce, and compares it with the formula: <b>24.21%</b> simulated against <b>24.25%</b> predicted, a gap of four hundredths of a point. The identity is real, and it holds on paths rather than only on paper.</p>
+  </div>
+
+  <div class="mline">σ<sub>I</sub>² = Σ<sub>i</sub> w<sub>i</sub>²σ<sub>i</sub>² &nbsp;+&nbsp; ρ · Σ<sub>i≠j</sub> w<sub>i</sub>w<sub>j</sub>σ<sub>i</sub>σ<sub>j</sub></div>
+  <p class="mread">Reads as: <b>index variance is what each name contributes on its own, plus a correlation-weighted share of every pairing between different names.</b> The first sum is small because the weights are squared; the second is large because there are so many pairs.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Index volatility against correlation, with its ceiling and its floor</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Index volatility</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Weighted average — the ceiling</span>
+            <span><i class="swl" style="background:var(--moss)"></i>ρ = 0 — the floor</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="300"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Where index variance actually comes from</h3></div>
+        <canvas id="cv1b" height="185"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The basket</h4>
+        <div id="ctl1"></div>
+        <div class="btnrow"><button class="act" id="run1">Simulate the paths</button></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Notice the shape of the top curve: it rises steeply out of zero and then flattens. That curvature is why correlation is hard to trade — the same move in ρ is worth several times more index volatility at the bottom of the range than at the top, so a position that is comfortably sized at ρ = 0.6 is not comfortably sized at ρ = 0.2.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set correlation to exactly 1 and compare the index volatility with the average single-name volatility in the readout. <b>Predict</b> whether they are close or identical.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"rho":1}' data-focus="cv1">Perfect correlation</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"rho":0}' data-focus="cv1">No correlation at all</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"rho":0.3}' data-focus="cv1">Something realistic</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Every stock in an index doubles its volatility overnight, and correlation is unchanged. What happens to index volatility?</p>
+    <div class="opts">
+      <button>It rises by less than double, because diversification absorbs some of it</button>
+      <button data-ok="1">It exactly doubles. Every term in the double sum carries two volatility factors, so scaling all of them by two scales the variance by four and the volatility by two</button>
+      <button>It more than doubles, because correlation amplifies</button>
+      <button>It depends on the weights</button>
+    </div>
+    <div class="ans"><b>It exactly doubles.</b> The formula is homogeneous of degree one in the volatilities — pull a common factor out of every σ and it comes straight through to σ<sub>I</sub>. That is worth knowing precisely because it isolates what dispersion is really trading: not the level of volatility, which passes through untouched, but the correlation, which is the only thing left.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — where the double sum comes from, and the one-number simplification</summary>
+    <div class="body">
+      <p>The index return is the weighted sum of the component returns, so its variance is the variance of a sum.</p>
+      <div class="mline">Var(Σ w<sub>i</sub>r<sub>i</sub>) = Σ<sub>i</sub>Σ<sub>j</sub> w<sub>i</sub>w<sub>j</sub> Cov(r<sub>i</sub>, r<sub>j</sub>)</div>
+      <p class="mread">Reads as: <b>the variance of a portfolio is every pairwise covariance, weighted twice.</b> Nothing here is specific to options; it is the same identity that produces portfolio theory.</p>
+      <p>Write each covariance as <b>ρ<sub>ij</sub>σ<sub>i</sub>σ<sub>j</sub></b> and split the sum into the terms where i = j and the terms where it does not.</p>
+      <div class="mline">σ<sub>I</sub>² = Σ<sub>i</sub> w<sub>i</sub>²σ<sub>i</sub>² + Σ<sub>i≠j</sub> w<sub>i</sub>w<sub>j</sub>ρ<sub>ij</sub>σ<sub>i</sub>σ<sub>j</sub></div>
+      <p class="mread">Reads as: <b>the diagonal is undiversifiable and the off-diagonal is where correlation lives.</b> With n names there are n diagonal terms and n²−n off-diagonal ones, so for any decent-sized index the second sum dominates.</p>
+      <p>Everything on this page then replaces the whole correlation matrix with a single average <b>ρ</b>. That is a real simplification and it is the one the market makes too, because a single number is what can be quoted and hedged.</p>
+      <p><b>Where it breaks.</b> One ρ cannot describe a market where sectors move together and against each other, and the failure is not symmetric: a basket with two tightly correlated blocks has the same average pairwise correlation as one that is uniformly loosely correlated, and behaves nothing like it in a stress. Dispersion books hedged on average correlation carry exactly this exposure, and it shows up as an unexplained residual in precisely the moves that matter. The second simplification is weights: index weights drift with prices, so a basket matched today is not matched in three months.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>Nobody quotes correlation, so you invert for it</h2>
+    <p class="dek">Take the index price, take the component prices, and solve the formula backwards. What comes out is a number with opinions baked into it.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">There is no correlation screen. What exists is an index option market and twenty single-name option markets, and the bridge between them is chapter 01's identity read from right to left. Fix every σ<sub>i</sub> at its implied volatility, fix σ<sub>I</sub> at the index's implied volatility, and there is exactly one ρ that makes the equation true. That number is <b>implied correlation</b>, and it is the closest thing the market has to a price for co-movement.</p>
+    <p>The mapping is steep, which is the first practical thing to know. On our basket, an index quoted at <b>20%</b> implies <b>0.220</b>; at <b>25%</b> it implies <b>0.375</b>; at <b>28%</b> it implies <b>0.485</b>. Three volatility points of index move a correlation estimate by more than a tenth, so a stale index mark or a mismatched snapshot time produces a correlation number that is badly wrong while looking perfectly plausible.</p>
+    <p>The second thing to know is that the inversion inherits every choice you made on the way in. Which expiry? Which strike — at-the-money volatility, or the variance strike from <a href="variance.html#c5" style="color:var(--blue)">page 09</a>, which carries a skew premium? Do you use all five hundred names or the top fifty as a proxy? Each answer produces a different implied correlation from the same market, and they do not agree to two decimal places. A quoted implied correlation without its recipe is not a number.</p>
+    <p>The lower panel splits index variance into the part that survives no matter what — the diagonal — and the part that correlation controls. On a twenty-name basket the diagonal is small: at ρ = 0.3 it supplies about a tenth of index variance, and the rest is the correlation term. That is the mechanical reason index volatility is so sensitive to a parameter nobody observes.</p>
+  </div>
+
+  <div class="mline">ρ<sub>imp</sub> = (σ<sub>I</sub>² − Σ w<sub>i</sub>²σ<sub>i</sub>²) / Σ<sub>i≠j</sub> w<sub>i</sub>w<sub>j</sub>σ<sub>i</sub>σ<sub>j</sub></div>
+  <p class="mread">Reads as: <b>take the index variance, remove the part that cannot be diversified, and express what is left as a fraction of the most it could possibly be.</b> That fraction is the implied correlation.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Quoted index volatility mapped to implied correlation</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Implied correlation</span>
+            <span><i class="swl" style="background:var(--verm)"></i>ρ = 1, the arbitrage boundary</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Index variance split into its two sources</h3></div>
+        <canvas id="cv2b" height="195"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Today's marks</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Push the quoted index volatility toward the weighted average of the components and watch implied correlation run into its ceiling. Everything to the right of that vermilion line is not an expensive index, it is an inconsistent set of prices — and the check for it costs one line of arithmetic.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the index volatility to 39.5% against components averaging 39.1%. <b>Predict</b> what implied correlation comes out, and what that means.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"sigI":0.395}' data-focus="cv2">Above the ceiling</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"sigI":0.25}' data-focus="cv2">A normal day</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Two desks report implied correlation on the same index on the same day: 0.38 and 0.51. Who is wrong?</p>
+    <div class="opts">
+      <button>The higher one — correlation that high is implausible</button>
+      <button data-ok="1">Possibly neither. The inversion depends on expiry, on whether you use at-the-money or variance strikes, and on how many components you include; different recipes give different answers from identical prices</button>
+      <button>The lower one, since implied correlation is biased upward</button>
+      <button>Both, since implied correlation cannot be computed from listed prices</button>
+    </div>
+    <div class="ans"><b>Possibly neither.</b> Implied correlation is a derived quantity, not an observed one, and the derivation has at least three free choices in it. The practical rule is that a correlation number is only comparable with another number built the same way — which is why desks track their own series rather than a published one, and why cross-desk arguments about "the level of correlation" are usually arguments about methodology.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>The trade, and what it is actually long</h2>
+    <p class="dek">Sell index variance, buy the components' variance, and the volatility level cancels. What is left is a straight line in realized correlation.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Dispersion is the trade that expresses chapter 01 directly. Sell variance on the index, buy variance on each of its members in matched size, and hold both to expiry. If the names move around a lot but independently, the components pay and the index does not, and you win. If everything moves together, the index pays more than the components and you lose.</p>
+    <p>The reason it is traded in <b>variance</b> rather than volatility is chapter 01's identity, which is exactly linear in variance and a mess in volatility. Match variance notionals and the position's P&amp;L reduces to the difference between implied and realized correlation, multiplied by the size of the off-diagonal sum. That is a clean exposure. Try the same thing with volatility swaps or straddles and the relationship is approximate and drifts with spot.</p>
+    <p>The figure runs it. With implied correlation at <b>0.35</b> — an index implied of <b>24.25%</b> against those components — the P&amp;L line crosses zero at realized correlation of exactly 0.35 and is a straight line either side. Realized correlation of <b>0.15</b> and the short index leg wins comfortably; realized <b>0.60</b> and it loses about two and a half times what it made in the good case, because the line keeps going.</p>
+    <p>Three practical things the figure cannot show. Trading twenty single-name variance swaps means twenty bid–offers against one, so the entry cost is asymmetric and the trade needs a decent gap between implied and expected realized just to break even. Weights drift, so a matched basket stops being matched. And the components have their own wing problems from <a href="variance.html#c4" style="color:var(--blue)">page 09 chapter 04</a> — single-name variance is exactly the product whose replication is most fragile, and you are long twenty of them.</p>
+  </div>
+
+  <div class="mline">P&amp;L ∝ (ρ<sub>imp</sub> − ρ<sub>realized</sub>) · Σ<sub>i≠j</sub> w<sub>i</sub>w<sub>j</sub>σ<sub>i</sub>σ<sub>j</sub></div>
+  <p class="mread">Reads as: <b>you are paid the difference between the correlation you sold and the correlation that happened, scaled by how much correlation there was to sell.</b> Nothing about the level of volatility survives into this expression.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Dispersion P&amp;L against realized correlation</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Net position</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Short index leg</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Long component leg</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="300"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>The same trade, with the volatility level moved instead</h3></div>
+        <canvas id="cv3b" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The position</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The lower panel is the control experiment and it is the point of the chapter. Multiply every single-name volatility by any factor you like, leaving correlation alone, and the net line barely moves — both legs scale together. The position is genuinely insensitive to the thing everybody talks about and completely exposed to the thing nobody quotes.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Move the volatility multiplier from 0.6 to 1.8 and watch the net P&amp;L line in the lower panel. <b>Predict</b> how much it moves before you drag it.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"volMult":0.6}' data-focus="cv3b">Calm market</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"volMult":1.8}' data-focus="cv3b">Volatile market</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"rhoReal":0.75,"volMult":1}' data-focus="cv3">Correlation spikes instead</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are short index variance and long component variance. The market crashes: every single-name volatility triples. What happened to your P&amp;L?</p>
+    <div class="opts">
+      <button>You made a lot — you are long twenty variance swaps and variance exploded</button>
+      <button data-ok="1">It depends almost entirely on correlation, and in a crash correlation rises too. The volatility level cancels between the legs; the correlation move does not, and it goes against you</button>
+      <button>You lost exactly the index leg's notional</button>
+      <button>Nothing — the position is variance-neutral</button>
+    </div>
+    <div class="ans"><b>Correlation decides it, and in a crash correlation is the thing that moves against you.</b> The first answer is the seductive one because being long twenty variance swaps into a crash sounds wonderful, and it would be — except that you are short the index's variance in matched size, and the index's variance rises by more than the components' when everything moves together. Chapter 05 puts numbers on how much more.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>Why implied correlation is persistently rich</h2>
+    <p class="dek">Two large, opposite, structural flows push on the two legs. The gap between them is the trade's carry, and also the reason it is crowded.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Implied correlation has historically sat above subsequently realized correlation more often than not. That is a claim about a persistent premium, and a persistent premium needs a persistent reason, not a story about sentiment. The reason here is flow, and it is the same argument <a href="structures.html#c5" style="color:var(--blue)">page 04's bridge chapter</a> makes about the surface generally: durable one-way demand shows up as a price.</p>
+    <p>The two flows push in opposite directions on the two legs of the same trade.</p>
+    <p><b>Index volatility is bid.</b> Institutions hedging equity portfolios buy index puts, because one index hedge is cheaper and simpler to administer than five hundred single-name hedges, and because a mandate usually specifies portfolio-level protection. That demand is structural, price-insensitive within limits, and one-directional. It lifts index implied volatility.</p>
+    <p><b>Single-name volatility is offered.</b> Overwriting programmes, structured-product issuance and yield-enhancement mandates all sell single-name upside. That supply is also structural and one-directional, and it depresses single-name implied volatility.</p>
+    <p>Now put them into chapter 02's inversion. Index implied up, component implied down, and the implied correlation that reconciles them must rise — even if nobody involved held any opinion about correlation at all. The number is a residual, and residuals absorb whatever the flows do to the inputs.</p>
+    <p>Two honest qualifications, because this is exactly the kind of claim that gets stated too confidently. The premium is not a free lunch: it is compensation for taking the other side of a hedge that pays off in crashes, and chapter 05 is what you are being paid for. And it is not constant — the flows change with issuance cycles and with how much index hedging is fashionable, so a strategy calibrated to one regime's premium can find it has gone.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Two flows, one residual</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Index implied</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Average component implied</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Implied correlation</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Flow pressure</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Neither slider expresses a view about correlation, and both move implied correlation. That is the whole mechanism: correlation is inferred from two prices that are each being pushed around by unrelated demand, so it records the flow imbalance rather than anybody's forecast.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A large bank stops issuing autocallables, cutting the supply of single-name volatility. All else equal, what happens to implied correlation?</p>
+    <div class="opts">
+      <button>Nothing — correlation is a property of the stocks, not of option supply</button>
+      <button data-ok="1">It falls. Less single-name selling lifts component implied volatility, and with index implied unchanged the inversion returns a lower correlation</button>
+      <button>It rises, because less issuance means less liquidity</button>
+      <button>It rises, since autocallables are short correlation</button>
+    </div>
+    <div class="ans"><b>It falls.</b> Implied correlation is the residual that reconciles two option markets, so anything that moves either market moves it — including events with no informational content about how stocks co-move at all. This is why the number is better read as a flow indicator than as a forecast, and why "correlation is cheap" is often a statement about issuance calendars.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Correlation goes to one exactly when you need it not to</h2>
+    <p class="dek">The variable is bounded above, the position is short it, and the bound is reached in the one scenario the position was never sized for.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Every risk on this page collapses into a single sentence. A dispersion position is short correlation; correlation has a hard ceiling at one; and markets travel toward that ceiling in exactly the episodes where everything else is going wrong too. The trade's worst case is not a tail of a smooth distribution — it is a regime change, and it arrives with the rest of the portfolio's worst case.</p>
+    <p>Put numbers on it with our basket. In a calm market at <b>ρ = 0.25</b>, index volatility is <b>21.06%</b>. Move correlation alone to <b>0.90</b>, touching no single-name volatility at all, and index volatility goes to <b>37.20%</b> — a rise of <b>16.14 points</b> produced entirely by co-movement. Now do what actually happens and let single-name volatilities rise as well, say by <b>1.8×</b>: index volatility reaches <b>66.97%</b>, up <b>45.91 points</b> from calm.</p>
+    <p>Watch what that does to the two legs. The short index variance leg loses on a move of <b>4,041</b> variance units. The long component leg, which is supposed to be the hedge, gains only <b>3,425</b>. The trade is not volatility-neutral in a crash because it was never a volatility trade — the legs only cancel while correlation is where you left it.</p>
+    <p>Two more failure modes worth naming, both of which turn a bad outcome into an unmanageable one.</p>
+    <p><b>The average is not the matrix.</b> A single ρ cannot distinguish a market that has become uniformly more correlated from one that has split into two blocks. Books hedged on average correlation carry the difference as an unhedged residual, and it is largest in stress, when the correlation structure is changing shape rather than just level.</p>
+    <p><b>Liquidity leaves both legs at once.</b> Single-name variance is the product from <a href="variance.html#c7" style="color:var(--blue)">page 09 chapter 07</a> whose replication depends on a put wing that gaps and widens in a crash. Twenty of those, against one index position, is a lot of fragility concentrated in one direction.</p>
+    <p>And the arithmetic check from chapter 02 becomes a live risk control here. Because index volatility can never exceed the weighted average of its components, an index quoted at <b>39.5%</b> against components averaging <b>39.10%</b> implies a correlation of <b>1.0217</b> — which is impossible, and therefore evidence that a mark is stale, a proxy basket is wrong, or something is genuinely dislocated. It is one line of arithmetic and it is worth running every day.</p>
+  </div>
+
+  <div class="mline">σ<sub>I</sub> ≤ Σ<sub>i</sub> w<sub>i</sub>σ<sub>i</sub> &nbsp;&nbsp; always</div>
+  <p class="mread">Reads as: <b>an index can never be more volatile than the weighted average of its members.</b> Equality needs perfect correlation, so a quote above that line is not a price, it is a broken input.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Calm, correlation stress, and full stress</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Index volatility</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Weighted average component</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="270"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>What each leg does as the stress builds</h3></div>
+        <canvas id="cv5b" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The stress</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Drag correlation and the volatility multiplier together, the way a real crash moves them, and watch the two legs stop offsetting. The gap between the vermilion and moss lines in the lower panel is the loss, and it opens fastest in the top-right corner — which is the only corner that matters.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Take correlation to 0.95 while leaving the volatility multiplier at 1. <b>Predict</b> whether the long component leg gains anything at all.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"rho":0.95,"volMult":1}' data-focus="cv5b">Correlation only</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"rho":0.9,"volMult":1.8}' data-focus="cv5b">A real crash</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"rho":0.25,"volMult":1}' data-focus="cv5b">Back to calm</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why is a dispersion book's worst day usually also the firm's worst day?</p>
+    <div class="opts">
+      <button>Coincidence — the strategies are unrelated</button>
+      <button data-ok="1">Because it is short correlation, and correlation spikes in exactly the broad sell-offs that hurt every other long-biased book at the same time. The diversification you thought you had is the thing that fails</button>
+      <button>Because dispersion books are usually too large</button>
+      <button>Because index options stop trading in a crash</button>
+    </div>
+    <div class="ans"><b>It is short the thing that defines a crash.</b> A crash <em>is</em> a correlation event — that is close to what the word means at portfolio level. So a short-correlation position is not merely unlucky in those episodes, it is structurally aligned with them, and its returns look wonderful right up until the day they explain themselves. Sizing it as though its historical volatility described its risk is the specific mistake.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Six questions across the page.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">Twenty names average 39% volatility. What is the highest the index volatility can possibly be?</p>
+    <div class="opts">
+      <button>Higher than 39%, if correlation is high enough</button>
+      <button data-ok="1">Exactly 39%. Correlation of one gives the weighted average and there is nothing above that</button>
+      <button>39% divided by the square root of twenty</button>
+      <button>It depends on the weights, which are not given</button>
+    </div>
+    <div class="ans"><b>The weighted average is a hard ceiling.</b> It is also a live arbitrage check — an index quoted above it implies correlation above one, which means an input is broken.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 01</span>
+    <p class="q">The same twenty names, but correlation is zero. Roughly what is the index volatility?</p>
+    <div class="opts">
+      <button>Zero — independent moves cancel completely</button>
+      <button data-ok="1">About 9%. The diagonal terms survive, so idiosyncratic variance leaves a floor that diversification cannot remove</button>
+      <button>About 20%, half the average</button>
+      <button>Still 39%</button>
+    </div>
+    <div class="ans"><b>About 9%.</b> Independence removes the cross terms, not the individual variances. With equal weights that floor falls like one over the square root of the number of names, which is why it is small but never zero.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 02</span>
+    <p class="q">Why is implied correlation so sensitive to the index mark?</p>
+    <div class="opts">
+      <button>Because index options are illiquid</button>
+      <button data-ok="1">Because the diagonal term is small, so almost all of index variance is the correlation term — three points of index volatility can move implied correlation by more than a tenth</button>
+      <button>Because single-name volatilities are unreliable</button>
+      <button>It is not; the mapping is nearly flat</button>
+    </div>
+    <div class="ans"><b>The correlation term carries almost all of index variance.</b> A small residual computed as a difference between two large-ish numbers amplifies any error in either, so stale or mistimed marks produce plausible-looking nonsense.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 03</span>
+    <p class="q">Why is dispersion traded in variance rather than volatility?</p>
+    <div class="opts">
+      <button>Because variance swaps are cheaper</button>
+      <button data-ok="1">Because the index identity is exactly linear in variance. Match variance notionals and the P&amp;L is a clean straight line in realized correlation; match anything else and it is approximate and drifts</button>
+      <button>Because volatility swaps are not listed</button>
+      <button>Because variance has no vega</button>
+    </div>
+    <div class="ans"><b>The algebra is linear in variance and not in volatility.</b> This is the practical reason page 09 comes before this one — dispersion is the clearest application of why the square is the tradeable object.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 04</span>
+    <p class="q">What makes implied correlation persistently rich?</p>
+    <div class="opts">
+      <button>Investors systematically overestimate how correlated stocks are</button>
+      <button data-ok="1">Two opposite structural flows: index hedging bids index volatility while overwriting and structured-product issuance offer single-name volatility. Correlation is the residual that reconciles them</button>
+      <button>Central bank policy</button>
+      <button>It is not rich; the premium is a statistical illusion</button>
+    </div>
+    <div class="ans"><b>Flow on both legs, pushing the same way.</b> Neither side of that flow has any opinion about correlation, which is the point — the number records a supply-and-demand imbalance in two separate markets, and it is compensation for taking the other side of a crash hedge.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 05</span>
+    <p class="q">Correlation moves from 0.25 to 0.90 with every single-name volatility unchanged. What happens to index volatility on our basket?</p>
+    <div class="opts">
+      <button>Nothing, since no component moved</button>
+      <button data-ok="1">It rises from about 21% to about 37% — sixteen points, produced entirely by co-movement</button>
+      <button>It roughly doubles to 42%</button>
+      <button>It falls, since correlated names diversify better</button>
+    </div>
+    <div class="ans"><b>21% to 37%, from correlation alone.</b> This is the single most useful number on the page for sizing: it is what a short-correlation position loses before any volatility has moved at all, and it is why historical P&amp;L volatility badly understates the risk.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every figure here replaces a full correlation matrix with one average pairwise correlation, and every basket is equally weighted with a smooth spread of volatilities. Real indices are capitalisation-weighted with a long tail of small names, real correlation matrices have sector structure that a single number cannot express, and real dispersion books are traded on a subset of components chosen for liquidity rather than on the whole index. The flow argument in chapter 04 describes a mechanism and a direction; the size of the premium varies with the issuance cycle and is not a constant. Nothing here is a forecast of correlation, and the historical persistence of the premium is not a guarantee of it.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ══════════ the basket every figure uses ══════════ */
+const NAMES=20;
+const W=new Array(NAMES).fill(1/NAMES);
+const VOLS=Array.from({length:NAMES},(_,i)=>0.22+0.018*i);   // 22% .. 56%
+const AVGVOL=VOLS.reduce((a,b)=>a+b,0)/NAMES;
+
+function diagSum(vols){let s=0;for(let i=0;i<NAMES;i++)s+=W[i]*W[i]*vols[i]*vols[i];return s;}
+function offSum(vols){let s=0;
+  for(let i=0;i<NAMES;i++)for(let j=0;j<NAMES;j++)if(i!==j)s+=W[i]*W[j]*vols[i]*vols[j];
+  return s;}
+const idxVar=(vols,rho)=>diagSum(vols)+rho*offSum(vols);
+const idxVol=(vols,rho)=>Math.sqrt(Math.max(0,idxVar(vols,rho)));
+const impCorr=(vols,sigI)=>(sigI*sigI-diagSum(vols))/offSum(vols);
+const scale=(vols,m)=>vols.map(v=>v*m);
+const wAvg=vols=>vols.reduce((a,v,i)=>a+W[i]*v,0);
+
+function bars3(o,xs,ys,col,wfrac){
+  const g=o.g,w=(o.pw/Math.max(1,xs.length))*(wfrac||0.7);
+  g.save();g.fillStyle=col;
+  for(let i=0;i<xs.length;i++){
+    const x=o.X(xs[i]),y=o.Y(ys[i]),y0=o.Y(0);
+    g.fillRect(x-w/2,Math.min(y,y0),Math.max(w,1),Math.abs(y0-y));
+  }
+  g.restore();
+}
+function stack(o,i,parts,cols,wfrac){
+  const g=o.g,w=(o.pw/3)*(wfrac||0.5);
+  let base=0;g.save();
+  parts.forEach((p,k)=>{
+    g.fillStyle=cols[k];
+    g.fillRect(o.X(i)-w/2,o.Y(base+p),w,Math.abs(o.Y(base)-o.Y(base+p)));
+    base+=p;
+  });
+  g.restore();
+}
+function label(o,x,y,txt,col,size){
+  const g=o.g;g.save();g.fillStyle=col||C("--ink");g.textAlign="center";g.textBaseline="bottom";
+  g.font=(size||10)+"px 'IBM Plex Mono', monospace";g.fillText(txt,o.X(x),o.Y(y)-5);g.restore();
+}
+
+/* ══════════ HERO — twenty paths locking together ══════════ */
+(function(){
+  const cv=document.getElementById("heroCv");let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  const N=14,STEPS=170;
+  const noise=[],common=[];
+  for(let i=0;i<N;i++){const a=[];for(let t=0;t<=STEPS;t++)a.push(Math.sin(t*0.11+i*2.1)*0.6+Math.sin(t*0.043+i*5.7)*0.5);noise.push(a);}
+  for(let t=0;t<=STEPS;t++)common.push(Math.sin(t*0.055)*1.1+Math.sin(t*0.021)*0.8);
+  function draw(ph){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    const rho=0.5+0.5*Math.sin(ph);                      // correlation breathing 0..1
+    const padT=h*0.16,gh=h*0.68;
+    for(let i=0;i<N;i++){
+      g.strokeStyle=i%5===0?C("--verm"):C("--blue");
+      g.globalAlpha=0.13+0.10*(1-i/N);g.lineWidth=1.2;
+      g.beginPath();
+      let acc=0;
+      for(let t=0;t<=STEPS;t++){
+        acc += Math.sqrt(rho)*common[t]*0.05 + Math.sqrt(1-rho)*noise[i][t]*0.05;
+        const x=(t/STEPS)*w, y=padT+gh/2+acc*gh*0.055;
+        t?g.lineTo(x,y):g.moveTo(x,y);
+      }
+      g.stroke();
+    }
+    g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;draw((ts-t0)/3000);raf=requestAnimationFrame(frame);}
+  size();if(RM)draw(0.8);else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)draw(0.8);else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════ 01 — the index is not the average ══════════ */
+const s1={rho:0.30};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"a1",k:"rho",lbl:"ρ",name:"Average correlation",min:0,max:1,step:.01,fmt:v=>v.toFixed(2)}
+  ],s1,()=>draw(),"c1");
+  let sim=null;
+  function run(){
+    const rho=s1.rho,n=252,M=140;
+    let tot=0;
+    for(let m=0;m<M;m++){
+      const S=new Array(NAMES).fill(100);
+      let prev=100;let qv=0;
+      for(let t=0;t<n;t++){
+        const z0=gauss();let lvl=0;
+        for(let i=0;i<NAMES;i++){
+          const z=Math.sqrt(rho)*z0+Math.sqrt(1-rho)*gauss();
+          S[i]*=Math.exp(-0.5*VOLS[i]*VOLS[i]/n+VOLS[i]*z/Math.sqrt(n));
+          lvl+=W[i]*S[i];
+        }
+        const lr=Math.log(lvl/prev);qv+=lr*lr;prev=lvl;
+      }
+      tot+=qv;
+    }
+    sim={vol:Math.sqrt(tot/M),rho};
+    draw();
+  }
+  document.getElementById("run1").addEventListener("click",run);
+  window.draw1=()=>{draw();};
+  function draw(){
+    const xs=[],ys=[];
+    for(let i=0;i<=100;i++){const r=i/100;xs.push(r);ys.push(idxVol(VOLS,r)*100);}
+    const o=Fig(document.getElementById("cv1"),{h:300,x0:0,x1:1,y0:0,y1:AVGVOL*100*1.12,pad:{l:54}});
+    axes(o,v=>v.toFixed(2),v=>v.toFixed(0)+"%",5,4);
+    clip(o,()=>{
+      line(o,[0,1],[AVGVOL*100,AVGVOL*100],C("--verm"),1.8,[5,4]);
+      line(o,[0,1],[idxVol(VOLS,0)*100,idxVol(VOLS,0)*100],C("--moss"),1.6,[3,3]);
+      line(o,xs,ys,C("--blue"),3);
+    });
+    vline(o,s1.rho,C("--ink"),"ρ");
+
+    // where index variance comes from at this rho
+    const d=diagSum(VOLS), off=s1.rho*offSum(VOLS);
+    const o2=Fig(document.getElementById("cv1b"),{h:185,x0:-0.6,x1:2.6,y0:0,y1:Math.max(d+off,1e-9)*1.35,pad:{l:54,b:32}});
+    axes(o2,()=>"",v=>v.toFixed(3),1,3);
+    stack(o2,0,[d,off],[C("--moss"),C("--blue")],0.42);
+    label(o2,0,d+off,"total "+(idxVol(VOLS,s1.rho)*100).toFixed(2)+"%");
+    stack(o2,1,[d],[C("--moss")],0.42);
+    label(o2,1,d,"idio "+ (100*d/(d+off)).toFixed(0)+"%",C("--moss"));
+    stack(o2,2,[off],[C("--blue")],0.42);
+    label(o2,2,off,"corr "+ (100*off/(d+off)).toFixed(0)+"%",C("--blue"));
+
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Names",String(NAMES)],
+      ["Vol range","22% – 56%"],
+      ["Weighted average",pct2(AVGVOL)],
+      ["Correlation",s1.rho.toFixed(2)],
+      ["Index volatility",pct2(idxVol(VOLS,s1.rho))],
+      ["  as % of average",pct(idxVol(VOLS,s1.rho)/AVGVOL)],
+      ["Floor at ρ=0",pct2(idxVol(VOLS,0))],
+      ["Ceiling at ρ=1",pct2(idxVol(VOLS,1))],
+      ["Simulated",sim&&Math.abs(sim.rho-s1.rho)<1e-9?pct2(sim.vol):"press simulate"],
+      ["Simulation gap",sim&&Math.abs(sim.rho-s1.rho)<1e-9?((sim.vol-idxVol(VOLS,s1.rho))*100).toFixed(3)+" pts":"—"]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — implied correlation ══════════ */
+const s2={sigI:0.2425};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"a2",k:"sigI",lbl:"σ",name:"Quoted index volatility",min:.08,max:.42,step:.001,fmt:pct2}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function draw(){
+    const xs=[],ys=[];
+    for(let i=0;i<=160;i++){
+      const s=0.08+i*(0.34/160);
+      xs.push(s*100); ys.push(impCorr(VOLS,s));
+    }
+    const o=Fig(document.getElementById("cv2"),{h:290,x0:8,x1:42,y0:-0.1,y1:1.35,pad:{l:54}});
+    axes(o,v=>v.toFixed(0)+"%",v=>v.toFixed(2),5,4);
+    clip(o,()=>{
+      line(o,[8,42],[1,1],C("--verm"),2,[5,4]);
+      line(o,[8,42],[0,0],C("--grey"),1.2,[3,3]);
+      line(o,xs,ys,C("--blue"),2.8);
+    });
+    vline(o,s2.sigI*100,C("--ink"),"quote");
+    vline(o,AVGVOL*100,C("--verm"),"ceiling");
+
+    const rho=impCorr(VOLS,s2.sigI);
+    const d=diagSum(VOLS), off=Math.max(0,rho)*offSum(VOLS);
+    const o2=Fig(document.getElementById("cv2b"),{h:195,x0:-0.6,x1:1.6,y0:0,y1:Math.max(d+off,1e-9)*1.35,pad:{l:54,b:30}});
+    axes(o2,()=>"",v=>v.toFixed(3),1,3);
+    stack(o2,0,[d,off],[C("--moss"),C("--blue")],0.36);
+    label(o2,0,d+off,"index variance");
+    stack(o2,1,[d],[C("--moss")],0.36);
+    label(o2,1,d,"undiversifiable",C("--moss"));
+
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Quoted index",pct2(s2.sigI)],
+      ["Component average",pct2(AVGVOL)],
+      ["Implied correlation",rho.toFixed(4)],
+      ["Admissible?",rho<=1?(rho>=0?"yes":"below zero — check marks"):"NO — above one"],
+      ["Diagonal share",pct(d/Math.max(1e-12,d+off))],
+      ["Correlation share",pct(off/Math.max(1e-12,d+off))],
+      ["ρ if index +3 pts",impCorr(VOLS,s2.sigI+0.03).toFixed(4)],
+      ["Sensitivity",(impCorr(VOLS,s2.sigI+0.01)-rho).toFixed(4)+" per vol pt"]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — the dispersion trade ══════════ */
+const s3={rhoImp:0.35,rhoReal:0.35,volMult:1};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"a3",k:"rhoImp",lbl:"ρᵢ",name:"Implied correlation sold",min:.05,max:.9,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"b3",k:"rhoReal",lbl:"ρᵣ",name:"Realized correlation",min:0,max:1,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"c3v",k:"volMult",lbl:"×",name:"Volatility multiplier",min:.4,max:2.2,step:.05,fmt:v=>v.toFixed(2)+"×"}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  /* short index variance, long component variance, matched at inception */
+  function legs(rhoR,mult){
+    const vi=scale(VOLS,mult);
+    const shortIdx = idxVar(VOLS,s3.rhoImp) - idxVar(vi,rhoR);       // sold at implied
+    const longComp = diagSum(vi) - diagSum(VOLS);                    // bought at implied
+    return {shortIdx, longComp, net:shortIdx+longComp};
+  }
+  function draw(){
+    const xs=[],net=[],si=[],lc=[];
+    for(let i=0;i<=100;i++){
+      const r=i/100;const L=legs(r,s3.volMult);
+      xs.push(r);net.push(L.net*1e4);si.push(L.shortIdx*1e4);lc.push(L.longComp*1e4);
+    }
+    let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<xs.length;i++){lo=Math.min(lo,net[i],si[i],lc[i]);hi=Math.max(hi,net[i],si[i],lc[i]);}
+    const o=Fig(document.getElementById("cv3"),{h:300,x0:0,x1:1,y0:lo*1.1,y1:hi*1.1,pad:{l:58}});
+    axes(o,v=>v.toFixed(2),v=>v.toFixed(0),5,4);
+    clip(o,()=>{
+      line(o,[0,1],[0,0],C("--grey"),1.2,[3,3]);
+      line(o,xs,si,C("--verm"),1.8,[5,4]);
+      line(o,xs,lc,C("--moss"),1.8,[5,4]);
+      line(o,xs,net,C("--blue"),3);
+    });
+    vline(o,s3.rhoImp,C("--ochre"),"sold at");
+    vline(o,s3.rhoReal,C("--ink"),"realized");
+
+    // control: move volatility level instead
+    const mx=[],mn=[];
+    for(let i=0;i<=60;i++){
+      const m=0.4+i*(1.8/60);
+      mx.push(m);mn.push(legs(s3.rhoReal,m).net*1e4);
+    }
+    const o2=Fig(document.getElementById("cv3b"),{h:190,x0:0.4,x1:2.2,y0:Math.min(-10,Math.min.apply(null,mn)*1.2),y1:Math.max(10,Math.max.apply(null,mn)*1.2),pad:{l:58}});
+    axes(o2,v=>v.toFixed(1)+"×",v=>v.toFixed(0),5,3);
+    clip(o2,()=>{
+      line(o2,[0.4,2.2],[0,0],C("--grey"),1.2,[3,3]);
+      line(o2,mx,mn,C("--blue"),2.8);
+    });
+    vline(o2,s3.volMult,C("--ink"),"×");
+
+    const L=legs(s3.rhoReal,s3.volMult);
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Sold correlation at",s3.rhoImp.toFixed(2)],
+      ["Index implied",pct2(idxVol(VOLS,s3.rhoImp))],
+      ["Realized correlation",s3.rhoReal.toFixed(2)],
+      ["Volatility multiplier",s3.volMult.toFixed(2)+"×"],
+      ["Realized index vol",pct2(idxVol(scale(VOLS,s3.volMult),s3.rhoReal))],
+      ["Short index leg",(L.shortIdx*1e4).toFixed(1)],
+      ["Long component leg",(L.longComp*1e4).toFixed(1)],
+      ["Net (×1e-4)",(L.net*1e4).toFixed(1)],
+      ["Verdict",L.net>0?"wins":"loses"]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — why it is rich ══════════ */
+const s4={idxBid:0.03,nameOffer:0.02};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"a4",k:"idxBid",lbl:"↑",name:"Index hedging demand",min:0,max:.08,step:.002,fmt:v=>"+"+(v*100).toFixed(1)+" pts"},
+    {id:"b4",k:"nameOffer",lbl:"↓",name:"Single-name supply",min:0,max:.08,step:.002,fmt:v=>"−"+(v*100).toFixed(1)+" pts"}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  const TRUE_RHO=0.30;
+  function draw(){
+    const xs=[],ci=[],cc=[],cr=[];
+    for(let i=0;i<=80;i++){
+      const t=i/80;
+      const bid=s4.idxBid*t, off=s4.nameOffer*t;
+      const comps=VOLS.map(v=>Math.max(0.02,v-off));
+      const sigI=idxVol(VOLS,TRUE_RHO)+bid;
+      xs.push(t*100);
+      ci.push(sigI*100); cc.push(wAvg(comps)*100); cr.push(impCorr(comps,sigI));
+    }
+    const o=Fig(document.getElementById("cv4"),{h:300,x0:0,x1:100,y0:0,y1:Math.max(AVGVOL*100*1.15,Math.max.apply(null,ci)*1.15),pad:{l:54,r:54}});
+    axes(o,v=>v.toFixed(0)+"%",v=>v.toFixed(0)+"%",5,4);
+    clip(o,()=>{
+      line(o,xs,ci,C("--verm"),2.6);
+      line(o,xs,cc,C("--moss"),2.6);
+      // implied correlation on a second, rescaled axis
+      const lo=0,hi=1;
+      const scaled=cr.map(r=>(r-lo)/(hi-lo)*(o.y1-o.y0)+o.y0);
+      line(o,xs,scaled,C("--blue"),2.8,[6,4]);
+    });
+    (function(){const g=o.g;g.save();g.fillStyle=C("--blue");g.textAlign="left";g.textBaseline="middle";
+      g.font="9.5px 'IBM Plex Mono', monospace";
+      g.fillText("ρ = 1",o.P.l+o.pw+6,o.Y(o.y1));
+      g.fillText("ρ = 0",o.P.l+o.pw+6,o.Y(o.y0));
+      g.restore();})();
+
+    const comps=VOLS.map(v=>Math.max(0.02,v-s4.nameOffer));
+    const sigI=idxVol(VOLS,TRUE_RHO)+s4.idxBid;
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["True correlation",TRUE_RHO.toFixed(2)],
+      ["Fair index vol",pct2(idxVol(VOLS,TRUE_RHO))],
+      ["Index bid up by","+"+(s4.idxBid*100).toFixed(1)+" pts"],
+      ["Quoted index",pct2(sigI)],
+      ["Names offered down","−"+(s4.nameOffer*100).toFixed(1)+" pts"],
+      ["Component average",pct2(wAvg(comps))],
+      ["Implied correlation",impCorr(comps,sigI).toFixed(4)],
+      ["Premium over true",(impCorr(comps,sigI)-TRUE_RHO).toFixed(4)]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — where it breaks ══════════ */
+const s5={rho:0.25,volMult:1,rhoImp:0.35};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"a5",k:"rho",lbl:"ρ",name:"Realized correlation",min:0,max:1,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"b5",k:"volMult",lbl:"×",name:"Single-name vol multiplier",min:.5,max:2.5,step:.05,fmt:v=>v.toFixed(2)+"×"}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function draw(){
+    const scen=[
+      {n:"calm",rho:0.25,m:1},
+      {n:"corr",rho:0.90,m:1},
+      {n:"crash",rho:s5.rho,m:s5.volMult}
+    ];
+    const o=Fig(document.getElementById("cv5"),{h:270,x0:-0.6,x1:2.6,y0:0,y1:Math.max(70,idxVol(scale(VOLS,s5.volMult),s5.rho)*100*1.2),pad:{l:56,b:32}});
+    axes(o,()=>"",v=>v.toFixed(0)+"%",1,4);
+    scen.forEach((s,i)=>{
+      const iv=idxVol(scale(VOLS,s.m),s.rho)*100, av=wAvg(scale(VOLS,s.m))*100;
+      stack(o,i,[iv],[C("--verm")],0.42);
+      const g=o.g;g.save();g.strokeStyle=C("--moss");g.lineWidth=2;g.setLineDash([4,3]);
+      const w=(o.pw/3)*0.42;
+      g.beginPath();g.moveTo(o.X(i)-w/2,o.Y(av));g.lineTo(o.X(i)+w/2,o.Y(av));g.stroke();g.restore();
+      label(o,i,iv,iv.toFixed(1)+"%");
+      const g2=o.g;g2.save();g2.fillStyle=C("--grey");g2.textAlign="center";g2.textBaseline="top";
+      g2.font="9.5px 'IBM Plex Mono', monospace";
+      g2.fillText(s.n+"  ρ="+s.rho.toFixed(2),o.X(i),o.P.t+o.ph+8);g2.restore();
+    });
+
+    // legs as the stress builds
+    const xs=[],si=[],lc=[],net=[];
+    for(let i=0;i<=60;i++){
+      const t=i/60;
+      const rho=0.25+(0.95-0.25)*t, m=1+(s5.volMult-1)*t;
+      const vi=scale(VOLS,m);
+      const sIdx=(idxVar(VOLS,s5.rhoImp)-idxVar(vi,rho))*1e4;
+      const lComp=(diagSum(vi)-diagSum(VOLS))*1e4;
+      xs.push(t*100);si.push(sIdx);lc.push(lComp);net.push(sIdx+lComp);
+    }
+    let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<xs.length;i++){lo=Math.min(lo,si[i],lc[i],net[i]);hi=Math.max(hi,si[i],lc[i],net[i]);}
+    const o2=Fig(document.getElementById("cv5b"),{h:200,x0:0,x1:100,y0:lo*1.1,y1:Math.max(hi*1.1,10),pad:{l:58}});
+    axes(o2,v=>v.toFixed(0)+"%",v=>v.toFixed(0),5,4);
+    clip(o2,()=>{
+      line(o2,[0,100],[0,0],C("--grey"),1.2,[3,3]);
+      line(o2,xs,si,C("--verm"),2.4);
+      line(o2,xs,lc,C("--moss"),2.4);
+      line(o2,xs,net,C("--blue"),3);
+    });
+
+    const vi=scale(VOLS,s5.volMult);
+    const sIdx=(idxVar(VOLS,s5.rhoImp)-idxVar(vi,s5.rho))*1e4;
+    const lComp=(diagSum(vi)-diagSum(VOLS))*1e4;
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Calm index (ρ=0.25)",pct2(idxVol(VOLS,0.25))],
+      ["Correlation only (0.90)",pct2(idxVol(VOLS,0.90))],
+      ["  from correlation alone","+"+((idxVol(VOLS,0.90)-idxVol(VOLS,0.25))*100).toFixed(2)+" pts"],
+      ["This scenario",pct2(idxVol(vi,s5.rho))],
+      ["  total move","+"+((idxVol(vi,s5.rho)-idxVol(VOLS,0.25))*100).toFixed(2)+" pts"],
+      ["Ceiling now",pct2(wAvg(vi))],
+      ["Short index leg",sIdx.toFixed(0)],
+      ["Long component leg",lComp.toFixed(0)],
+      ["Net",(sIdx+lComp).toFixed(0)]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

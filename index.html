@@ -156,33 +156,39 @@
     <span class="st live">Live &rarr;</span>
   </a>
 
-  <div class="entry planned">
+  <a class="entry" href="variance.html">
     <span class="n">09</span>
     <div>
-      <h3>Variance and the Log Contract</h3>
-      <p>Variance is replicable with a static strip of options; volatility is not. That asymmetry is the whole subject — the 1/K² weights, what a variance swap really pays, VIX as an implementation, and where the replication quietly fails.</p>
-      <div class="tags"><span>Variance swaps</span><span>Replication</span><span>VIX</span></div>
+      <h3>Only One of Them Is Tradeable</h3>
+      <p>Delta-hedge one particular contract and your P&amp;L <em>is</em> the realized variance &mdash; on every path, correlation 0.99998, not on average. That contract is a logarithm, you build it from ordinary options weighted by 1/K&sup2;, and then the wings turn out to be a third of it: cut the strike range to 92&ndash;108% and a 25 variance swap prices at 17.4. Ends with what VIX actually is, and the jump that breaks the whole argument.</p>
+      <div class="tags"><span>Variance vs volatility</span><span>Log contract</span><span>Static replication</span><span>Variance swaps</span><span>VIX</span></div>
     </div>
+    <span class="st live">Live &rarr;</span>
+  </a>
     <span class="st soon">Planned</span>
   </div>
 
-  <div class="entry planned">
+  <a class="entry" href="dispersion.html">
     <span class="n">10</span>
     <div>
-      <h3>Dispersion and Correlation</h3>
-      <p>Index variance is a weighted sum of single-name variances plus a correlation term. Trade the difference and you are trading correlation whether you meant to or not.</p>
-      <div class="tags"><span>Dispersion</span><span>Implied correlation</span></div>
+      <h3>Correlation, Whether You Meant To or Not</h3>
+      <p>Twenty stocks averaging 39% volatility make an index worth anywhere from 9% to 39%, and the whole range is one number nobody quotes. Back it out of an index price, trade it against the components, and watch the volatility level cancel between the legs &mdash; leaving a straight line in realized correlation. Then the part that matters: correlation is bounded at one, and it gets there on the day you cannot afford it.</p>
+      <div class="tags"><span>Index algebra</span><span>Implied correlation</span><span>Dispersion</span><span>Flow</span><span>Correlation to one</span></div>
     </div>
+    <span class="st live">Live &rarr;</span>
+  </a>
     <span class="st soon">Planned</span>
   </div>
 
-  <div class="entry planned">
+  <a class="entry" href="book.html">
     <span class="n">11</span>
     <div>
-      <h3>The Book</h3>
-      <p>Everything so far has been one option. A book is a portfolio, and portfolio risk is not the sum of the parts. Scenario matrices, bucketed vega, limits, and reading a real risk report end to end.</p>
-      <div class="tags"><span>Portfolio greeks</span><span>Scenarios</span><span>Limits</span></div>
+      <h3>The Sum of the Parts</h3>
+      <p>Ten pages priced one option at a time. A book is a portfolio: dollar units add, rates do not, and a greek report is wrong by 0.7% on a 1% move and 58% on a 20% one. The scenario matrix is what a risk manager actually reads. And a net vega of 417 turns out to describe four volatility moves whose P&amp;L runs from $743 to $1,238 &mdash; the safest-looking number on the page hiding the most.</p>
+      <div class="tags"><span>Aggregating greeks</span><span>Scenario matrix</span><span>Bucketed vega</span><span>Limits</span><span>Reading a report</span></div>
     </div>
+    <span class="st live">Live &rarr;</span>
+  </a>
     <span class="st soon">Planned</span>
   </div>
 </div>

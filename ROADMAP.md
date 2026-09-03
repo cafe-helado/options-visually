@@ -325,7 +325,28 @@ convention, dated, and taught as mechanism rather than rulebook.
 
 ---
 
-## 09 · Variance, Volatility, and the Log Contract
+## 09 · Only One of Them Is Tradeable  ✅ live (variance.html)
+
+Signature as built: delta-hedge a log contract and plot each path's P&L against the
+realized variance it delivered. It is a LINE, not a cloud — correlation 0.99998 at 10
+vol and 0.99966 at 45, mean P&L matching mean realized variance to five decimals.
+Constant dollar gamma is the whole trick, shown against an ordinary call's gamma hill.
+
+Verified: the strip recovers a flat 25% to 2.1bp with $10 spacing (21 strikes) over
+40–250% of forward, and to 0.1bp at $2.50. But hold spacing at $5 and pull the range
+in — 75–140% gives 23.69%, 85–120% gives 20.81%, 92–108% gives 17.42%, low by 30.3%.
+Contribution by bucket: 90–110% supplies 50.7%, 70–90% supplies 22.9%, below 70%
+another 3.5%. A quarter of the contract lives below 90% strikes.
+
+Also verified: convexity gap between var and vol swaps is 2.08 vol pts at nu=0.4 and
+4.93 at nu=0.6. A -0.25 skew on a 25 ATM gives a 30.4 variance strike — the smile
+averaged in mechanically, not a forecast. Jumps break the replication by 0.59 vol pts
+at lambda=1/J=-20% and 1.10 at 0.5/-30%, always under-hedging a falling stock.
+
+Caught in review: the payoff was coded in decimals when vega notional is dollars per
+volatility POINT — a clean 100x error the prose numbers exposed.
+
+## 09-superseded · Variance, Volatility, and the Log Contract
 
 **Spine:** variance is replicable with a static strip of options; volatility is not.
 That asymmetry is the whole subject.
@@ -344,7 +365,29 @@ Chapters
 
 ---
 
-## 10 · Dispersion and Correlation
+## 10 · Correlation, Whether You Meant To or Not  ✅ live (dispersion.html)
+
+Signature as built: index volatility against correlation with both hard bounds drawn.
+Twenty names averaging 39.10% give an index of 9.05% at rho=0 and exactly 39.10% at
+rho=1 — the weighted average is a ceiling, not an approximation. A live simulation of
+twenty correlated paths lands at 24.21% against the formula's 24.25%.
+
+Verified: implied correlation inverts steeply — index 20% -> 0.220, 25% -> 0.375,
+28% -> 0.485, so three vol points move correlation by more than a tenth. An index
+quoted at 39.5% against a 39.10% average implies rho = 1.0217, impossible, and makes
+a one-line daily arbitrage check.
+
+The stress number that sizes the trade: correlation 0.25 -> 0.90 with every
+single-name vol untouched lifts index vol 16.14 points, 21.06% to 37.20%. Let vols
+also go 1.8x and the index reaches 66.97%. The short index leg loses on 4,041
+variance units while the long component leg gains 3,425 — the legs stop offsetting
+precisely in the crash.
+
+Control experiment worth keeping: scale every single-name vol by any factor and the
+dispersion P&L barely moves. The position is insensitive to the thing everyone
+discusses and fully exposed to the thing nobody quotes.
+
+## 10-superseded · Dispersion and Correlation
 
 **Spine:** index variance is a weighted sum of single-name variances plus a correlation
 term. Trade the difference and you are trading correlation, whether you meant to or not.
@@ -361,7 +404,25 @@ Chapters
 
 ---
 
-## 11 · The Book
+## 11 · The Sum of the Parts  ✅ live (book.html)
+
+Signature as built: a spot x vol scenario matrix with three views on one grid — full
+reprice, greek estimate, and the error between them. Four-position book; at +20% spot
+/ +10 vol it makes $49,061 while the greeks predict $29,456 less.
+
+Verified decay of the local approximation: delta+gamma error is 0.7% at a 1% move,
+2.7% at 2%, 13.8% at 5%, 35.2% at 10%, 58.2% at 20%. Error grows roughly with the
+cube of the move, so the knee is much closer in than people assume.
+
+The bucketed-vega demonstration: net vega 417 = front 99, belly -495, back 813. Four
+vol moves that all "look like two points" produce $863, $864, $1,238 and $743 — a 67%
+spread that a single net number cannot distinguish.
+
+Also: dollar delta adds ($56.8k from legs of -2,496/+1,430/+709/+914 shares), gamma
+cash adds ($2,042 net from a -$18,002 and a +$20,033 leg — a small net over a large
+gross), and vega adds arithmetically while meaning nothing.
+
+## 11-superseded · The Book
 
 **Spine:** everything so far has been one option. A book is a portfolio, and portfolio
 risk is not the sum of the parts.

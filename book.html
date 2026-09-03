@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>The Book — Options, visually</title>
+<meta name="description" content="A book is a portfolio and portfolio risk is not the sum of the parts. Aggregating greeks, the scenario matrix, where local approximations fail, bucketed vega, and reading a risk report.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Book — Options, visually">
+<meta property="og:description" content="A book is a portfolio and portfolio risk is not the sum of the parts. Aggregating greeks, the scenario matrix, where local approximations fail, bucketed vega, and reading a risk report.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 11 · The Book</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>What adds</span><i></i></a>
+  <a href="#c2"><span>The matrix</span><i></i></a>
+  <a href="#c3"><span>Where greeks stop</span><i></i></a>
+  <a href="#c4"><span>Bucketed vega</span><i></i></a>
+  <a href="#c5"><span>Limits</span><i></i></a>
+  <a href="#c6"><span>The report</span><i></i></a>
+  <a href="#c7"><span>Check yourself</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 11</div>
+    <h1>The sum of the <em>parts</em></h1>
+    <p class="sub">Ten pages have priced one option at a time. A book is a portfolio, its risk is not the sum of its positions, and the number that looks safest on the report — a net vega near zero — is frequently the one hiding the most.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This is the capstone and it assumes the series. The greeks come from <a href="black-scholes.html#c5" style="color:var(--blue)">page 01</a>, the term structure from <a href="surface.html" style="color:var(--blue)">page 02</a>, and the hedging-cost trade-off from <a href="execution.html#c1" style="color:var(--blue)">page 06</a>. Nothing new is derived here; everything is aggregated, which turns out to be the hard part.</p>
+  <ol>
+    <li><b>Chapter 02 is the figure risk managers actually look at.</b> Not a greek report — a grid of full repricings, with the greek estimate beside it so you can see where the estimate fails.</li>
+    <li><b>Chapter 03 puts a number on "fails".</b> At a 1% move the greeks are wrong by 0.7%. At 20% they are wrong by 58%.</li>
+    <li><b>Chapter 04 is the one that catches people.</b> A book with 417 of net vega can lose or make wildly different amounts on vol moves that all "look like" two points.</li>
+    <li><b>The book on this page is four positions.</b> A real one has thousands, which changes the arithmetic not at all and the intuition completely.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>Dollar delta</td><td>Delta × shares × spot. What adds across a book, because it is money rather than a rate.</td></tr>
+      <tr><td>Gamma cash</td><td>The change in dollar delta for a 1% move in spot. The only gamma unit that means anything at portfolio level.</td></tr>
+      <tr><td>Vega bucket</td><td>Vega grouped by expiry. The single net figure is an accounting total, not a risk measure.</td></tr>
+      <tr><td>Scenario matrix</td><td>A grid of full repricings across spot and volatility. The book's actual P&amp;L, not a local approximation to it.</td></tr>
+      <tr><td>Taylor estimate</td><td>Delta + gamma + vega applied to a move. What a greek report implicitly predicts.</td></tr>
+      <tr><td>Twist</td><td>A volatility move that is not parallel — front up, back down, or the reverse. Invisible to net vega.</td></tr>
+      <tr><td>Stress</td><td>A scenario chosen because it hurts, rather than because it is likely.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Some greeks add and some only look like they do</h2>
+    <p class="dek">Addition is a statement about units. Get the units right and the aggregation question answers itself.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The first thing that goes wrong when you put positions together is that people add numbers which are not in the same units. A delta of 0.54 on one option and 0.31 on another do not sum to anything meaningful, because delta is a rate — shares per share — and the two options are written on different quantities of stock. Convert to money first and the problem disappears.</p>
+    <p><b>Dollar delta adds</b>, on one underlying, without qualification. Multiply delta by the contract multiplier, by the position size, and by spot, and you have a number of dollars that moves one-for-one with a percentage change in the stock. Our four-position book carries a share delta of <b>557</b> — about <b>$57,000</b> of exposure — assembled from legs of −2,496, +1,430, +709 and +914 shares.</p>
+    <p><b>Gamma cash adds</b>, once expressed as dollars of delta gained per 1% move. Our book's is <b>$2,042</b> per percent, and it is worth noticing how it got there: the short front-month 100 calls contribute <b>−$18,002</b> and the long 110 calls <b>+$20,033</b>. Two large opposing numbers netting to something small is the normal condition of an options book, and it is precisely the condition under which a net figure stops describing the risk.</p>
+    <p><b>Vega adds arithmetically and lies.</b> You can total it — ours is <b>$417</b> per volatility point — but the total presumes every volatility moves together, which is the one thing volatilities reliably do not do. Chapter 04 takes this apart.</p>
+    <p>And two things do not add at all. <b>Gamma across different underlyings</b> is not additive in any useful sense, because a 1% move in one name is not the same event as a 1% move in another; you need a covariance structure, which is <a href="dispersion.html" style="color:var(--blue)">page 10's</a> subject. <b>Greeks across dates</b> are not comparable either — a one-week gamma and a one-year gamma are different animals wearing the same label.</p>
+  </div>
+
+  <div class="mline">$Δ = Δ × multiplier × contracts × S &nbsp;&nbsp;&nbsp; Γ<sub>cash</sub> = Γ × multiplier × contracts × S² × 1%</div>
+  <p class="mread">Reads as: <b>turn every rate into money before you add anything up.</b> The conversion is mechanical and skipping it is the most common error on a real blotter.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Every position's contribution, and what survives netting</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Long legs</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Short legs</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Net</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="290"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>The book</h3></div>
+        <table class="blot" id="bookTab"></table>
+      </div>
+      <div class="rail panel">
+        <h4>Position sizes</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Switch the measure and watch the netting change character. Dollar delta nets to something modest out of large opposing legs; gamma cash nets to almost nothing out of two legs twenty times its size. The ratio of the net to the gross is the single best one-glance indicator of how much a summary number is hiding.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Take the front-month 110 calls to zero and watch gamma cash. <b>Predict</b> whether the book becomes more or less dangerous when a leg is removed.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"q2":0}' data-focus="cv1">Remove the long 110s</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"q1":-40,"q2":60,"q3":-25,"q4":30}' data-focus="cv1">Back to the book</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A book shows gamma cash of $2,000 per 1%, assembled from a −$18,000 leg and a +$20,000 leg. What should worry you?</p>
+    <div class="opts">
+      <button>Nothing — $2,000 is a small number and that is what the book is running</button>
+      <button data-ok="1">That the net only holds at today's spot. Two large opposing gamma positions at different strikes stop offsetting as soon as spot moves, so the small net is a statement about a moment</button>
+      <button>That the legs should be equal in size</button>
+      <button>That gamma cash is the wrong measure</button>
+    </div>
+    <div class="ans"><b>The offset is local.</b> Each leg's gamma is a hill centred on its own strike — the same fact that made page 09's log contract necessary — so a book flat by netting at 102 can be substantially long or short gamma at 95 or 115. This is exactly why chapter 02 exists: a single netted number describes one point, and a matrix describes the neighbourhood.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The grid a risk manager actually reads</h2>
+    <p class="dek">Reprice the whole book in every cell. Then put the greek prediction beside it and look at the difference.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A greek report is a description of the book at one point, expressed in derivatives. A scenario matrix is the book itself, evaluated at many points. The difference between them is the subject of this page, and the fastest way to see it is to compute both and subtract.</p>
+    <p>The grid below moves spot across the columns and volatility down the rows and puts the full repriced P&amp;L in each cell. Every position is revalued from scratch at the new spot and the new volatility — no approximations, no local expansions. This is what the book would actually be worth.</p>
+    <p>Then switch the display to <b>error</b> and you are looking at what a greek report would have missed. At the centre the errors are trivially small, which is exactly what "the greeks are a local approximation" means. Move to the corners and they are enormous: at spot +20% with volatility up 10 points, the book makes <b>$49,061</b> and the greek estimate is short by <b>$29,456</b> — the report would have predicted well under half the move.</p>
+    <p>The asymmetry matters as much as the size. The errors are not symmetric in spot, because gamma is not constant, and they are not symmetric in volatility, because vega is not constant either. A book that looks balanced in the greeks can be strongly convex in one direction and concave in the other, and only the matrix shows it.</p>
+    <p>This is why the matrix, not the greek line, is the artefact that gets escalated. A greek report answers "what is the book doing right now"; a matrix answers "what happens if", and the second question is the one a risk committee is actually asking.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Spot across, volatility down — the whole book, repriced</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--moss)"></i>Profit</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Loss</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="360"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The grid</h4>
+        <div id="ctl2"></div>
+        <div class="btnrow">
+          <button class="act ghost" id="mFull">Full reprice</button>
+          <button class="act ghost" id="mTay">Greek estimate</button>
+          <button class="act ghost" id="mErr">Error</button>
+        </div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Flip between the three views on the same grid. Full reprice and greek estimate look broadly similar in the middle four cells and diverge everywhere else; the error view makes the pattern obvious in one glance. Notice that the largest error is not in the worst cell — the greeks fail hardest where the book is <em>making</em> money, which is why "the model was conservative" is not a defence.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the spot range to ±5% and read the error view. <b>Predict</b> what happens to the errors when you widen it to ±25%.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"srange":0.05}' data-focus="cv2" data-then="mErr">A quiet week</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"srange":0.25}' data-focus="cv2" data-then="mErr">A bad week</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your greek report and your scenario matrix disagree about a −20% cell by $12,000. Which is wrong?</p>
+    <div class="opts">
+      <button>The matrix — it uses a different pricing model</button>
+      <button data-ok="1">Neither. The matrix is the book's actual value there; the greek report is a local expansion around today's spot and was never meant to be accurate 20% away</button>
+      <button>The greek report, which must have a stale input</button>
+      <button>Both, since neither includes correlation</button>
+    </div>
+    <div class="ans"><b>Neither is wrong; they answer different questions.</b> Greeks are derivatives evaluated at a point and their accuracy decays with distance from that point — chapter 03 measures how fast. Treating a disagreement as a reconciliation break rather than as expected behaviour is a common and expensive misunderstanding, because the fix people reach for is to "correct" the matrix.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>How far can you trust a greek report?</h2>
+    <p class="dek">About one percent. After that the answer degrades quickly and in a measurable way.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">"The greeks are a local approximation" is true and useless without a number attached. Here is the number. Take our book, move spot, and compare the full reprice against what delta and gamma predicted.</p>
+    <p>At <b>1%</b> the book makes <b>$582</b> and the greeks predict <b>$578</b> — an error of <b>0.7%</b>, entirely negligible. At <b>2%</b> the error is <b>2.7%</b>. At <b>5%</b> it is <b>13.8%</b>: the book makes $3,589 and the estimate says $3,093. At <b>10%</b> the estimate captures barely two-thirds. At <b>20%</b> the book makes <b>$36,971</b> and the greeks predict <b>$15,436</b> — an error of <b>58%</b>, which is to say the report is wrong by more than it is right.</p>
+    <p>The shape of that decay is the useful part. The error grows roughly like the cube of the move, because delta and gamma capture the first two terms of the expansion and the first thing they miss is the third. So halving the move you care about cuts the error by about eight, and doubling it multiplies the error by about eight. That is a fast enough exponent that the boundary between "greeks are fine" and "greeks are useless" is narrow, and it sits at a smaller move than most people assume.</p>
+    <p>The practical rule that falls out: use greeks for hedging decisions and daily attribution, where moves are small and the derivative is exactly what you want. Use the matrix for limits, stress and anything that gets escalated, where the moves are large by construction. Using a greek report to answer a stress question is the specific error, and it always errs in the direction of comfort — it under-predicts big moves in both directions, because it is missing the convexity that makes them big.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Full reprice against the greek estimate, as the move grows</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Full reprice</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Delta + gamma</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Delta only</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Error as a share of the move</h3></div>
+        <canvas id="cv3b" height="195"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The move</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The lower panel is the one to remember. It is flat and near zero out to a couple of percent and then climbs steeply — there is a knee, and knowing roughly where your book's knee sits is what tells you when to stop quoting greeks and start running scenarios.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Adding a third-order term to the estimate would help most in which situation?</p>
+    <div class="opts">
+      <button>Small moves, where precision matters most</button>
+      <button data-ok="1">Large moves, where it is the first missing term and the error grows roughly with the cube of the move</button>
+      <button>It would not help; the error comes from vega</button>
+      <button>Only for books that are net short gamma</button>
+    </div>
+    <div class="ans"><b>Large moves.</b> At small moves the error is already negligible so there is nothing to fix. The reason desks generally do not bother adding higher-order terms is that once you are far enough out for them to matter, a full reprice is both exact and cheap — the approximation exists to save computation that is no longer worth saving.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>One vega number across the term structure is a lie</h2>
+    <p class="dek">Our book's net vega is 417. Four different volatility moves that all "look like two points" produce P&amp;L from 743 to 1,238.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Vega is quoted as a single figure and it is the most misleading number on a risk report, because summing it presumes that every implied volatility on the surface moves together. They do not. Front-month volatility is jumpy and event-driven; back-month volatility is stable and mean-reverting; and the front can rise five points on an earnings date while the back does not move at all.</p>
+    <p>Our book's vega breaks into <b>+99</b> in the front two months, <b>−495</b> in the two-to-six month bucket, and <b>+813</b> beyond six months, netting to <b>+417</b>. That net is a true arithmetic total and it describes almost nothing, because the book is really a term-structure position — short the belly, long the wings of the calendar — wearing the disguise of a modest long-vol book.</p>
+    <p>Watch what that does. A genuine parallel move of +2 volatility points makes <b>$863</b>, close to the naive net-vega prediction of $834. But a front-up-ten, back-down-one-and-a-half twist makes <b>$864</b>; a front-down-six, back-up-five twist makes <b>$1,238</b>; and a front-up-twelve, back-down-three twist makes <b>$743</b>. Same book, same net vega, and a spread of nearly <b>67%</b> between the outcomes — with nothing that a single number could have distinguished.</p>
+    <p>Which is why real risk systems bucket. The convention is a set of tenor buckets with vega reported in each, and the discipline is that limits are set per bucket rather than on the total. A desk that is flat on net vega and running plus-and-minus a thousand in adjacent buckets is not flat; it has a term-structure position that nobody has approved.</p>
+    <p>The same argument applies twice more, and for the same reason. Bucket by <b>strike</b> as well as by tenor, because a book long wings and short the body has zero net vega and a large skew position. And remember from <a href="surface.html#c5" style="color:var(--blue)">page 02</a> that the delta you are bucketing is itself model-dependent — sticky-strike and sticky-delta conventions produce different vega attributions from identical prices.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Vega by tenor bucket, and the net that hides it</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Bucket vega</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Net</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="250"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Four volatility moves, one net vega</h3></div>
+        <canvas id="cv4b" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The volatility move</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Drag the front and back shifts independently and watch the actual P&amp;L bar separate from the net-vega prediction. Any point on the line where the two agree is a coincidence of that particular twist, not a property of the book — and the further the surface move is from parallel, the less the single number means.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the front shift to +10 and the back to −1.5. Then flip to front −6, back +5. <b>Predict</b> whether the P&amp;L changes sign, before you look.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"front":0.10,"back":-0.015}' data-focus="cv4b">Front spikes</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"front":-0.06,"back":0.05}' data-focus="cv4b">Back leads instead</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"front":0.02,"back":0.02}' data-focus="cv4b">A true parallel move</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A desk reports net vega of zero. What have you learned?</p>
+    <div class="opts">
+      <button>That the desk has no volatility exposure</button>
+      <button data-ok="1">Almost nothing. It could genuinely be flat, or it could be long a thousand in the front against short a thousand in the back — a large term-structure position that nets to zero</button>
+      <button>That the desk is hedged against a parallel shift only, which is the standard hedge</button>
+      <button>That the desk has closed its positions</button>
+    </div>
+    <div class="ans"><b>Almost nothing.</b> The third answer is closest to being right and still misses the point: "hedged against a parallel shift" describes the one scenario that essentially never happens cleanly. This is why bucketed limits exist, and why a risk manager's first question on seeing a zero is not "good" but "show me the buckets".</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Limits, and the question underneath them</h2>
+    <p class="dek">A limit is not a prediction. It is a statement about how much of a specific bad day the firm is willing to own.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Limits look like bureaucracy from a trading seat and like arithmetic from a risk seat, and both readings miss what they are for. A limit is a pre-committed answer to a question nobody can think clearly about while it is happening: how much are we prepared to lose in a scenario we have decided is plausible?</p>
+    <p>They come in layers, and the layers exist because each one fails differently.</p>
+    <p><b>Greek limits</b> — maximum dollar delta, gamma cash, bucketed vega. Cheap to compute, easy to monitor continuously, and subject to exactly the failure of chapter 03: they describe the book near today's spot and say nothing about the corners. A book can sit inside every greek limit and still be carrying a scenario loss nobody has authorised.</p>
+    <p><b>Scenario limits</b> — the worst cell of the matrix must be better than some number. This is the one that actually binds, because it is computed from full repricings and therefore does not degrade with move size. Its weakness is that it only covers the scenarios in the grid.</p>
+    <p><b>Stress limits</b> — named historical or hypothetical events, deliberately chosen because they hurt rather than because they are likely, and usually including a correlation-goes-to-one case for the reasons on <a href="dispersion.html#c5" style="color:var(--blue)">page 10</a>.</p>
+    <p>The figure makes the first layer's weakness concrete. Adjust the position sizes until every greek sits inside its limit, then look at the worst cell of the matrix. It is entirely possible — and on this book, easy — to be green on every greek and red on the scenario, because the greeks are measuring the middle of the grid and the limit that matters lives in a corner.</p>
+    <p>One more thing worth saying plainly, because it is where limits are most often misunderstood. A limit breach is not a prediction that you will lose the money. It is a statement that the position has grown past the size at which the firm is willing to find out. The correct response is to reduce, not to argue about the probability.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Greek limits against the scenario limit</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--moss)"></i>Inside</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Breached</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Utilisation</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Scale the book up and watch which bar turns first. Greek utilisation grows linearly with position size and scenario utilisation grows faster, because the scenario loss contains the convexity that the greeks are missing. That difference in slope is the entire argument for having both kinds of limit.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A book is inside every greek limit but breaches its worst-case scenario limit. What is the most likely explanation?</p>
+    <div class="opts">
+      <button>A system error — the two should agree</button>
+      <button data-ok="1">The book is convex. Greeks measure the neighbourhood of today's spot; the scenario limit is set by a corner where higher-order terms dominate, and chapter 03 showed those reach 58% of the move at 20%</button>
+      <button>The scenario limit is set too tightly</button>
+      <button>The book must have positions in another underlying</button>
+    </div>
+    <div class="ans"><b>The book is convex, and that is what the two limits are for.</b> They are not redundant controls that should agree — they are deliberately different instruments measuring different regions, and the whole reason for running both is that a book can pass one and fail the other. If they always agreed, one of them would be pointless.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Reading the report end to end</h2>
+    <p class="dek">The order in which you look at it is most of the skill.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Everything above assembles into one page of output that a desk looks at every morning. Reading it well is a routine, and the routine is worth stating explicitly because the natural reading order is close to the worst one.</p>
+    <p><b>Start with yesterday's P&amp;L against yesterday's prediction.</b> Attribution before position. If the book made money the greeks cannot explain, something is wrong with your marks or your understanding, and no amount of looking at today's risk will surface it. An unexplained residual is the single most informative number on the report.</p>
+    <p><b>Then the scenario matrix, corners first.</b> Not the greeks. The corners are where the limits bind and where chapter 03 says your intuition is least reliable. Look for asymmetry: a book that loses twice as much down as up is a different animal from one that is symmetric, whatever its delta says.</p>
+    <p><b>Then bucketed vega and bucketed gamma.</b> Look for large opposing buckets, which chapter 04 showed are invisible in the totals. The question is not "what is the net" but "what is the gross, and is it deliberate".</p>
+    <p><b>Then the greeks, as a hedging instruction.</b> This is what they are good at: telling you what to trade today. It is the last thing to look at, not the first.</p>
+    <p><b>Then concentration.</b> How much of the risk is in one name, one expiry, one strike. A book can be well-behaved on every aggregate measure and be a single position with a hedge around it.</p>
+    <p>The table below assembles the report for our four-position book, and the small print underneath it is the part worth internalising: every number in it is conditional on the marks, and the marks on the illiquid lines are somebody's model. A risk report is a measurement of a book made with instruments that the book itself can bend.</p>
+  </div>
+
+  <figure class="bleed">
+    <div>
+      <div class="figtop"><h3>Daily risk summary</h3></div>
+      <table class="wtab" id="reportTab"></table>
+    </div>
+    <figcaption>Every line here has appeared in this series with its own chapter. The report is not new information; it is the same information arranged so that a person with four minutes can find the thing that matters.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">What should you look at first on a daily risk report?</p>
+    <div class="opts">
+      <button>Net delta, to know your directional exposure</button>
+      <button data-ok="1">Yesterday's P&amp;L against what the greeks predicted. An unexplained residual means the marks or the model are wrong, and every other number on the page inherits that error</button>
+      <button>The scenario matrix</button>
+      <button>Bucketed vega</button>
+    </div>
+    <div class="ans"><b>Attribution first.</b> Every forward-looking number on the report is computed from the same marks and the same model that produced yesterday's prediction. If that prediction failed, the rest of the page is being computed with a broken instrument — and finding that out before you act on the risk numbers is the whole reason attribution is run daily rather than monthly.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Six questions across the page, and the series.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">Which of these adds cleanly across a book on one underlying?</p>
+    <div class="opts">
+      <button>Delta, as a decimal between −1 and 1</button>
+      <button data-ok="1">Dollar delta. Converting the rate into money first is what makes positions of different sizes comparable</button>
+      <button>Implied volatility</button>
+      <button>Moneyness</button>
+    </div>
+    <div class="ans"><b>Dollar delta.</b> Rates do not add across different position sizes; money does. This is the same units discipline that page 01's chapter 08 built the blotter around, applied to a whole book instead of one line.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 03</span>
+    <p class="q">Roughly how wrong is a delta-plus-gamma estimate on a 20% move, for our book?</p>
+    <div class="opts">
+      <button>A few percent</button>
+      <button>About 15%</button>
+      <button data-ok="1">About 58% — the book makes $36,971 and the estimate predicts $15,436</button>
+      <button>It is exact; gamma captures the whole curvature</button>
+    </div>
+    <div class="ans"><b>About 58%.</b> Error grows roughly with the cube of the move, so it is negligible at 1% and dominant at 20%. The practical consequence is that greeks are a hedging tool and the matrix is a limits tool, and swapping them is how books get sized wrongly.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 04</span>
+    <p class="q">Our book's net vega is 417. What is the range of P&amp;L across volatility moves that all average about two points?</p>
+    <div class="opts">
+      <button>Essentially none — that is what net vega means</button>
+      <button data-ok="1">Roughly $743 to $1,238, because the book is long the front and back and short the belly. The net cannot distinguish a parallel move from a twist</button>
+      <button>About $800 to $850</button>
+      <button>Unbounded</button>
+    </div>
+    <div class="ans"><b>$743 to $1,238 — a spread of about 67%.</b> The book is a term-structure position wearing the disguise of a modest long-vol book, and the disguise is the net vega number itself.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 02</span>
+    <p class="q">Why does a scenario matrix use full repricing rather than greeks?</p>
+    <div class="opts">
+      <button>Because it is faster</button>
+      <button data-ok="1">Because the cells that matter are far from today's spot, which is exactly where a local expansion stops working. Full repricing does not degrade with distance</button>
+      <button>Because greeks are unavailable for exotic positions</button>
+      <button>Because regulators require it</button>
+    </div>
+    <div class="ans"><b>Because the interesting cells are far away.</b> The matrix is deliberately built where the approximation fails; using the approximation to build it would defeat the purpose. Full repricing costs more computation and the corners are the only place the extra cost buys anything.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 05</span>
+    <p class="q">What is a limit breach actually telling you?</p>
+    <div class="opts">
+      <button>That the firm predicts a loss of that size</button>
+      <button data-ok="1">That the position has grown past the size at which the firm is willing to find out. The correct response is to reduce rather than to argue about probability</button>
+      <button>That the risk model has been recalibrated</button>
+      <button>That the desk has lost money</button>
+    </div>
+    <div class="ans"><b>It is a statement about appetite, not a forecast.</b> Limits are pre-committed answers to a question that becomes impossible to think about clearly once the scenario is actually happening — which is the entire reason they are set in advance.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 06</span>
+    <p class="q">The book made $40,000 yesterday and the greeks predicted $5,000. What is the first thing to check?</p>
+    <div class="opts">
+      <button>Nothing — you made money, which is the objective</button>
+      <button data-ok="1">Your marks and your model. A large unexplained residual means the instrument producing every other number on the report is broken, and today's risk figures inherit that error</button>
+      <button>Whether the desk exceeded its limits</button>
+      <button>Whether volatility moved</button>
+    </div>
+    <div class="ans"><b>Marks and model.</b> An unexplained profit is exactly as alarming as an unexplained loss and considerably less likely to be investigated, which is precisely why it is worth naming as the first item in the routine. Attribution is a test of your instruments, and it happens to be denominated in money.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">The book on this page is four positions on one underlying with a flat volatility surface per line, no dividends, deterministic rates and a single pricing model. A real book has thousands of lines across hundreds of underlyings, a surface per name that must itself be marked, cross-gamma between correlated underlyings that no single-name figure captures, and positions whose marks are model outputs rather than observed prices. None of that changes the arguments here — dollar units still add, local expansions still fail at the same rate, and net vega still hides the same term-structure risk — but all of it makes the marks less reliable than the arithmetic performed on them. The largest risk on most real reports is not in any of the numbers; it is in the lines whose prices nobody can check.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ══════════ the book every figure prices ══════════ */
+const R=0.045, MULT=100, SPOT=102;
+const LEGS=[
+  {n:"Mar 100 call", k:"q1", K:100, T:30/365,  v:0.30, cp:true,  q:-40},
+  {n:"Mar 110 call", k:"q2", K:110, T:30/365,  v:0.33, cp:true,  q: 60},
+  {n:"Jun 95 put",   k:"q3", K:95,  T:120/365, v:0.31, cp:false, q:-25},
+  {n:"Sep 120 call", k:"q4", K:120, T:210/365, v:0.29, cp:true,  q: 30}
+];
+const QTY={q1:-40,q2:60,q3:-25,q4:30};
+const bucketOf=T=>T<60/365?0:T<180/365?1:2;
+const BUCKETS=["front 0–2m","belly 2–6m","back 6m+"];
+
+function value(dS,dV,shiftFn){
+  let tot=0;
+  for(const L of LEGS){
+    const dv = shiftFn ? shiftFn(L.T) : dV;
+    const o=bs(SPOT*(1+dS),L.K,Math.max(L.T,1/365),Math.max(0.01,L.v+dv),R,0,L.cp);
+    tot+=QTY[L.k]*MULT*o.price;
+  }
+  return tot;
+}
+function bookGreeks(){
+  let val=0,d=0,g=0,ve=0,th=0;
+  const bv=[0,0,0];
+  for(const L of LEGS){
+    const o=bs(SPOT,L.K,L.T,L.v,R,0,L.cp), q=QTY[L.k];
+    val+=q*MULT*o.price; d+=q*MULT*o.delta; g+=q*MULT*o.gamma;
+    ve+=q*MULT*o.vega*0.01; th+=q*MULT*o.theta/365;
+    bv[bucketOf(L.T)]+=q*MULT*o.vega*0.01;
+  }
+  return {val,d,g,ve,th,bv,
+    dollarDelta:d*SPOT, gammaCash:g*SPOT*SPOT*0.01};
+}
+const taylor=(G,dS,dV)=>{const dSp=SPOT*dS;return G.d*dSp+0.5*G.g*dSp*dSp+G.ve*(dV*100);};
+const money=v=>(v<0?"−$":"$")+Math.abs(Math.round(v)).toLocaleString("en-US");
+function bars4(o,xs,ys,cols,wfrac){
+  const g=o.g,w=(o.pw/Math.max(1,xs.length))*(wfrac||0.6);
+  g.save();
+  for(let i=0;i<xs.length;i++){
+    g.fillStyle=typeof cols==="function"?cols(ys[i],i):cols;
+    const x=o.X(xs[i]),y=o.Y(ys[i]),y0=o.Y(0);
+    g.fillRect(x-w/2,Math.min(y,y0),Math.max(w,1),Math.abs(y0-y));
+  }
+  g.restore();
+}
+function txt(o,x,y,s,col,size,base){
+  const g=o.g;g.save();g.fillStyle=col||C("--ink");g.textAlign="center";
+  g.textBaseline=base||"bottom";g.font=(size||10)+"px 'IBM Plex Mono', monospace";
+  g.fillText(s,o.X(x),o.Y(y)+(base==="top"?5:-5));g.restore();
+}
+
+/* ══════════ HERO — a grid of cells lighting up ══════════ */
+(function(){
+  const cv=document.getElementById("heroCv");let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  const NC=13,NR=7;
+  function draw(ph){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    const padX=w*0.06,padY=h*0.20;
+    const cw=(w-2*padX)/NC, ch=(h-2*padY)/NR;
+    for(let i=0;i<NC;i++)for(let j=0;j<NR;j++){
+      const ds=(i-(NC-1)/2)/((NC-1)/2)*0.22;
+      const dv=(j-(NR-1)/2)/((NR-1)/2)*0.10;
+      const p=value(ds,dv)-value(0,0);
+      const mag=Math.min(1,Math.abs(p)/26000);
+      g.fillStyle=p>=0?C("--moss"):C("--verm");
+      g.globalAlpha=0.10+0.55*mag*(0.6+0.4*Math.sin(ph*1.2+i*0.4+j*0.3));
+      g.fillRect(padX+i*cw+1.5,padY+j*ch+1.5,cw-3,ch-3);
+    }
+    g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;draw((ts-t0)/1400);raf=requestAnimationFrame(frame);}
+  size();if(RM)draw(1);else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)draw(1);else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════ 01 — what adds ══════════ */
+const s1={q1:-40,q2:60,q3:-25,q4:30,measure:0};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"m1",k:"measure",lbl:"",name:"Measure",min:0,max:2,step:1,fmt:v=>["Dollar delta","Gamma cash","Vega"][v]},
+    {id:"a1",k:"q1",lbl:"1",name:"Mar 100 call",min:-100,max:100,step:5,fmt:v=>v.toFixed(0)},
+    {id:"b1",k:"q2",lbl:"2",name:"Mar 110 call",min:-100,max:100,step:5,fmt:v=>v.toFixed(0)},
+    {id:"c1c",k:"q3",lbl:"3",name:"Jun 95 put",min:-100,max:100,step:5,fmt:v=>v.toFixed(0)},
+    {id:"d1",k:"q4",lbl:"4",name:"Sep 120 call",min:-100,max:100,step:5,fmt:v=>v.toFixed(0)}
+  ],s1,()=>{sync();draw();},"c1");
+  function sync(){QTY.q1=s1.q1;QTY.q2=s1.q2;QTY.q3=s1.q3;QTY.q4=s1.q4;}
+  window.draw1=()=>{sync();draw();};
+  window.syncBook=sync;
+  function legMeasure(L){
+    const o=bs(SPOT,L.K,L.T,L.v,R,0,L.cp), q=QTY[L.k];
+    if(s1.measure<0.5)return q*MULT*o.delta*SPOT;
+    if(s1.measure<1.5)return q*MULT*o.gamma*SPOT*SPOT*0.01;
+    return q*MULT*o.vega*0.01;
+  }
+  function draw(){
+    const vals=LEGS.map(legMeasure);
+    const net=vals.reduce((a,b)=>a+b,0);
+    const xs=[0,1,2,3,4.4], ys=vals.concat([net]);
+    let lo=Math.min(0,Math.min.apply(null,ys)), hi=Math.max(0,Math.max.apply(null,ys));
+    const pad=(hi-lo)*0.22||1;
+    const o=Fig(document.getElementById("cv1"),{h:290,x0:-0.7,x1:5.1,y0:lo-pad,y1:hi+pad,pad:{l:64,b:34}});
+    axes(o,()=>"",v=>money(v),1,4);
+    bars4(o,xs,ys,(v,i)=>i===4?C("--ochre"):(v>=0?C("--blue"):C("--verm")),0.52);
+    const g=o.g;g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+    g.font="9px 'IBM Plex Mono', monospace";
+    ["Mar 100c","Mar 110c","Jun 95p","Sep 120c","NET"].forEach((l,i)=>
+      g.fillText(l,o.X(xs[i]),o.P.t+o.ph+8));
+    g.restore();
+    ys.forEach((v,i)=>txt(o,xs[i],v,money(v),v>=0?C("--ink"):C("--verm"),9.5,v>=0?"bottom":"top"));
+
+    const G=bookGreeks();
+    document.getElementById("bookTab").innerHTML=
+      '<tr><th>Position</th><th>Qty</th><th>Price</th><th>$ delta</th><th>Γ cash /1%</th><th>Vega /pt</th><th>Bucket</th></tr>'+
+      LEGS.map(L=>{const o2=bs(SPOT,L.K,L.T,L.v,R,0,L.cp),q=QTY[L.k];
+        return '<tr><td>'+L.n+'</td><td>'+q+'</td><td>'+o2.price.toFixed(3)+'</td><td>'+
+          money(q*MULT*o2.delta*SPOT)+'</td><td>'+money(q*MULT*o2.gamma*SPOT*SPOT*0.01)+'</td><td>'+
+          money(q*MULT*o2.vega*0.01)+'</td><td>'+BUCKETS[bucketOf(L.T)]+'</td></tr>';}).join("")+
+      '<tr class="tot"><td><b>Book</b></td><td></td><td>'+money(G.val)+'</td><td>'+money(G.dollarDelta)+
+      '</td><td>'+money(G.gammaCash)+'</td><td>'+money(G.ve)+'</td><td>net</td></tr>';
+
+    const gross=vals.reduce((a,b)=>a+Math.abs(b),0);
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Measure",["Dollar delta","Gamma cash /1%","Vega /point"][Math.round(s1.measure)]],
+      ["Gross",money(gross)],
+      ["Net",money(net)],
+      ["Net / gross",gross>1e-9?pct(Math.abs(net)/gross):"—"],
+      ["—","—"],
+      ["Book value",money(G.val)],
+      ["Share delta",G.d.toFixed(0)],
+      ["Dollar delta",money(G.dollarDelta)],
+      ["Gamma cash /1%",money(G.gammaCash)],
+      ["Vega /point",money(G.ve)],
+      ["Theta /day",money(G.th)]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — the scenario matrix ══════════ */
+const s2={srange:0.20,vrange:0.10};
+let MODE=0;   /* 0 full, 1 taylor, 2 error */
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"a2",k:"srange",lbl:"S",name:"Spot range",min:.05,max:.30,step:.01,fmt:v=>"±"+(v*100).toFixed(0)+"%"},
+    {id:"b2",k:"vrange",lbl:"σ",name:"Volatility range",min:.02,max:.20,step:.01,fmt:v=>"±"+(v*100).toFixed(0)+" pts"}
+  ],s2,()=>draw(),"c2");
+  const setMode=m=>{MODE=m;
+    [["mFull",0],["mTay",1],["mErr",2]].forEach(([id,k])=>{
+      const b=document.getElementById(id);
+      if(b)b.setAttribute("aria-pressed",k===m?"true":"false");});
+    draw();};
+  ["mFull","mTay","mErr"].forEach((id,i)=>{
+    const b=document.getElementById(id); if(b)b.addEventListener("click",()=>setMode(i));});
+  window.draw2=draw;
+  function draw(){
+    if(window.syncBook)window.syncBook();
+    const G=bookGreeks();
+    const NC=7,NR=5;
+    const cv=document.getElementById("cv2");
+    const H=cvh(360), dpr=window.devicePixelRatio||1, W=cv.clientWidth||600;
+    cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
+    const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+    const L=NARROW()?46:66, Tp=26, B=24, Rp=6;
+    const gw=W-L-Rp, gh=H-Tp-B;
+    const cw=gw/NC, ch=gh/NR;
+    let peak=1;
+    const cells=[];
+    for(let j=0;j<NR;j++){
+      const dv=(j-(NR-1)/2)/((NR-1)/2)*s2.vrange;
+      const row=[];
+      for(let i=0;i<NC;i++){
+        const ds=(i-(NC-1)/2)/((NC-1)/2)*s2.srange;
+        const full=value(ds,dv)-G.val, tay=taylor(G,ds,dv);
+        const v=MODE===0?full:MODE===1?tay:full-tay;
+        peak=Math.max(peak,Math.abs(v));
+        row.push({ds,dv,v,full,tay});
+      }
+      cells.push(row);
+    }
+    g.font=(NARROW()?8:9.5)+"px 'IBM Plex Mono', monospace";
+    for(let j=0;j<NR;j++)for(let i=0;i<NC;i++){
+      const c=cells[j][i];
+      const mag=Math.min(1,Math.abs(c.v)/peak);
+      g.fillStyle=c.v>=0?C("--moss"):C("--verm");
+      g.globalAlpha=0.08+0.62*mag;
+      g.fillRect(L+i*cw+1,Tp+j*ch+1,cw-2,ch-2);
+      g.globalAlpha=1;
+      g.fillStyle=mag>0.55?"#fff":C("--ink");
+      g.textAlign="center";g.textBaseline="middle";
+      g.fillText(money(c.v),L+i*cw+cw/2,Tp+j*ch+ch/2);
+    }
+    g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+    g.font=(NARROW()?8:9)+"px 'IBM Plex Mono', monospace";
+    for(let i=0;i<NC;i++){
+      const ds=(i-(NC-1)/2)/((NC-1)/2)*s2.srange;
+      g.fillText((ds>=0?"+":"")+(ds*100).toFixed(0)+"%",L+i*cw+cw/2,Tp+gh+6);
+    }
+    g.textAlign="right";g.textBaseline="middle";
+    for(let j=0;j<NR;j++){
+      const dv=(j-(NR-1)/2)/((NR-1)/2)*s2.vrange;
+      g.fillText((dv>=0?"+":"")+(dv*100).toFixed(0)+" vol",L-6,Tp+j*ch+ch/2);
+    }
+    g.textAlign="left";g.textBaseline="bottom";g.fillStyle=C("--ink");
+    g.font="600 10px 'IBM Plex Mono', monospace";
+    g.fillText(["FULL REPRICE","GREEK ESTIMATE","ERROR (full − greek)"][MODE],L,Tp-8);
+
+    let worst=0,worstAt="",best=0;
+    cells.forEach(row=>row.forEach(c=>{
+      if(c.full<worst){worst=c.full;worstAt=(c.ds*100).toFixed(0)+"% / "+(c.dv*100).toFixed(0)+"vol";}
+      if(Math.abs(c.full-c.tay)>Math.abs(best))best=c.full-c.tay;}));
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["View",["Full reprice","Greek estimate","Error"][MODE]],
+      ["Cells",NC+" × "+NR],
+      ["Book value",money(G.val)],
+      ["Worst cell",money(worst)],
+      ["  at",worstAt],
+      ["Largest greek error",money(best)],
+      ["Centre cell","$0 by construction"]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — where the greeks stop ══════════ */
+const s3={maxMove:0.25};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"a3",k:"maxMove",lbl:"S",name:"Largest move shown",min:.05,max:.4,step:.01,fmt:v=>"±"+(v*100).toFixed(0)+"%"}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  function draw(){
+    if(window.syncBook)window.syncBook();
+    const G=bookGreeks();
+    const xs=[],full=[],dg=[],dOnly=[],err=[];
+    for(let i=0;i<=120;i++){
+      const ds=-s3.maxMove+i*(2*s3.maxMove/120);
+      const dSp=SPOT*ds;
+      const f=value(ds,0)-G.val;
+      const t=G.d*dSp+0.5*G.g*dSp*dSp;
+      xs.push(ds*100);full.push(f);dg.push(t);dOnly.push(G.d*dSp);
+      err.push(Math.abs(f)>1?100*Math.abs(f-t)/Math.abs(f):0);
+    }
+    let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<xs.length;i++){lo=Math.min(lo,full[i],dg[i],dOnly[i]);hi=Math.max(hi,full[i],dg[i],dOnly[i]);}
+    const o=Fig(document.getElementById("cv3"),{h:300,x0:-s3.maxMove*100,x1:s3.maxMove*100,y0:lo*1.1,y1:hi*1.1,pad:{l:66}});
+    axes(o,v=>v.toFixed(0)+"%",v=>money(v),5,4);
+    clip(o,()=>{
+      line(o,[-100,100],[0,0],C("--grey"),1,[3,3]);
+      line(o,xs,dOnly,C("--grey"),1.6,[4,3]);
+      line(o,xs,dg,C("--ochre"),2.2,[6,4]);
+      line(o,xs,full,C("--blue"),2.8);
+    });
+
+    const o2=Fig(document.getElementById("cv3b"),{h:195,x0:-s3.maxMove*100,x1:s3.maxMove*100,y0:0,y1:Math.max(20,Math.max.apply(null,err)*1.1),pad:{l:66}});
+    axes(o2,v=>v.toFixed(0)+"%",v=>v.toFixed(0)+"%",5,4);
+    clip(o2,()=>line(o2,xs,err,C("--verm"),2.6));
+
+    const rows=[0.01,0.02,0.05,0.10,0.20].map(m=>{
+      const dSp=SPOT*m, f=value(m,0)-G.val, t=G.d*dSp+0.5*G.g*dSp*dSp;
+      return [(m*100).toFixed(0)+"% move",money(f)+" vs "+money(t)];
+    });
+    document.getElementById("kv3").innerHTML=kvHTML(
+      [["Full vs delta+gamma",""]].concat(rows).concat([
+        ["—","—"],
+        ["Error at 1%",pct(Math.abs((value(0.01,0)-G.val)-(G.d*SPOT*0.01+0.5*G.g*(SPOT*0.01)**2))/Math.abs(value(0.01,0)-G.val))],
+        ["Error at 20%",pct(Math.abs((value(0.20,0)-G.val)-(G.d*SPOT*0.20+0.5*G.g*(SPOT*0.20)**2))/Math.abs(value(0.20,0)-G.val))]
+      ]));
+  }
+})();
+
+/* ══════════ 04 — bucketed vega ══════════ */
+const s4={front:0.02,back:0.02};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"a4",k:"front",lbl:"F",name:"Front vol shift",min:-.12,max:.12,step:.005,fmt:v=>(v>=0?"+":"")+(v*100).toFixed(1)+" pts"},
+    {id:"b4",k:"back",lbl:"B",name:"Back vol shift",min:-.12,max:.12,step:.005,fmt:v=>(v>=0?"+":"")+(v*100).toFixed(1)+" pts"}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  const shift=T=>T<60/365?s4.front:s4.back;
+  function draw(){
+    if(window.syncBook)window.syncBook();
+    const G=bookGreeks();
+    const xs=[0,1,2,3.4], ys=G.bv.concat([G.ve]);
+    let lo=Math.min(0,Math.min.apply(null,ys)), hi=Math.max(0,Math.max.apply(null,ys));
+    const pad=(hi-lo)*0.25||1;
+    const o=Fig(document.getElementById("cv4"),{h:250,x0:-0.7,x1:4.1,y0:lo-pad,y1:hi+pad,pad:{l:62,b:32}});
+    axes(o,()=>"",v=>money(v),1,4);
+    bars4(o,xs,ys,(v,i)=>i===3?C("--ochre"):(v>=0?C("--blue"):C("--verm")),0.5);
+    const g=o.g;g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+    g.font="9px 'IBM Plex Mono', monospace";
+    BUCKETS.concat(["NET"]).forEach((l,i)=>g.fillText(l,o.X(xs[i]),o.P.t+o.ph+8));
+    g.restore();
+    ys.forEach((v,i)=>txt(o,xs[i],v,money(v),v>=0?C("--ink"):C("--verm"),9.5,v>=0?"bottom":"top"));
+
+    // four named scenarios, all "about two points"
+    const SC=[
+      {n:"parallel +2",f:0.02,b:0.02},
+      {n:"front +10 / back −1.5",f:0.10,b:-0.015},
+      {n:"front −6 / back +5",f:-0.06,b:0.05},
+      {n:"front +12 / back −3",f:0.12,b:-0.03},
+      {n:"yours",f:s4.front,b:s4.back}
+    ];
+    const sx=[],sy=[],pred=[];
+    SC.forEach((s,i)=>{
+      sx.push(i);
+      sy.push(value(0,0,T=>T<60/365?s.f:s.b)-G.val);
+      pred.push(G.ve*2);
+    });
+    let lo2=Math.min(0,Math.min.apply(null,sy)), hi2=Math.max(0,Math.max.apply(null,sy),G.ve*2);
+    const pad2=(hi2-lo2)*0.28||1;
+    const o2=Fig(document.getElementById("cv4b"),{h:230,x0:-0.7,x1:SC.length-0.3,y0:lo2-pad2,y1:hi2+pad2,pad:{l:62,b:44}});
+    axes(o2,()=>"",v=>money(v),1,4);
+    bars4(o2,sx,sy,(v,i)=>i===SC.length-1?C("--ochre"):C("--blue"),0.5);
+    clip(o2,()=>line(o2,[-0.7,SC.length-0.3],[G.ve*2,G.ve*2],C("--verm"),2,[5,4]));
+    const g2=o2.g;g2.save();g2.fillStyle=C("--grey");g2.textAlign="center";g2.textBaseline="top";
+    g2.font=(NARROW()?7:8.5)+"px 'IBM Plex Mono', monospace";
+    SC.forEach((s,i)=>{
+      const words=s.n.split(" / ");
+      words.forEach((wd,k)=>g2.fillText(wd,o2.X(i),o2.P.t+o2.ph+8+k*10));
+    });
+    g2.restore();
+    sy.forEach((v,i)=>txt(o2,sx[i],v,money(v),C("--ink"),9,v>=0?"bottom":"top"));
+
+    const mine=value(0,0,shift)-G.val;
+    document.getElementById("kv4").innerHTML=kvHTML([
+      [BUCKETS[0],money(G.bv[0])],
+      [BUCKETS[1],money(G.bv[1])],
+      [BUCKETS[2],money(G.bv[2])],
+      ["Net vega /pt",money(G.ve)],
+      ["Gross vega",money(G.bv.reduce((a,b)=>a+Math.abs(b),0))],
+      ["—","—"],
+      ["Net-vega estimate @2pts",money(G.ve*2)],
+      ["Your twist actually",money(mine)],
+      ["Difference",money(mine-G.ve*2)]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — limits ══════════ */
+const s5={size:1};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"a5",k:"size",lbl:"×",name:"Scale the whole book",min:.25,max:4,step:.05,fmt:v=>v.toFixed(2)+"×"}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  const LIM={dd:150000, gc:6000, vg:1500, scen:-60000};
+  function draw(){
+    const base={q1:s1.q1,q2:s1.q2,q3:s1.q3,q4:s1.q4};
+    Object.keys(base).forEach(k=>QTY[k]=base[k]*s5.size);
+    const G=bookGreeks();
+    let worst=0;
+    for(let i=0;i<7;i++)for(let j=0;j<5;j++){
+      const ds=(i-3)/3*0.20, dv=(j-2)/2*0.10;
+      worst=Math.min(worst,value(ds,dv)-G.val);
+    }
+    const use=[
+      {n:"Dollar delta",u:Math.abs(G.dollarDelta)/LIM.dd},
+      {n:"Gamma cash",u:Math.abs(G.gammaCash)/LIM.gc},
+      {n:"Vega (gross)",u:G.bv.reduce((a,b)=>a+Math.abs(b),0)/LIM.vg},
+      {n:"Worst scenario",u:Math.abs(worst)/Math.abs(LIM.scen)}
+    ];
+    const xs=use.map((_,i)=>i), ys=use.map(u=>u.u*100);
+    const o=Fig(document.getElementById("cv5"),{h:300,x0:-0.7,x1:use.length-0.3,y0:0,y1:Math.max(140,Math.max.apply(null,ys)*1.18),pad:{l:58,b:34}});
+    axes(o,()=>"",v=>v.toFixed(0)+"%",1,4);
+    bars4(o,xs,ys,v=>v>100?C("--verm"):C("--moss"),0.5);
+    clip(o,()=>line(o,[-0.7,use.length-0.3],[100,100],C("--ink"),2,[5,4]));
+    const g=o.g;g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+    g.font=(NARROW()?7.5:9)+"px 'IBM Plex Mono', monospace";
+    use.forEach((u,i)=>g.fillText(u.n,o.X(i),o.P.t+o.ph+8));
+    g.restore();
+    ys.forEach((v,i)=>txt(o,xs[i],v,v.toFixed(0)+"%",v>100?C("--verm"):C("--ink"),9.5));
+
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Book scale",s5.size.toFixed(2)+"×"],
+      ["Dollar delta",money(G.dollarDelta)+" / "+money(LIM.dd)],
+      ["Gamma cash",money(G.gammaCash)+" / "+money(LIM.gc)],
+      ["Gross vega",money(G.bv.reduce((a,b)=>a+Math.abs(b),0))+" / "+money(LIM.vg)],
+      ["Worst scenario",money(worst)+" / "+money(LIM.scen)],
+      ["Breaches",String(use.filter(u=>u.u>1).length)],
+      ["First to breach",(()=>{let best=null,bu=0;use.forEach(u=>{if(u.u>bu){bu=u.u;best=u.n;}});return best;})()]
+    ]);
+    Object.keys(base).forEach(k=>QTY[k]=base[k]);
+  }
+})();
+
+/* ══════════ 06 — the report ══════════ */
+(function(){
+  window.draw6=draw;
+  function draw(){
+    if(window.syncBook)window.syncBook();
+    const G=bookGreeks();
+    let worst=0,worstAt="";
+    for(let i=0;i<7;i++)for(let j=0;j<5;j++){
+      const ds=(i-3)/3*0.20, dv=(j-2)/2*0.10;
+      const p=value(ds,dv)-G.val;
+      if(p<worst){worst=p;worstAt=(ds*100).toFixed(0)+"% spot / "+(dv*100).toFixed(0)+" vol";}
+    }
+    const twist=value(0,0,T=>T<60/365?0.05:-0.03)-G.val;
+    const rows=[
+      ["P&amp;L attribution","yesterday explained by greeks","—","check residual first"],
+      ["Book value","mark to model",money(G.val),""],
+      ["Dollar delta","adds across the book",money(G.dollarDelta),"hedge instruction"],
+      ["Gamma cash /1%","adds; net hides gross",money(G.gammaCash),"gross "+money(Math.abs(-40)*0+0)],
+      ["Vega — front 0–2m","bucketed, not netted",money(G.bv[0]),""],
+      ["Vega — belly 2–6m","",money(G.bv[1]),""],
+      ["Vega — back 6m+","",money(G.bv[2]),""],
+      ["Vega — net","an accounting total",money(G.ve),"not a risk measure"],
+      ["Theta /day","carry",money(G.th),""],
+      ["Worst scenario cell","full reprice",money(worst),worstAt],
+      ["Term-structure twist","front +5 / back −3",money(twist),"invisible to net vega"],
+      ["Concentration","largest single leg",LEGS.reduce((a,L)=>{
+        const o=bs(SPOT,L.K,L.T,L.v,R,0,L.cp);
+        const v=Math.abs(QTY[L.k]*MULT*o.vega*0.01);
+        return v>a.v?{v,n:L.n}:a;},{v:0,n:"—"}).n,"by vega"]
+    ];
+    document.getElementById("reportTab").innerHTML=
+      '<tr><th>Line</th><th>What it is</th><th>Value</th><th>Note</th></tr>'+
+      rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td></tr>').join("");
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
