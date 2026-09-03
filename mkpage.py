@@ -26,6 +26,6 @@ head=f"""<!DOCTYPE html>
 </head>
 <body>
 """
-page=head+open(body_f).read()+'\n<script src="assets/lab.js"></script>\n<script>\n'+open(js_f).read()+'\n</script>\n</body>\n</html>\n'
-open(out_f,'w').write(page)
+page=head+open(body_f,encoding="utf-8").read()+'\n<script src="assets/lab.js"></script>\n<script>\n'+open(js_f,encoding="utf-8").read()+'\n</script>\n</body>\n</html>\n'
+open(out_f,"w",encoding="utf-8",newline="").write(page)
 print(out_f, len(page), "bytes")

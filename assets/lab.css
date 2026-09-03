@@ -125,6 +125,11 @@ canvas{display:block;width:100%}
 .panel{background:var(--card);border:1px solid var(--hair);border-radius:2px;padding:22px 24px}
 .split{display:grid;grid-template-columns:1fr 300px;gap:26px;align-items:start}
 .split.wide{grid-template-columns:1fr 340px}
+/* Grid items default to min-width:auto, so a wide child — a .tblwrap holding a
+   440px table, a long .mline — widens the column past the viewport and the page
+   scrolls sideways on a phone. Letting the tracks shrink hands the overflow back
+   to the inner scroller, which is where it was meant to live. */
+.split>*{min-width:0}
 @media(max-width:900px){.split,.split.wide{grid-template-columns:1fr}}
 
 .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
