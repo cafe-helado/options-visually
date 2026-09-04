@@ -83,7 +83,7 @@
     <p><b>Continuous trading.</b> Page 06 showed that adding transaction costs turns "hedge as often as possible" from a theorem into a corner solution that is wrong — the objective becomes a U-curve with a minimum around <b>128 rehedges</b> on a ninety-day option.</p>
     <p><b>Continuous paths.</b> This is the assumption chapter 02 breaks, and it is the most damaging on the list because it invalidates the replication argument itself rather than merely adding a cost to it.</p>
     <p><b>Constant volatility.</b> Page 02 measured a delta difference of <b>0.097</b> — about ten shares a contract — arising purely from which sticky convention you assume, with identical prices on the screen.</p>
-    <p>What the table also shows is that the assumptions are not independent. Jumps produce fat tails; fat tails produce a smile; a smile makes "the volatility" ambiguous; the ambiguity makes delta model-dependent. Most of this page is one failure propagating.</p>
+    <p>What the table also shows is that the assumptions are not independent. Jumps produce <span class="term" data-t="Fat tails" data-def="More of the distribution's variance coming from rare large moves than a lognormal allows. It is a statement about shape, and it is compatible with any variance you like.">fat tails</span>; fat tails produce a smile; a smile makes "the volatility" ambiguous; the ambiguity makes delta model-dependent. Most of this page is one failure propagating.</p>
   </div>
 
   <figure class="bleed">
@@ -206,7 +206,7 @@
 
   <div class="prose">
     <p class="lead">The lognormal is not wrong about how much stocks move. It is wrong about how that movement is distributed between ordinary days and extraordinary ones — and that distinction is invisible in a variance number.</p>
-    <p>Here is the cleanest demonstration. Build a world where <b>85% of the time</b> volatility is <b>18</b> and <b>15% of the time</b> it is <b>42</b>. The total variance of that mixture is exactly the variance of a single volatility of <b>23.238%</b>. Same variance. Different shape.</p>
+    <p>Here is the cleanest demonstration. Build a world where <b>85% of the time</b> volatility is <b>18</b> and <b>15% of the time</b> it is <b>42</b>. The total variance of that <span class="term" data-t="Mixture" data-def="A distribution built by drawing from one of several regimes. The simplest way to produce fat tails while holding total variance exactly fixed.">mixture</span> is exactly the variance of a single volatility of <b>23.238%</b>. Same variance. Different shape.</p>
     <p>Now price options in both worlds and invert to implied volatility. The mixture produces <b>25.27%</b> at the 70 strike, <b>22.00%</b> at 90, <b>21.60%</b> at the money, <b>22.11%</b> at 120 and <b>22.87%</b> at 130 — a smile, with its minimum near the money and both wings lifted.</p>
     <p>Read that again, because it is the point. Nobody changed the variance. Nobody expressed a view about the level of volatility. A perfectly ordinary fat-tailed distribution with the same second moment produces a smile on its own.</p>
     <p>Which reframes the whole of <a href="surface.html" style="color:var(--blue)">page 02</a>. The smile is not primarily the market saying "volatility is higher than you think out there". It is the market saying "the distribution has more weight in the tails than a lognormal does", and the only way to say that in Black–Scholes' vocabulary — which has one parameter — is to quote a different parameter at each strike.</p>
