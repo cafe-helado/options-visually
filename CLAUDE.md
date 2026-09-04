@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. All eleven pages live.
+no dependencies. All fifteen pages live.
 
 ## Before you change anything
 
@@ -115,9 +115,15 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all eleven pages are live. Work from here is depth rather than
-coverage. `ROADMAP.md` records what each page actually shipped, including the
-verified numbers.
+Nothing unbuilt — all fifteen pages are live. Pages 12-15 were added after mapping
+the series against Natenberg's *Option Volatility and Pricing* table of contents,
+which is a good source of gaps: it found the binomial model (his ch 5 and 19),
+forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
+catalogue (10-13), and models-versus-reality (23) all missing.
+
+Still uncovered from that mapping, if more is ever wanted: hedging with options from
+a corporate or portfolio seat (his ch 17), and expiration P&L taught from scratch
+(ch 4), which this series assumes.
 
 ## Two traps this repo has already fallen into twice
 

@@ -455,3 +455,67 @@ Chapters
   re-explain, and add primer sections only for genuinely new machinery
   (Breeden–Litzenberger in 02, quadratic variation in 03, adverse selection in 05,
   impact and timing risk in 06, static replication in 09).
+
+---
+
+## 12 · The Price That Ignores the Odds  ✅ live (binomial.html)
+
+Natenberg 5 and 19. Signature: one step, two outcomes, and a replicating portfolio
+whose cost is the price. Slide the real-world P(up) from 1% to 99% and the expected
+payoff moves 0.10 -> 9.90 while the replication cost sits at 5.000000.
+
+Verified: convergence is first order (ratios 1.998 / 1.999 / 2.001 / 2.002 / 2.005
+across N = 50..1600) and it is a SAWTOOTH — N=40 low by 0.0734, N=41 high by 0.0672,
+N=42 low by 0.0699, N=43 high by 0.0640. Averaging N with N+1 takes a 25-step error
+from +0.1103 to -0.0012, about 90x better. Tree E[S_T] on 200 steps is 105.12711
+against a forward of 105.12711. American put premium at S=80/K=100/r=10% is 4.0267 on
+16.2413. p leaves (0,1) when dt > (sigma/r)^2 — at 5% vol and 10% rates a one-year
+single step gives p = 1.5388 and the tree returns a number rather than an error.
+
+## 13 · The Forward Is the Real Underlying  ✅ live (forwards.html)
+
+Natenberg 1, 2, 3 and 22. Signature: cash-and-carry P&L is 3.1e-14 across terminal
+spots from 40 to 240, so the forward is built rather than forecast — it sits at
+103.0455 while expected spot ranges 80.25 to 125.86 as drift moves.
+
+The find: page 08's rule INVERTS on futures. Both American calls and puts exercise
+early — at F=130 the call premium is 1.2166, at F=70 the put premium is 1.4492, at
+the money both are 0.2205 exactly, against a stock call premium of 0.00e+0. The
+mechanism is one discount factor: a stock call is floored at S - Ke^-rT (above
+intrinsic), a futures call at e^-rT(F-K) (below it), so the European futures call
+trades under its own intrinsic — 39.0630 against 40 at F=140.
+
+Also: Black-76 equals the spot model to 1.2e-14; the futures delta is the spot delta
+times exactly e^-rT, so you hedge with ~1.8 fewer contracts per hundred.
+
+## 14 · Nobody Trades One Option  ✅ live (spreading.html)
+
+Natenberg 10-13, the decision page 04 never made. Signature: five bullish structures
+sized to identical 100-share deltas, and the lead changes hands FOUR times across five
+regions — long call at 80, risk reversal at 90, short put 95-105, 1x2 ratio 110-120,
+long call again at 130. The long call is simultaneously best if you are wrong, worst
+if slightly right, and best again if extremely right.
+
+Verified: a 100/110 call spread costs 3.6607 and the matching put spread pays 6.2290;
+they sum to the discounted width 9.889654 and their P&L differs by a constant 0.110346
+at every terminal price — exactly the interest on the width. Credit and debit spreads
+are one trade. The five structures run gamma-cash +669 to -4,160 and vega +46 to -287
+on the same delta. The 1x2 ratio peaks at 8.904 and crosses back through zero at
+123.904.
+
+Caught in review: the bull put spread had its legs inverted, and the lead changes four
+times rather than five.
+
+## 15 · Every Assumption, and What It Costs  ✅ live (real-world.html)
+
+Natenberg 23. Signature: page 01's 1/sqrt(N) hedging law, broken. Under diffusion
+sd*sqrt(N) is flat (8.4 -> 8.7) and 32x the hedging buys 5.50x, close to the sqrt(32)
+= 5.66 the theory predicts. Add one jump a year averaging -12% and the diagnostic
+climbs 9.9 -> 32.2 while the improvement falls to 1.73x. The error has a floor,
+because a jump does not get smaller when you trade faster.
+
+Verified: a mixture of 85% at 18 vol and 15% at 42 vol has the variance of a single
+23.238% vol and smiles anyway — 25.27% at K=70, 21.60% at the money, 22.87% at 130.
+Variance and shape are separate facts. Pricing a skewed chain at the ATM vol errs
+-73.9% at K=75 and +213.3% at K=125 while being only -2.0% at the money, which is
+why the practice survives: the model is right where it gets checked.
