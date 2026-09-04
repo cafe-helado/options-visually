@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Spreading — Options, visually</title>
+<meta name="description" content="Five bullish structures at identical delta, and the lead changes hands four times across the outcome range. Verticals, the credit-spread illusion, ratios that turn on you, and how to actually choose.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spreading — Options, visually">
+<meta property="og:description" content="Five bullish structures at identical delta, and the lead changes hands four times across the outcome range. Verticals, the credit-spread illusion, ratios that turn on you, and how to actually choose.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 14 · Spreading</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Why spread</span><i></i></a>
+  <a href="#c2"><span>The vertical</span><i></i></a>
+  <a href="#c3"><span>Five ways</span><i></i></a>
+  <a href="#c4"><span>What you signed</span><i></i></a>
+  <a href="#c5"><span>Ratios</span><i></i></a>
+  <a href="#c6"><span>Capped or not</span><i></i></a>
+  <a href="#c7"><span>Choosing</span><i></i></a>
+  <a href="#c8"><span>Drills</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 14</div>
+    <h1>Nobody trades <em>one</em> option</h1>
+    <p class="sub">Five structures, all bullish, all sized to exactly the same delta. Which one makes the most money changes hands four times as the stock moves — and there is no version of "the right one" that survives contact with the outcome.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede"><a href="structures.html" style="color:var(--blue)">Page 04</a> catalogued structures and showed what each one <em>is</em>. This page is about choosing between them — the question a trader actually faces, which is not "what does a call spread look like" but "I am bullish; now what do I put on".</p>
+  <ol>
+    <li><b>Chapter 01 answers the question the series has dodged.</b> Why bother with two legs? Because one leg carries views you did not mean to take, and the spread cancels them.</li>
+    <li><b>Chapter 03 is the page.</b> Five bullish structures at identical delta. The lead changes hands four times across the outcome range, and the differences run to tens of thousands of dollars on the same nominal exposure.</li>
+    <li><b>Chapter 02 kills a myth.</b> A "credit spread" and the corresponding "debit spread" are the same trade. The difference is 11 cents of financing, and it is not a strategy choice.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>Vertical</td><td>Two options, same type and expiry, different strikes. The basic directional spread.</td></tr>
+      <tr><td>Debit / credit</td><td>Whether the package costs money or pays it. A description of cash flow, not of risk.</td></tr>
+      <tr><td>Ratio spread</td><td>Unequal numbers of long and short options. Sold more than bought means unlimited risk on one side.</td></tr>
+      <tr><td>Backspread</td><td>The reverse: bought more than sold. Limited risk, and it wants a big move.</td></tr>
+      <tr><td>Butterfly</td><td>Long the wings, short twice the body. The capped version of a short straddle.</td></tr>
+      <tr><td>Risk reversal</td><td>Long an out-of-the-money call, short an out-of-the-money put. Directional, financed by selling the other tail.</td></tr>
+      <tr><td>Reward : risk</td><td>Maximum profit divided by maximum loss. A number that says nothing about probability, which is the trap.</td></tr>
+      <tr><td>Sized to delta</td><td>Scaling every structure so they start with identical directional exposure. The only honest way to compare them.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>An outright is three opinions in a trench coat</h2>
+    <p class="dek">Buy a call and you have bet on direction, on volatility and on time. You probably only meant one of them.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Suppose you think a 100 stock is going to 110 over the next three months. The obvious trade is to buy a call. The obvious trade also commits you to two other views you never expressed.</p>
+    <p>Buy the 105 call at <b>3.9341</b>. You are now long <b>0.194</b> of vega per point — so if implied volatility drops five points overnight with the stock unchanged, the option is worth <b>2.9419</b> and you have lost <b>25.2%</b> of your money having been exactly right about nothing happening yet.</p>
+    <p>Now sell the 115 call against it. The package costs <b>2.5151</b> and carries <b>0.0568</b> of vega — <b>71% less</b>. The same five-point volatility drop costs <b>13.9%</b> instead of 25.2%. You have kept most of the directional exposure and thrown away most of the exposure you did not want.</p>
+    <p>That is the entire argument for spreading, and it generalises. Every additional leg is an opportunity to cancel a sensitivity you are not being paid to hold. A calendar cancels direction and keeps term structure. A butterfly cancels direction and most of the vega and keeps the distribution's shape. A risk reversal cancels most of the volatility level and keeps skew.</p>
+    <p>Two things you give up, and they are real. The spread <b>caps the upside</b> — above 115 the short call gives back everything the long call earns. And it doubles the transaction costs, which <a href="microstructure.html#c1" style="color:var(--blue)">page 05</a> priced: two spreads crossed instead of one, on options whose spreads are wide in volatility terms.</p>
+    <p>So spreading is not free and it is not automatically better. It is a way of paying, in upside and in commission, to stop being exposed to things you have no view on. Whether that is worth it is the subject of the rest of the page.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The same directional view, with and without the second leg</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Outright call</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Call spread</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>What a volatility move does to each, spot unchanged</h3></div>
+        <canvas id="cv1b" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The view</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>The upper panel is what you gain and give up in the payoff. The lower one is what you gain and give up in exposure — and it is the panel people skip. Drag the volatility shift and watch the outright swing while the spread barely moves.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Drop implied volatility by five points with spot unchanged. <b>Predict</b> which loses more, and roughly by what ratio.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"dv":-0.05}' data-focus="cv1b">Volatility falls five</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"dv":0.05}' data-focus="cv1b">Volatility rises five</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"K2":130}' data-focus="cv1">Sell a further strike</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are bullish and buy a call. The stock does nothing for a week and you lose 12%. What happened?</p>
+    <div class="opts">
+      <button>Nothing — options lose value when the stock does not move, and that is theta</button>
+      <button data-ok="1">Some of it is theta, and probably most of it is vega. An outright call is long volatility as well as long direction, and you only expressed one of those views</button>
+      <button>The market maker mispriced it</button>
+      <button>The delta must have been wrong</button>
+    </div>
+    <div class="ans"><b>Theta and vega, and it is usually the vega that surprises people.</b> A five-point volatility drop costs 25.2% on this outright and a week of theta costs a fraction of that. The whole reason to spread is that you can keep the view you have and stop paying for the ones you do not.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The vertical, and the credit-spread illusion</h2>
+    <p class="dek">A bull call spread and a bull put spread on the same strikes are the same trade. The difference is eleven cents of interest.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The vertical is the basic directional spread: two options, same type, same expiry, different strikes. Buy the 100 call and sell the 110 call and you have paid <b>3.6607</b> for a position that can make at most <b>6.3393</b>, loses at most what you paid, and breaks even at <b>103.6607</b>.</p>
+    <p>Now do it the other way. Sell the 100 put and buy the 110 put — a "credit spread" — and you receive <b>6.2290</b>. Different options, different cash flow, and a whole vocabulary of trading advice built on the distinction.</p>
+    <p>It is the same trade. Line the two P&amp;L profiles up across every terminal price and they differ by a constant <b>0.110346</b> at every single point — at 80, at 95, at 110, at 120, identically. That constant is not a strategic difference. It is interest: the width of the spread is 10, the debit plus the credit is <b>9.889654</b>, and the gap is exactly <b>10 × (1 − e<sup>−rT</sup>)</b> — the financing on the width over ninety days, which the credit version collects because the cash arrives today.</p>
+    <p>So "I prefer credit spreads because I collect premium" is a statement about cash flow and margin treatment, not about risk. The two positions have the same payoff diagram, the same maximum profit, the same maximum loss and the same breakeven. Choosing between them is a financing and operational decision — which is a real decision, and a completely different one from the one people think they are making.</p>
+    <p>The other trap in this chapter is <b>reward-to-risk</b>. The 100/110 spread offers 1.73 to 1; the 100/105 offers 1.33 to 1. That ranking says nothing about which is better, because it says nothing about how likely each outcome is. A structure with a 20:1 reward-to-risk that needs a 30% move is not generous; it is a lottery ticket with the odds printed on the other side.</p>
+  </div>
+
+  <div class="mline">debit + credit = (K<sub>2</sub> − K<sub>1</sub>) · e<sup>−rT</sup></div>
+  <p class="mread">Reads as: <b>what you pay for the call spread plus what you receive for the put spread is the width of the spread, discounted.</b> That identity is why the two are the same position — it is put–call parity applied to both legs.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Call spread and put spread, drawn on top of each other</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Long call spread</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Short put spread</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="290"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Their difference, across every outcome</h3></div>
+        <canvas id="cv2b" height="180"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The vertical</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The lower panel is the claim: the difference between a "debit spread" and a "credit spread" is a horizontal line, not a shape. Widen the strikes, move the expiry, change the rate — the line moves up and down and stays flat, because it is interest on the width and nothing else.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the rate to zero. <b>Predict</b> what the difference between the two structures becomes.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"r":0}' data-focus="cv2b">No interest at all</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"r":0.12,"T":1}' data-focus="cv2b">High rates, one year</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A trader says they prefer selling credit spreads because "you collect premium and time decay works for you". What is wrong?</p>
+    <div class="opts">
+      <button>Nothing — selling premium is a positive expected value strategy</button>
+      <button data-ok="1">The equivalent debit spread has identical payoff, maximum profit, maximum loss and breakeven. Both are the same position, so both have the same theta. Collecting cash up front is a financing difference of about eleven cents</button>
+      <button>Time decay works against credit spreads, not for them</button>
+      <button>Credit spreads have unlimited risk</button>
+    </div>
+    <div class="ans"><b>They are describing the same position twice.</b> The bull put spread and the bull call spread on the same strikes are one trade — if one has favourable decay so does the other, because they are identical. What genuinely differs is margin treatment, assignment risk on the short leg (<a href="early-exercise.html" style="color:var(--blue)">page 08</a>) and the eleven cents of interest. Those are worth choosing on; the payoff diagram is not.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>Five ways to be bullish, and none of them wins</h2>
+    <p class="dek">Identical starting delta. Five structures lead in five different regions, and the lead changes hands four times.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Here is the comparison the textbooks describe and rarely draw. You are bullish on a 100 stock over ninety days. Five structures express that, and to compare them honestly each is sized so they all start with exactly <b>100 share-deltas</b> — identical directional exposure, so the only differences are structural.</p>
+    <p>The sizes are already revealing. A hundred deltas costs <b>$10,000</b> as stock, <b>$936</b> as long 105 calls, <b>$1,122</b> as a 105/115 call spread, and <b>−$954</b> as short 95 puts — you are paid to take the position. The 1×2 call ratio needs a size of <b>35.6</b> spreads to reach a hundred deltas, because each one starts with almost none.</p>
+    <p>Then the outcomes, and this is the point of the page.</p>
+    <p>If the stock falls to <b>80</b>, the long call is the best of the five, losing <b>$936</b> — its whole cost — while the short put loses <b>$4,011</b>. At <b>95 to 105</b>, where nothing much happens, the short put is best at <b>+$954</b> and the long call is the worst, losing its entire premium. At <b>110 to 120</b> the ratio spread dominates everything, making <b>$31,734</b> at 115. And at <b>130</b> the ratio has collapsed to a <b>$21,727 loss</b> while the plain long call — worst-in-class over most of the range — is the best of the five at <b>+$5,014</b>.</p>
+    <p>Five structures, one view, identical initial delta, and the lead changes hands four times across five distinct regions. The long call is simultaneously the best trade if you are wrong, the worst trade if you are slightly right, and the best trade again if you are extremely right.</p>
+    <p>Which means "what is the best bullish structure" is not a question with an answer. The question with an answer is <b>how right do you expect to be, and how wrong can you afford to be</b> — and each of these five encodes a different reply.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Five bullish structures at identical delta</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Stock</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Long call</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Call spread</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Short put</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Ratio</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="330"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Which structure pays most, by where the stock lands</h3></div>
+        <canvas id="cv3b" height="90"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The comparison</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The strip below the chart is the answer to "which is best" — and it has five bands. Drag the strikes and the bands move, but they never collapse into one. There is no structure that wins everywhere, which is the honest version of every "best options strategy" article ever written.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Move the short strike of the ratio spread further out. <b>Predict</b> whether the band where it wins gets wider or narrower, and what happens to the band where it loses catastrophically.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"Kr":125}' data-focus="cv3">Ratio strikes further out</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"Kr":110}' data-focus="cv3">Ratio strikes closer in</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"Kp":85}' data-focus="cv3">Sell a lower put</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">All five structures start with 100 deltas. What does that tell you about their risk?</p>
+    <div class="opts">
+      <button>They have the same risk, since delta is the measure of directional risk</button>
+      <button data-ok="1">Almost nothing. Delta matches them only for the first small move — their gamma runs from +669 to −4,160 and their vega from +46 to −287, so they diverge immediately and violently</button>
+      <button>They have the same risk at expiry but not before</button>
+      <button>The one with the lowest cost has the lowest risk</button>
+    </div>
+    <div class="ans"><b>Almost nothing.</b> Matching delta matches the first derivative at one point — which is exactly <a href="book.html#c3" style="color:var(--blue)">page 11's</a> lesson about how fast a local approximation stops describing a position. These five agree on the first penny of movement and disagree by tens of thousands of dollars on the outcome.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>What you actually signed up for</h2>
+    <p class="dek">Same delta, opposite everything else. The greek table is the contract you did not read.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 03 showed the outcomes. This is the mechanism, and it fits in one table. Every structure carries the same hundred deltas and completely different second-order exposure.</p>
+    <p>The <b>long 105 call</b> runs gamma-cash of <b>+669</b>, vega of <b>+46.20</b> and theta of <b>−8.30</b> a day. You are long movement, long volatility, and paying rent for both.</p>
+    <p>The <b>short 95 put</b> runs gamma-cash of <b>−830</b>, vega of <b>−57.33</b> and theta of <b>+7.57</b>. Same direction, opposite everything else: you are short movement, short volatility, and collecting rent.</p>
+    <p>The <b>105/115 call spread</b> is the moderate version — <b>+367</b> of gamma, <b>+25.33</b> of vega, <b>−5.04</b> of theta — roughly half the long call's second-order exposure for the same first-order exposure, which is chapter 01's argument in numbers.</p>
+    <p>The <b>1×2 call ratio</b> is in a different category: <b>−4,160</b> of gamma-cash and <b>−287</b> of vega on a position that is nominally just "bullish". That is six times the short put's gamma and five times its vega. The ratio is a short-volatility trade wearing a directional label, which is why chapter 03 showed it making $31,734 in one place and losing $21,727 in another.</p>
+    <p>So the greek table is where the disguise comes off. Two structures with the same delta and opposite gamma are not two versions of the same view — they are a directional view bundled with a volatility view, and the second one is frequently larger.</p>
+    <p>The practical habit that follows: before putting on any spread, look at its gamma, vega and theta per unit of delta. If those numbers are large relative to the delta you wanted, the trade is mostly not about direction, whatever you called it when you decided to do it.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>The same hundred deltas, five different contracts</h3></div>
+        <table class="idtab" id="greekTab"></table>
+        <div class="figtop" style="margin:24px 0 6px">
+          <h3>Second-order exposure per unit of delta</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>Gamma cash</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Vega</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="240"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The structures</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Read the bars as "how much of something else am I buying per unit of the thing I wanted". The ratio spread's bars leave the chart, which is the visual version of the sentence: it is not a directional trade.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Two structures both have 100 deltas. One has +669 of gamma cash and one has −4,160. What are you really choosing between?</p>
+    <div class="opts">
+      <button>Two ways of expressing the same directional view</button>
+      <button data-ok="1">A long-volatility trade and a short-volatility trade that happen to share a directional tilt. The volatility exposure is the larger part of both</button>
+      <button>A cheap version and an expensive version</button>
+      <button>A short-dated and a long-dated version</button>
+    </div>
+    <div class="ans"><b>You are choosing a volatility view.</b> The shared delta is the smallest thing these two have in common. This is the same trap <a href="structures.html#c1" style="color:var(--blue)">page 04</a> describes from the other end: a structure has a payoff description and an exposure description, and the exposure description is the one that determines what happens to you between now and expiry.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Ratios: the spread that turns on you</h2>
+    <p class="dek">Sell more than you buy and the payoff has a peak. Past that peak it goes down forever.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A ratio spread buys one option and sells more than one further out. Our 1×2 — long one 105 call, short two 115 calls — is a net <b>debit of 1.0961</b>, and its payoff is a tent: nothing much below 105, rising to a peak of <b>8.904</b> at 115, then falling away.</p>
+    <p>The number that matters is where it crosses back through zero on the way down: <b>123.904</b>. Above that the position loses money, and it keeps losing without limit, because you are net short one call.</p>
+    <p>That single fact makes the ratio a fundamentally different animal from everything else on this page. A vertical's worst case is its debit. A ratio's worst case is unbounded and is realised precisely when your directional view was <em>most</em> right. It is the only structure here that punishes you for being too correct.</p>
+    <p>Turn it around and you get a <b>backspread</b>: sell one near option, buy two further out. Now the payoff is a valley — you lose in the middle and win big at the edges, with limited risk. Backspreads are long volatility with a directional tilt; ratios are short volatility with a directional tilt.</p>
+    <p>The reason ratios get traded despite the tail is that the tent covers the region where the stock usually ends up, and the premium collected pays for the middle. That is a real edge and it is also the exact shape of a strategy that works repeatedly and then removes a year of profit in a week. <a href="catalyst.html#c5" style="color:var(--blue)">Page 03's</a> earnings-straddle chapter is the same distributional shape seen from the other side: high win rate, negative tail, and a mean that hides both.</p>
+    <p>The figure lets you drag the ratio and the strikes so you can watch the upper breakeven move. Two things to notice: widening the gap between strikes raises the peak and moves the breakeven further away, and raising the ratio from 1×2 to 1×3 does the opposite in a hurry.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Ratio and backspread, with their breakevens</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Ratio (net short)</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Backspread (net long)</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="310"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Where the upper breakeven sits, against the ratio</h3></div>
+        <canvas id="cv5b" height="185"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The ratio</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>The tent and the valley are mirror images and both are drawn from the same two strikes. Watch the upper breakeven in the lower panel as you raise the ratio — the move from 1×2 to 1×3 brings the point of no return in dramatically, which is why the extra premium is not free.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Take the ratio to 1×3. <b>Predict</b> what happens to the peak profit and to the upper breakeven before you look — they move in opposite directions.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"ratio":3}' data-focus="cv5">One by three</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"ratio":2,"K2":125}' data-focus="cv5">Wider strikes</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"ratio":2,"K2":115}' data-focus="cv5">Back to one by two</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your 1×2 call ratio is at its maximum profit. The stock keeps rallying. What happens?</p>
+    <div class="opts">
+      <button>You keep the maximum profit — it is capped</button>
+      <button data-ok="1">You give it all back and then lose without limit. Past 123.90 the position is a naked short call, and the loss grows one-for-one with the stock</button>
+      <button>The position becomes delta neutral</button>
+      <button>You lose only the premium collected</button>
+    </div>
+    <div class="ans"><b>It becomes a naked short call.</b> The peak is not a cap, it is a turning point — which is the single most important thing to know about ratios and the thing their payoff diagram makes look benign. Being spectacularly right about direction is the scenario that hurts, and no other structure on this page has that property.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>The same view, capped and uncapped</h2>
+    <p class="dek">A short straddle and a long butterfly both want the stock to sit still. One of them can end your year.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Suppose the view is not directional at all: you think the stock stays near 100 and implied volatility is too high. Two structures express it, and comparing them is the cleanest illustration of what capping risk actually costs.</p>
+    <p><b>Short the 100 straddle.</b> You receive <b>11.0586</b>. If the stock finishes at 100 you keep all of it. If it finishes at 85 or 115 you lose <b>3.941</b>. If it finishes at 130 you lose about nineteen, and there is no bound on that number.</p>
+    <p><b>Buy the 90/100/110 butterfly.</b> You pay <b>2.7243</b>. If the stock finishes at 100 you make <b>7.276</b>. If it finishes at 85 or 115 you lose <b>2.7243</b> — your entire cost — and that is the worst that can ever happen, at any price, forever.</p>
+    <p>So the butterfly gives up about a third of the best case and removes the entire tail. The trade-off is priced, as it should be, and the question of which to prefer is a question about how you size rather than about which is "better".</p>
+    <p>The subtle part is what the two positions are made of. Both are short volatility, but the straddle is short volatility <em>everywhere</em> while the butterfly is short volatility only near the body and long the wings. So a move to 130 that would be catastrophic for the straddle is merely the butterfly's ordinary maximum loss — and a large rise in implied volatility hurts the straddle much more, because the butterfly's long wings absorb most of it.</p>
+    <p>Which points at the practical rule. Structures that look similar in payoff can behave very differently in <em>vega</em>, and structures with the same vega can behave very differently in the tail. Reading either dimension alone gets you a surprise eventually.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Short straddle against long butterfly</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Short straddle</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Long butterfly</span>
+          </span>
+        </div>
+        <canvas id="cv6" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>What a volatility shock does to each</h3></div>
+        <canvas id="cv6b" height="195"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The structures</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>The two payoff curves cross twice and the region between them is what the cap costs. The lower panel is the part the payoff diagram hides: under a volatility shock the straddle's mark moves several times as far, because the butterfly's wings are long the same volatility its body is short.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Narrow the butterfly's wings toward the body. <b>Predict</b> what happens to its cost and to its maximum profit — and to how much it resembles the straddle.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c6" data-patch='{"wing":5}' data-focus="cv6">Narrow wings</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"wing":25}' data-focus="cv6">Wide wings</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"dv":0.08}' data-focus="cv6b">Volatility spikes eight points</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Implied volatility jumps eight points overnight with the stock unchanged. You are short a straddle and your colleague is long a butterfly on the same strikes. Who is hurt more?</p>
+    <div class="opts">
+      <button>The butterfly, because it is a long-premium position</button>
+      <button data-ok="1">The straddle, by a wide margin. It is short vega across the whole surface, while the butterfly's long wings offset most of what its short body loses</button>
+      <button>Equally — both are short volatility</button>
+      <button>Neither, since the stock did not move</button>
+    </div>
+    <div class="ans"><b>The straddle, and it is not close.</b> Both positions want the stock to sit still, and only one of them is meaningfully short vega. That is why a butterfly is often described as a "cheap" way to be short volatility — the description is right about the cash and wrong about the reason, which is that most of the vega has been hedged away by the wings rather than discounted.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Choosing, and the question that actually decides it</h2>
+    <p class="dek">Not "am I right" but "how right, how soon, and how wrong can I afford to be".</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Everything above assembles into a decision, and the decision is not made on the payoff diagram. Chapter 03 established that no structure dominates. What remains is to be explicit about the four questions whose answers pick one.</p>
+    <p><b>How right do you expect to be?</b> A modest move favours spreads and short-premium structures; a large move favours outright long options, which is why the long call was the worst structure over most of chapter 03's range and the best at 130. Capping the upside is only cheap if you did not need it.</p>
+    <p><b>How wrong can you afford to be?</b> The long call's maximum loss is its premium. The short put's is many times that. The ratio's is unbounded. These are not refinements of one another; they are different businesses, and position sizing has to be done on the worst case rather than on the delta.</p>
+    <p><b>What is your volatility view?</b> Chapter 04 showed that structures matched on delta run gamma from +669 to −4,160. If you have no volatility view, the honest choice is the structure with the least of it — and that is usually a spread rather than an outright.</p>
+    <p><b>When do you need to be right?</b> Theta runs from −8.30 a day to +7.57 across the same five structures. A long option needs the move to arrive before the premium decays; a short-premium structure needs the move <em>not</em> to arrive, and is happy to wait.</p>
+    <p>The figure puts those together as a scenario grid — outcome across, volatility change down, best structure in each cell. It is the same instrument as <a href="book.html#c2" style="color:var(--blue)">page 11's</a> scenario matrix, applied to a choice rather than to a book, and it has the same lesson: the answer lives in the corners, and no single number on the entry ticket predicts it.</p>
+    <p>The honest summary of this page is that "which spread should I use" is underdetermined until you have said something about magnitude, timing, volatility and tolerance. Most bad structure choices are not errors of arithmetic. They are answers to a question that was never fully asked.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Best structure by outcome and volatility change</h3>
+        </div>
+        <canvas id="cv7" height="340"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The scenario</h4>
+        <div id="ctl7"></div>
+        <div class="kv" style="margin-top:20px" id="kv7"></div>
+      </div>
+    </div>
+    <figcaption>Each cell is coloured by whichever of the five structures makes the most money in that scenario. The map is not a recommendation — it is a demonstration that the recommendation depends entirely on a cell you cannot know in advance, which is why the four questions above are the actual method.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are mildly bullish, have no volatility view, and cannot tolerate a large loss. Which of the five fits best?</p>
+    <div class="opts">
+      <button>Short put — it profits from a mild rise and collects premium</button>
+      <button data-ok="1">The call spread. It keeps the direction, carries about half the long call's vega, and its maximum loss is the debit — the only one of the five that matches all three constraints</button>
+      <button>The 1×2 ratio, because it profits most from a mild rise</button>
+      <button>Long stock, since it has no option risk at all</button>
+    </div>
+    <div class="ans"><b>The call spread.</b> Work the constraints: no volatility view rules out the long call and the short put, both of which carry large vega; intolerance of a large loss rules out the short put and the ratio, whose worst cases are many times the premium. The ratio does profit most from a mild rise — and its unbounded tail fails the third constraint, which is exactly the trade-off chapter 05 is about.</div>
+  </div>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Drill it, then check yourself</h2>
+    <p class="dek">Breakevens, maximum losses and reward-to-risk, at the speed you need them on a screen.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The generator below produces randomized spread problems — breakevens, maximum profits and losses, ratio turning points and the credit-versus-debit identity. This is the arithmetic that decides whether a structure fits the constraints in chapter 07, and it needs to be fast enough to do while somebody is waiting for a quote.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:150px"><span class="k">Difficulty</span>
+          <div class="seg" style="margin-top:5px;max-width:230px">
+            <button id="dEasy" aria-pressed="true">Core</button>
+            <button id="dHard" aria-pressed="false">Full</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>Core covers vertical breakevens and maximum profit and loss; Full adds ratio turning points and the credit–debit identity.</figcaption>
+  </figure>
+
+  <div class="prose" style="margin-top:46px">
+    <p>Six questions across the page.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">Why sell a further-out call against a call you have bought?</p>
+    <div class="opts">
+      <button>To collect premium, which is always good</button>
+      <button data-ok="1">To cancel exposures you did not intend. The spread carries 71% less vega than the outright, so a five-point volatility drop costs 13.9% instead of 25.2%</button>
+      <button>To reduce the delta</button>
+      <button>To avoid assignment</button>
+    </div>
+    <div class="ans"><b>To stop paying for views you do not have.</b> The cost is the capped upside and a second bid-offer to cross. Whether that is worth it depends on how large a move you expect, which is chapter 07's first question.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">A 100/110 bull call spread costs 3.66. What does the 100/110 bull put spread pay?</p>
+    <div class="opts">
+      <button>3.66, the same</button>
+      <button data-ok="1">About 6.23 — the two must sum to the width discounted, 10 × e^(−rT) = 9.89</button>
+      <button>10.00, the full width</button>
+      <button>It depends on the volatility skew</button>
+    </div>
+    <div class="ans"><b>6.23.</b> The identity is put–call parity applied to both strikes, so the debit and credit always sum to the discounted width. That is why the two positions are the same trade, differing by eleven cents of interest.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">Five bullish structures at identical delta. How many times does the lead change hands across outcomes from 80 to 130?</p>
+    <div class="opts">
+      <button>Once — one structure dominates above the breakeven</button>
+      <button data-ok="1">Four times, across five regions. The long call leads at 80, the risk reversal at 90, the short put from 95 to 105, the ratio from 110 to 120, and the long call again at 130</button>
+      <button>Never — they all pay the same, since the delta is the same</button>
+      <button>Twice</button>
+    </div>
+    <div class="ans"><b>Four changes, five regions.</b> The long call is simultaneously the best structure if you are wrong, the worst if you are slightly right, and the best again if you are extremely right. There is no dominant choice, which is the whole page.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">A 1×2 call ratio sized to 100 deltas carries −4,160 of gamma cash. What is it really?</p>
+    <div class="opts">
+      <button>A leveraged bullish position</button>
+      <button data-ok="1">A short-volatility position with a directional tilt. Its gamma is six times the short put's and its vega is −287 against the long call's +46</button>
+      <button>A delta-neutral volatility trade</button>
+      <button>A hedged version of the call spread</button>
+    </div>
+    <div class="ans"><b>A short-volatility trade wearing a directional label.</b> Which is exactly why it made $31,734 in one cell of chapter 03 and lost $21,727 in another — outcomes that have nothing to do with the hundred deltas it started with.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 05</span>
+    <p class="q">Your 1×2 ratio peaks at 8.90 and you paid 1.10. Where does it stop making money?</p>
+    <div class="opts">
+      <button>It does not — the maximum profit is capped at 8.90</button>
+      <button data-ok="1">At 123.90. Above that it is a naked short call and the loss grows without limit</button>
+      <button>At 115, the short strike</button>
+      <button>At 125, one width above the short strike</button>
+    </div>
+    <div class="ans"><b>123.90 — the peak plus what you paid, measured from the short strike.</b> The peak is a turning point, not a cap, and the scenario that produces the unbounded loss is the one where your directional view was most correct.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 06</span>
+    <p class="q">A short straddle receives 11.06 and a long butterfly on the same body costs 2.72. What does the butterfly buy you?</p>
+    <div class="opts">
+      <button>A higher maximum profit</button>
+      <button data-ok="1">A bounded worst case. Its maximum loss is 2.72 at any price forever, against an unbounded loss for the straddle — paid for by giving up about a third of the best case</button>
+      <button>A directional tilt</button>
+      <button>Positive theta, which the straddle lacks</button>
+    </div>
+    <div class="ans"><b>A bounded worst case.</b> Both positions want the stock to sit still; only one of them can remove a year of profit in a week. The butterfly also carries far less vega, because its long wings offset the short body — which is the part the payoff diagram does not show.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every structure on this page is priced on a flat volatility surface, which is the one assumption that most changes the answers. A real skew makes the short put richer and the risk reversal cheaper than shown here, and it moves the ranking in chapter 03 — <a href="surface.html" style="color:var(--blue)">page 02</a> is the correction and it is not a small one. Transaction costs are excluded from every payoff, and a multi-leg structure crosses a spread on every leg, which <a href="microstructure.html" style="color:var(--blue)">page 05</a> prices at up to eleven volatility points on a short-dated wing. Margin treatment differs by structure and by account type and frequently decides the choice before any of this arithmetic does. And every short option carries the assignment risk of <a href="early-exercise.html" style="color:var(--blue)">page 08</a>, which no payoff diagram shows.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ══════════ shared spread machinery ══════════ */
+const S0=100, T0=90/365, V0=0.28, R0=0.045;
+/* a structure is a list of legs: {t:"c"|"p"|"s", K, n} */
+function legPrice(l,S,T,v,r){
+  if(l.t==="s")return l.n*S;
+  return l.n*bs(S,l.K,Math.max(T,1e-9),Math.max(v,0.005),r,0,l.t==="c").price;
+}
+const structPrice=(L,S,T,v,r)=>L.reduce((a,l)=>a+legPrice(l,S,T,v,r),0);
+function structGreeks(L,S,T,v,r){
+  let d=0,g=0,ve=0,th=0;
+  for(const l of L){
+    if(l.t==="s"){d+=l.n;continue;}
+    const o=bs(S,l.K,Math.max(T,1e-9),Math.max(v,0.005),r,0,l.t==="c");
+    d+=l.n*o.delta; g+=l.n*o.gamma; ve+=l.n*o.vega*0.01; th+=l.n*o.theta/365;
+  }
+  return {d,g,ve,th,gcash:g*S*S*0.01};
+}
+function structPayoff(L,ST){
+  let p=0;
+  for(const l of L){
+    if(l.t==="s"){p+=l.n*ST;continue;}
+    p+=l.n*Math.max(0,l.t==="c"?ST-l.K:l.K-ST);
+  }
+  return p;
+}
+/* P&L at expiry for a structure entered today */
+const structPnl=(L,ST,S,T,v,r)=>structPayoff(L,ST)-structPrice(L,S,T,v,r);
+const money=x=>(x<0?"−$":"$")+Math.abs(x).toLocaleString("en-US",{maximumFractionDigits:0});
+function barsS(o,xs,ys,cols,wfrac){
+  const g=o.g,w=(o.pw/Math.max(1,xs.length))*(wfrac||0.6);
+  g.save();
+  for(let i=0;i<xs.length;i++){
+    g.fillStyle=typeof cols==="function"?cols(ys[i],i):cols;
+    const x=o.X(xs[i]),y=o.Y(ys[i]),y0=o.Y(0);
+    g.fillRect(x-w/2,Math.min(y,y0),Math.max(w,1),Math.abs(y0-y));
+  }
+  g.restore();
+}
+function labS(o,x,y,s,col,size,base){
+  const g=o.g;g.save();g.fillStyle=col||C("--ink");g.textAlign="center";
+  g.textBaseline=base||"bottom";g.font=(size||10)+"px 'IBM Plex Mono', monospace";
+  g.fillText(s,o.X(x),o.Y(y)+(base==="top"?6:-6));g.restore();
+}
+
+/* ══════════ HERO — payoff kinks assembling ══════════ */
+(function(){
+  const cv=document.getElementById("heroCv");let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  function draw(ph){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    const padL=w*0.06,padR=w*0.06,padT=h*0.22,padB=h*0.22;
+    const gw=w-padL-padR,gh=h-padT-padB;
+    const X=S=>padL+((S-60)/80)*gw;
+    const Y=v=>padT+gh/2-(v/26)*gh*0.5;
+    const shapes=[
+      [{t:"c",K:105,n:1}],
+      [{t:"c",K:100,n:1},{t:"c",K:112,n:-1}],
+      [{t:"p",K:92,n:-1}],
+      [{t:"c",K:98,n:1},{t:"c",K:110,n:-2}],
+      [{t:"c",K:90,n:1},{t:"c",K:100,n:-2},{t:"c",K:110,n:1}],
+      [{t:"c",K:108,n:1},{t:"p",K:92,n:-1}]
+    ];
+    shapes.forEach((L,i)=>{
+      const phase=Math.sin(ph+i*0.8)*0.5+0.5;
+      g.strokeStyle=i%2?C("--verm"):C("--blue");
+      g.globalAlpha=0.10+0.14*phase;g.lineWidth=1.7;
+      g.beginPath();
+      for(let S=60;S<=140;S+=1){
+        const v=structPayoff(L,S)-structPayoff(L,100)*0.35;
+        S===60?g.moveTo(X(S),Y(v)):g.lineTo(X(S),Y(v));
+      }
+      g.stroke();
+    });
+    g.globalAlpha=.25;g.strokeStyle=C("--ink");g.lineWidth=1;g.setLineDash([4,4]);
+    g.beginPath();g.moveTo(padL,Y(0));g.lineTo(w-padR,Y(0));g.stroke();
+    g.setLineDash([]);g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;draw((ts-t0)/2600);raf=requestAnimationFrame(frame);}
+  size();if(RM)draw(1);else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)draw(1);else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════ 01 — why spread ══════════ */
+const s1={K1:105,K2:115,dv:-0.05,v:0.28};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"a1",k:"K1",lbl:"K₁",name:"Strike bought",min:95,max:120,step:1,fmt:v=>v.toFixed(0)},
+    {id:"b1",k:"K2",lbl:"K₂",name:"Strike sold",min:105,max:140,step:1,fmt:v=>v.toFixed(0)},
+    {id:"c1v",k:"v",lbl:"σ",name:"Implied vol",min:.12,max:.6,step:.01,fmt:pct},
+    {id:"d1",k:"dv",lbl:"Δσ",name:"Volatility shift",min:-.12,max:.12,step:.005,fmt:v=>(v>=0?"+":"")+(v*100).toFixed(1)+" pts"}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function draw(){
+    const OUT=[{t:"c",K:s1.K1,n:1}];
+    const SPR=[{t:"c",K:s1.K1,n:1},{t:"c",K:Math.max(s1.K2,s1.K1+1),n:-1}];
+    const xs=[],po=[],ps=[];
+    for(let ST=70;ST<=145;ST+=0.5){
+      xs.push(ST);
+      po.push(structPnl(OUT,ST,S0,T0,s1.v,R0));
+      ps.push(structPnl(SPR,ST,S0,T0,s1.v,R0));
+    }
+    const o=Fig(document.getElementById("cv1"),{h:300,x0:70,x1:145,y0:Math.min.apply(null,po)*1.3-1,y1:Math.max.apply(null,po)*1.05,pad:{l:58}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(1),5,4);
+    clip(o,()=>{
+      line(o,[70,145],[0,0],C("--grey"),1,[3,3]);
+      line(o,xs,po,C("--blue"),2.6);
+      line(o,xs,ps,C("--verm"),2.6);
+    });
+    vline(o,S0,C("--ink"),"S");
+
+    // mark-to-market after a volatility shift, spot unchanged, one day later
+    const dvx=[],mo=[],ms=[];
+    for(let i=0;i<=80;i++){
+      const dv=-0.12+i*(0.24/80);
+      dvx.push(dv*100);
+      mo.push(100*(structPrice(OUT,S0,T0-1/365,s1.v+dv,R0)/structPrice(OUT,S0,T0,s1.v,R0)-1));
+      ms.push(100*(structPrice(SPR,S0,T0-1/365,s1.v+dv,R0)/structPrice(SPR,S0,T0,s1.v,R0)-1));
+    }
+    const o2=Fig(document.getElementById("cv1b"),{h:200,x0:-12,x1:12,
+      y0:Math.min.apply(null,mo)*1.1,y1:Math.max.apply(null,mo)*1.1,pad:{l:58}});
+    axes(o2,v=>(v>=0?"+":"")+v.toFixed(0),v=>v.toFixed(0)+"%",5,4);
+    clip(o2,()=>{
+      line(o2,[-12,12],[0,0],C("--grey"),1,[3,3]);
+      line(o2,dvx,mo,C("--blue"),2.6);
+      line(o2,dvx,ms,C("--verm"),2.6);
+    });
+    vline(o2,s1.dv*100,C("--ink"),"Δσ");
+
+    const go=structGreeks(OUT,S0,T0,s1.v,R0), gs=structGreeks(SPR,S0,T0,s1.v,R0);
+    const co=structPrice(OUT,S0,T0,s1.v,R0), cs=structPrice(SPR,S0,T0,s1.v,R0);
+    const co2=structPrice(OUT,S0,T0-1/365,s1.v+s1.dv,R0), cs2=structPrice(SPR,S0,T0-1/365,s1.v+s1.dv,R0);
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Outright cost",co.toFixed(4)],
+      ["Spread cost",cs.toFixed(4)],
+      ["Outright vega/pt",go.ve.toFixed(4)],
+      ["Spread vega/pt",gs.ve.toFixed(4)],
+      ["Vega removed",pct(1-Math.abs(gs.ve/go.ve))],
+      ["—","—"],
+      ["Vol shift",(s1.dv*100).toFixed(1)+" pts"],
+      ["Outright now",co2.toFixed(4)],
+      ["  change",pct((co2-co)/co)],
+      ["Spread now",cs2.toFixed(4)],
+      ["  change",pct((cs2-cs)/cs)]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — the vertical ══════════ */
+const s2={K1:100,K2:110,r:0.045,T:90,v:0.28};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"a2",k:"K1",lbl:"K₁",name:"Lower strike",min:85,max:110,step:1,fmt:v=>v.toFixed(0)},
+    {id:"b2",k:"K2",lbl:"K₂",name:"Upper strike",min:95,max:130,step:1,fmt:v=>v.toFixed(0)},
+    {id:"c2r",k:"r",lbl:"r",name:"Rate",min:0,max:.15,step:.005,fmt:pct2},
+    {id:"d2",k:"T",lbl:"T",name:"Days",min:7,max:730,step:1,fmt:v=>v.toFixed(0)+"d"}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function draw(){
+    const K1=s2.K1,K2=Math.max(s2.K2,s2.K1+1),T=s2.T/365;
+    const CS=[{t:"c",K:K1,n:1},{t:"c",K:K2,n:-1}];
+    const PS=[{t:"p",K:K1,n:1},{t:"p",K:K2,n:-1}];   // bull put spread: long the lower strike
+    const debit=structPrice(CS,S0,T,s2.v,s2.r);
+    const credit=-structPrice(PS,S0,T,s2.v,s2.r);
+    const xs=[],a=[],b=[],diff=[];
+    for(let ST=K1-25;ST<=K2+25;ST+=0.5){
+      xs.push(ST);
+      const pa=structPnl(CS,ST,S0,T,s2.v,s2.r);
+      const pb=structPnl(PS,ST,S0,T,s2.v,s2.r);
+      a.push(pa);b.push(pb);diff.push(pa-pb);
+    }
+    const o=Fig(document.getElementById("cv2"),{h:290,x0:xs[0],x1:xs[xs.length-1],
+      y0:Math.min.apply(null,a)*1.25,y1:Math.max.apply(null,a)*1.15,pad:{l:58}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(1),5,4);
+    clip(o,()=>{
+      line(o,[xs[0],xs[xs.length-1]],[0,0],C("--grey"),1,[3,3]);
+      line(o,xs,a,C("--blue"),3.2);
+      line(o,xs,b,C("--verm"),1.8,[6,4]);
+    });
+    vline(o,K1,C("--ochre"),"K₁");vline(o,K2,C("--ochre"),"K₂");
+
+    const dm=Math.max.apply(null,diff.map(Math.abs));
+    const o2=Fig(document.getElementById("cv2b"),{h:180,x0:xs[0],x1:xs[xs.length-1],
+      y0:-Math.max(dm*2,0.05),y1:Math.max(dm*2,0.05),pad:{l:58}});
+    axes(o2,v=>v.toFixed(0),v=>v.toFixed(3),5,4);
+    clip(o2,()=>{
+      line(o2,[xs[0],xs[xs.length-1]],[0,0],C("--grey"),1,[3,3]);
+      line(o2,xs,diff,C("--moss"),2.8);
+    });
+
+    const width=K2-K1;
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Call spread debit",debit.toFixed(4)],
+      ["Put spread credit",credit.toFixed(4)],
+      ["Sum",(debit+credit).toFixed(6)],
+      ["Width discounted",(width*Math.exp(-s2.r*T)).toFixed(6)],
+      ["Identity residual",Math.abs(debit+credit-width*Math.exp(-s2.r*T)).toExponential(1)],
+      ["—","—"],
+      ["Max profit",(width-debit).toFixed(4)],
+      ["Max loss",debit.toFixed(4)],
+      ["Breakeven",(K1+debit).toFixed(4)],
+      ["Reward : risk",(( width-debit)/debit).toFixed(2)+" : 1"],
+      ["Constant gap",diff[0].toFixed(6)],
+      ["  = interest on width",(width*(1-Math.exp(-s2.r*T))).toFixed(6)]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — five ways to be bullish ══════════ */
+const s3={Kc:105,Ks:115,Kp:95,Kr:115,v:0.28};
+const NAMES=["long stock","long call","call spread","short put","risk reversal","1×2 ratio"];
+const COLS=()=>[C("--grey"),C("--blue"),C("--moss"),C("--verm"),C("--ink"),C("--ochre")];
+function buildFive(st){
+  const Kc=st.Kc, Ks=Math.max(st.Ks,st.Kc+1), Kp=st.Kp, Kr=Math.max(st.Kr,st.Kc+1);
+  return [
+    [{t:"s",n:1}],
+    [{t:"c",K:Kc,n:1}],
+    [{t:"c",K:Kc,n:1},{t:"c",K:Ks,n:-1}],
+    [{t:"p",K:Kp,n:-1}],
+    [{t:"c",K:Ks,n:1},{t:"p",K:Kp-5,n:-1}],
+    [{t:"c",K:Kc,n:1},{t:"c",K:Kr,n:-2}]
+  ];
+}
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"a3",k:"Kc",lbl:"Kc",name:"Call strike",min:98,max:118,step:1,fmt:v=>v.toFixed(0)},
+    {id:"b3",k:"Ks",lbl:"Ks",name:"Spread short strike",min:105,max:135,step:1,fmt:v=>v.toFixed(0)},
+    {id:"c3p",k:"Kp",lbl:"Kp",name:"Put sold",min:80,max:100,step:1,fmt:v=>v.toFixed(0)},
+    {id:"d3",k:"Kr",lbl:"Kr",name:"Ratio short strike",min:105,max:140,step:1,fmt:v=>v.toFixed(0)},
+    {id:"e3",k:"v",lbl:"σ",name:"Implied vol",min:.12,max:.6,step:.01,fmt:pct}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  window.sizedFive=()=>{
+    const L=buildFive(s3);
+    return L.map(l=>{
+      const d=structGreeks(l,S0,T0,s3.v,R0).d;
+      return {legs:l,mult:Math.abs(d)>1e-6?100/d:0};
+    });
+  };
+  function draw(){
+    const S=window.sizedFive();
+    const xs=[],series=S.map(()=>[]);
+    for(let ST=75;ST<=135;ST+=0.5){
+      xs.push(ST);
+      S.forEach((s,i)=>series[i].push(structPnl(s.legs,ST,S0,T0,s3.v,R0)*s.mult));
+    }
+    let lo=Infinity,hi=-Infinity;
+    series.forEach(ser=>ser.forEach(v=>{lo=Math.min(lo,v);hi=Math.max(hi,v);}));
+    lo=Math.max(lo,-12000);hi=Math.min(hi,40000);
+    const o=Fig(document.getElementById("cv3"),{h:330,x0:75,x1:135,y0:lo*1.08,y1:hi*1.08,pad:{l:70}});
+    axes(o,v=>v.toFixed(0),v=>money(v),5,4);
+    const cols=COLS();
+    clip(o,()=>{
+      line(o,[75,135],[0,0],C("--grey"),1,[3,3]);
+      series.forEach((ser,i)=>line(o,xs,ser,cols[i],i===0?1.6:2.4,i===0?[4,3]:null));
+    });
+    vline(o,S0,C("--ink"),"S");
+
+    // winner strip
+    const cv=document.getElementById("cv3b");
+    const H=cvh(90),dpr=window.devicePixelRatio||1,W=cv.clientWidth||600;
+    cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
+    const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+    const L=70,Rp=10,gw=W-L-Rp;
+    let flips=0,prev=-1;
+    for(let i=0;i<xs.length;i++){
+      let bi=0;for(let k=1;k<series.length;k++)if(series[k][i]>series[bi][i])bi=k;
+      if(prev!==-1&&bi!==prev)flips++;
+      prev=bi;
+      g.fillStyle=cols[bi];g.globalAlpha=.75;
+      g.fillRect(L+(i/xs.length)*gw,16,gw/xs.length+1,34);
+    }
+    g.globalAlpha=1;
+    g.fillStyle=C("--grey");g.font="9px 'IBM Plex Mono', monospace";
+    g.textAlign="left";g.textBaseline="top";
+    g.fillText("best structure by outcome",L,2);
+    g.textAlign="center";g.textBaseline="top";
+    for(const t of [80,90,100,110,120,130])
+      g.fillText(String(t),L+((t-75)/60)*gw,54);
+    g.textAlign="right";g.fillStyle=C("--ink");
+    g.fillText(flips+" changes of leader",W-Rp,54);
+
+    const rows=S.map((s,i)=>{
+      const gk=structGreeks(s.legs,S0,T0,s3.v,R0);
+      return [NAMES[i],structPrice(s.legs,S0,T0,s3.v,R0)*s.mult,gk.gcash*s.mult,gk.ve*s.mult];
+    });
+    document.getElementById("kv3").innerHTML=kvHTML(
+      [["Sized to","100 deltas each"],["Leader changes",String(flips)],["—","—"]].concat(
+      rows.map(r=>[r[0],money(r[1])])));
+  }
+})();
+
+/* ══════════ 04 — what you signed up for ══════════ */
+const s4={v:0.28};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"a4",k:"v",lbl:"σ",name:"Implied vol",min:.12,max:.6,step:.01,fmt:pct}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const L=buildFive(s3);
+    const rows=L.map((l,i)=>{
+      const d=structGreeks(l,S0,T0,s4.v,R0).d;
+      const m=Math.abs(d)>1e-6?100/d:0;
+      const g=structGreeks(l,S0,T0,s4.v,R0);
+      return {n:NAMES[i],cost:structPrice(l,S0,T0,s4.v,R0)*m,
+        d:g.d*m,gc:g.gcash*m,ve:g.ve*m,th:g.th*m};
+    });
+    document.getElementById("greekTab").innerHTML=
+      '<tr><th>Structure</th><th>Net cost</th><th>Delta</th><th>Γ cash /1%</th><th>Vega /pt</th><th>Theta /day</th></tr>'+
+      rows.map(r=>'<tr><td>'+r.n+'</td><td>'+money(r.cost)+'</td><td>'+r.d.toFixed(0)+
+        '</td><td>'+r.gc.toFixed(0)+'</td><td>'+r.ve.toFixed(1)+'</td><td>'+r.th.toFixed(1)+'</td></tr>').join("");
+    const xs=rows.map((_,i)=>i);
+    const gmax=Math.max.apply(null,rows.map(r=>Math.abs(r.gc)));
+    const vmax=Math.max.apply(null,rows.map(r=>Math.abs(r.ve)));
+    const o=Fig(document.getElementById("cv4"),{h:240,x0:-0.6,x1:rows.length-0.4,y0:-1.15,y1:1.15,pad:{l:58,b:36}});
+    axes(o,()=>"",v=>v.toFixed(1),1,4);
+    const g=o.g,w=(o.pw/rows.length)*0.26;
+    rows.forEach((r,i)=>{
+      const y0=o.Y(0);
+      g.fillStyle=C("--blue");
+      let y=o.Y(r.gc/gmax);g.fillRect(o.X(i)-w-2,Math.min(y,y0),w,Math.abs(y0-y));
+      g.fillStyle=C("--verm");
+      y=o.Y(r.ve/vmax);g.fillRect(o.X(i)+2,Math.min(y,y0),w,Math.abs(y0-y));
+    });
+    g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+    g.font=(NARROW()?7:8.5)+"px 'IBM Plex Mono', monospace";
+    rows.forEach((r,i)=>{
+      r.n.split(" ").forEach((wd,k)=>g.fillText(wd,o.X(i),o.P.t+o.ph+8+k*10));
+    });
+    g.restore();
+    document.getElementById("kv4").innerHTML=kvHTML(
+      [["Normalised to","the largest in each"],["Gamma range",rows.reduce((a,r)=>Math.min(a,r.gc),0).toFixed(0)+" to "+rows.reduce((a,r)=>Math.max(a,r.gc),0).toFixed(0)],
+       ["Vega range",rows.reduce((a,r)=>Math.min(a,r.ve),0).toFixed(0)+" to "+rows.reduce((a,r)=>Math.max(a,r.ve),0).toFixed(0)],["—","—"]]
+      .concat(rows.map(r=>[r.n,"Γ "+r.gc.toFixed(0)+"  ν "+r.ve.toFixed(0)])));
+  }
+})();
+
+/* ══════════ 05 — ratios ══════════ */
+const s5={K1:105,K2:115,ratio:2,v:0.28};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"a5",k:"K1",lbl:"K₁",name:"Strike bought",min:95,max:115,step:1,fmt:v=>v.toFixed(0)},
+    {id:"b5",k:"K2",lbl:"K₂",name:"Strike sold",min:100,max:140,step:1,fmt:v=>v.toFixed(0)},
+    {id:"c5n",k:"ratio",lbl:"n",name:"Sold per bought",min:1.5,max:4,step:.25,fmt:v=>"1 × "+v.toFixed(2)},
+    {id:"d5",k:"v",lbl:"σ",name:"Implied vol",min:.12,max:.6,step:.01,fmt:pct}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function draw(){
+    const K1=s5.K1,K2=Math.max(s5.K2,s5.K1+1);
+    const RAT=[{t:"c",K:K1,n:1},{t:"c",K:K2,n:-s5.ratio}];
+    const BACK=[{t:"c",K:K1,n:-1},{t:"c",K:K2,n:s5.ratio}];
+    const xs=[],a=[],b=[];
+    for(let ST=80;ST<=175;ST+=0.5){
+      xs.push(ST);
+      a.push(structPnl(RAT,ST,S0,T0,s5.v,R0));
+      b.push(structPnl(BACK,ST,S0,T0,s5.v,R0));
+    }
+    const o=Fig(document.getElementById("cv5"),{h:310,x0:80,x1:175,
+      y0:Math.max(-40,Math.min.apply(null,a)),y1:Math.max(Math.max.apply(null,a),Math.max.apply(null,b))*1.2+1,pad:{l:60}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(1),5,4);
+    clip(o,()=>{
+      line(o,[80,175],[0,0],C("--grey"),1,[3,3]);
+      line(o,xs,a,C("--verm"),2.8);
+      line(o,xs,b,C("--blue"),2.2,[6,4]);
+    });
+    vline(o,K1,C("--ochre"),"K₁");vline(o,K2,C("--ochre"),"K₂");
+    // upper breakeven of the ratio
+    let lo=K2,hi=400,found=null;
+    if(structPnl(RAT,hi,S0,T0,s5.v,R0)<0){
+      for(let i=0;i<200;i++){const m=(lo+hi)/2;
+        if(structPnl(RAT,m,S0,T0,s5.v,R0)>0)lo=m;else hi=m;}
+      found=lo;
+      vline(o,found,C("--ink"),"BE");
+    }
+
+    const rx=[],ry=[];
+    for(let n=1.25;n<=4.01;n+=0.05){
+      const L=[{t:"c",K:K1,n:1},{t:"c",K:K2,n:-n}];
+      let l2=K2,h2=600,be=null;
+      if(structPnl(L,h2,S0,T0,s5.v,R0)<0){
+        for(let i=0;i<120;i++){const m=(l2+h2)/2;
+          if(structPnl(L,m,S0,T0,s5.v,R0)>0)l2=m;else h2=m;}
+        be=l2;
+      }
+      rx.push(n);ry.push(be===null?NaN:be);
+    }
+    const o2=Fig(document.getElementById("cv5b"),{h:185,x0:1.25,x1:4,
+      y0:K2,y1:Math.max(K2+15,Math.max.apply(null,ry.filter(isFinite))*1.05),pad:{l:60}});
+    axes(o2,v=>"1×"+v.toFixed(1),v=>v.toFixed(0),5,4);
+    clip(o2,()=>line(o2,rx,ry,C("--verm"),2.6));
+    vline(o2,s5.ratio,C("--ink"),"n");
+
+    const cost=structPrice(RAT,S0,T0,s5.v,R0);
+    const peak=structPnl(RAT,K2,S0,T0,s5.v,R0);
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Structure","1 × "+s5.ratio.toFixed(2)+" call ratio"],
+      ["Strikes",K1+" / "+K2],
+      ["Net "+(cost>0?"debit":"credit"),Math.abs(cost).toFixed(4)],
+      ["Peak profit",peak.toFixed(4)],
+      ["  at",K2.toFixed(0)],
+      ["Upper breakeven",found?found.toFixed(3):"none"],
+      ["Above that","unbounded loss"],
+      ["Net short calls",(s5.ratio-1).toFixed(2)],
+      ["Vega/pt",structGreeks(RAT,S0,T0,s5.v,R0).ve.toFixed(3)]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — capped or not ══════════ */
+const s6={wing:10,v:0.28,dv:0};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"a6",k:"wing",lbl:"w",name:"Butterfly wing width",min:3,max:30,step:1,fmt:v=>"±"+v.toFixed(0)},
+    {id:"b6",k:"v",lbl:"σ",name:"Implied vol",min:.12,max:.6,step:.01,fmt:pct},
+    {id:"c6d",k:"dv",lbl:"Δσ",name:"Volatility shock",min:-.12,max:.12,step:.005,fmt:v=>(v>=0?"+":"")+(v*100).toFixed(1)+" pts"}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  function draw(){
+    const w=s6.wing;
+    const STR=[{t:"c",K:100,n:-1},{t:"p",K:100,n:-1}];
+    const FLY=[{t:"c",K:100-w,n:1},{t:"c",K:100,n:-2},{t:"c",K:100+w,n:1}];
+    const xs=[],a=[],b=[];
+    for(let ST=60;ST<=140;ST+=0.5){
+      xs.push(ST);
+      a.push(structPnl(STR,ST,S0,T0,s6.v,R0));
+      b.push(structPnl(FLY,ST,S0,T0,s6.v,R0));
+    }
+    const o=Fig(document.getElementById("cv6"),{h:300,x0:60,x1:140,
+      y0:Math.min.apply(null,a)*1.1,y1:Math.max(Math.max.apply(null,a),Math.max.apply(null,b))*1.2,pad:{l:58}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(1),5,4);
+    clip(o,()=>{
+      line(o,[60,140],[0,0],C("--grey"),1,[3,3]);
+      line(o,xs,a,C("--verm"),2.6);
+      line(o,xs,b,C("--blue"),2.6);
+    });
+    vline(o,100,C("--ochre"),"K");
+
+    const dvx=[],ma=[],mb=[];
+    const a0=structPrice(STR,S0,T0,s6.v,R0), b0=structPrice(FLY,S0,T0,s6.v,R0);
+    for(let i=0;i<=80;i++){
+      const dv=-0.12+i*(0.24/80);
+      dvx.push(dv*100);
+      ma.push(-(structPrice(STR,S0,T0,s6.v+dv,R0)-a0));
+      mb.push(structPrice(FLY,S0,T0,s6.v+dv,R0)-b0);
+    }
+    const lim=Math.max(Math.max.apply(null,ma.map(Math.abs)),Math.max.apply(null,mb.map(Math.abs)))*1.15;
+    const o2=Fig(document.getElementById("cv6b"),{h:195,x0:-12,x1:12,y0:-lim,y1:lim,pad:{l:58}});
+    axes(o2,v=>(v>=0?"+":"")+v.toFixed(0),v=>v.toFixed(2),5,4);
+    clip(o2,()=>{
+      line(o2,[-12,12],[0,0],C("--grey"),1,[3,3]);
+      line(o2,dvx,ma,C("--verm"),2.6);
+      line(o2,dvx,mb,C("--blue"),2.6);
+    });
+    vline(o2,s6.dv*100,C("--ink"),"Δσ");
+
+    const gs=structGreeks(STR,S0,T0,s6.v,R0), gf=structGreeks(FLY,S0,T0,s6.v,R0);
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Straddle credit",(-structPrice(STR,S0,T0,s6.v,R0)).toFixed(4)],
+      ["Butterfly debit",structPrice(FLY,S0,T0,s6.v,R0).toFixed(4)],
+      ["Straddle max profit",structPnl(STR,100,S0,T0,s6.v,R0).toFixed(4)],
+      ["Butterfly max profit",structPnl(FLY,100,S0,T0,s6.v,R0).toFixed(4)],
+      ["Straddle max loss","unbounded"],
+      ["Butterfly max loss",structPrice(FLY,S0,T0,s6.v,R0).toFixed(4)],
+      ["—","—"],
+      ["Straddle vega/pt",gs.ve.toFixed(4)],
+      ["Butterfly vega/pt",gf.ve.toFixed(4)],
+      ["Ratio",Math.abs(gf.ve)>1e-9?Math.abs(gs.ve/gf.ve).toFixed(1)+"×":"—"]
+    ]);
+  }
+})();
+
+/* ══════════ 07 — choosing ══════════ */
+const s7={v:0.28};
+(function(){
+  sliders(document.getElementById("ctl7"),[
+    {id:"a7",k:"v",lbl:"σ",name:"Implied vol at entry",min:.12,max:.6,step:.01,fmt:pct}
+  ],s7,()=>draw(),"c7");
+  window.draw7=draw;
+  function draw(){
+    const L=buildFive(s3);
+    const sized=L.map(l=>{
+      const d=structGreeks(l,S0,T0,s7.v,R0).d;
+      return {legs:l,mult:Math.abs(d)>1e-6?100/d:0};
+    });
+    const NC=9,NR=5;
+    const cv=document.getElementById("cv7");
+    const H=cvh(340),dpr=window.devicePixelRatio||1,W=cv.clientWidth||600;
+    cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
+    const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+    const Lm=NARROW()?42:60,Tp=26,B=34,Rp=8;
+    const gw=W-Lm-Rp, gh=H-Tp-B, cw=gw/NC, ch=gh/NR;
+    const cols=COLS();
+    const tally={};
+    g.font=(NARROW()?7:8.5)+"px 'IBM Plex Mono', monospace";
+    for(let j=0;j<NR;j++){
+      const dv=(j-(NR-1)/2)/((NR-1)/2)*0.08;
+      for(let i=0;i<NC;i++){
+        const ST=80+i*(50/(NC-1));
+        // mark half way to expiry under the shifted vol, then settle
+        let bi=0,bv=-1e18;
+        sized.forEach((s,k)=>{
+          const v=(structPayoff(s.legs,ST)-structPrice(s.legs,S0,T0,s7.v+dv,R0))*s.mult;
+          if(v>bv){bv=v;bi=k;}
+        });
+        tally[NAMES[bi]]=(tally[NAMES[bi]]||0)+1;
+        g.fillStyle=cols[bi];g.globalAlpha=.72;
+        g.fillRect(Lm+i*cw+1,Tp+j*ch+1,cw-2,ch-2);
+        g.globalAlpha=1;
+      }
+    }
+    g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+    for(let i=0;i<NC;i++)g.fillText((80+i*(50/(NC-1))).toFixed(0),Lm+i*cw+cw/2,Tp+gh+5);
+    g.textAlign="right";g.textBaseline="middle";
+    for(let j=0;j<NR;j++){
+      const dv=(j-(NR-1)/2)/((NR-1)/2)*0.08;
+      g.fillText((dv>=0?"+":"")+(dv*100).toFixed(0)+"v",Lm-5,Tp+j*ch+ch/2);
+    }
+    g.textAlign="left";g.textBaseline="bottom";g.fillStyle=C("--ink");
+    g.font="600 10px 'IBM Plex Mono', monospace";
+    g.fillText("BEST STRUCTURE BY SCENARIO",Lm,Tp-8);
+    // legend
+    g.font="8.5px 'IBM Plex Mono', monospace";g.textBaseline="top";
+    let x=Lm;
+    NAMES.forEach((n,i)=>{
+      if(!tally[n])return;
+      g.fillStyle=cols[i];g.fillRect(x,Tp+gh+18,9,9);
+      g.fillStyle=C("--grey");g.fillText(n,x+12,Tp+gh+18);
+      const mt=g.measureText&&g.measureText(n);
+      x+=((mt&&mt.width)||n.length*5)+28;
+    });
+    document.getElementById("kv7").innerHTML=kvHTML(
+      [["Cells",NC+" × "+NR],["Distinct winners",String(Object.keys(tally).length)],["—","—"]]
+      .concat(Object.entries(tally).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v+" cells"])));
+  }
+})();
+
+/* ══════════ 08 — drills ══════════ */
+(function(){
+  let hard=false,score=0,asked=0,streak=0,best=0,cur=null;
+  const E=id=>document.getElementById(id);
+  function make(){
+    const R=Math.random;
+    const t=(hard?[0,1,2,3]:[0,1])[Math.floor(R()*(hard?4:2))];
+    const K1=[80,90,95,100,105,110][Math.floor(R()*6)];
+    const wdt=[5,10,15,20,25][Math.floor(R()*5)];
+    const K2=K1+wdt;
+    const deb=Math.round((wdt*(0.25+R()*0.5))*100)/100;
+    if(t===0) return {kind:"Vertical breakeven",unit:"$",a:K1+deb,tol:0.02,
+      q:"You buy the <b>"+K1+"/"+K2+"</b> call spread for a debit of <b>"+deb.toFixed(2)+"</b>. Where does it break even?",
+      w:"Breakeven = lower strike + debit = "+K1+" + "+deb.toFixed(2)+" = <b>"+(K1+deb).toFixed(2)+"</b>."};
+    if(t===1) return {kind:"Maximum profit",unit:"$",a:wdt-deb,tol:0.02,
+      q:"Same <b>"+K1+"/"+K2+"</b> call spread, debit <b>"+deb.toFixed(2)+"</b>. What is the most it can make?",
+      w:"Max profit = width − debit = "+wdt+" − "+deb.toFixed(2)+" = <b>"+(wdt-deb).toFixed(2)+"</b>. Max loss is the debit, "+deb.toFixed(2)+", so reward:risk is "+((wdt-deb)/deb).toFixed(2)+":1."};
+    if(t===2){
+      const r=[0.02,0.04,0.05,0.08][Math.floor(R()*4)];
+      const days=[30,60,90,180,365][Math.floor(R()*5)];
+      const credit=wdt*Math.exp(-r*days/365)-deb;
+      return {kind:"Credit–debit identity",unit:"$",a:credit,tol:0.03,
+        q:"The <b>"+K1+"/"+K2+"</b> call spread costs <b>"+deb.toFixed(2)+"</b>, with <b>"+days+"</b> days to expiry and rates at <b>"+(r*100).toFixed(0)+"%</b>. What does the matching put spread pay?",
+        w:"debit + credit = width × e^(−rT) = "+wdt+" × "+Math.exp(-r*days/365).toFixed(4)+" = "+(wdt*Math.exp(-r*days/365)).toFixed(4)+", so credit = <b>"+credit.toFixed(3)+"</b>."};
+    }
+    const n=[2,3][Math.floor(R()*2)];
+    const cr=Math.round((R()*2.5)*100)/100;
+    // 1 x n ratio, net credit cr: upper breakeven = K2 + (K2-K1+cr)/(n-1)
+    const be=K2+((K2-K1)+cr)/(n-1);
+    return {kind:"Ratio breakeven",unit:"$",a:be,tol:0.05,
+      q:"A <b>1 × "+n+"</b> call ratio, long the <b>"+K1+"</b> and short "+n+" of the <b>"+K2+"</b>, taken in for a net credit of <b>"+cr.toFixed(2)+"</b>. Above what price does it start losing?",
+      w:"Peak profit at K₂ is (K₂−K₁) + credit = "+(K2-K1)+" + "+cr.toFixed(2)+" = "+((K2-K1)+cr).toFixed(2)+". Above K₂ you are net short "+(n-1)+" call(s), so it erodes at "+(n-1)+" per point: breakeven = "+K2+" + "+((K2-K1)+cr).toFixed(2)+"/"+(n-1)+" = <b>"+be.toFixed(2)+"</b>."};
+  }
+  function next(){
+    cur=make();
+    E("dKind").textContent=cur.kind;E("dText").innerHTML=cur.q;
+    E("dUnit").textContent=cur.unit;E("dInput").value="";
+    E("drill").classList.remove("done");
+    focusSoft(E("dInput"),E("drill"));
+  }
+  function submit(){
+    if(!cur||E("drill").classList.contains("done"))return;
+    const raw=parseFloat(String(E("dInput").value).replace(/[$,\s]/g,""));
+    asked++;
+    const ok=isFinite(raw)&&Math.abs(raw-cur.a)<=cur.tol;
+    if(ok){score++;streak++;if(streak>best)best=streak;} else streak=0;
+    E("dVerdict").textContent=ok?"CORRECT":("NOT QUITE — the answer is "+cur.a.toFixed(2));
+    E("dVerdict").className="vd "+(ok?"ok":"no");
+    E("dWork").innerHTML=cur.w;
+    E("dScore").textContent=score+" / "+asked;
+    E("dStreak").textContent=String(streak);E("dBest").textContent=String(best);
+    E("drill").classList.add("done");
+  }
+  E("dSubmit").addEventListener("click",submit);
+  E("dInput").addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+  E("dNext").addEventListener("click",next);
+  E("dSkip").addEventListener("click",()=>{streak=0;E("dStreak").textContent="0";next();});
+  E("dEasy").addEventListener("click",()=>{hard=false;E("dEasy").setAttribute("aria-pressed","true");E("dHard").setAttribute("aria-pressed","false");next();});
+  E("dHard").addEventListener("click",()=>{hard=true;E("dHard").setAttribute("aria-pressed","true");E("dEasy").setAttribute("aria-pressed","false");next();});
+  window.drawDrill=next;
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
