@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>The Binomial Model — Options, visually</title>
+<meta name="description" content="One step, two outcomes, and a price that does not depend on the odds. Replication, risk-neutral probability, convergence to Black-Scholes, and the American exercise a formula cannot reach.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Binomial Model — Options, visually">
+<meta property="og:description" content="One step, two outcomes, and a price that does not depend on the odds. Replication, risk-neutral probability, convergence to Black-Scholes, and the American exercise a formula cannot reach.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 12 · The Binomial Model</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>One step</span><i></i></a>
+  <a href="#c2"><span>The fake probability</span><i></i></a>
+  <a href="#c3"><span>Many steps</span><i></i></a>
+  <a href="#c4"><span>The sawtooth</span><i></i></a>
+  <a href="#c5"><span>What it can do</span><i></i></a>
+  <a href="#c6"><span>Greeks</span><i></i></a>
+  <a href="#c7"><span>Where it breaks</span><i></i></a>
+  <a href="#c8"><span>Drills</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 12</div>
+    <h1>The price that ignores the <em>odds</em></h1>
+    <p class="sub">Ask what a stock is likely to do and you get one number. Ask what it costs to guarantee the payoff and you get another. Only the second one is the option's price — and it does not change when you change the odds.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This is the page that should probably have come first. <a href="black-scholes.html" style="color:var(--blue)">Page 01</a> derived the option price by simulating thousands of paths and averaging; this one derives it from a single step and no probability at all, and then shows the two answers converging on each other.</p>
+  <ol>
+    <li><b>Chapter 01 is the whole idea.</b> One period, two outcomes, and a portfolio of stock and cash that reproduces the option exactly. Its cost <em>is</em> the price, and the argument never mentions how likely either outcome is.</li>
+    <li><b>Chapter 02 names the thing that looks like a probability and isn't.</b> The risk-neutral p is an artefact of the algebra — mistaking it for a forecast is the single most common misreading in derivatives.</li>
+    <li><b>Chapter 05 is why the model survives.</b> Black–Scholes is closed-form and cannot price an American put. A tree can, and that is the reason every desk still runs one.</li>
+    <li><b>Read the sawtooth chapter before you trust a tree.</b> Convergence is not smooth, and the standard fix is one line.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>u, d</td><td>The up and down multipliers on the stock over one step. In the CRR scheme d = 1/u, so the tree recombines.</td></tr>
+      <tr><td>Δ</td><td>Shares held in the replicating portfolio. Over one step it is the ratio of the spread in payoffs to the spread in stock prices.</td></tr>
+      <tr><td>B</td><td>Cash borrowed alongside the shares. Positive means you owe it.</td></tr>
+      <tr><td>p</td><td>The risk-neutral probability. Looks like a probability, behaves like one algebraically, and forecasts nothing.</td></tr>
+      <tr><td>N</td><td>Steps in the tree. Each step is dt = T/N of a year.</td></tr>
+      <tr><td>Recombining</td><td>Up-then-down lands on the same node as down-then-up, so N steps give N+1 terminal nodes rather than 2<sup>N</sup>.</td></tr>
+      <tr><td>Backward induction</td><td>Filling the tree from expiry back to today. At each node the value is the discounted expectation of its two children, under p.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>One step, two outcomes, one price</h2>
+    <p class="dek">Build a portfolio that pays whatever the option pays. Its cost is the option's price, and nothing about likelihood entered the calculation.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Strip the problem to its smallest interesting version. A stock at 100. One period. Two possible outcomes: up to 110 or down to 90. A call struck at 100, which pays 10 in the up state and nothing in the down state. What is it worth?</p>
+    <p>The instinct is to ask how likely the up state is, multiply, and discount. Hold that thought — it is the wrong question, and chapter 02 explains why. Ask instead: <b>can I build something out of stock and cash that pays exactly 10 and 0 in those two states?</b></p>
+    <p>Buy Δ shares and borrow B. In the up state the position is worth <b>110Δ − B</b>; in the down state <b>90Δ − B</b>. Set those equal to 10 and 0 and you have two equations in two unknowns. Subtracting gives <b>20Δ = 10</b>, so <b>Δ = 0.5</b>, and back-substituting gives <b>B = 45</b>.</p>
+    <p>So half a share, funded by 45 of borrowing, pays exactly what the call pays in both states. It costs <b>0.5 × 100 − 45 = 5</b>. That is the price. Any other price and you can buy the cheap one, sell the dear one, and collect the difference with no exposure at all — the portfolios are identical in every state of the world, so their prices must be too.</p>
+    <p>Now the part worth sitting with. Slide the real-world probability of an up move across the figure. At <b>P(up) = 0.01</b> the option's expected payoff is <b>0.10</b>. At <b>P(up) = 0.99</b> it is <b>9.90</b> — a hundredfold difference in what you expect to receive. The replication cost, printed beside it, stays at <b>5.000000</b> throughout. Not approximately: the number never moves, because the probability never appeared in the derivation.</p>
+    <p>This is the single most counterintuitive result in the subject, and the binomial model is where it is easiest to see, because you can watch it happen with two numbers and no calculus.</p>
+  </div>
+
+  <div class="mline">Δ = (C<sub>u</sub> − C<sub>d</sub>) / (S<sub>u</sub> − S<sub>d</sub>) &nbsp;&nbsp;&nbsp; C = ΔS − B</div>
+  <p class="mread">Reads as: <b>hold enough shares that their spread across the two outcomes matches the option's spread, then borrow whatever makes the low state come out right.</b> The cost of that package is the option's value.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The one-step tree, and the portfolio that reproduces it</h3>
+        </div>
+        <canvas id="cv1" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Expected payoff against replication cost, as the odds change</h3></div>
+        <canvas id="cv1b" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The one period</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Drag the real-world probability and watch the two bars in the lower panel behave completely differently. The blue one — what you expect to be paid — sweeps across the whole range. The vermilion one — what it costs to guarantee that payoff — does not move at all. Everything else on this page is a consequence of that gap.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the probability of an up move to 99%. <b>Predict</b> the option's price before you look at the readout, then set it to 1% and predict again.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"pReal":0.99}' data-focus="cv1b">Almost certain to rise</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"pReal":0.01}' data-focus="cv1b">Almost certain to fall</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"u":1.25,"d":0.8}' data-focus="cv1">Widen the outcomes instead</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Two traders disagree completely about whether the stock will rise. One thinks 90% likely, the other 10%. What should they conclude about the option's price?</p>
+    <div class="opts">
+      <button>They will price it differently, which is what makes a market</button>
+      <button data-ok="1">They must agree on it. The price is the cost of a replicating portfolio, and that cost is determined by the two possible stock prices, not by the odds of reaching them</button>
+      <button>The optimist's price is higher by the ratio of their probabilities</button>
+      <button>Neither can price it without agreeing on the probability first</button>
+    </div>
+    <div class="ans"><b>They must agree.</b> They will disagree violently about whether the trade is <em>good</em> — the optimist expects to make money buying it — but not about what it costs, because the cost is set by a portfolio both of them can construct and observe. That separation between value and expectation is the foundation the whole subject stands on, and it is why an options market can function between people with opposite views.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — the two equations, and where the probability would have gone</summary>
+    <div class="body">
+      <p>Write the replicating portfolio's value in each state and demand that it match the option.</p>
+      <div class="mline">S<sub>u</sub>Δ − B(1+r) = C<sub>u</sub> &nbsp;&nbsp;&nbsp;&nbsp; S<sub>d</sub>Δ − B(1+r) = C<sub>d</sub></div>
+      <p class="mread">Reads as: <b>in the up state and in the down state, the shares minus the loan must equal the option.</b> Two equations, two unknowns, no probabilities anywhere.</p>
+      <p>Subtract the second from the first. The borrowing cancels because it is the same in both states — it is a certain amount, not a contingent one.</p>
+      <div class="mline">Δ (S<sub>u</sub> − S<sub>d</sub>) = C<sub>u</sub> − C<sub>d</sub></div>
+      <p class="mread">Reads as: <b>the share count is fixed by matching the spread.</b> This is delta, arrived at without differentiating anything.</p>
+      <p>Substitute back for B and the price is <b>C = ΔS − B</b>. Notice what is absent: there is no place in either equation for a probability, because the equations describe <em>every</em> state rather than an average over states. That is the whole trick, and it is why the answer is a price rather than a forecast.</p>
+      <p><b>Where it breaks.</b> Two outcomes and two instruments is a square system, which is why it has a unique solution. Add a third possible outcome — a jump, a gap, a takeover at a different price — and you have three equations and two unknowns, no exact replication, and no single arbitrage-free price. The market is then said to be <span class="term" data-t="Incomplete market" data-def="One where not every payoff can be manufactured from the traded instruments. Prices become a range rather than a point, and the gap is where a dealer's risk appetite lives.">incomplete</span>, and prices become a band whose width is somebody's risk appetite. Everything on this page assumes the world stays square.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The probability that is not a probability</h2>
+    <p class="dek">Rearrange the answer and a number between zero and one falls out. It is not a forecast, and treating it as one is the classic error.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Take the price from chapter 01 and rearrange it. With a little algebra <b>C = ΔS − B</b> becomes something that looks startlingly like an expectation.</p>
+    <p>Define <b>p = (e<sup>r·dt</sup> − d) / (u − d)</b>. Then the price is exactly the discounted average of the two payoffs, weighted by p and 1−p. On our one-step example with zero rates, p works out to <b>0.500000</b>, and the discounted expectation is <b>5.000000</b> — the same answer replication gave, as it must be, because it is the same equation written differently.</p>
+    <p>So there is a set of weights under which the naive "average the payoffs and discount" calculation is right. Those weights are the <b>risk-neutral probabilities</b>, and three things about them matter.</p>
+    <p><b>They are not anybody's forecast.</b> Nothing about the real world went into them — only u, d and the interest rate. If the true probability of an up move is 90%, p is still whatever the algebra says.</p>
+    <p><b>They are exactly the weights that make the stock earn the risk-free rate.</b> That is the defining property and the source of the name. Under p, the expected stock price is the forward. The figure checks it on a 200-step tree: the tree's expected terminal price is <b>105.12711</b> against a forward of <b>105.12711</b>, agreeing to the last digit shown.</p>
+    <p><b>They exist because replication does.</b> The reason you may price by taking an expectation under the wrong probabilities is that you were never really taking an expectation — you were pricing a portfolio, and the expectation is a bookkeeping device that produces the same number more conveniently.</p>
+    <p>Get this backwards and you will believe the market is forecasting a 32% chance of a stock finishing below some level when it is doing nothing of the kind. What the market is telling you is what the insurance costs. Converting that into a real-world probability requires a risk premium that the option price does not contain.</p>
+  </div>
+
+  <div class="mline">p = (e<sup>r·dt</sup> − d) / (u − d) &nbsp;&nbsp;&nbsp;&nbsp; C = e<sup>−r·dt</sup> [ p·C<sub>u</sub> + (1−p)·C<sub>d</sub> ]</div>
+  <p class="mread">Reads as: <b>there is one weighting under which averaging the payoffs gives the right answer, and it is the one that makes the stock drift at the interest rate.</b> Use it to compute; do not read it as a belief.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Two sets of weights on the same tree</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Real-world</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Risk-neutral</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="290"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Where each set of weights puts the stock on average</h3></div>
+        <canvas id="cv2b" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The two worlds</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The two distributions can be wildly different shapes and the option price only ever uses the vermilion one. Push the real-world drift up and the blue distribution marches right while the price readout sits still — the same result as chapter 01, now visible across a whole terminal distribution rather than two nodes.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the real-world drift to +40% a year. <b>Predict</b> whether the risk-neutral distribution moves with it.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"mu":0.40}' data-focus="cv2">A raging bull market</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"mu":-0.30}' data-focus="cv2">A collapse</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"mu":0.05}' data-focus="cv2">Drift equal to the rate</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">An option's price implies a 32% chance the stock finishes below 90. What can you conclude?</p>
+    <div class="opts">
+      <button>The market thinks there is a 32% chance of finishing below 90</button>
+      <button data-ok="1">That the insurance costs what a 32% chance would cost in a risk-neutral world. The real-world probability is lower, because the price includes compensation for bearing the risk</button>
+      <button>Nothing — implied probabilities are meaningless</button>
+      <button>That the stock will finish below 90 about a third of the time</button>
+    </div>
+    <div class="ans"><b>It is a price, expressed in the units of a probability.</b> Risk-neutral probabilities systematically overweight bad outcomes relative to reality, because people pay up for protection — which is exactly the risk premium the option price contains and the real-world probability does not. The third answer over-corrects: the number is highly informative, it just answers "what does this cost" rather than "what will happen".</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>Two outcomes become a thousand</h2>
+    <p class="dek">Chain the one-step argument and it becomes a lattice. Push the steps up and it becomes Black–Scholes.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">One step is a caricature — a stock with exactly two possible futures. The fix is not to abandon the argument but to repeat it. Split the year into N periods, let the stock move up or down in each, and apply chapter 01's replication at every node, working backwards from expiry.</p>
+    <p>Two features make this practical. First the tree <b>recombines</b>: choosing <b>d = 1/u</b> means up-then-down lands exactly where down-then-up does, so N steps produce N+1 terminal prices rather than 2<sup>N</sup>. A 500-step tree has 501 endpoints, not a number with 150 digits in it.</p>
+    <p>Second, the up and down sizes are chosen so the tree's variance matches the volatility you are pricing with: <b>u = e<sup>σ√dt</sup></b>. That is the Cox–Ross–Rubinstein choice, and it is what makes the lattice converge to the same distribution Black–Scholes assumes.</p>
+    <p>And converge it does. On a one-year at-the-money call at 30 volatility with rates at 5%, Black–Scholes says <b>14.2312</b>. A one-step tree says <b>16.9640</b> — off by more than two and a half. Ten steps gives <b>13.9408</b>. A hundred gives <b>14.2018</b>. Sixteen hundred gives <b>14.2294</b>, wrong in the third decimal.</p>
+    <p>The rate of convergence is worth committing to memory because it is the honest answer to "how many steps do I need". Doubling N halves the error — measured across N = 50 to 1600 the ratio is <b>1.998, 1.999, 2.001, 2.002, 2.005</b>. That is <b>first order</b>: to get one more decimal place you need ten times the work, and the work grows with N². Trees are not cheap.</p>
+    <p>The figure draws the lattice with its node values and the convergence beside it. Watch the terminal distribution take shape as you add steps — by about thirty it is visibly a lognormal, which is the sense in which Black–Scholes is the limit of this construction rather than a separate theory.</p>
+  </div>
+
+  <div class="mline">u = e<sup>σ√dt</sup> &nbsp;&nbsp; d = 1/u &nbsp;&nbsp; dt = T/N</div>
+  <p class="mread">Reads as: <b>make each step's up-move the size volatility says a step of that length should be, and make the down-move its exact reciprocal so the tree folds back on itself.</b></p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The lattice, with its terminal distribution</h3>
+        </div>
+        <canvas id="cv3" height="330"></canvas>
+        <div class="figtop" style="margin:22px 0 6px">
+          <h3>Convergence to Black–Scholes</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Binomial price</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Black–Scholes</span>
+          </span>
+        </div>
+        <canvas id="cv3b" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The tree</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Notice how fast the shape of the terminal distribution settles and how slowly the price does. By ten steps the histogram already looks lognormal while the price is still wrong in the first decimal — the distribution converges much faster than the number does, which is why "it looks converged" is not a test.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Step through N = 1, 2, 3, 4. <b>Predict</b> whether the price is approaching Black–Scholes from above, from below, or neither.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"N":1}' data-focus="cv3">One step</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"N":4}' data-focus="cv3">Four steps</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"N":40}' data-focus="cv3">Forty steps</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your 200-step tree is accurate to about a cent. Roughly what does it cost to reach a tenth of a cent?</p>
+    <div class="opts">
+      <button>Twice the steps, so twice the work</button>
+      <button data-ok="1">Ten times the steps, and about a hundred times the work — the error falls like 1/N while the node count grows like N²</button>
+      <button>Four times the steps</button>
+      <button>The tree cannot reach that accuracy</button>
+    </div>
+    <div class="ans"><b>Ten times the steps, a hundred times the work.</b> First-order convergence combined with quadratic cost is why nobody brute-forces a tree to high precision — you either use the closed form where one exists, or you use the averaging trick in the next chapter, which buys about two decimal places for one extra tree.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>Convergence is a sawtooth, not a slope</h2>
+    <p class="dek">Adding one step can make a tree less accurate. Knowing why turns a nuisance into a free decimal place.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The convergence table in chapter 03 hides something. The errors do not shrink smoothly toward zero — they alternate in sign, step by step, while their envelope decays. Look at four consecutive trees on the same option: N = 40 is low by <b>0.0734</b>, N = 41 is high by <b>0.0672</b>, N = 42 is low by <b>0.0699</b>, N = 43 is high by <b>0.0640</b>.</p>
+    <p>So going from a 40-step tree to a 41-step tree does not improve the answer. It moves it to the other side of the truth by about the same distance. Anyone who has tried to tune a tree by nudging N has met this and usually concluded something was broken.</p>
+    <p>The cause is where the strike sits relative to the terminal nodes. In a recombining CRR tree the terminal prices are <b>S·u<sup>2j−N</sup></b>, so when N is even one node lands exactly at the starting price and when N is odd the strike falls between two nodes. An at-the-money option therefore sees a structurally different terminal grid depending on the parity of N, and the pricing error inherits that alternation.</p>
+    <p>Which points straight at the fix. If consecutive trees sit on opposite sides of the answer by roughly equal amounts, <b>average them</b>. Price with N and with N+1 and take the mean. On this option a 25-step tree is off by <b>+0.1103</b> and the 25/26 average is off by <b>−0.0012</b> — about ninety times better for one extra tree. At N = 400 the raw error is <b>−0.0074</b> and the average is <b>−0.0002</b>.</p>
+    <p>This is the practical content of the chapter: an unaveraged tree is being needlessly bad, and the correction is one line of code. It also generalises — the same idea underlies the Richardson extrapolation used to accelerate almost every first-order numerical scheme.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Pricing error against step count</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Raw tree</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Averaged with N+1</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>The same errors, magnified around the true price</h3></div>
+        <canvas id="cv4b" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The option</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>The vermilion trace is the sawtooth and the moss trace is the same information averaged in pairs. The averaged line is not merely smoother — it sits an order of magnitude closer to zero across the whole range, which is what makes this a fix rather than a cosmetic improvement.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Move the strike away from the money and <b>predict</b> what happens to the sawtooth's amplitude. The mechanism in the prose tells you the answer.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"K":100}' data-focus="cv4">At the money</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"K":130}' data-focus="cv4">Well out of the money</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"K":75}' data-focus="cv4">Deep in the money</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You price an option on a 100-step tree and again on 101 steps. The answers differ by six cents. What is wrong?</p>
+    <div class="opts">
+      <button>One of the trees has a bug</button>
+      <button data-ok="1">Nothing. Consecutive trees straddle the true price because the strike sits differently against the terminal nodes depending on the parity of N. Average the two and you land within a fraction of a cent</button>
+      <button>The volatility input is inconsistent between them</button>
+      <button>100 steps is too few for any option</button>
+    </div>
+    <div class="ans"><b>Nothing is wrong — that is the sawtooth.</b> This is worth recognising on sight, because the natural response is to hunt for a bug that does not exist. The disagreement between the two trees is itself the useful signal: it is roughly twice the error in either one, so it tells you how far off you are, and averaging removes most of it.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>What the lattice can do that the formula cannot</h2>
+    <p class="dek">Black–Scholes is faster, exact and closed-form. It also cannot price an American put, which is most of the equity option market.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">If the binomial model merely converged to Black–Scholes it would be a teaching device and nothing more. It survives on real desks because backward induction can answer questions the closed form cannot even express.</p>
+    <p>The reason is structural. Black–Scholes gives you a value at expiry and a formula for today, with nothing in between. A tree gives you a value at <em>every node</em> — every combination of price and time the model considers possible — and once you have that, you can apply a rule at each one.</p>
+    <p><b>Early exercise.</b> At every node, compare the continuation value with what exercising would pay and take the larger. That single line converts a European pricer into an American one. On a one-year 100-strike put with spot at 80, 30 volatility and rates at 10%, the European value is <b>16.2413</b> and the American is <b>20.2680</b> — a premium of <b>4.0267</b>, or <b>24.8%</b> of the option's value. <a href="early-exercise.html" style="color:var(--blue)">Page 08</a> is about when that premium exists; this is the machinery that computes it.</p>
+    <p><b>Discrete dividends.</b> A real stock pays lumps on known dates, not a continuous yield. In a tree you subtract the dividend from the stock price at the nodes where it goes ex. There is no clean way to say that in a closed form.</p>
+    <p><b>Barriers and path rules.</b> Anything that depends on where the price has been — knock-outs, triggers, exercise windows — can be enforced node by node.</p>
+    <p>The figure prices both styles on the same lattice and shades the nodes where exercising wins. Raise rates and the shaded region climbs; that region <em>is</em> the exercise boundary from page 08, drawn here as the discrete object the model actually computes rather than as a smooth curve.</p>
+    <p>The honest cost: the tree is slower, it converges as a sawtooth, and every extra feature slows it further. Desks use closed forms where they exist and lattices where they do not, which in equities means lattices for most of the book.</p>
+  </div>
+
+  <div class="mline">V<sub>node</sub> = max( e<sup>−r·dt</sup>[ pV<sub>u</sub> + (1−p)V<sub>d</sub> ] , &nbsp; exercise value )</div>
+  <p class="mread">Reads as: <b>at every node, take the better of holding on and cashing in.</b> Deleting the max turns it back into a European pricer, which is the whole difference between the two models.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The same lattice, priced both ways</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--verm)"></i>Exercise beats holding</span>
+            <span><i class="sw" style="background:var(--blue)"></i>Hold</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="320"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>The early-exercise premium against rates</h3></div>
+        <canvas id="cv5b" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The contract</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>The shaded nodes are where the model would exercise, and their upper edge is the exercise boundary drawn as the staircase it really is. Take rates to zero and the shading vanishes entirely for the put — the same result page 08 proves analytically, arrived at here by a machine that was never told about it.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set rates to zero with the put selected. <b>Predict</b> whether any node stays shaded.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"r":0,"cp":0}' data-focus="cv5">A put at zero rates</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"r":0.12,"cp":0}' data-focus="cv5">A put at twelve percent</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"r":0.12,"cp":1}' data-focus="cv5">A call at twelve percent</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why can't Black–Scholes price an American put?</p>
+    <div class="opts">
+      <button>Because American puts have a different payoff at expiry</button>
+      <button data-ok="1">Because it produces a value today and at expiry with nothing in between, and the American question is a decision at every intermediate price and time. The tree prices one because it values every node</button>
+      <button>Because the formula assumes zero interest rates</button>
+      <button>It can, using put-call parity</button>
+    </div>
+    <div class="ans"><b>There is nothing in between.</b> The closed form is a single expression for today's value; the American problem is a free-boundary problem whose answer is a decision rule across the whole price-time plane. The last answer is a common trap: parity is a European relation and does not hold as an equality for American options, which is precisely why page 08's put chapter needs a tree.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Greeks fall out of the lattice for free</h2>
+    <p class="dek">You already computed the neighbouring nodes. Delta and gamma are differences between numbers you have.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A tree gives you the option's value at nodes that surround today's price, which means it has already done the work for the first two derivatives. No re-pricing and no bumping required.</p>
+    <p>Delta is the difference between the two nodes one step out, divided by the difference in stock price between them — which is exactly chapter 01's Δ, now read off a big tree instead of a small one. On the one-year at-the-money call, a 500-step lattice gives <b>0.624192</b> against Black–Scholes' <b>0.624252</b>: a gap of <b>6 × 10<sup>−5</sup></b>, well inside the price error at that step count.</p>
+    <p>Gamma comes from three nodes two steps out, as a second difference. Theta comes almost free as well: the central node two steps out sits at the same stock price as today but two periods later, so the difference between them is the passage of time with nothing else changed.</p>
+    <p>Vega and rho are the exceptions. Neither volatility nor the interest rate is a coordinate of the lattice — they are baked into u, d and p — so getting those requires rebuilding the tree with a bumped input and differencing. That asymmetry is worth knowing when you are counting how expensive a full greek set is: delta, gamma and theta are nearly free, and every other greek costs another tree.</p>
+    <p>One caution the figure makes visible. Because the price itself oscillates with N, so do the greeks read off it — and gamma, being a second difference, is noisier than delta. If a tree-derived gamma looks unstable across step counts, the tree is not broken; you are differencing a sawtooth.</p>
+  </div>
+
+  <div class="mline">Δ ≈ (V<sub>u</sub> − V<sub>d</sub>) / (S<sub>u</sub> − S<sub>d</sub>) &nbsp;&nbsp;&nbsp; Θ ≈ (V<sub>ud</sub> − V<sub>0</sub>) / 2dt</div>
+  <p class="mread">Reads as: <b>delta is the slope between the two nodes beside you and theta is the change at the node directly ahead of you.</b> Both are differences between values the tree has already computed.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Tree greeks against the closed form, as steps increase</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>From the lattice</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Black–Scholes</span>
+          </span>
+        </div>
+        <canvas id="cv6" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>What to read</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>Switch between delta and gamma and watch how much noisier the second one is at the same step count. Gamma is a difference of differences, so it inherits the sawtooth twice — which is the practical reason tree gammas are usually computed on a finer lattice than the price needs.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Which greek costs an extra tree to compute?</p>
+    <div class="opts">
+      <button>Delta, because it needs the nodes either side</button>
+      <button data-ok="1">Vega. Volatility is not a coordinate of the lattice — it is baked into u and d — so you must rebuild the tree with a bumped input and difference the two prices</button>
+      <button>Gamma, because it is a second derivative</button>
+      <button>Theta, because time is not a tree coordinate</button>
+    </div>
+    <div class="ans"><b>Vega, and rho for the same reason.</b> Delta, gamma and theta are differences between nodes the tree already contains, because price and time <em>are</em> its two coordinates. Anything that changes the geometry of the lattice itself has to be priced by building a second lattice.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Where it breaks</h2>
+    <p class="dek">A tree with too few steps is not merely inaccurate. It can be arbitrageable.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The risk-neutral weight <b>p = (e<sup>r·dt</sup> − d)/(u − d)</b> is only a probability when it lands between zero and one. Nothing in the construction guarantees that, and when it fails the tree stops describing any coherent market at all.</p>
+    <p>The condition is that the risk-free growth over one step must sit between the down move and the up move: <b>d &lt; e<sup>r·dt</sup> &lt; u</b>. With the CRR choice that reduces to a neat requirement on the step length.</p>
+    <p>Fail it and the model says the stock will grow faster in its worst case than cash does, which is a free lunch. Concretely: at <b>10% volatility with rates at 8%</b>, a two-year option priced on a single step gives <b>p = 1.0761</b>. Stretch it to four years and p is <b>1.3867</b>. At 5% volatility with 10% rates, even a one-year single step gives <b>1.5388</b>. Low volatility and high rates is exactly the combination that breaks it, and it is not an exotic corner — it is short-dated rates products and low-volatility credit-like underlyings.</p>
+    <p>The fix is more steps, since the requirement is a bound on <b>dt</b>: keeping each step shorter than <b>(σ/r)²</b> years is sufficient. It is worth checking rather than assuming, because a tree with p outside the unit interval does not crash. It returns a number, and the number is wrong in a way that no amount of eyeballing will reveal.</p>
+    <p>Three further limits worth naming.</p>
+    <p><b>Convergence is first order and the cost is quadratic.</b> Chapter 03's arithmetic — ten times the steps for one more decimal, at a hundred times the work — is the reason lattices lose to closed forms and to finite-difference schemes wherever those are available.</p>
+    <p><b>The tree's distribution is not the world's.</b> Everything here inherits Black–Scholes' assumption of constant volatility and continuous, jump-free movement. A recombining lattice with fixed u and d cannot represent a volatility smile at all, which is why the model is a pricing engine rather than a description of the market — <a href="surface.html" style="color:var(--blue)">page 02</a> is the correction.</p>
+    <p><b>Discrete dividends break recombination.</b> Subtracting a fixed cash amount at an ex-date means up-then-down no longer lands where down-then-up does, and the tree stops folding. The usual repair is to build the lattice on the dividend-stripped price and add the dividend's present value back, which restores recombination at the cost of an approximation that <a href="early-exercise.html#c3" style="color:var(--blue)">page 08</a> flags in its own derivation.</p>
+  </div>
+
+  <div class="mline">d &lt; e<sup>r·dt</sup> &lt; u &nbsp;&nbsp;⟺&nbsp;&nbsp; dt &lt; (σ / r)²</div>
+  <p class="mread">Reads as: <b>each step must be short enough that volatility can outrun the interest rate over it.</b> Violate it and the tree contains an arbitrage rather than a price.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The risk-neutral weight, and the band it has to stay inside</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>p</span>
+            <span><i class="swl" style="background:var(--verm)"></i>The admissible band</span>
+          </span>
+        </div>
+        <canvas id="cv7" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The parameters</h4>
+        <div id="ctl7"></div>
+        <div class="kv" style="margin-top:20px" id="kv7"></div>
+      </div>
+    </div>
+    <figcaption>Drag volatility down or rates up and watch p climb out of the band. The readout names the step count at which the tree becomes admissible again — which is a number worth computing before trusting any lattice on a low-volatility, high-rate underlying.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set volatility to 8% and rates to 10% on a two-year option. <b>Predict</b> how many steps you need before the tree is admissible.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c7" data-patch='{"v":0.08,"r":0.10,"T":2}' data-focus="cv7">Low vol, high rates</button>
+      <button class="act ghost" data-preset="c7" data-patch='{"v":0.30,"r":0.05,"T":1}' data-focus="cv7">An ordinary equity option</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your tree returns p = 1.08. What does that mean?</p>
+    <div class="opts">
+      <button>The stock is 8% more likely to rise than fall</button>
+      <button data-ok="1">The model is arbitrageable: even the down move beats the risk-free rate, so the price it returns is not a price. Shorten the steps until p is back inside (0, 1)</button>
+      <button>Rounding error in the exponential</button>
+      <button>The volatility input is too high</button>
+    </div>
+    <div class="ans"><b>The tree contains an arbitrage.</b> p above one means <b>e<sup>r·dt</sup> &gt; u</b>: cash grows faster than the stock's best case, so shorting the stock and lending is riskless profit. The dangerous part is that nothing throws an error — you get a plausible number back. The fourth answer inverts the fix: it is <em>low</em> volatility, not high, that causes this.</div>
+  </div>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Drill it, then check yourself</h2>
+    <p class="dek">One-step trees are the arithmetic worth having automatic, because every larger tree is this repeated.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The generator below produces randomized one-step problems: hedge ratios, replication costs, risk-neutral weights and step-size limits. All four are the arithmetic a lattice performs thousands of times, and doing them by hand a dozen times is what turns the model from a black box into something you can reason about.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:150px"><span class="k">Difficulty</span>
+          <div class="seg" style="margin-top:5px;max-width:230px">
+            <button id="dEasy" aria-pressed="true">Core</button>
+            <button id="dHard" aria-pressed="false">Full</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>Core asks for hedge ratios and risk-neutral weights; Full adds replication costs and the step-size limit. The working is shown every time, right or wrong.</figcaption>
+  </figure>
+
+  <div class="prose" style="margin-top:46px">
+    <p>Six questions across the page.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">A stock at 100 goes to 110 or 90. A 100-strike call is worth 5. What happens to that price if the up move becomes twice as likely?</p>
+    <div class="opts">
+      <button>It roughly doubles</button>
+      <button data-ok="1">Nothing. The price is the cost of half a share funded by 45 of borrowing, and neither number depends on the odds</button>
+      <button>It rises, but by less than double</button>
+      <button>It cannot be determined without the new probability</button>
+    </div>
+    <div class="ans"><b>Nothing at all.</b> The replicating portfolio pays the option's payoff in <em>both</em> states, so its cost is fixed by the two stock prices rather than by their likelihoods. What changes is whether the trade is attractive, not what it costs.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">What defines the risk-neutral probability?</p>
+    <div class="opts">
+      <button>The market's consensus forecast</button>
+      <button data-ok="1">The weighting under which the stock's expected growth equals the risk-free rate. It is set by u, d and r, and contains no view about the real world</button>
+      <button>The historical frequency of up days</button>
+      <button>The probability implied by the option's delta</button>
+    </div>
+    <div class="ans"><b>The weighting that makes the stock drift at the risk-free rate.</b> On a 200-step tree the implied expected terminal price is 105.12711 against a forward of 105.12711 — that identity is the definition, not a coincidence.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">Doubling the number of steps in a CRR tree does what to the pricing error?</p>
+    <div class="opts">
+      <button>Quarters it — convergence is second order</button>
+      <button data-ok="1">Halves it. Measured ratios across N = 50 to 1600 run 1.998 to 2.005, which is first-order convergence</button>
+      <button>Reduces it by a factor of about ten</button>
+      <button>Leaves it unchanged once N exceeds 100</button>
+    </div>
+    <div class="ans"><b>Halves it.</b> First-order convergence with quadratic cost is the tree's central weakness, and it is why the averaging trick in chapter 04 matters so much in practice.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">Why do consecutive step counts give prices on opposite sides of the true value?</p>
+    <div class="opts">
+      <button>Floating-point rounding accumulates differently</button>
+      <button data-ok="1">Because the terminal nodes sit at S·u^(2j−N), so the strike lands on a node when N is even and between nodes when N is odd. The grid geometry alternates with parity</button>
+      <button>Because the risk-neutral probability alternates in sign</button>
+      <button>Because odd trees have no central node at expiry</button>
+    </div>
+    <div class="ans"><b>The strike's position against the terminal grid alternates with parity.</b> Recognising this on sight saves a bug hunt, and averaging N with N+1 turns the nuisance into roughly two extra decimal places.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 05</span>
+    <p class="q">What single change turns a European tree pricer into an American one?</p>
+    <div class="opts">
+      <button>Using a finer time grid near expiry</button>
+      <button data-ok="1">Taking the maximum of the continuation value and the exercise value at every node</button>
+      <button>Changing the terminal payoff</button>
+      <button>Adjusting the risk-neutral probability</button>
+    </div>
+    <div class="ans"><b>One max at every node.</b> That the American problem reduces to a single line is the reason lattices remain standard equipment — on a one-year 100-strike put with spot at 80 and rates at 10%, that line is worth 4.03 on a 16.24 option.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 07</span>
+    <p class="q">Which combination is most likely to push p outside (0, 1)?</p>
+    <div class="opts">
+      <button>High volatility and low rates, with many steps</button>
+      <button data-ok="1">Low volatility and high rates, with few steps. The requirement is dt &lt; (σ/r)², so a long step on a quiet underlying with expensive money fails it</button>
+      <button>Any tree with fewer than 50 steps</button>
+      <button>Deep in-the-money strikes</button>
+    </div>
+    <div class="ans"><b>Low volatility, high rates, long steps.</b> At 5% volatility and 10% rates a one-year single step gives p = 1.5388 — and the tree returns a number rather than an error, which is what makes the condition worth checking rather than assuming.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every tree on this page is Cox–Ross–Rubinstein with d = 1/u and constant volatility, priced on a European or American vanilla with no dividends. Real implementations differ in ways that matter: alternative parameterisations (Jarrow–Rudd, Leisen–Reimer, and the trinomial family) have different convergence behaviour and some remove the sawtooth entirely; discrete dividends require either a dividend-stripped lattice or a non-recombining one; and any production pricer has to handle the exercise schedule, settlement convention and corporate-action history of the specific contract. The model's deeper limitation is the one it shares with Black–Scholes — a single volatility and a continuous path — which is why it prices vanillas well and describes markets badly.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ══════════ lattice machinery ══════════ */
+function crrParams(v,r,dt){
+  const u=Math.exp(v*Math.sqrt(dt)), d=1/u;
+  return {u,d,p:(Math.exp(r*dt)-d)/(u-d),disc:Math.exp(-r*dt),dt};
+}
+/* full backward induction; returns the value grid so figures can read nodes */
+function lattice(S,K,T,v,r,N,cp,american){
+  const {u,d,p,disc,dt}=crrParams(v,r,T/N);
+  const px=(i,j)=>S*Math.pow(u,2*j-i);
+  const V=[]; for(let i=0;i<=N;i++)V.push(new Float64Array(i+1));
+  const EX=[]; for(let i=0;i<=N;i++)EX.push(new Uint8Array(i+1));
+  for(let j=0;j<=N;j++)V[N][j]=Math.max(0,cp?px(N,j)-K:K-px(N,j));
+  for(let i=N-1;i>=0;i--)for(let j=0;j<=i;j++){
+    const cont=disc*(p*V[i+1][j+1]+(1-p)*V[i+1][j]);
+    const ex=Math.max(0,cp?px(i,j)-K:K-px(i,j));
+    if(american&&ex>cont){V[i][j]=ex;EX[i][j]=1;} else V[i][j]=cont;
+  }
+  return {V,EX,u,d,p,disc,dt,px,N,price:V[0][0]};
+}
+const treePrice=(S,K,T,v,r,N,cp,am)=>lattice(S,K,T,v,r,N,cp,am).price;
+const stepLimit=(v,r)=>r<=1e-9?Infinity:Math.pow(v/r,2);
+const money=x=>(x<0?"−$":"$")+Math.abs(x).toLocaleString("en-US",{maximumFractionDigits:2});
+
+/* draw a recombining lattice: nodes on a log-price ladder */
+function drawLattice(o,L,S,opts){
+  const g=o.g, N=L.N, shade=opts&&opts.shade, valueFn=opts&&opts.valueFn;
+  const lo=S*Math.pow(L.d,N), hi=S*Math.pow(L.u,N);
+  const X=i=>o.P.l+(i/N)*o.pw;
+  const Y=s=>o.P.t+o.ph-(Math.log(s/lo)/Math.log(hi/lo))*o.ph;
+  g.save();
+  g.strokeStyle=C("--grey");g.globalAlpha=.18;g.lineWidth=.8;
+  for(let i=0;i<N;i++)for(let j=0;j<=i;j++){
+    const s=L.px(i,j);
+    g.beginPath();g.moveTo(X(i),Y(s));g.lineTo(X(i+1),Y(s*L.u));
+    g.moveTo(X(i),Y(s));g.lineTo(X(i+1),Y(s*L.d));g.stroke();
+  }
+  g.globalAlpha=1;
+  const rad=N>28?2:N>16?2.8:4;
+  for(let i=0;i<=N;i++)for(let j=0;j<=i;j++){
+    const s=L.px(i,j);
+    const lit=shade&&L.EX[i][j];
+    g.beginPath();g.arc(X(i),Y(s),lit?rad+1:rad,0,6.2832);
+    g.fillStyle=lit?C("--verm"):C("--blue");
+    g.globalAlpha=lit?.9:.45;g.fill();
+  }
+  g.globalAlpha=1;
+  if(valueFn&&N<=6){
+    g.fillStyle=C("--ink");g.font="9px 'IBM Plex Mono', monospace";
+    g.textAlign="center";g.textBaseline="bottom";
+    for(let i=0;i<=N;i++)for(let j=0;j<=i;j++)
+      g.fillText(valueFn(i,j),X(i),Y(L.px(i,j))-7);
+  }
+  g.restore();
+  return {X,Y,lo,hi};
+}
+function bars5(o,xs,ys,cols,wfrac){
+  const g=o.g,w=(o.pw/Math.max(1,xs.length))*(wfrac||0.6);
+  g.save();
+  for(let i=0;i<xs.length;i++){
+    g.fillStyle=typeof cols==="function"?cols(ys[i],i):cols;
+    const x=o.X(xs[i]),y=o.Y(ys[i]),y0=o.Y(0);
+    g.fillRect(x-w/2,Math.min(y,y0),Math.max(w,1),Math.abs(y0-y));
+  }
+  g.restore();
+}
+function tag(o,x,y,s,col,size,base){
+  const g=o.g;g.save();g.fillStyle=col||C("--ink");g.textAlign="center";
+  g.textBaseline=base||"bottom";g.font=(size||10)+"px 'IBM Plex Mono', monospace";
+  g.fillText(s,o.X(x),o.Y(y)+(base==="top"?6:-6));g.restore();
+}
+
+/* ══════════ HERO — a lattice unfolding ══════════ */
+(function(){
+  const cv=document.getElementById("heroCv");let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  function draw(ph){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    const N=22, u=Math.exp(0.30*Math.sqrt(1/N)), d=1/u;
+    const grow=0.5+0.5*Math.sin(ph);               // the tree breathing outward
+    const shown=Math.max(1,Math.round(N*(0.25+0.75*grow)));
+    const padL=w*0.07,padR=w*0.07,padT=h*0.20,padB=h*0.20;
+    const gw=w-padL-padR,gh=h-padT-padB;
+    const lo=Math.pow(d,N),hi=Math.pow(u,N);
+    const X=i=>padL+(i/N)*gw;
+    const Y=s=>padT+gh-(Math.log(s/lo)/Math.log(hi/lo))*gh;
+    g.strokeStyle=C("--grey");g.globalAlpha=.14;g.lineWidth=.8;
+    for(let i=0;i<shown;i++)for(let j=0;j<=i;j++){
+      const s=Math.pow(u,2*j-i);
+      g.beginPath();g.moveTo(X(i),Y(s));g.lineTo(X(i+1),Y(s*u));
+      g.moveTo(X(i),Y(s));g.lineTo(X(i+1),Y(s*d));g.stroke();
+    }
+    g.globalAlpha=1;
+    for(let i=0;i<=shown;i++)for(let j=0;j<=i;j++){
+      const s=Math.pow(u,2*j-i);
+      g.beginPath();g.arc(X(i),Y(s),1.9,0,6.2832);
+      g.fillStyle=(2*j-i)>0?C("--blue"):C("--verm");
+      g.globalAlpha=.16+.34*(i/Math.max(1,shown));g.fill();
+    }
+    g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;draw((ts-t0)/2800);raf=requestAnimationFrame(frame);}
+  size();if(RM)draw(1.6);else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)draw(1.6);else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════ 01 — one step ══════════ */
+const s1={u:1.10,d:0.90,K:100,pReal:0.50,r:0};
+(function(){
+  const S=100;
+  sliders(document.getElementById("ctl1"),[
+    {id:"a1",k:"pReal",lbl:"P",name:"Real chance of an up move",min:.01,max:.99,step:.01,fmt:pct},
+    {id:"b1",k:"u",lbl:"u",name:"Up multiplier",min:1.02,max:1.6,step:.01,fmt:v=>"×"+v.toFixed(2)},
+    {id:"c1d",k:"d",lbl:"d",name:"Down multiplier",min:.5,max:.98,step:.01,fmt:v=>"×"+v.toFixed(2)},
+    {id:"d1",k:"K",lbl:"K",name:"Strike",min:70,max:130,step:1,fmt:v=>v.toFixed(0)},
+    {id:"e1",k:"r",lbl:"r",name:"Rate over the period",min:0,max:.15,step:.005,fmt:pct2}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function calc(){
+    const Su=S*s1.u, Sd=S*s1.d;
+    const Cu=Math.max(0,Su-s1.K), Cd=Math.max(0,Sd-s1.K);
+    const delta=(Cu-Cd)/(Su-Sd);
+    const B=(delta*Sd-Cd)/Math.exp(s1.r);
+    const price=delta*S-B;
+    const p=(Math.exp(s1.r)-s1.d)/(s1.u-s1.d);
+    return {Su,Sd,Cu,Cd,delta,B,price,p};
+  }
+  function draw(){
+    const q=calc();
+    const o=Fig(document.getElementById("cv1"),{h:300,x0:0,x1:1,y0:0,y1:1,pad:{l:14,r:14,t:14,b:14}});
+    const g=o.g;
+    const xL=o.P.l+o.pw*0.16, xR=o.P.l+o.pw*0.74;
+    const yM=o.P.t+o.ph*0.52, yU=o.P.t+o.ph*0.20, yD=o.P.t+o.ph*0.84;
+    g.save();
+    g.strokeStyle=C("--grey");g.lineWidth=1.4;g.globalAlpha=.5;
+    g.beginPath();g.moveTo(xL,yM);g.lineTo(xR,yU);g.moveTo(xL,yM);g.lineTo(xR,yD);g.stroke();
+    g.globalAlpha=1;
+    const node=(x,y,col,r)=>{g.beginPath();g.arc(x,y,r||9,0,6.2832);g.fillStyle=col;g.globalAlpha=.9;g.fill();g.globalAlpha=1;};
+    node(xL,yM,C("--ink"));node(xR,yU,C("--moss"));node(xR,yD,C("--verm"));
+    g.font="600 12px 'IBM Plex Mono', monospace";g.fillStyle=C("--ink");
+    g.textAlign="right";g.textBaseline="middle";
+    g.fillText("S = "+S.toFixed(0),xL-16,yM-8);
+    g.font="11px 'IBM Plex Mono', monospace";g.fillStyle=C("--blue");
+    g.fillText("C = "+q.price.toFixed(4),xL-16,yM+10);
+    g.textAlign="left";g.fillStyle=C("--ink");g.font="600 12px 'IBM Plex Mono', monospace";
+    g.fillText(q.Su.toFixed(2),xR+16,yU-8);
+    g.fillText(q.Sd.toFixed(2),xR+16,yD-8);
+    g.font="11px 'IBM Plex Mono', monospace";g.fillStyle=C("--blue");
+    g.fillText("pays "+q.Cu.toFixed(2),xR+16,yU+10);
+    g.fillText("pays "+q.Cd.toFixed(2),xR+16,yD+10);
+    // the replicating portfolio, written on the tree
+    g.textAlign="center";g.fillStyle=C("--ochre");g.font="600 11px 'IBM Plex Mono', monospace";
+    g.fillText("Δ = "+q.delta.toFixed(4)+"  shares",(xL+xR)/2,o.P.t+o.ph*0.30);
+    g.fillText("borrow "+q.B.toFixed(3),(xL+xR)/2,o.P.t+o.ph*0.30+15);
+    g.fillStyle=C("--grey");g.font="10px 'IBM Plex Mono', monospace";
+    g.fillText("real P(up) = "+(s1.pReal*100).toFixed(0)+"%   ·   risk-neutral p = "+q.p.toFixed(4),
+      (xL+xR)/2,o.P.t+o.ph*0.97);
+    g.restore();
+
+    // expected payoff vs replication cost, across the odds
+    const xs=[],exp=[],cost=[];
+    for(let i=0;i<=100;i++){const pr=i/100;xs.push(pr);
+      exp.push(pr*q.Cu+(1-pr)*q.Cd); cost.push(q.price);}
+    const hi=Math.max(q.Cu,q.price)*1.2+.5;
+    const o2=Fig(document.getElementById("cv1b"),{h:200,x0:0,x1:1,y0:0,y1:hi,pad:{l:56}});
+    axes(o2,v=>(v*100).toFixed(0)+"%",v=>v.toFixed(1),5,4);
+    clip(o2,()=>{
+      line(o2,xs,exp,C("--blue"),2.6);
+      line(o2,xs,cost,C("--verm"),3);
+    });
+    vline(o2,s1.pReal,C("--ink"),"P");
+    (function(){const g2=o2.g;g2.save();g2.font="10px 'IBM Plex Mono', monospace";
+      g2.fillStyle=C("--blue");g2.textAlign="left";g2.textBaseline="bottom";
+      g2.fillText("expected payoff",o2.X(0.03),o2.Y(q.Cu*0.92));
+      g2.fillStyle=C("--verm");
+      g2.fillText("replication cost — flat",o2.X(0.03),o2.Y(q.price)-6);
+      g2.restore();})();
+
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Up / down",q.Su.toFixed(2)+" / "+q.Sd.toFixed(2)],
+      ["Payoffs",q.Cu.toFixed(2)+" / "+q.Cd.toFixed(2)],
+      ["Δ shares",q.delta.toFixed(6)],
+      ["Borrow",q.B.toFixed(4)],
+      ["Replication cost",q.price.toFixed(6)],
+      ["Risk-neutral p",q.p.toFixed(6)],
+      ["Discounted E[payoff]",(Math.exp(-s1.r)*(q.p*q.Cu+(1-q.p)*q.Cd)).toFixed(6)],
+      ["—","—"],
+      ["Real P(up)",pct(s1.pReal)],
+      ["Real E[payoff]",(s1.pReal*q.Cu+(1-s1.pReal)*q.Cd).toFixed(4)],
+      ["Price moved?","no"]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — the probability that is not one ══════════ */
+const s2={mu:0.12,v:0.30,r:0.05,T:1,N:60};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"a2",k:"mu",lbl:"μ",name:"Real-world drift",min:-.4,max:.5,step:.01,fmt:pct},
+    {id:"b2",k:"v",lbl:"σ",name:"Volatility",min:.1,max:.7,step:.01,fmt:pct},
+    {id:"c2r",k:"r",lbl:"r",name:"Risk-free rate",min:0,max:.12,step:.005,fmt:pct2}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function dist(pUp){
+    const N=s2.N,{u,d}=crrParams(s2.v,s2.r,s2.T/N);
+    const xs=[],ws=[];let c=1;
+    for(let j=0;j<=N;j++){
+      xs.push(100*Math.pow(u,2*j-N));
+      ws.push(c*Math.pow(pUp,j)*Math.pow(1-pUp,N-j));
+      c=c*(N-j)/(j+1);
+    }
+    return {xs,ws};
+  }
+  function draw(){
+    const N=s2.N,dt=s2.T/N,{u,d,p}=crrParams(s2.v,s2.r,dt);
+    // real-world up probability that reproduces drift mu on this lattice
+    const pReal=Math.min(0.999,Math.max(0.001,(Math.exp(s2.mu*dt)-d)/(u-d)));
+    const A=dist(pReal), B=dist(p);
+    const hi=Math.max(Math.max.apply(null,A.ws),Math.max.apply(null,B.ws))*1.15;
+    const o=Fig(document.getElementById("cv2"),{h:290,x0:A.xs[0],x1:A.xs[A.xs.length-1],y0:0,y1:hi,pad:{l:54}});
+    axes(o,v=>v.toFixed(0),()=>"",5,3);
+    clip(o,()=>{
+      line(o,A.xs,A.ws,C("--blue"),2.4);
+      line(o,B.xs,B.ws,C("--verm"),2.4);
+    });
+    let eA=0,eB=0;
+    for(let i=0;i<A.xs.length;i++){eA+=A.ws[i]*A.xs[i];eB+=B.ws[i]*B.xs[i];}
+    vline(o,eA,C("--blue"),"E real");
+    vline(o,eB,C("--verm"),"E rn");
+
+    const fwd=100*Math.exp(s2.r*s2.T);
+    const o2=Fig(document.getElementById("cv2b"),{h:190,x0:-0.6,x1:2.6,y0:Math.min(eA,eB,fwd)*0.92,y1:Math.max(eA,eB,fwd)*1.06,pad:{l:54,b:32}});
+    axes(o2,()=>"",v=>v.toFixed(1),1,4);
+    bars5(o2,[0,1,2],[eA,eB,fwd],(v,i)=>i===0?C("--blue"):i===1?C("--verm"):C("--moss"),0.42);
+    [["real world",eA],["risk-neutral",eB],["forward",fwd]].forEach((t,i)=>{
+      tag(o2,i,t[1],t[1].toFixed(3),C("--ink"),9.5);
+      const g=o2.g;g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+      g.font="9px 'IBM Plex Mono', monospace";g.fillText(t[0],o2.X(i),o2.P.t+o2.ph+8);g.restore();
+    });
+
+    const price=treePrice(100,100,s2.T,s2.v,s2.r,N,true,false);
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Steps",String(N)],
+      ["Real drift",pct(s2.mu)],
+      ["Real p(up)",pReal.toFixed(6)],
+      ["Risk-neutral p",p.toFixed(6)],
+      ["Real E[S_T]",eA.toFixed(4)],
+      ["Risk-neutral E[S_T]",eB.toFixed(4)],
+      ["Forward S·e^rT",fwd.toFixed(4)],
+      ["  rn minus forward",(eB-fwd).toExponential(1)],
+      ["100-strike call",price.toFixed(6)],
+      ["Depends on μ?","no"]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — many steps ══════════ */
+const s3={N:8,v:0.30,r:0.05,T:1,K:100};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"a3",k:"N",lbl:"N",name:"Steps",min:1,max:44,step:1,fmt:v=>v.toFixed(0)},
+    {id:"b3",k:"v",lbl:"σ",name:"Volatility",min:.1,max:.7,step:.01,fmt:pct},
+    {id:"c3r",k:"r",lbl:"r",name:"Rate",min:0,max:.12,step:.005,fmt:pct2},
+    {id:"d3",k:"K",lbl:"K",name:"Strike",min:70,max:135,step:1,fmt:v=>v.toFixed(0)}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  function draw(){
+    const N=Math.round(s3.N);
+    const L=lattice(100,s3.K,s3.T,s3.v,s3.r,N,true,false);
+    const o=Fig(document.getElementById("cv3"),{h:330,x0:0,x1:1,y0:0,y1:1,pad:{l:40,r:74,t:12,b:26}});
+    const geo=drawLattice(o,L,100,{valueFn:(i,j)=>L.V[i][j].toFixed(1)});
+    // terminal distribution on the right margin
+    (function(){
+      const g=o.g;const {p}=L;let c=1;const ws=[];
+      for(let j=0;j<=N;j++){ws.push(c*Math.pow(p,j)*Math.pow(1-p,N-j));c=c*(N-j)/(j+1);}
+      const mx=Math.max.apply(null,ws);
+      g.save();g.fillStyle=C("--ochre");g.globalAlpha=.55;
+      for(let j=0;j<=N;j++){
+        const y=geo.Y(L.px(N,j)), wdt=(ws[j]/mx)*60;
+        g.fillRect(o.P.l+o.pw+4,y-1.6,wdt,3.2);
+      }
+      g.restore();
+    })();
+    const bsp=bs(100,s3.K,s3.T,s3.v,s3.r,0,true).price;
+
+    const xs=[],ys=[],ref=[];
+    for(let n=1;n<=60;n++){xs.push(n);ys.push(treePrice(100,s3.K,s3.T,s3.v,s3.r,n,true,false));ref.push(bsp);}
+    const lo=Math.min.apply(null,ys),hi=Math.max.apply(null,ys);
+    const o2=Fig(document.getElementById("cv3b"),{h:200,x0:1,x1:60,y0:Math.min(lo,bsp)*0.97,y1:Math.max(hi,bsp)*1.03,pad:{l:56}});
+    axes(o2,v=>v.toFixed(0),v=>v.toFixed(2),5,4);
+    clip(o2,()=>{
+      line(o2,xs,ref,C("--moss"),2,[5,4]);
+      line(o2,xs,ys,C("--blue"),2.2);
+    });
+    vline(o2,N,C("--ink"),"N");
+
+    const pr=L.price;
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Steps",String(N)],
+      ["Nodes",String((N+1)*(N+2)/2)],
+      ["u / d",L.u.toFixed(5)+" / "+L.d.toFixed(5)],
+      ["Risk-neutral p",L.p.toFixed(6)],
+      ["Binomial price",pr.toFixed(6)],
+      ["Black–Scholes",bsp.toFixed(6)],
+      ["Error",(pr-bsp>=0?"+":"")+(pr-bsp).toFixed(6)],
+      ["Error at 2N",(treePrice(100,s3.K,s3.T,s3.v,s3.r,2*N,true,false)-bsp).toFixed(6)],
+      ["Ratio",Math.abs(treePrice(100,s3.K,s3.T,s3.v,s3.r,2*N,true,false)-bsp)>1e-12
+        ? Math.abs((pr-bsp)/(treePrice(100,s3.K,s3.T,s3.v,s3.r,2*N,true,false)-bsp)).toFixed(3) : "—"]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — the sawtooth ══════════ */
+const s4={K:100,v:0.30,r:0.05,T:1};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"a4",k:"K",lbl:"K",name:"Strike",min:70,max:135,step:1,fmt:v=>v.toFixed(0)},
+    {id:"b4",k:"v",lbl:"σ",name:"Volatility",min:.1,max:.7,step:.01,fmt:pct},
+    {id:"c4r",k:"r",lbl:"r",name:"Rate",min:0,max:.12,step:.005,fmt:pct2}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const bsp=bs(100,s4.K,s4.T,s4.v,s4.r,0,true).price;
+    const xs=[],raw=[],avg=[];
+    for(let n=8;n<=90;n++){
+      const a=treePrice(100,s4.K,s4.T,s4.v,s4.r,n,true,false);
+      const b=treePrice(100,s4.K,s4.T,s4.v,s4.r,n+1,true,false);
+      xs.push(n);raw.push(a-bsp);avg.push((a+b)/2-bsp);
+    }
+    const lim=Math.max.apply(null,raw.map(Math.abs))*1.15;
+    const o=Fig(document.getElementById("cv4"),{h:300,x0:8,x1:90,y0:-lim,y1:lim,pad:{l:62}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(3),5,4);
+    clip(o,()=>{
+      line(o,[8,90],[0,0],C("--grey"),1.2,[3,3]);
+      line(o,xs,raw,C("--verm"),1.8);
+      line(o,xs,avg,C("--moss"),2.6);
+    });
+    const lim2=Math.max(1e-4,Math.max.apply(null,avg.map(Math.abs))*1.5);
+    const o2=Fig(document.getElementById("cv4b"),{h:190,x0:8,x1:90,y0:-lim2,y1:lim2,pad:{l:62}});
+    axes(o2,v=>v.toFixed(0),v=>v.toFixed(4),5,4);
+    clip(o2,()=>{
+      line(o2,[8,90],[0,0],C("--grey"),1.2,[3,3]);
+      line(o2,xs,avg,C("--moss"),2.6);
+    });
+    const a25=treePrice(100,s4.K,s4.T,s4.v,s4.r,25,true,false);
+    const a26=treePrice(100,s4.K,s4.T,s4.v,s4.r,26,true,false);
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Black–Scholes",bsp.toFixed(6)],
+      ["N=40 error",(treePrice(100,s4.K,s4.T,s4.v,s4.r,40,true,false)-bsp).toFixed(6)],
+      ["N=41 error",(treePrice(100,s4.K,s4.T,s4.v,s4.r,41,true,false)-bsp).toFixed(6)],
+      ["N=42 error",(treePrice(100,s4.K,s4.T,s4.v,s4.r,42,true,false)-bsp).toFixed(6)],
+      ["N=43 error",(treePrice(100,s4.K,s4.T,s4.v,s4.r,43,true,false)-bsp).toFixed(6)],
+      ["—","—"],
+      ["N=25 raw error",(a25-bsp).toFixed(6)],
+      ["25/26 averaged",((a25+a26)/2-bsp).toFixed(6)],
+      ["Improvement",Math.abs((a25+a26)/2-bsp)>1e-12?(Math.abs(a25-bsp)/Math.abs((a25+a26)/2-bsp)).toFixed(0)+"×":"—"]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — what the lattice can do ══════════ */
+const s5={r:0.10,v:0.30,K:100,S:80,cp:0,N:22};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"a5",k:"cp",lbl:"",name:"Contract",min:0,max:1,step:1,fmt:v=>v?"Call":"Put"},
+    {id:"b5",k:"r",lbl:"r",name:"Rate",min:0,max:.15,step:.005,fmt:pct2},
+    {id:"c5s",k:"S",lbl:"S",name:"Spot",min:60,max:130,step:1,fmt:v=>v.toFixed(0)},
+    {id:"d5",k:"v",lbl:"σ",name:"Volatility",min:.1,max:.7,step:.01,fmt:pct},
+    {id:"e5",k:"N",lbl:"N",name:"Steps drawn",min:6,max:40,step:1,fmt:v=>v.toFixed(0)}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function draw(){
+    const cp=s5.cp>.5,N=Math.round(s5.N);
+    const L=lattice(s5.S,s5.K,1,s5.v,s5.r,N,cp,true);
+    const o=Fig(document.getElementById("cv5"),{h:320,x0:0,x1:1,y0:0,y1:1,pad:{l:40,r:14,t:12,b:26}});
+    drawLattice(o,L,s5.S,{shade:true});
+    (function(){const g=o.g;g.save();g.fillStyle=C("--grey");
+      g.font="9.5px 'IBM Plex Mono', monospace";g.textAlign="left";g.textBaseline="top";
+      let n=0;for(let i=0;i<=N;i++)for(let j=0;j<=i;j++)if(L.EX[i][j])n++;
+      g.fillText(n+" of "+((N+1)*(N+2)/2)+" nodes exercise early",o.P.l+4,o.P.t+2);
+      g.restore();})();
+
+    const xs=[],prem=[];
+    for(let i=0;i<=40;i++){
+      const r=i*(0.15/40);
+      const am=treePrice(s5.S,s5.K,1,s5.v,r,220,cp,true);
+      const eu=treePrice(s5.S,s5.K,1,s5.v,r,220,cp,false);
+      xs.push(r*100);prem.push(am-eu);
+    }
+    const o2=Fig(document.getElementById("cv5b"),{h:190,x0:0,x1:15,y0:0,y1:Math.max(0.5,Math.max.apply(null,prem)*1.15),pad:{l:58}});
+    axes(o2,v=>v.toFixed(0)+"%",v=>v.toFixed(2),5,4);
+    clip(o2,()=>line(o2,xs,prem,C("--verm"),2.6));
+    vline(o2,s5.r*100,C("--ink"),"r");
+
+    const am=treePrice(s5.S,s5.K,1,s5.v,s5.r,400,cp,true);
+    const eu=treePrice(s5.S,s5.K,1,s5.v,s5.r,400,cp,false);
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Contract",cp?"American call":"American put"],
+      ["Spot / strike",s5.S.toFixed(0)+" / "+s5.K.toFixed(0)],
+      ["Rate",pct2(s5.r)],
+      ["European",eu.toFixed(4)],
+      ["American",am.toFixed(4)],
+      ["Early-exercise premium",(am-eu).toFixed(4)],
+      ["  as % of European",eu>1e-9?pct((am-eu)/eu):"—"],
+      ["Exercise nodes",String((()=>{let n=0;for(let i=0;i<=N;i++)for(let j=0;j<=i;j++)if(L.EX[i][j])n++;return n;})())]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — greeks off the lattice ══════════ */
+const s6={which:0,v:0.30,r:0.05,K:100};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"a6",k:"which",lbl:"",name:"Greek",min:0,max:1,step:1,fmt:v=>v?"Gamma":"Delta"},
+    {id:"b6",k:"v",lbl:"σ",name:"Volatility",min:.1,max:.7,step:.01,fmt:pct},
+    {id:"c6k",k:"K",lbl:"K",name:"Strike",min:80,max:125,step:1,fmt:v=>v.toFixed(0)}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  function treeGreek(N){
+    const S=100,L=lattice(S,s6.K,1,s6.v,s6.r,N,true,false);
+    const Su=S*L.u,Sd=S*L.d;
+    const delta=(L.V[1][1]-L.V[1][0])/(Su-Sd);
+    const Suu=S*L.u*L.u,Sdd=S*L.d*L.d;
+    const dU=(L.V[2][2]-L.V[2][1])/(Suu-S), dD=(L.V[2][1]-L.V[2][0])/(S-Sdd);
+    const gamma=(dU-dD)/((Suu-Sdd)/2);
+    return {delta,gamma};
+  }
+  function draw(){
+    const g0=bs(100,s6.K,1,s6.v,s6.r,0,true);
+    const want=s6.which<0.5?g0.delta:g0.gamma;
+    const xs=[],ys=[],ref=[];
+    for(let n=6;n<=140;n+=2){
+      const t=treeGreek(n);
+      xs.push(n);ys.push(s6.which<0.5?t.delta:t.gamma);ref.push(want);
+    }
+    const spread=Math.max.apply(null,ys.map(y=>Math.abs(y-want)))*1.3||want*0.05;
+    const o=Fig(document.getElementById("cv6"),{h:290,x0:6,x1:140,y0:want-spread,y1:want+spread,pad:{l:70}});
+    axes(o,v=>v.toFixed(0),v=>s6.which<0.5?v.toFixed(4):v.toFixed(5),5,4);
+    clip(o,()=>{
+      line(o,xs,ref,C("--moss"),2,[5,4]);
+      line(o,xs,ys,C("--blue"),2.2);
+    });
+    const t500=treeGreek(500);
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Reading",s6.which<0.5?"Delta":"Gamma"],
+      ["From a 500-step tree",(s6.which<0.5?t500.delta:t500.gamma).toFixed(6)],
+      ["Black–Scholes",want.toFixed(6)],
+      ["Gap",((s6.which<0.5?t500.delta:t500.gamma)-want).toExponential(2)],
+      ["—","—"],
+      ["Delta (500 steps)",t500.delta.toFixed(6)],
+      ["Delta (closed form)",g0.delta.toFixed(6)],
+      ["Costs an extra tree","vega, rho"]
+    ]);
+  }
+})();
+
+/* ══════════ 07 — where it breaks ══════════ */
+const s7={v:0.10,r:0.08,T:2};
+(function(){
+  sliders(document.getElementById("ctl7"),[
+    {id:"a7",k:"v",lbl:"σ",name:"Volatility",min:.03,max:.6,step:.01,fmt:pct},
+    {id:"b7",k:"r",lbl:"r",name:"Rate",min:.005,max:.2,step:.005,fmt:pct2},
+    {id:"c7t",k:"T",lbl:"T",name:"Years",min:.25,max:5,step:.25,fmt:v=>v.toFixed(2)+"y"}
+  ],s7,()=>draw(),"c7");
+  window.draw7=draw;
+  function draw(){
+    const xs=[],ps=[],hiB=[],loB=[];
+    for(let n=1;n<=40;n++){
+      const {p}=crrParams(s7.v,s7.r,s7.T/n);
+      xs.push(n);ps.push(p);hiB.push(1);loB.push(0);
+    }
+    const lo=Math.min(0,Math.min.apply(null,ps))-0.1;
+    const hi=Math.max(1,Math.max.apply(null,ps))+0.1;
+    const o=Fig(document.getElementById("cv7"),{h:290,x0:1,x1:40,y0:lo,y1:hi,pad:{l:56}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(2),5,4);
+    clip(o,()=>{
+      const g=o.g;g.save();g.globalAlpha=.12;g.fillStyle=C("--verm");
+      g.fillRect(o.P.l,o.Y(1),o.pw,Math.max(0,o.Y(hi)-o.Y(1)));
+      g.fillRect(o.P.l,o.Y(lo),o.pw,Math.max(0,o.Y(0)-o.Y(lo)));
+      g.restore();
+      line(o,[1,40],[1,1],C("--verm"),1.8,[4,3]);
+      line(o,[1,40],[0,0],C("--verm"),1.8,[4,3]);
+      line(o,xs,ps,C("--blue"),2.8);
+    });
+    const lim=stepLimit(s7.v,s7.r);
+    const need=isFinite(lim)?Math.max(1,Math.ceil(s7.T/lim)):1;
+    vline(o,need,C("--ochre"),"N min");
+
+    const p1=crrParams(s7.v,s7.r,s7.T/1).p;
+    document.getElementById("kv7").innerHTML=kvHTML([
+      ["Volatility",pct2(s7.v)],
+      ["Rate",pct2(s7.r)],
+      ["Years",s7.T.toFixed(2)],
+      ["Step limit (σ/r)²",isFinite(lim)?lim.toFixed(4)+" y":"∞"],
+      ["p at N = 1",p1.toFixed(4)],
+      ["Admissible at N = 1?",(p1>0&&p1<1)?"yes":"NO — arbitrage"],
+      ["Smallest safe N",String(need)],
+      ["p at that N",crrParams(s7.v,s7.r,s7.T/need).p.toFixed(4)]
+    ]);
+  }
+})();
+
+/* ══════════ 08 — drills ══════════ */
+(function(){
+  let hard=false,score=0,asked=0,streak=0,best=0,cur=null;
+  const E=id=>document.getElementById(id);
+  function make(){
+    const R=Math.random;
+    const kinds=hard?[0,1,2,3]:[0,1];
+    const t=kinds[Math.floor(R()*kinds.length)];
+    const S=[50,60,80,100,120,150][Math.floor(R()*6)];
+    const up=1.05+Math.floor(R()*12)*0.025, dn=1/up;
+    const Su=S*up, Sd=S*dn;
+    const K=Math.round(S*(0.9+R()*0.2));
+    const Cu=Math.max(0,Su-K), Cd=Math.max(0,Sd-K);
+    if(t===0){
+      const delta=(Cu-Cd)/(Su-Sd);
+      return {kind:"Hedge ratio",unit:"shares",a:delta,tol:Math.max(0.005,Math.abs(delta)*0.02),
+        q:"A stock at <b>"+S+"</b> goes to <b>"+Su.toFixed(2)+"</b> or <b>"+Sd.toFixed(2)+"</b> in one step. A <b>"+K+"</b>-strike call pays <b>"+Cu.toFixed(2)+"</b> or <b>"+Cd.toFixed(2)+"</b>. How many shares does the replicating portfolio hold?",
+        w:"Δ = (C<sub>u</sub> − C<sub>d</sub>)/(S<sub>u</sub> − S<sub>d</sub>) = ("+Cu.toFixed(2)+" − "+Cd.toFixed(2)+")/("+Su.toFixed(2)+" − "+Sd.toFixed(2)+") = <b>"+delta.toFixed(4)+"</b>."};
+    }
+    const r=[0.01,0.02,0.03,0.04,0.05,0.06,0.08][Math.floor(R()*7)];
+    const dt=[0.25,0.5,1][Math.floor(R()*3)];
+    if(t===1){
+      const p=(Math.exp(r*dt)-dn)/(up-dn);
+      return {kind:"Risk-neutral weight",unit:"",a:p,tol:0.01,
+        q:"Up multiplier <b>"+up.toFixed(3)+"</b>, down <b>"+dn.toFixed(4)+"</b>, rate <b>"+(r*100).toFixed(0)+"%</b>, step <b>"+dt+"</b> years. What is the risk-neutral weight p?",
+        w:"p = (e^(r·dt) − d)/(u − d) = ("+Math.exp(r*dt).toFixed(4)+" − "+dn.toFixed(4)+")/("+up.toFixed(3)+" − "+dn.toFixed(4)+") = <b>"+p.toFixed(4)+"</b>."};
+    }
+    if(t===2){
+      const delta=(Cu-Cd)/(Su-Sd);
+      const B=(delta*Sd-Cd)/Math.exp(r*dt);
+      const price=delta*S-B;
+      return {kind:"Replication cost",unit:"$",a:price,tol:Math.max(0.02,Math.abs(price)*0.02),
+        q:"Same one-step tree: stock <b>"+S+"</b> to <b>"+Su.toFixed(2)+"</b> or <b>"+Sd.toFixed(2)+"</b>, call payoffs <b>"+Cu.toFixed(2)+"</b> / <b>"+Cd.toFixed(2)+"</b>, rate <b>"+(r*100).toFixed(0)+"%</b> over <b>"+dt+"</b> years. What does the option cost?",
+        w:"Δ = "+delta.toFixed(4)+", borrow B = (ΔS<sub>d</sub> − C<sub>d</sub>)·e^(−r·dt) = "+B.toFixed(3)+", so C = ΔS − B = "+delta.toFixed(4)+"×"+S+" − "+B.toFixed(3)+" = <b>"+price.toFixed(3)+"</b>."};
+    }
+    const v=[0.05,0.08,0.10,0.15,0.20,0.30][Math.floor(R()*6)];
+    const rr=[0.04,0.06,0.08,0.10,0.12][Math.floor(R()*5)];
+    const T=[1,2,3][Math.floor(R()*3)];
+    const lim=Math.pow(v/rr,2), need=Math.max(1,Math.ceil(T/lim));
+    return {kind:"Smallest safe N",unit:"steps",a:need,tol:0.5,
+      q:"Volatility <b>"+(v*100).toFixed(0)+"%</b>, rate <b>"+(rr*100).toFixed(0)+"%</b>, <b>"+T+"</b> years. What is the fewest steps that keeps p inside (0, 1)?",
+      w:"Need dt &lt; (σ/r)² = ("+v+"/"+rr+")² = "+lim.toFixed(4)+" years, so N &gt; T/that = "+(T/lim).toFixed(3)+" — the smallest whole number is <b>"+need+"</b>."};
+  }
+  function next(){
+    cur=make();
+    E("dKind").textContent=cur.kind;
+    E("dText").innerHTML=cur.q;
+    E("dUnit").textContent=cur.unit;
+    E("dInput").value="";
+    E("drill").classList.remove("done");
+    focusSoft(E("dInput"),E("drill"));
+  }
+  function submit(){
+    if(!cur||E("drill").classList.contains("done"))return;
+    const raw=parseFloat(String(E("dInput").value).replace(/[$,\s]/g,""));
+    asked++;
+    const ok=isFinite(raw)&&Math.abs(raw-cur.a)<=cur.tol;
+    if(ok){score++;streak++;if(streak>best)best=streak;} else streak=0;
+    E("dVerdict").textContent=ok?"CORRECT":("NOT QUITE — the answer is "+cur.a.toFixed(cur.unit==="steps"?0:4));
+    E("dVerdict").className="vd "+(ok?"ok":"no");
+    E("dWork").innerHTML=cur.w;
+    E("dScore").textContent=score+" / "+asked;
+    E("dStreak").textContent=String(streak);
+    E("dBest").textContent=String(best);
+    E("drill").classList.add("done");
+  }
+  E("dSubmit").addEventListener("click",submit);
+  E("dInput").addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+  E("dNext").addEventListener("click",next);
+  E("dSkip").addEventListener("click",()=>{streak=0;E("dStreak").textContent="0";next();});
+  E("dEasy").addEventListener("click",()=>{hard=false;E("dEasy").setAttribute("aria-pressed","true");E("dHard").setAttribute("aria-pressed","false");next();});
+  E("dHard").addEventListener("click",()=>{hard=true;E("dHard").setAttribute("aria-pressed","true");E("dEasy").setAttribute("aria-pressed","false");next();});
+  window.drawDrill=next;
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
