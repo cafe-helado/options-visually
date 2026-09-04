@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Carry, Forwards and Futures — Options, visually</title>
+<meta name="description" content="A forward price is built, not forecast. Cost of carry, contract specifications, Black-76, and the early-exercise rule that inverts completely when the underlying is a futures contract.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Carry, Forwards and Futures — Options, visually">
+<meta property="og:description" content="A forward price is built, not forecast. Cost of carry, contract specifications, Black-76, and the early-exercise rule that inverts completely when the underlying is a futures contract.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 13 · Carry, Forwards and Futures</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Built, not forecast</span><i></i></a>
+  <a href="#c2"><span>What carry is</span><i></i></a>
+  <a href="#c3"><span>The contract</span><i></i></a>
+  <a href="#c4"><span>Options on futures</span><i></i></a>
+  <a href="#c5"><span>The rule inverts</span><i></i></a>
+  <a href="#c6"><span>Index products</span><i></i></a>
+  <a href="#c7"><span>Where it breaks</span><i></i></a>
+  <a href="#c8"><span>Drills</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 13</div>
+    <h1>The forward is the real <em>underlying</em></h1>
+    <p class="sub">Options are not priced off the stock price. They are priced off the forward, and once you see that, options on futures become the simple case and options on shares become the complicated one — including a rule from page 08 that inverts completely.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This is the plumbing chapter the series skipped. <a href="black-scholes.html" style="color:var(--blue)">Page 01</a> priced an option on a share and quietly used a forward; <a href="parity.html" style="color:var(--blue)">page 07</a> traded the financing without ever defining it. This page defines it, and then shows what changes when the underlying is a futures contract instead of a share.</p>
+  <ol>
+    <li><b>Chapter 01 is the whole idea.</b> A forward price is not a prediction. It is the cost of a package you can assemble today, and the package's P&amp;L is exactly zero at every possible outcome.</li>
+    <li><b>Chapter 05 is the one that will surprise you.</b> Page 08 proved an American call on a non-dividend payer is never exercised early. Put the identical option on a futures contract and <em>both</em> sides exercise early.</li>
+    <li><b>Chapter 03 is the least glamorous and the most frequently expensive.</b> Multipliers, settlement style and exercise style decide what actually lands in your account.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>F</td><td>The forward price for delivery at T. Not a forecast of the spot price — the price agreed today for a trade that settles later.</td></tr>
+      <tr><td>Carry</td><td>The net cost of holding the underlying to the delivery date: financing minus whatever the asset pays you.</td></tr>
+      <tr><td>q</td><td>Continuous dividend yield. A modelling convenience; real shares pay lumps, which chapter 02 handles separately.</td></tr>
+      <tr><td>Basis</td><td>The gap between the futures price and spot. It converges to zero at delivery by construction.</td></tr>
+      <tr><td>Black-76</td><td>Black–Scholes rewritten for an underlying that is already a forward. The carry term disappears and only discounting is left.</td></tr>
+      <tr><td>Multiplier</td><td>How many units of the underlying one contract controls. The difference between a number on a screen and an amount of money.</td></tr>
+      <tr><td>Cash settled</td><td>Settled by a payment computed from a reference price, with nothing delivered. Standard for index products, because you cannot deliver an index.</td></tr>
+      <tr><td>Variation margin</td><td>Daily cash settlement of a futures position's mark-to-market. It is why a futures contract has no financing built into it.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>A forward price is built, not forecast</h2>
+    <p class="dek">Buy the share, borrow the money, collect the dividends, sell it forward. The P&amp;L is zero at every possible outcome, and that zero is what fixes the price.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Ask what a stock will be worth in six months and you get an opinion. Ask what price you can <em>agree today</em> to trade it at in six months and you get a number that follows from arithmetic, because the trade can be assembled out of things you can already do.</p>
+    <p>Here is the package. Borrow 100 at 5%. Buy the share. Hold it for six months, collecting dividends at 2%. Simultaneously agree to sell it forward at F. At delivery you hand over the share, receive F, and repay the loan. If F is anything other than <b>100 · e<sup>(0.05−0.02)·0.5</sup> = 101.5113</b>, that package makes or loses money with no risk, and somebody will do it until it doesn't.</p>
+    <p>The figure runs the ledger across every terminal spot price from 60 to 160. The locked P&amp;L is <b>0.0000000000</b> in every column. Not small, not approximately zero — the position has no exposure to the outcome at all, which is exactly why the forward price is determined rather than debated.</p>
+    <p>That has a consequence people find hard to accept. A forward is <b>not a forecast</b>. Change your expected return on the stock to −20% a year and the expected spot in a year drops to 80.25; change it to +25% and it rises to 125.86. The forward stays at <b>103.0455</b> through all of it, because no step in the construction used an expected return. This is the same argument as <a href="binomial.html#c1" style="color:var(--blue)">page 12's replication</a>, applied one instrument earlier.</p>
+    <p>So when a futures curve is upward sloping, the market is not predicting a rise. It is telling you what it costs to carry the thing — and reading contango as bullishness is one of the most durable misreadings in finance.</p>
+  </div>
+
+  <div class="mline">F = S · e<sup>(r − q)T</sup></div>
+  <p class="mread">Reads as: <b>the forward is today's price, grown at the financing rate and reduced by whatever the asset pays you while you hold it.</b> Two costs, netted, and no opinion anywhere.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Cash-and-carry P&amp;L, across every outcome</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Share, financed</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Short forward</span>
+            <span><i class="swl" style="background:var(--moss)"></i>The package</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>The forward against what people expect</h3></div>
+        <canvas id="cv1b" height="195"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The carry</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>The two sloping lines are large and opposite; the flat moss line is their sum. Drag anything and the moss line stays welded to zero — which is the visual definition of "no arbitrage". In the lower panel the forward marker refuses to follow the expectation marker no matter how far you push the drift.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the dividend yield above the financing rate. <b>Predict</b> whether the forward ends up above or below spot, and what that does to the shape of a futures curve.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"q":0.08,"r":0.05}' data-focus="cv1">Dividends beat financing</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"q":0.0,"r":0.05}' data-focus="cv1">No dividends at all</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"mu":0.25}' data-focus="cv1b">Everyone turns bullish</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A futures curve slopes upward. What is the market telling you?</p>
+    <div class="opts">
+      <button>That it expects the price to rise</button>
+      <button data-ok="1">That financing costs more than the asset pays you to hold it. The slope is carry, and it would be there with an expected return of zero</button>
+      <button>That the asset is in short supply</button>
+      <button>That volatility is elevated</button>
+    </div>
+    <div class="ans"><b>It is the carry, not a forecast.</b> An upward-sloping curve on an equity index says the interest on the money exceeds the dividends on the shares, and nothing more. The tell that this is arithmetic rather than sentiment: the slope changes the day rates change, with no revision to anybody's view of the market.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — the arbitrage that pins F, in both directions</summary>
+    <div class="body">
+      <p>Suppose the forward trades above <b>S·e<sup>(r−q)T</sup></b>. Borrow S, buy the share, sell the forward.</p>
+      <div class="mline">at T: &nbsp; receive F, &nbsp; repay S·e<sup>rT</sup>, &nbsp; keep dividends worth S(e<sup>qT</sup> − 1)</div>
+      <p class="mread">Reads as: <b>you end with the forward price, minus the loan, plus whatever the share paid you.</b> The share itself is gone — you delivered it — so its price at T never enters.</p>
+      <p>The profit is <b>F − S·e<sup>(r−q)T</sup></b>, locked at inception and independent of S<sub>T</sub>. If that is positive, everyone does it until it isn't.</p>
+      <p>Now suppose the forward trades below. Reverse every leg: short the share, invest the proceeds, buy the forward. The profit is <b>S·e<sup>(r−q)T</sup> − F</b>, again locked. Both inequalities close, so the forward is pinned to a point rather than a band.</p>
+      <p><b>Where it breaks.</b> The second argument is the fragile one, and it is fragile in practice rather than in theory. It requires shorting the share, which requires borrowing it, which costs a fee that is not the risk-free rate and can spike without warning. On a hard-to-borrow name the lower arbitrage stops working and the forward can sit persistently below the formula — the difference <em>is</em> the borrow cost, which is how the market quotes it. <a href="parity.html#c9" style="color:var(--blue)">Page 07</a> trades that gap directly. The other assumptions are milder: financing at a single rate rather than a bid and an ask, dividends known rather than estimated, and no cost to holding the share, which is false for physical commodities and is where convenience yield comes from.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>What carry is actually made of</h2>
+    <p class="dek">One number on a screen, assembled from four things that move independently.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The continuous yield <b>q</b> in chapter 01 is a modelling convenience. Real shares pay discrete lumps on announced dates, and the forward drops by each dividend's future value at the moment it goes ex. Getting this right matters because the difference is not small.</p>
+    <p>On a 100 stock at 5% over one year, the no-dividend forward is <b>105.1271</b>. Three quarterly dividends of 60 cents pull it to <b>103.2814</b>. A single 2.50 special dividend paid at three months pulls it to <b>102.5316</b> — a bigger effect than the three regular payments combined, and one that arrives with a few weeks' notice.</p>
+    <p>Four components make up the carry, and they behave differently.</p>
+    <p><b>Financing.</b> The cost of the money, at your rate rather than the government's. It moves with the curve and with your credit.</p>
+    <p><b>Dividends.</b> Known in the near term, estimated further out. A forward two years away contains eight dividend forecasts, and each is somebody's guess.</p>
+    <p><b>Borrow.</b> Only relevant if you are short the underlying, and it is the component that misbehaves — usually a few basis points, occasionally hundreds, and it can be recalled.</p>
+    <p><b>Storage and convenience.</b> Absent for shares, decisive for physical commodities, where holding the actual barrel has a cost and also an option value that shows up as a negative carry term.</p>
+    <p>The figure builds the forward curve from these pieces so you can watch each one bend it. Notice that dividends produce <em>steps</em> rather than a slope: the curve is smooth between ex-dates and drops discontinuously through them, which is why a futures contract expiring a day either side of an ex-date is a materially different instrument.</p>
+  </div>
+
+  <div class="mline">F = ( S − PV(dividends) ) · e<sup>rT</sup></div>
+  <p class="mread">Reads as: <b>strip out the cash the share will pay before delivery, then finance what is left.</b> The dividends are subtracted at present value because you receive them before T, not at it.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The forward curve, and the steps dividends put in it</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Forward</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Spot</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Ex-dates</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="300"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Carry broken into its parts</h3></div>
+        <canvas id="cv2b" height="195"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The components</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Watch the curve go from smooth to stepped as you turn discrete dividends on. The steps are where a real futures roll gets interesting — two contracts a month apart can straddle an ex-date, and the spread between them is then mostly a dividend forecast rather than an interest rate.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Put a large special dividend just before the one-year point, then move it to just after. <b>Predict</b> what happens to the one-year forward.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"special":3.0,"specialT":0.9}' data-focus="cv2">Special dividend before</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"special":3.0,"specialT":1.4}' data-focus="cv2">Same dividend, after</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"special":0,"borrow":0.04}' data-focus="cv2b">Hard to borrow instead</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A stock's dividend forecast for next year is cut. What happens to its one-year forward?</p>
+    <div class="opts">
+      <button>It falls, because the stock is less attractive</button>
+      <button data-ok="1">It rises. Holding the share now returns less, so the cost of carrying it to delivery is higher and the forward sits further above spot</button>
+      <button>Nothing — dividends are already in the spot price</button>
+      <button>It falls by the present value of the cut</button>
+    </div>
+    <div class="ans"><b>It rises.</b> This catches people because the instinctive reaction to a dividend cut is bearish, and the forward's response is mechanically the opposite. Spot may well fall on the news; the <em>forward relative to spot</em> widens, because the dividend was the thing making the carry cheap. Someone long a forward and short the stock is long the dividend forecast, whether they thought about it or not.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>What one contract actually controls</h2>
+    <p class="dek">The least interesting page in the specification is the one that decides how much money is at stake.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Everything in this series so far has been priced per unit of underlying. A real trade is a number of contracts, each controlling a multiple of something, settling in a specific way on a specific date. Getting that chain wrong is not a modelling error, it is a wire transfer.</p>
+    <p>The multiplier is the first link. A single-stock option on a 172.40 share controls 100 shares — <b>$17,240</b> of notional per contract. An index option with a 100 multiplier on a 5,280 index controls <b>$528,000</b>. An E-mini equity index future with a 50 multiplier on the same index controls <b>$264,000</b>. Three instruments on similar-sounding things, differing by a factor of thirty in what one unit commits you to.</p>
+    <p>Then <b>settlement style</b>. A single-stock option is physically settled: exercise and shares move. An index option is cash settled, because there is nothing to deliver — you receive the difference. On a 5,200 call settling at 5,283.47 with a 100 multiplier, that is <b>(5,283.47 − 5,200) × 100 = $8,347</b>, and no position in anything remains afterwards. That distinction changes what happens on expiration weekend entirely: <a href="early-exercise.html#c7" style="color:var(--blue)">page 08's pin risk</a> is a physical-settlement problem and largely evaporates under cash settlement.</p>
+    <p>Then <b>exercise style</b>. American for most single-stock options, European for most index options — which is why page 08's early-exercise machinery applies to one and not the other.</p>
+    <p>And finally <b>the settlement price itself</b>, which is not always the closing price. Some index products settle on a special quotation calculated from opening prices on the expiration morning, a value that may never trade as a level anywhere. A position held to expiry settles against a number the screen never printed.</p>
+    <p>The figure walks the chain from a quote to an amount of money, with the multiplier and settlement style as controls. It is deliberately mundane. It is also the calculation most likely to be wrong by a factor of ten in a real book.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>From a quote to an amount of money</h3></div>
+        <table class="wtab" id="specTab"></table>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Notional controlled, per contract</h3></div>
+        <canvas id="cv3" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The contract</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The bars are on the same axis on purpose. An index option and a single-stock option look like the same kind of object on a screen and commit you to amounts that differ by more than an order of magnitude — which is the entire reason position limits are written in contracts and risk limits are written in dollars.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are short 10 index calls, cash settled, that finish 83.47 points in the money on a 100 multiplier. What happens on Monday?</p>
+    <div class="opts">
+      <button>You are short the index and must buy it back</button>
+      <button data-ok="1">You pay $83,470 and hold nothing. Cash settlement closes the position outright — there is no delivery and no residual exposure</button>
+      <button>You are assigned 1,000 units of the index</button>
+      <button>Nothing until you choose to close the position</button>
+    </div>
+    <div class="ans"><b>You pay and you are flat.</b> Ten contracts × 83.47 points × 100 = $83,470. The absence of a residual position is the whole point of cash settlement, and it is why index expirations do not produce page 08's Monday-morning surprise. The trade-off is that you cannot influence or hedge the settlement print, which for a special opening quotation is a number assembled from prices you never saw as a level.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>Options on futures: the same model, simplified</h2>
+    <p class="dek">When the underlying is already a forward, the carry term has nowhere left to go.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A futures contract costs nothing to enter and pays nothing to hold — its mark-to-market is settled in cash every day through variation margin. So there is no financing to do and no dividend to collect, which means the carry term that dominated chapters 01 and 02 simply vanishes from the option pricing problem.</p>
+    <p>What is left is Black–Scholes with the forward substituted for the spot and the drift removed. This is <b>Black-76</b>, and it is not a different model — it is the same model told the truth about its underlying. Price a six-month at-the-money call on a 100 stock at 6% two ways: Black–Scholes on the share gives <b>9.882656</b>, and Black-76 on the corresponding forward of <b>103.0455</b> gives <b>9.882656</b>. They agree to <b>1.2 × 10<sup>−14</sup></b>, because they are the same equation.</p>
+    <p>One practical difference does survive, and it catches people. The delta of a futures option is measured <em>with respect to the futures price</em>, and it comes out <b>discounted</b>: exactly <b>e<sup>−rT</sup></b> times the corresponding spot delta. At the money in our example that is <b>0.5801</b> against <b>0.5977</b> — a ratio of <b>0.970446</b>, which is <b>e<sup>−0.03</sup></b> to six decimals.</p>
+    <p>So hedging a futures option requires <b>fewer futures</b> than the spot-model delta suggests — about <b>1.8 contracts fewer per hundred</b> at the money, and 2.7 fewer per hundred at a 20% in-the-money strike. The reason is that a futures position's profit arrives as cash today through margin, while the option's payoff arrives at expiry; matching them means discounting one to the other.</p>
+    <p>It is a small number and it is a systematic one, which is the worst combination — large enough to matter on size, small enough to be invisible in a single trade.</p>
+  </div>
+
+  <div class="mline">c = e<sup>−rT</sup> [ F·N(d<sub>1</sub>) − K·N(d<sub>2</sub>) ] &nbsp;&nbsp;&nbsp; d<sub>1</sub> = [ ln(F/K) + ½σ²T ] / σ√T</div>
+  <p class="mread">Reads as: <b>the same formula, with the forward in place of the spot and nothing left to grow.</b> Every appearance of the carry rate has gone except the discount factor out front.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Delta against strike: with respect to spot, and with respect to the future</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Spot delta</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Futures delta</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="290"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>Contracts you over-hedge by, per hundred</h3></div>
+        <canvas id="cv4b" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The option</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>The two delta curves look identical at a glance and are not. The lower panel is their difference, expressed as the number of futures you would buy too many of on a hundred-lot — small, always in the same direction, and growing with both time and the level of rates.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Push rates to 12% and the expiry out to two years. <b>Predict</b> how many contracts per hundred the gap becomes before you look.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"r":0.12,"T":2}' data-focus="cv4b">High rates, long dated</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"r":0.01,"T":0.25}' data-focus="cv4b">Low rates, short dated</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why does an option on a futures contract have no carry term in its pricing formula?</p>
+    <div class="opts">
+      <button>Because futures have no dividends</button>
+      <button data-ok="1">Because a futures position costs nothing to hold — it is marked and settled in cash daily — so there is no financing to recover and no yield to give up</button>
+      <button>Because futures are cash settled</button>
+      <button>Because futures options are always European</button>
+    </div>
+    <div class="ans"><b>There is nothing to carry.</b> Variation margin means a futures position never ties up the notional, so the cost of holding it is zero and the forward is already the expected settlement under the pricing measure. The first answer is a symptom rather than the cause — the deeper point is that a future is <em>already</em> a forward, so the carry has been done for you.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Where page 08's rule inverts</h2>
+    <p class="dek">An American call on a non-dividend payer is never exercised early. Put the identical option on a futures contract and both sides exercise early.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead"><a href="early-exercise.html#c1" style="color:var(--blue)">Page 08 opened</a> by proving something absolute: on a stock that pays no dividend, the right to exercise an American call early is worth exactly zero, measured at 1.85 × 10<sup>−13</sup> across six hundred cases. The proof was one line — a call is worth more alive than dead because selling it recovers the discount on the strike.</p>
+    <p>Now price the same option on a futures contract. On a one-year 100-strike with 30 volatility and rates at 8%, the numbers come out like this.</p>
+    <p>At <b>F = 130</b> the European call is worth <b>30.9927</b> and the American is <b>32.2092</b> — an early-exercise premium of <b>1.2166</b>. At <b>F = 70</b> the European put is <b>29.0132</b> and the American is <b>30.4624</b>, a premium of <b>1.4492</b>. At the money both sides carry a premium of <b>0.2205</b>, identically, because futures options are symmetric in F and K in a way stock options are not. Meanwhile the stock call's premium at the same moneyness is <b>0.00e+0</b>, exactly as page 08 promised.</p>
+    <p>The mechanism is visible in one number. A European futures option can trade <b>below its intrinsic value</b>. At F = 140 the European call is worth <b>39.0630</b> against an intrinsic of 40 — below by <b>0.9370</b>. At F = 200 it is <b>92.4494</b> against 100, below by <b>7.5506</b>.</p>
+    <p>That is impossible for a stock option, and the impossibility is precisely page 08's proof: the bound there was <b>c ≥ S − Ke<sup>−rT</sup></b>, which sits <em>above</em> the intrinsic S − K. For a futures option the corresponding bound is <b>c ≥ e<sup>−rT</sup>(F − K)</b>, which sits <em>below</em> the intrinsic F − K. Both terms get discounted instead of just one, so the floor drops beneath the exercise value and exercising becomes worth doing.</p>
+    <p>The intuition, stripped of algebra: exercising a deep futures option converts a claim you will collect later into cash you hold now, and holding cash earns interest. Nothing is given up in exchange, because a futures position — unlike a share — costs nothing to hold. So the interest on the intrinsic is free money, and it beats the remaining time value once the option is deep enough.</p>
+    <p>Two consequences worth carrying. Deep in-the-money futures options should not be assumed to have time value; check. And the early-exercise premium is <b>symmetric</b> here, so a futures options book carries the risk on both wings, where an equity book carries it almost entirely on the put side.</p>
+  </div>
+
+  <div class="mline">stock: &nbsp; c ≥ S − Ke<sup>−rT</sup> &gt; S − K &nbsp;&nbsp;&nbsp;&nbsp; futures: &nbsp; c ≥ e<sup>−rT</sup>(F − K) &lt; F − K</div>
+  <p class="mread">Reads as: <b>on a share only the strike gets discounted, so the floor sits above intrinsic; on a future both sides get discounted, so the floor sits below it.</b> One discount factor is the whole difference between "never exercise" and "exercise both sides".</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Early-exercise premium against the underlying's level</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Futures call</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Futures put</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Stock call — flat at zero</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="310"></canvas>
+        <div class="figtop" style="margin:22px 0 6px"><h3>The European futures call against its own intrinsic value</h3></div>
+        <canvas id="cv5b" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The contract</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>The grey line is page 08's result, drawn here for comparison and pinned to zero across the whole range. The two coloured curves are the same option on a futures contract. The lower panel shows why: where the blue price curve dips beneath the dashed intrinsic line, exercising immediately is worth more than holding, and the tree finds it.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Take rates to zero. <b>Predict</b> what happens to both futures curves before you press it — the algebra above tells you.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"r":0}' data-focus="cv5">Zero rates</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"r":0.15}' data-focus="cv5">Very high rates</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"r":0.08,"v":0.10}' data-focus="cv5">Low volatility instead</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A deep in-the-money American futures call is trading at exactly its intrinsic value. Is something wrong?</p>
+    <div class="opts">
+      <button>Yes — an option can never be worth only its intrinsic value before expiry</button>
+      <button data-ok="1">No. The European version would trade below intrinsic, so the American one is pinned at intrinsic by the right to exercise. It is behaving exactly as the model says</button>
+      <button>Yes, the volatility input must be zero</button>
+      <button>No, but only if the option expires today</button>
+    </div>
+    <div class="ans"><b>It is correct, and it is the signature of a futures option.</b> Once the European value drops below intrinsic, the American value is held at intrinsic by the exercise right — it cannot go lower and there is no reason for it to be higher. Anyone who learned "options always have time value" on equities will read this as a broken quote; it is the discount factor applying to both legs instead of one.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Index products, and the dividends you already own</h2>
+    <p class="dek">You cannot deliver an index, cannot capture its dividends by exercising, and cannot trade the price it settles at.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Index derivatives look like equity derivatives and differ in three ways that each remove a whole chapter of complication — and add a different one.</p>
+    <p><b>The dividends are inside the index, not attached to it.</b> A price index falls as its members go ex, so the dividend stream shows up in the carry rather than as something you can collect by exercising. That deletes page 08's entire dividend-capture apparatus for index options: there is no ex-date on which owning the deliverable pays you something the option does not.</p>
+    <p><b>Settlement is cash and exercise is usually European.</b> Between them, the two remove early exercise and pin risk almost entirely. There is no Monday-morning share position, because there was never a share.</p>
+    <p><b>But the settlement price is its own hazard.</b> Several index products settle against a special quotation computed from opening prices on expiration morning rather than from a traded close. The resulting number is a weighted assembly of prices that may never have coexisted, and it can differ from any level the index printed. A position carried to expiry settles against something you could not have traded, which is a small, specific and entirely one-directional risk.</p>
+    <p>The figure prices the same strike as an index option and as a single-stock option to show which complications survive the change of underlying. The comparison is worth having explicitly, because most option education is written about single stocks and most option <em>volume</em> is in index products.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>The same strike, on three different underlyings</h3></div>
+        <table class="idtab" id="idxTab"></table>
+        <div class="figtop" style="margin:24px 0 6px"><h3>Where the dividend goes in each case</h3></div>
+        <canvas id="cv6" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The comparison</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>The table's last column is the one to read: which of this series' complications actually applies to each instrument. An index option deletes three of them and adds one that nobody talks about.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why is dividend capture not a consideration for index options?</p>
+    <div class="opts">
+      <button>Index constituents do not pay dividends</button>
+      <button data-ok="1">Because a price index already falls as its members go ex, so the dividends live in the carry rather than being something exercising would let you collect</button>
+      <button>Because index options are cash settled</button>
+      <button>Because index dividends are too small to matter</button>
+    </div>
+    <div class="ans"><b>The dividends are inside the index.</b> Exercising an index option gives you cash, not a basket you could hold through an ex-date, so there is nothing to capture. Cash settlement is a genuine reason early exercise is rare, but the deeper reason is that the economic incentive page 08 identified never exists here in the first place.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Where it breaks</h2>
+    <p class="dek">The forward formula has one rate in it. Real financing has two, and one of them can be recalled.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 01's derivation closed the arbitrage from both sides and therefore pinned the forward to a point. Every failure on this page is a failure of one of those two legs.</p>
+    <p><b>Borrow breaks the lower arbitrage.</b> Selling the share requires borrowing it, at a fee that is not the risk-free rate. On a hard-to-borrow name that fee is large, variable and revocable — a recall can force you to close at the worst moment. When it bites, the forward sits persistently below the textbook level and the gap <em>is</em> the market's borrow quote. <a href="parity.html#c9" style="color:var(--blue)">Page 07</a> shows the same effect arriving through put–call parity, which is the same arbitrage wearing options.</p>
+    <p><b>There is no single rate.</b> You borrow at one rate and lend at another, so the arbitrage closes to a band rather than a point. The band is narrow for a large institution and not narrow for anybody else, and it widens exactly when funding markets are stressed.</p>
+    <p><b>Dividends are forecasts.</b> Anything beyond the next declared payment is an estimate. A two-year forward contains eight of them, so a long-dated forward is partly a bet on a dividend policy — and special dividends, buybacks and cuts all arrive with little notice.</p>
+    <p><b>Futures are not forwards.</b> The two are equal only when interest rates are deterministic. A futures contract settles its mark-to-market daily, so gains are financed at rates that themselves move; when rates and the underlying are correlated, that daily settlement is worth something and the futures price separates from the forward. The effect is negligible on short-dated equity index products and material on long-dated rate-sensitive ones.</p>
+    <p><b>And the basis does not always converge quietly.</b> It must reach zero at delivery, but it can behave badly on the way — particularly around index rebalances, dividend seasons and quarterly rolls, when a lot of positions have to move at once.</p>
+    <p>The figure puts the borrow rate and the financing spread on sliders so you can see the pinned point become a band. What survives all of it is the direction of every argument: carry sets the forward, the forward is not a forecast, and options are priced off the forward rather than off spot.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The no-arbitrage point becomes a band</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Upper bound</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Lower bound</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Textbook forward</span>
+          </span>
+        </div>
+        <canvas id="cv7" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The frictions</h4>
+        <div id="ctl7"></div>
+        <div class="kv" style="margin-top:20px" id="kv7"></div>
+      </div>
+    </div>
+    <figcaption>Raise the borrow cost and watch the lower bound fall away while the upper one stays put. The asymmetry is the point: the arbitrage that caps the forward needs only money, and the one that floors it needs somebody willing to lend you shares.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the borrow rate to 15% — a genuinely hard-to-borrow name. <b>Predict</b> whether the band opens upward, downward, or both.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c7" data-patch='{"borrow":0.15}' data-focus="cv7">Hard to borrow</button>
+      <button class="act ghost" data-preset="c7" data-patch='{"borrow":0.0025,"spread":0.02}' data-focus="cv7">Easy borrow, wide funding</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A stock's forward trades persistently 3% below the textbook value. What is the most likely explanation?</p>
+    <div class="opts">
+      <button>The market expects the stock to fall</button>
+      <button data-ok="1">It is expensive to borrow. The lower arbitrage requires shorting the share, so a high borrow fee lets the forward sit below the formula — and the gap is the market quoting that fee</button>
+      <button>A pricing error somebody will arbitrage away</button>
+      <button>Dividends have been cut</button>
+    </div>
+    <div class="ans"><b>Borrow cost.</b> Persistent, one-directional deviations in a forward are almost always financing rather than opinion, because the opinion channel is exactly the one chapter 01 showed does not exist. The fourth answer has the sign backwards: a dividend cut raises the forward relative to spot.</div>
+  </div>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Drill it, then check yourself</h2>
+    <p class="dek">Forwards, notionals and settlement amounts — the arithmetic that decides how much money moves.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The generator below produces randomized carry and contract-specification problems. None of it is difficult and all of it is the kind of thing that gets done quickly, under pressure, and wrong.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:150px"><span class="k">Difficulty</span>
+          <div class="seg" style="margin-top:5px;max-width:230px">
+            <button id="dEasy" aria-pressed="true">Core</button>
+            <button id="dHard" aria-pressed="false">Full</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>Core covers forwards and notionals; Full adds dividend-adjusted forwards and cash settlement amounts.</figcaption>
+  </figure>
+
+  <div class="prose" style="margin-top:46px">
+    <p>Six questions across the page.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">What does an upward-sloping futures curve tell you about expected prices?</p>
+    <div class="opts">
+      <button>That the market expects prices to rise by the slope</button>
+      <button data-ok="1">Nothing. The slope is the cost of carrying the asset, and it would be identical with an expected return of zero</button>
+      <button>That the market expects prices to fall</button>
+      <button>That storage is scarce</button>
+    </div>
+    <div class="ans"><b>Nothing about expectations.</b> The cash-and-carry package has zero P&amp;L at every outcome, so no expected return could have entered the price. Reading contango as bullishness survives mostly because the two happen to look alike on a chart.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">A company announces a surprise special dividend before your forward's delivery date. What happens to the forward?</p>
+    <div class="opts">
+      <button>It rises by the dividend</button>
+      <button data-ok="1">It falls. The forward is (S − PV of dividends) grown at the financing rate, so a new dividend before delivery pulls it down</button>
+      <button>It is unaffected</button>
+      <button>It rises by the present value of the dividend</button>
+    </div>
+    <div class="ans"><b>It falls.</b> On a 100 stock at 5%, a 2.50 special at three months takes the one-year forward from 105.13 to 102.53 — a bigger move than three regular 60-cent dividends combined.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">An index option with a 100 multiplier on a 5,280 index. How much notional does one contract control?</p>
+    <div class="opts">
+      <button>$5,280</button>
+      <button data-ok="1">$528,000 — the index level times the multiplier</button>
+      <button>$52,800</button>
+      <button>It depends on the strike</button>
+    </div>
+    <div class="ans"><b>$528,000.</b> Thirty times a single-stock option on a 172.40 share, and the two look like the same kind of object on a screen. This is the arithmetic most likely to be wrong by a factor of ten in a real book.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">Your spot model says delta is 0.60. How many futures do you sell to hedge a hundred-lot?</p>
+    <div class="opts">
+      <button>60 — delta is delta</button>
+      <button data-ok="1">Slightly fewer, about 58. The futures delta is the spot delta times e^(−rT), because futures profits arrive as cash today and the option's payoff arrives at expiry</button>
+      <button>More than 60, to account for margin</button>
+      <button>60, but rebalanced daily</button>
+    </div>
+    <div class="ans"><b>About 58.</b> At 6% over six months the ratio is 0.970446, so 0.5977 becomes 0.5801 — roughly 1.8 contracts fewer per hundred. Small, systematic, and invisible on any single trade.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 05</span>
+    <p class="q">Which is true of American options on futures?</p>
+    <div class="opts">
+      <button>Neither side is ever exercised early, as with non-dividend stocks</button>
+      <button data-ok="1">Both calls and puts can be exercised early, because a European futures option can trade below intrinsic and the exercise right pins it back up</button>
+      <button>Only puts are exercised early, as with stocks</button>
+      <button>Only calls, and only into a dividend</button>
+    </div>
+    <div class="ans"><b>Both sides.</b> At F=130 the call premium is 1.2166 and at F=70 the put premium is 1.4492; at the money both are 0.2205 exactly. The stock call at the same moneyness is 0.00e+0. One extra discount factor separates the two worlds.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 07</span>
+    <p class="q">Why does a hard-to-borrow stock's forward sit below the textbook value?</p>
+    <div class="opts">
+      <button>Because the market is bearish on it</button>
+      <button data-ok="1">Because the arbitrage that would push the forward back up requires shorting the share, and borrowing it is expensive. Only the upper bound is enforced cheaply</button>
+      <button>Because dividends are uncertain</button>
+      <button>Because of margin requirements on the forward</button>
+    </div>
+    <div class="ans"><b>The lower arbitrage is broken.</b> Capping the forward needs only money; flooring it needs somebody willing to lend you shares. That asymmetry is why deviations in a forward are almost always financing rather than opinion.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Contract specifications on this page are illustrative and every one of them is set by an exchange and revised periodically — multipliers, settlement style, exercise style, expiration timing and the definition of the settlement price all differ by product and by venue, and several have changed within living memory. Nothing here should be used in place of the current specification for a specific contract. The pricing arguments are more durable but still assume a single financing rate, known dividends, and interest rates that do not move, which is what makes futures and forwards identical here and not quite identical in a long-dated rate-sensitive market.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ══════════ carry and futures machinery ══════════ */
+const fwd=(S,r,q,T)=>S*Math.exp((r-q)*T);
+function fwdDisc(S,r,T,divs){           // divs = [[t, amount], ...]
+  let pv=0; divs.forEach(([t,d])=>{ if(t<=T) pv+=d*Math.exp(-r*t); });
+  return (S-pv)*Math.exp(r*T);
+}
+/* Black-76: an option on a forward. Delta is with respect to the FORWARD. */
+function b76(F,K,T,v,r,cp){
+  T=Math.max(T,1e-9); v=Math.max(v,1e-9);
+  const sq=Math.sqrt(T),sv=v*sq;
+  const d1=(Math.log(F/K)+.5*v*v*T)/sv, d2=d1-sv;
+  const er=Math.exp(-r*T), N1=ncdf(d1), N2=ncdf(d2);
+  return {price: er*(cp ? F*N1-K*N2 : K*ncdf(-d2)-F*ncdf(-d1)),
+          delta: er*(cp ? N1 : N1-1)};
+}
+/* American option on a futures contract: the future has zero drift under p */
+function futTree(F,K,T,v,r,N,cp,american){
+  const dt=T/N, u=Math.exp(v*Math.sqrt(dt)), d=1/u;
+  const p=(1-d)/(u-d), disc=Math.exp(-r*dt);
+  const px=(i,j)=>F*Math.pow(u,2*j-i);
+  const V=new Float64Array(N+1);
+  for(let j=0;j<=N;j++)V[j]=Math.max(0,cp?px(N,j)-K:K-px(N,j));
+  for(let i=N-1;i>=0;i--)for(let j=0;j<=i;j++){
+    let c=disc*(p*V[j+1]+(1-p)*V[j]);
+    if(american){const ex=Math.max(0,cp?px(i,j)-K:K-px(i,j)); if(ex>c)c=ex;}
+    V[j]=c;
+  }
+  return V[0];
+}
+/* American option on a share, for the comparison in chapter 05 */
+function stkTree(S,K,T,v,r,N,cp,american){
+  const dt=T/N,u=Math.exp(v*Math.sqrt(dt)),d=1/u;
+  const p=(Math.exp(r*dt)-d)/(u-d),disc=Math.exp(-r*dt);
+  const px=(i,j)=>S*Math.pow(u,2*j-i);
+  const V=new Float64Array(N+1);
+  for(let j=0;j<=N;j++)V[j]=Math.max(0,cp?px(N,j)-K:K-px(N,j));
+  for(let i=N-1;i>=0;i--)for(let j=0;j<=i;j++){
+    let c=disc*(p*V[j+1]+(1-p)*V[j]);
+    if(american){const ex=Math.max(0,cp?px(i,j)-K:K-px(i,j)); if(ex>c)c=ex;}
+    V[j]=c;
+  }
+  return V[0];
+}
+const money=x=>(x<0?"−$":"$")+Math.abs(x).toLocaleString("en-US",{maximumFractionDigits:0});
+const money2=x=>(x<0?"−$":"$")+Math.abs(x).toLocaleString("en-US",{maximumFractionDigits:2});
+function barsF(o,xs,ys,cols,wfrac){
+  const g=o.g,w=(o.pw/Math.max(1,xs.length))*(wfrac||0.6);
+  g.save();
+  for(let i=0;i<xs.length;i++){
+    g.fillStyle=typeof cols==="function"?cols(ys[i],i):cols;
+    const x=o.X(xs[i]),y=o.Y(ys[i]),y0=o.Y(0);
+    g.fillRect(x-w/2,Math.min(y,y0),Math.max(w,1),Math.abs(y0-y));
+  }
+  g.restore();
+}
+function lab(o,x,y,s,col,size,base){
+  const g=o.g;g.save();g.fillStyle=col||C("--ink");g.textAlign="center";
+  g.textBaseline=base||"bottom";g.font=(size||10)+"px 'IBM Plex Mono', monospace";
+  g.fillText(s,o.X(x),o.Y(y)+(base==="top"?6:-6));g.restore();
+}
+
+/* ══════════ HERO — a forward curve breathing with carry ══════════ */
+(function(){
+  const cv=document.getElementById("heroCv");let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  function draw(ph){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    const padL=w*0.07,padR=w*0.07,padT=h*0.22,padB=h*0.22;
+    const gw=w-padL-padR,gh=h-padT-padB;
+    const S=100;
+    for(let k=0;k<7;k++){
+      const q=0.005*k, r=0.03+0.05*(0.5+0.5*Math.sin(ph+k*0.35));
+      g.strokeStyle=(r-q)>0?C("--blue"):C("--verm");
+      g.globalAlpha=0.10+0.09*(1-k/7);g.lineWidth=1.6;
+      g.beginPath();
+      for(let i=0;i<=90;i++){
+        const T=i/90*2;
+        const F=fwd(S,r,q,T);
+        const x=padL+(T/2)*gw;
+        const y=padT+gh/2-((F-S)/14)*gh*0.5;
+        i?g.lineTo(x,y):g.moveTo(x,y);
+      }
+      g.stroke();
+    }
+    g.globalAlpha=.28;g.strokeStyle=C("--ink");g.lineWidth=1;g.setLineDash([4,4]);
+    g.beginPath();g.moveTo(padL,padT+gh/2);g.lineTo(w-padR,padT+gh/2);g.stroke();
+    g.setLineDash([]);g.globalAlpha=1;
+  }
+  function frame(ts){if(!t0)t0=ts;draw((ts-t0)/2600);raf=requestAnimationFrame(frame);}
+  size();if(RM)draw(1);else raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();t0=0;if(RM)draw(1);else raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════ 01 — built, not forecast ══════════ */
+const s1={S:100,r:0.05,q:0.02,T:0.5,mu:0.08};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"a1",k:"r",lbl:"r",name:"Financing rate",min:0,max:.15,step:.005,fmt:pct2},
+    {id:"b1",k:"q",lbl:"q",name:"Dividend yield",min:0,max:.12,step:.005,fmt:pct2},
+    {id:"c1t",k:"T",lbl:"T",name:"To delivery",min:.08,max:3,step:.02,fmt:v=>v.toFixed(2)+"y"},
+    {id:"d1",k:"mu",lbl:"μ",name:"Expected return (nobody's business)",min:-.4,max:.5,step:.01,fmt:pct}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function draw(){
+    const S=s1.S, F=fwd(S,s1.r,s1.q,s1.T);
+    const shares=Math.exp(s1.q*s1.T), owe=S*Math.exp(s1.r*s1.T);
+    const xs=[],longLeg=[],shortLeg=[],pkg=[];
+    for(let i=0;i<=120;i++){
+      const ST=S*0.5+i*(S*1.2/120);
+      xs.push(ST);
+      longLeg.push(shares*ST-owe);
+      shortLeg.push(-(ST-F)*shares);
+      pkg.push(shares*ST-owe-(ST-F)*shares);
+    }
+    let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<xs.length;i++){lo=Math.min(lo,longLeg[i],shortLeg[i]);hi=Math.max(hi,longLeg[i],shortLeg[i]);}
+    const o=Fig(document.getElementById("cv1"),{h:300,x0:xs[0],x1:xs[xs.length-1],y0:lo*1.1,y1:hi*1.1,pad:{l:60}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(0),5,4);
+    clip(o,()=>{
+      line(o,[xs[0],xs[xs.length-1]],[0,0],C("--grey"),1,[3,3]);
+      line(o,xs,longLeg,C("--blue"),2.2);
+      line(o,xs,shortLeg,C("--verm"),2.2);
+      line(o,xs,pkg,C("--moss"),3.2);
+    });
+    vline(o,S,C("--ink"),"S");
+
+    // forward vs expectation
+    const ex=[],fw=[],mx=[];
+    for(let i=0;i<=80;i++){
+      const m=-0.4+i*(0.9/80);
+      mx.push(m);ex.push(S*Math.exp((m-s1.q)*s1.T));fw.push(F);
+    }
+    const o2=Fig(document.getElementById("cv1b"),{h:195,x0:-0.4,x1:0.5,y0:Math.min.apply(null,ex)*0.98,y1:Math.max.apply(null,ex)*1.02,pad:{l:60}});
+    axes(o2,v=>(v*100).toFixed(0)+"%",v=>v.toFixed(0),5,4);
+    clip(o2,()=>{
+      line(o2,mx,ex,C("--blue"),2.4);
+      line(o2,mx,fw,C("--moss"),3);
+    });
+    vline(o2,s1.mu,C("--ink"),"μ");
+
+    let worst=0; pkg.forEach(v=>worst=Math.max(worst,Math.abs(v)));
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Spot",S.toFixed(2)],
+      ["Financing",pct2(s1.r)],
+      ["Dividend yield",pct2(s1.q)],
+      ["Carry rate",pct2(s1.r-s1.q)],
+      ["Forward",F.toFixed(6)],
+      ["  premium to spot",(F-S).toFixed(4)],
+      ["Package P&L, worst cell",worst.toExponential(1)],
+      ["—","—"],
+      ["Your expected return",pct(s1.mu)],
+      ["Expected spot at T",(S*Math.exp((s1.mu-s1.q)*s1.T)).toFixed(3)],
+      ["Forward",F.toFixed(3)],
+      ["Forward moved?","no"]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — what carry is made of ══════════ */
+const s2={r:0.05,divQ:0.60,special:0,specialT:0.9,borrow:0,discrete:1};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"a2",k:"r",lbl:"r",name:"Financing",min:0,max:.14,step:.005,fmt:pct2},
+    {id:"b2",k:"divQ",lbl:"D",name:"Quarterly dividend",min:0,max:2,step:.05,fmt:v=>"$"+v.toFixed(2)},
+    {id:"c2s",k:"special",lbl:"S",name:"Special dividend",min:0,max:6,step:.25,fmt:v=>"$"+v.toFixed(2)},
+    {id:"d2",k:"specialT",lbl:"t",name:"Special paid at",min:.1,max:1.9,step:.05,fmt:v=>v.toFixed(2)+"y"},
+    {id:"e2",k:"borrow",lbl:"b",name:"Borrow cost",min:0,max:.10,step:.0025,fmt:pct2}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function divList(){
+    const d=[];
+    for(let t=0.25;t<=2.01;t+=0.25) d.push([t,s2.divQ]);
+    if(s2.special>0) d.push([s2.specialT,s2.special]);
+    return d;
+  }
+  function draw(){
+    const S=100, divs=divList();
+    const xs=[],F=[],sp=[];
+    for(let i=0;i<=200;i++){
+      const T=0.02+i*(2/200);
+      xs.push(T);F.push(fwdDisc(S,s2.r+s2.borrow,T,divs));sp.push(S);
+    }
+    const lo=Math.min(S,Math.min.apply(null,F)), hi=Math.max(S,Math.max.apply(null,F));
+    const o=Fig(document.getElementById("cv2"),{h:300,x0:0,x1:2,y0:lo-1.5,y1:hi+1.5,pad:{l:58}});
+    axes(o,v=>v.toFixed(2)+"y",v=>v.toFixed(1),5,4);
+    clip(o,()=>{
+      line(o,xs,sp,C("--grey"),1.6,[4,3]);
+      line(o,xs,F,C("--blue"),2.6);
+    });
+    divs.forEach(d=>{ if(d[1]>0.001) vline(o,d[0],C("--ochre"),null); });
+
+    // carry decomposition at one year
+    const T=1;
+    const interest=S*(Math.exp(s2.r*T)-1);
+    let pvd=0; divs.forEach(([t,d])=>{if(t<=T)pvd+=d*Math.exp(-s2.r*t);});
+    const divCost=-pvd*Math.exp(s2.r*T);
+    const borrowCost=S*(Math.exp((s2.r+s2.borrow)*T)-Math.exp(s2.r*T));
+    const parts=[["interest",interest],["dividends",divCost],["borrow",borrowCost]];
+    const o2=Fig(document.getElementById("cv2b"),{h:195,x0:-0.6,x1:2.6,
+      y0:Math.min(0,divCost)*1.3-0.5,y1:Math.max(0.5,interest+borrowCost)*1.3,pad:{l:58,b:32}});
+    axes(o2,()=>"",v=>v.toFixed(1),1,4);
+    barsF(o2,[0,1,2],parts.map(p=>p[1]),(v)=>v>=0?C("--blue"):C("--verm"),0.45);
+    parts.forEach((p,i)=>{
+      lab(o2,i,p[1],p[1].toFixed(2),C("--ink"),9.5,p[1]>=0?"bottom":"top");
+      const g=o2.g;g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+      g.font="9px 'IBM Plex Mono', monospace";g.fillText(p[0],o2.X(i),o2.P.t+o2.ph+8);g.restore();
+    });
+
+    const F1=fwdDisc(S,s2.r+s2.borrow,1,divs);
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Spot","100.00"],
+      ["Financing",pct2(s2.r)],
+      ["Borrow add-on",pct2(s2.borrow)],
+      ["Dividends to 1y","$"+divs.filter(d=>d[0]<=1).reduce((a,d)=>a+d[1],0).toFixed(2)],
+      ["  present value","$"+pvd.toFixed(4)],
+      ["1-year forward",F1.toFixed(4)],
+      ["  carry",(F1-S).toFixed(4)],
+      ["No-dividend forward",(S*Math.exp((s2.r+s2.borrow))).toFixed(4)],
+      ["Dividends cost",(F1-S*Math.exp(s2.r+s2.borrow)).toFixed(4)]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — the contract ══════════ */
+const s3={which:0,px:172.40,mult:100,contracts:10,settle:5283.47,strike:5200};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"a3",k:"which",lbl:"",name:"Instrument",min:0,max:2,step:1,
+      fmt:v=>["Single stock option","Index option","Equity index future"][v]},
+    {id:"b3",k:"contracts",lbl:"n",name:"Contracts",min:1,max:200,step:1,fmt:v=>v.toFixed(0)},
+    {id:"c3st",k:"settle",lbl:"S",name:"Settlement level",min:4800,max:5800,step:.01,fmt:v=>v.toFixed(2)},
+    {id:"d3",k:"strike",lbl:"K",name:"Strike",min:4800,max:5800,step:25,fmt:v=>v.toFixed(0)}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  const SPECS=[
+    {n:"Single stock option",mult:100,unit:"shares",px:172.40,settle:"physical",style:"American"},
+    {n:"Index option",mult:100,unit:"index units",px:5280,settle:"cash",style:"European"},
+    {n:"Equity index future",mult:50,unit:"index points",px:5280,settle:"cash",style:"—"}
+  ];
+  function draw(){
+    const i=Math.round(s3.which), sp=SPECS[i];
+    document.getElementById("specTab").innerHTML=
+      '<tr><th>Instrument</th><th>Multiplier</th><th>Quote</th><th>Notional / contract</th><th>Settles</th><th>Exercise</th></tr>'+
+      SPECS.map((x,k)=>'<tr'+(k===i?' style="background:rgba(31,76,232,.06)"':'')+'><td>'+x.n+
+        '</td><td>×'+x.mult+' '+x.unit+'</td><td>'+x.px.toLocaleString("en-US")+
+        '</td><td>'+money(x.mult*x.px)+'</td><td>'+x.settle+'</td><td>'+x.style+'</td></tr>').join("");
+    const o=Fig(document.getElementById("cv3"),{h:230,x0:-0.6,x1:2.6,y0:0,
+      y1:Math.max.apply(null,SPECS.map(x=>x.mult*x.px))*1.25,pad:{l:74,b:32}});
+    axes(o,()=>"",v=>money(v),1,4);
+    barsF(o,[0,1,2],SPECS.map(x=>x.mult*x.px),(v,k)=>k===i?C("--blue"):C("--grey"),0.45);
+    SPECS.forEach((x,k)=>{
+      lab(o,k,x.mult*x.px,money(x.mult*x.px),C("--ink"),9.5);
+      const g=o.g;g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+      g.font="8.5px 'IBM Plex Mono', monospace";
+      g.fillText(x.n.split(" ")[0],o.X(k),o.P.t+o.ph+8);
+      g.fillText(x.n.split(" ").slice(1).join(" "),o.X(k),o.P.t+o.ph+18);
+      g.restore();
+    });
+    const n=Math.round(s3.contracts);
+    const cash=Math.max(0,s3.settle-s3.strike)*sp.mult*n;
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Instrument",sp.n],
+      ["Multiplier","×"+sp.mult+" "+sp.unit],
+      ["Notional / contract",money(sp.mult*sp.px)],
+      ["Contracts",String(n)],
+      ["Total notional",money(sp.mult*sp.px*n)],
+      ["—","—"],
+      ["Settlement",s3.settle.toFixed(2)],
+      ["Strike",s3.strike.toFixed(0)],
+      ["In the money by",Math.max(0,s3.settle-s3.strike).toFixed(2)],
+      ["Cash settlement",money2(cash)],
+      ["Settles",sp.settle]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — options on futures ══════════ */
+const s4={S:100,r:0.06,T:0.5,v:0.30};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"a4",k:"r",lbl:"r",name:"Rate",min:0,max:.15,step:.005,fmt:pct2},
+    {id:"b4",k:"T",lbl:"T",name:"Years",min:.08,max:3,step:.02,fmt:v=>v.toFixed(2)+"y"},
+    {id:"c4v",k:"v",lbl:"σ",name:"Volatility",min:.1,max:.7,step:.01,fmt:pct}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const S=s4.S, F=fwd(S,s4.r,0,s4.T);
+    const ks=[],ds=[],df=[],gap=[];
+    for(let K=60;K<=145;K+=1){
+      ks.push(K);
+      const a=bs(S,K,s4.T,s4.v,s4.r,0,true).delta;
+      const b=b76(F,K,s4.T,s4.v,s4.r,true).delta;
+      ds.push(a);df.push(b);gap.push((a-b)*100);
+    }
+    const o=Fig(document.getElementById("cv4"),{h:290,x0:60,x1:145,y0:0,y1:1.02,pad:{l:56}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(2),5,4);
+    clip(o,()=>{
+      line(o,ks,ds,C("--blue"),2.6);
+      line(o,ks,df,C("--verm"),2.2,[6,4]);
+    });
+    vline(o,F,C("--ochre"),"F");
+
+    const o2=Fig(document.getElementById("cv4b"),{h:190,x0:60,x1:145,y0:0,y1:Math.max(1,Math.max.apply(null,gap)*1.15),pad:{l:56}});
+    axes(o2,v=>v.toFixed(0),v=>v.toFixed(1),5,4);
+    clip(o2,()=>line(o2,ks,gap,C("--moss"),2.6));
+
+    const cs=bs(S,100,s4.T,s4.v,s4.r,0,true), cf=b76(F,100,s4.T,s4.v,s4.r,true);
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Spot",S.toFixed(2)],
+      ["Forward",F.toFixed(4)],
+      ["Spot-model call",cs.price.toFixed(6)],
+      ["Black-76 call",cf.price.toFixed(6)],
+      ["Difference",Math.abs(cs.price-cf.price).toExponential(1)],
+      ["—","—"],
+      ["Delta wrt spot",cs.delta.toFixed(6)],
+      ["Delta wrt future",cf.delta.toFixed(6)],
+      ["Ratio",(cf.delta/cs.delta).toFixed(6)],
+      ["e^(−rT)",Math.exp(-s4.r*s4.T).toFixed(6)],
+      ["Over-hedge per 100",((cs.delta-cf.delta)*100).toFixed(2)+" contracts"]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — the rule inverts ══════════ */
+const s5={r:0.08,v:0.30,T:1,K:100};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"a5",k:"r",lbl:"r",name:"Rate",min:0,max:.20,step:.005,fmt:pct2},
+    {id:"b5",k:"v",lbl:"σ",name:"Volatility",min:.08,max:.7,step:.01,fmt:pct},
+    {id:"c5t",k:"T",lbl:"T",name:"Years",min:.25,max:3,step:.05,fmt:v=>v.toFixed(2)+"y"}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function draw(){
+    const K=s5.K,N=320;
+    const xs=[],pc=[],pp=[],ps=[];
+    for(let F=60;F<=145;F+=2.5){
+      xs.push(F);
+      pc.push(futTree(F,K,s5.T,s5.v,s5.r,N,true,true)-futTree(F,K,s5.T,s5.v,s5.r,N,true,false));
+      pp.push(futTree(F,K,s5.T,s5.v,s5.r,N,false,true)-futTree(F,K,s5.T,s5.v,s5.r,N,false,false));
+      ps.push(stkTree(F,K,s5.T,s5.v,s5.r,N,true,true)-stkTree(F,K,s5.T,s5.v,s5.r,N,true,false));
+    }
+    const hi=Math.max(0.4,Math.max(Math.max.apply(null,pc),Math.max.apply(null,pp))*1.15);
+    const o=Fig(document.getElementById("cv5"),{h:310,x0:60,x1:145,y0:-0.05,y1:hi,pad:{l:58}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(2),5,4);
+    clip(o,()=>{
+      line(o,[60,145],[0,0],C("--grey"),1,[3,3]);
+      line(o,xs,ps,C("--grey"),2.6);
+      line(o,xs,pc,C("--verm"),2.6);
+      line(o,xs,pp,C("--blue"),2.6);
+    });
+    vline(o,K,C("--ochre"),"K");
+
+    const fx=[],eu=[],intr=[];
+    for(let F=100;F<=210;F+=2){
+      fx.push(F);eu.push(b76(F,K,s5.T,s5.v,s5.r,true).price);intr.push(F-K);
+    }
+    const o2=Fig(document.getElementById("cv5b"),{h:200,x0:100,x1:210,y0:0,y1:115,pad:{l:58}});
+    axes(o2,v=>v.toFixed(0),v=>v.toFixed(0),5,4);
+    clip(o2,()=>{
+      line(o2,fx,intr,C("--grey"),2,[5,4]);
+      line(o2,fx,eu,C("--blue"),2.6);
+    });
+
+    const F=130;
+    const ec=b76(F,K,s5.T,s5.v,s5.r,true).price, ac=futTree(F,K,s5.T,s5.v,s5.r,600,true,true);
+    const ep=b76(2*K-F,K,s5.T,s5.v,s5.r,false).price, ap=futTree(2*K-F,K,s5.T,s5.v,s5.r,600,false,true);
+    const atmC=futTree(K,K,s5.T,s5.v,s5.r,600,true,true)-b76(K,K,s5.T,s5.v,s5.r,true).price;
+    const atmP=futTree(K,K,s5.T,s5.v,s5.r,600,false,true)-b76(K,K,s5.T,s5.v,s5.r,false).price;
+    const below=(140-K)-b76(140,K,s5.T,s5.v,s5.r,true).price;
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["F = 130 futures call",""],
+      ["  European",ec.toFixed(4)],
+      ["  American",ac.toFixed(4)],
+      ["  premium",(ac-ec).toFixed(4)],
+      ["F = 70 futures put",""],
+      ["  premium",(ap-ep).toFixed(4)],
+      ["At the money",""],
+      ["  call premium",atmC.toFixed(4)],
+      ["  put premium",atmP.toFixed(4)],
+      ["—","—"],
+      ["Stock call premium",Math.abs(stkTree(130,K,s5.T,s5.v,s5.r,600,true,true)-stkTree(130,K,s5.T,s5.v,s5.r,600,true,false)).toExponential(1)],
+      ["Euro call below intrinsic at F=140",below.toFixed(4)]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — index products ══════════ */
+const s6={q:0.02,r:0.05,T:0.5,v:0.20};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"a6",k:"q",lbl:"q",name:"Index dividend yield",min:0,max:.06,step:.0025,fmt:pct2},
+    {id:"b6",k:"r",lbl:"r",name:"Rate",min:0,max:.12,step:.005,fmt:pct2},
+    {id:"c6t",k:"T",lbl:"T",name:"Years",min:.08,max:2,step:.02,fmt:v=>v.toFixed(2)+"y"}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  function draw(){
+    const rows=[
+      ["Single stock option","physical","American","attached — capture by exercising","yes (page 08)","yes"],
+      ["Index option","cash","European","inside the index, in the carry","no","no"],
+      ["Option on a future","cash","American","none — the future has no carry","both sides (ch 05)","no"]
+    ];
+    document.getElementById("idxTab").innerHTML=
+      '<tr><th>Instrument</th><th>Settles</th><th>Exercise</th><th>Dividends</th><th>Early exercise?</th><th>Pin risk?</th></tr>'+
+      rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+
+        '</td><td>'+r[4]+'</td><td>'+r[5]+'</td></tr>').join("");
+    // where the dividend shows up
+    const S=100;
+    const F=fwd(S,s6.r,s6.q,s6.T);
+    const noDiv=fwd(S,s6.r,0,s6.T);
+    const o=Fig(document.getElementById("cv6"),{h:230,x0:-0.6,x1:2.6,y0:Math.min(S,F)*0.985,y1:Math.max(noDiv,S)*1.015,pad:{l:60,b:32}});
+    axes(o,()=>"",v=>v.toFixed(2),1,4);
+    barsF(o,[0,1,2],[S,noDiv,F],(v,i)=>i===0?C("--grey"):i===1?C("--ochre"):C("--blue"),0.42);
+    [["spot",S],["forward, no div",noDiv],["forward with div",F]].forEach((t,i)=>{
+      lab(o,i,t[1],t[1].toFixed(3),C("--ink"),9.5);
+      const g=o.g;g.save();g.fillStyle=C("--grey");g.textAlign="center";g.textBaseline="top";
+      g.font="8.5px 'IBM Plex Mono', monospace";g.fillText(t[0],o.X(i),o.P.t+o.ph+8);g.restore();
+    });
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Index level","100.00"],
+      ["Dividend yield",pct2(s6.q)],
+      ["Rate",pct2(s6.r)],
+      ["Net carry",pct2(s6.r-s6.q)],
+      ["Forward",F.toFixed(4)],
+      ["Without dividends",noDiv.toFixed(4)],
+      ["Dividends worth",(noDiv-F).toFixed(4)],
+      ["Capturable by exercising?","no"]
+    ]);
+  }
+})();
+
+/* ══════════ 07 — where it breaks ══════════ */
+const s7={borrow:0.0025,spread:0.005,r:0.05,q:0.02,T:1};
+(function(){
+  sliders(document.getElementById("ctl7"),[
+    {id:"a7",k:"borrow",lbl:"b",name:"Borrow cost",min:0,max:.20,step:.0025,fmt:pct2},
+    {id:"b7",k:"spread",lbl:"±",name:"Funding bid-offer",min:0,max:.03,step:.0025,fmt:pct2},
+    {id:"c7r",k:"r",lbl:"r",name:"Mid financing",min:0,max:.12,step:.005,fmt:pct2}
+  ],s7,()=>draw(),"c7");
+  window.draw7=draw;
+  function draw(){
+    const S=100;
+    const xs=[],up=[],dn=[],mid=[];
+    for(let i=0;i<=100;i++){
+      const T=0.05+i*(2/100);
+      xs.push(T);
+      up.push(fwd(S,s7.r+s7.spread,s7.q,T));                 // borrow money at the offer
+      dn.push(fwd(S,s7.r-s7.spread-s7.borrow,s7.q,T));       // lend at the bid, pay borrow
+      mid.push(fwd(S,s7.r,s7.q,T));
+    }
+    const o=Fig(document.getElementById("cv7"),{h:290,x0:0,x1:2.05,
+      y0:Math.min.apply(null,dn)-0.5,y1:Math.max.apply(null,up)+0.5,pad:{l:58}});
+    axes(o,v=>v.toFixed(2)+"y",v=>v.toFixed(1),5,4);
+    clip(o,()=>{
+      const g=o.g;g.save();g.globalAlpha=.13;g.fillStyle=C("--blue");
+      g.beginPath();g.moveTo(o.X(xs[0]),o.Y(up[0]));
+      for(let i=1;i<xs.length;i++)g.lineTo(o.X(xs[i]),o.Y(up[i]));
+      for(let i=xs.length-1;i>=0;i--)g.lineTo(o.X(xs[i]),o.Y(dn[i]));
+      g.closePath();g.fill();g.restore();
+      line(o,xs,mid,C("--moss"),2.4,[5,4]);
+      line(o,xs,up,C("--blue"),2.2);
+      line(o,xs,dn,C("--verm"),2.2);
+    });
+    const T=1;
+    document.getElementById("kv7").innerHTML=kvHTML([
+      ["Mid financing",pct2(s7.r)],
+      ["Funding bid-offer","±"+pct2(s7.spread)],
+      ["Borrow cost",pct2(s7.borrow)],
+      ["Textbook 1y forward",fwd(S,s7.r,s7.q,T).toFixed(4)],
+      ["Upper bound",fwd(S,s7.r+s7.spread,s7.q,T).toFixed(4)],
+      ["Lower bound",fwd(S,s7.r-s7.spread-s7.borrow,s7.q,T).toFixed(4)],
+      ["Band width",(fwd(S,s7.r+s7.spread,s7.q,T)-fwd(S,s7.r-s7.spread-s7.borrow,s7.q,T)).toFixed(4)],
+      ["  as % of spot",pct((fwd(S,s7.r+s7.spread,s7.q,T)-fwd(S,s7.r-s7.spread-s7.borrow,s7.q,T))/S)]
+    ]);
+  }
+})();
+
+/* ══════════ 08 — drills ══════════ */
+(function(){
+  let hard=false,score=0,asked=0,streak=0,best=0,cur=null;
+  const E=id=>document.getElementById(id);
+  function make(){
+    const R=Math.random;
+    const t=(hard?[0,1,2,3]:[0,2])[Math.floor(R()*(hard?4:2))];
+    if(t===0){
+      const S=[40,60,80,100,120,150,200][Math.floor(R()*7)];
+      const r=[0.02,0.03,0.04,0.05,0.06,0.08][Math.floor(R()*6)];
+      const q=[0,0.01,0.02,0.03][Math.floor(R()*4)];
+      const T=[0.25,0.5,1,2][Math.floor(R()*4)];
+      const F=S*Math.exp((r-q)*T);
+      return {kind:"Forward price",unit:"$",a:F,tol:Math.max(0.02,F*0.003),
+        q:"Spot <b>"+S+"</b>, financing <b>"+(r*100).toFixed(0)+"%</b>, dividend yield <b>"+(q*100).toFixed(0)+"%</b>, <b>"+T+"</b> years to delivery. What is the forward?",
+        w:"F = S·e^((r−q)T) = "+S+"·e^(("+r+"−"+q+")×"+T+") = <b>"+F.toFixed(4)+"</b>."};
+    }
+    if(t===1){
+      const S=100, r=[0.03,0.05,0.08][Math.floor(R()*3)];
+      const d=[0.4,0.6,1.0,2.5][Math.floor(R()*4)], td=[0.25,0.5,0.75][Math.floor(R()*3)];
+      const F=(S-d*Math.exp(-r*td))*Math.exp(r*1);
+      return {kind:"Forward with a dividend",unit:"$",a:F,tol:0.03,
+        q:"Spot <b>100</b>, financing <b>"+(r*100).toFixed(0)+"%</b>, one dividend of <b>$"+d.toFixed(2)+"</b> paid at <b>"+td+"</b> years. What is the <b>one-year</b> forward?",
+        w:"F = (S − PV(div))·e^(rT) = (100 − "+d.toFixed(2)+"·e^(−"+r+"×"+td+"))·e^("+r+") = (100 − "+(d*Math.exp(-r*td)).toFixed(4)+")·"+Math.exp(r).toFixed(4)+" = <b>"+F.toFixed(4)+"</b>."};
+    }
+    if(t===2){
+      const specs=[[100,"shares",R()*300+40],[100,"index units",R()*2000+4000],[50,"index points",R()*2000+4000]];
+      const s=specs[Math.floor(R()*3)];
+      const px=Math.round(s[2]*100)/100;
+      const n=[1,5,10,25,50][Math.floor(R()*5)];
+      const not=s[0]*px*n;
+      return {kind:"Notional controlled",unit:"$",a:not,tol:Math.max(1,not*0.005),
+        q:"<b>"+n+"</b> contracts, multiplier <b>×"+s[0]+" "+s[1]+"</b>, underlying at <b>"+px.toLocaleString("en-US")+"</b>. What notional do you control?",
+        w:n+" × "+s[0]+" × "+px.toLocaleString("en-US")+" = <b>$"+not.toLocaleString("en-US",{maximumFractionDigits:0})+"</b>."};
+    }
+    const K=[4800,5000,5200,5400][Math.floor(R()*4)];
+    const st=K+Math.round((R()*160-30)*100)/100;
+    const n=[1,5,10,20][Math.floor(R()*4)];
+    const cash=Math.max(0,st-K)*100*n;
+    return {kind:"Cash settlement",unit:"$",a:cash,tol:Math.max(1,cash*0.004),
+      q:"You are long <b>"+n+"</b> index calls struck at <b>"+K+"</b>, multiplier <b>100</b>, cash settled. The settlement level is <b>"+st.toFixed(2)+"</b>. What do you receive?",
+      w:"max(0, "+st.toFixed(2)+" − "+K+") × 100 × "+n+" = <b>$"+cash.toLocaleString("en-US",{maximumFractionDigits:2})+"</b>."};
+  }
+  function next(){
+    cur=make();
+    E("dKind").textContent=cur.kind;E("dText").innerHTML=cur.q;
+    E("dUnit").textContent=cur.unit;E("dInput").value="";
+    E("drill").classList.remove("done");
+    focusSoft(E("dInput"),E("drill"));
+  }
+  function submit(){
+    if(!cur||E("drill").classList.contains("done"))return;
+    const raw=parseFloat(String(E("dInput").value).replace(/[$,\s]/g,""));
+    asked++;
+    const ok=isFinite(raw)&&Math.abs(raw-cur.a)<=cur.tol;
+    if(ok){score++;streak++;if(streak>best)best=streak;} else streak=0;
+    E("dVerdict").textContent=ok?"CORRECT":("NOT QUITE — the answer is "+cur.a.toLocaleString("en-US",{maximumFractionDigits:4}));
+    E("dVerdict").className="vd "+(ok?"ok":"no");
+    E("dWork").innerHTML=cur.w;
+    E("dScore").textContent=score+" / "+asked;
+    E("dStreak").textContent=String(streak);E("dBest").textContent=String(best);
+    E("drill").classList.add("done");
+  }
+  E("dSubmit").addEventListener("click",submit);
+  E("dInput").addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+  E("dNext").addEventListener("click",next);
+  E("dSkip").addEventListener("click",()=>{streak=0;E("dStreak").textContent="0";next();});
+  E("dEasy").addEventListener("click",()=>{hard=false;E("dEasy").setAttribute("aria-pressed","true");E("dHard").setAttribute("aria-pressed","false");next();});
+  E("dHard").addEventListener("click",()=>{hard=true;E("dHard").setAttribute("aria-pressed","true");E("dEasy").setAttribute("aria-pressed","false");next();});
+  window.drawDrill=next;
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
