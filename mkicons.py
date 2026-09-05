@@ -36,7 +36,7 @@ def png(path, w, h, pixels):
 
 
 def draw(size, inset, bg=CHALK, ring=BLUE):
-    """The mark: a ring of stroke width 3/32 of the art box, centred.
+    """The mark: a ring of stroke width 3/32 of the art box, centered.
        `inset` is the fraction of the canvas the art occupies — 1.0 for a
        normal icon, 0.6 for a maskable one that must survive a circular crop."""
     px = [bg] * (size * size)

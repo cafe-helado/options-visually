@@ -64,7 +64,7 @@
     <li><b>Chapters 01 and 02 are the whole argument.</b> Exercising early costs you the option's time value, always, exactly. Everything after that is a catalogue of the things that can be worth more than time value, and there are only three.</li>
     <li><b>The call rule is exact; the put rule is not.</b> Chapter 03's criterion is arithmetic you can do on a phone. Chapter 04's needs a tree, and it shows how badly the phone version misses.</li>
     <li><b>Chapters 06 and 07 are where the money actually goes.</b> The theory says which options should be exercised. Assignment says which of yours were, and that is a lottery with a standard deviation.</li>
-    <li><b>Market plumbing is dated and provisional.</b> Auto-exercise thresholds, allocation methods and tender rules are conventions, not mathematics. They are labelled where they appear.</li>
+    <li><b>Market plumbing is dated and provisional.</b> Auto-exercise thresholds, allocation methods and tender rules are conventions, not mathematics. They are labeled where they appear.</li>
   </ol>
   <details class="drop">
     <summary>Notation — every symbol used on this page</summary>
@@ -218,7 +218,7 @@
       <button data-ok="1">Identical. K(1−e<sup>−rτ</sup>) contains no volatility term, no spot, and no distribution at all</button>
       <button>It depends on which is further in the money</button>
     </div>
-    <div class="ans"><b>Identical, and that is the useful part.</b> The floor is pure discounting: strike, rate, time. Volatility and spot enter time value only through the put. This is what makes the night-before screen in chapter 05 a two-column sort rather than a modelling exercise — you can rule out most of a chain using a number that needs no volatility input at all, and only then price the survivors.</div>
+    <div class="ans"><b>Identical, and that is the useful part.</b> The floor is pure discounting: strike, rate, time. Volatility and spot enter time value only through the put. This is what makes the night-before screen in chapter 05 a two-column sort rather than a modeling exercise — you can rule out most of a chain using a number that needs no volatility input at all, and only then price the survivors.</div>
   </div>
 
   <details class="derive">
@@ -418,7 +418,7 @@
 
   <div class="prose">
     <p class="lead">The theory in chapters 02 and 03 becomes a job the afternoon before an ex-date. You have long calls across a chain; some should be exercised by five o'clock and the rest should not; and the cost of getting it wrong in either direction is real money that nobody will ever tell you about, because an unexercised call does not generate a trade confirmation saying what you lost.</p>
-    <p>The screen is the rule from chapter 03, applied strike by strike, with the put quote taken off the market rather than modelled. Three columns: the dividend on the left, the hurdle in the middle, the difference on the right. Sort by the difference. Everything positive is an exercise notice.</p>
+    <p>The screen is the rule from chapter 03, applied strike by strike, with the put quote taken off the market rather than modeled. Three columns: the dividend on the left, the hurdle in the middle, the difference on the right. Sort by the difference. Everything positive is an exercise notice.</p>
     <p>The table below is live. It builds the hurdle from the interest floor plus a put valued on a skewed surface, so the low strikes carry the higher volatilities the way a real chain does. What to watch is where the line falls: at a stock of 112.40 with a $1.42 dividend and 38 days to run, the 100 strike clears by <b>21 cents</b> and the 105 strike misses by <b>79 cents</b>. The boundary between "exercise" and "hold" runs between two adjacent strikes, and it moves several strikes if you change the dividend by a few cents.</p>
     <p>Which is the practical warning. The rule of thumb people carry — "exercise the ones where the dividend is bigger than the put" — is the right equation with the interest floor deleted from it, and on that chain it moves the line by a full strike. The floor is small in absolute terms and it is decisive precisely because the decision is decided near zero.</p>
     <p>The bottom line adds up what is at stake. Across the strikes that clear, at a hundred contracts each, this chain is worth <b>$28,407</b> to get right, on positions whose total value is a small multiple of that. This is the highest ratio of dollars-to-effort anywhere in options operations, which is why it is a checklist item rather than a judgement call.</p>
@@ -539,8 +539,8 @@
     <p class="lead">An option that finishes a cent in the money is exercised automatically. One that finishes a cent out of the money is not. The clearing house applies the threshold mechanically — <span class="term" data-t="Exercise by exception" data-def="The clearing house exercises everything at or beyond a fixed in-the-money threshold unless the holder files a contrary instruction. The threshold is a convention that has changed over time; it currently sits at one cent.">exercise by exception</span>, currently at one cent — so the difference between a two-cent-in and a two-cent-out settlement is the difference between being short a thousand shares over the weekend and being flat.</p>
     <p>Take the arithmetic literally. You are short ten 100-strike calls and the stock settles at <b>100.02</b>. Those calls are exercised against you, and you are short a thousand shares from Friday's close. The intrinsic value that changed hands is two cents a share: <b>$20</b>. The overnight risk you have just been handed, on a 35-volatility name, has a standard deviation of <b>$2,205</b> for one trading day and <b>$3,820</b> across a three-day weekend.</p>
     <p>That ratio — <b>110 to 1</b> for a day, <b>191 to 1</b> for a weekend — is what pin risk actually is. Not the chance of a strange settlement, but the fact that a rounding-level economic difference determines a position-level exposure, and you learn which one you got after the market has closed.</p>
-    <p>It gets worse where it should get better. At a settlement of exactly the strike, holders' behaviour is genuinely unpredictable: the option is worth nothing either way, so some file exercise notices and some do not, and your assignment is a draw from chapter 06 with an exercise fraction nobody can estimate. Your Monday position is somewhere between flat and short a thousand shares, and there is no calculation that narrows it.</p>
-    <p>The defences are all operational rather than clever. Trade out of the position before the close instead of letting it settle — pay the spread and know your position. File a <b>do-not-exercise</b> instruction on longs you do not want, which is the one lever you actually control. Or close the offsetting stock so that either outcome leaves you flat rather than one of them leaving you long and the other short. What you cannot do is model your way out, because the uncertainty is in other people's paperwork.</p>
+    <p>It gets worse where it should get better. At a settlement of exactly the strike, holders' behavior is genuinely unpredictable: the option is worth nothing either way, so some file exercise notices and some do not, and your assignment is a draw from chapter 06 with an exercise fraction nobody can estimate. Your Monday position is somewhere between flat and short a thousand shares, and there is no calculation that narrows it.</p>
+    <p>The defenses are all operational rather than clever. Trade out of the position before the close instead of letting it settle — pay the spread and know your position. File a <b>do-not-exercise</b> instruction on longs you do not want, which is the one lever you actually control. Or close the offsetting stock so that either outcome leaves you flat rather than one of them leaving you long and the other short. What you cannot do is model your way out, because the uncertainty is in other people's paperwork.</p>
   </div>
 
   <figure class="bleed">
@@ -565,7 +565,7 @@
         <div class="kv" style="margin-top:20px" id="kv7"></div>
       </div>
     </div>
-    <figcaption>The grey line is what the settlement is worth; the coloured spread is what it exposes you to. They are drawn on the same axis on purpose, and the grey line is nearly invisible next to them. Move the settlement across the strike by two cents and the entire distribution jumps between two modes — that discontinuity, not the width of either mode, is the thing being managed.</figcaption>
+    <figcaption>The gray line is what the settlement is worth; the colored spread is what it exposes you to. They are drawn on the same axis on purpose, and the gray line is nearly invisible next to them. Move the settlement across the strike by two cents and the entire distribution jumps between two modes — that discontinuity, not the width of either mode, is the thing being managed.</figcaption>
   </figure>
 
   <div class="try">
@@ -845,7 +845,7 @@
     <span class="lab">Question 5 · chapter 04</span>
     <p class="q">The one-line test says exercise your put below 85. A binomial tree says 78. Which do you follow?</p>
     <div class="opts">
-      <button>The one-line test — closed forms are exact and trees have discretisation error</button>
+      <button>The one-line test — closed forms are exact and trees have discretization error</button>
       <button data-ok="1">The tree. The shortcut ignores the option to wait and exercise later, so it always overshoots — here by seven points of spot</button>
       <button>Split the difference at around 81</button>
       <button>Either; a seven-point difference is within model error</button>
@@ -859,7 +859,7 @@
     <div class="opts">
       <button>Certain — 40% of 50 is 20 contracts, so 2,000 shares</button>
       <button data-ok="1">Expect 2,000 shares with a standard deviation of about 346, and only a one-in-three chance of landing within a contract of that</button>
-      <button>Completely uncertain; assignment is arbitrary and cannot be modelled</button>
+      <button>Completely uncertain; assignment is arbitrary and cannot be modeled</button>
       <button>Certain to be assigned on all 50, since exercise is all-or-nothing per strike</button>
     </div>
     <div class="ans"><b>2,000 ± 346 shares.</b> Allocation is random across the short open interest, so your assignment is a binomial draw rather than a proportion. The mean is the number you hedge to; the standard deviation is the risk you carry overnight, and it is the number that never appears on a greek report.</div>
@@ -904,7 +904,7 @@
 /* ══════════ shared numerics ══════════
    One CRR lattice, priced American and European in the same backward pass,
    so the residual in chapter 01 is a statement about exercise policy and
-   never about discretisation. */
+   never about discretization. */
 function powers(u, N) {
   const P = new Float64Array(2 * N + 1);
   P[N] = 1;

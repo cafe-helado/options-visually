@@ -40,7 +40,7 @@ Chapters
 - Reading the smile as a distribution — Breeden–Litzenberger; the second derivative of
   price with respect to strike is the risk-neutral density
 - Two generators — jumps and stochastic vol each produce a smile. Simulate both, show
-  they are distinguishable by term structure behaviour, not by shape at one expiry
+  they are distinguishable by term structure behavior, not by shape at one expiry
 - Term structure — why the front is jumpier; the roots of contango and backwardation
 - Sticky strike vs sticky delta vs sticky moneyness — the same spot move gives three
   different mark-to-markets. Show the greek consequences
@@ -66,7 +66,7 @@ so at 20 vol / 30 days it is 4.57 against a one-sigma 5.73 — a 25% gap in a nu
 gets quoted to two decimals and reasoned about as though it were a standard deviation.
 
 And: a fairly priced earnings straddle has mean ~0, median -0.93, win rate 33%. The gap
-between mean and median is the whole behavioural problem with event vol.
+between mean and median is the whole behavioral problem with event vol.
 
 Second signature: the straddle price *is* the expected absolute move.
 straddle = E|S_T − S| = √(2/π)·S·σ√T, confirmed to three decimals across tenors.
@@ -95,7 +95,7 @@ Chapters
 same structure gets two orthogonal descriptions. Show both panels at once.
 
 Signature as built: the exposure fingerprint — five bars (direction, realized, vol
-level, skew, vol convexity) normalised against a one-lot ATM straddle. Collar and risk
+level, skew, vol convexity) normalized against a one-lot ATM straddle. Collar and risk
 reversal annihilate exactly: largest |sum| across all seven greeks is 0.00e+0.
 
 Unexpected find that became chapter 05: the lizards are CONDITIONAL structures. A jade
@@ -264,7 +264,7 @@ panel underneath. Across 600 cases — spot 60 to 180, expiries one month to two
 vol 15% to 60%, rates 0% to 10% — the worst gap is **1.85e-13**. The panel does not lift
 off the axis for any slider. Switch the contract to a put and it lifts immediately.
 
-The unifier that turned out to organise the whole page: **exercising early costs exactly
+The unifier that turned out to organize the whole page: **exercising early costs exactly
 the option's time value**, and parity splits time value into two named pieces.
 
     time value  =  K(1 - e^-r.tau)  +  p(S)
@@ -320,7 +320,7 @@ Chapters as built
 - Drills — interest floor, exercise edge, expected assignment, adjusted strikes
 
 Constraint honoured throughout: the mathematics is checked numerically, the market
-plumbing (auto-exercise thresholds, allocation method, tender rules) is labelled as
+plumbing (auto-exercise thresholds, allocation method, tender rules) is labeled as
 convention, dated, and taught as mechanism rather than rulebook.
 
 ---

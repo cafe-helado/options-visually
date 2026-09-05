@@ -32,7 +32,7 @@ of something witnessed, not a fact to accept.
 When planning a page, the question is: *what is the simulation or interaction that makes
 the conclusion obvious, and what is the minimum the reader needs to understand it?*
 Order the chapters from that answer. A chapter whose figure could be replaced by a
-sentence is prose, and should be folded into its neighbour.
+sentence is prose, and should be folded into its neighbor.
 
 ## Verify the arithmetic before it reaches the prose
 
@@ -130,7 +130,7 @@ canvas height — `Fig` applies it, so call it yourself only when sizing a canva
 `LAB.boot(drawAll)` handles first paint, webfont reflow, resize, orientation change
 and table wrapping.
 
-Colours: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proof ·
+Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proof ·
 `--ochre` markers · `--grey` secondary · `--ink` text.
 
 ## Offline, and installing to a phone
@@ -182,7 +182,7 @@ catalogue (10-13), and models-versus-reality (23) all missing.
 
 Page 16 is a different kind of page and worth understanding before adding another.
 It teaches nothing new — it re-asks the other fifteen subjects in the shape a question
-comes in, on a difficulty ladder, because recognising gamma and *answering* "you are
+comes in, on a difficulty ladder, because recognizing gamma and *answering* "you are
 long a 25-delta call and the stock rallies five percent, are you longer?" are
 different skills. Its unit is the card: a question, four options where three are real
 misconceptions, a reason, and a figure spec the shared renderer draws. Twenty-two of

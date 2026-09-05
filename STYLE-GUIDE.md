@@ -18,7 +18,7 @@ a *summary of something they watched*, not a new fact to accept.
 Apply this to any topic by asking: what is the simulation or interaction that makes
 the conclusion obvious, and what is the minimum the reader needs to understand it?
 Order the chapters from that answer. If a chapter's figure could be replaced by a
-sentence, the chapter is prose and should be folded into its neighbour.
+sentence, the chapter is prose and should be folded into its neighbor.
 
 ## Chapter anatomy
 
@@ -40,7 +40,7 @@ Every chapter is the same seven slots, in this order. Skip any except the first 
   saying what the thing is *for*, not just what it is.
 - **Derivations end with "where it breaks."** Naming the failing assumption is what
   separates teaching from reciting.
-- **Captions say what to notice**, never what the axes are. The axes are labelled.
+- **Captions say what to notice**, never what the axes are. The axes are labeled.
 - **Distractors in `.check` must be real misconceptions**, not filler. If you can't
   think of three things someone actually believes wrongly, the question is too easy.
 - **Verify the arithmetic before writing it.** Every number in the Black–Scholes page

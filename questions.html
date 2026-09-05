@@ -141,7 +141,7 @@
       <button>Because interviewers prefer conceptual questions</button>
       <button>Because arithmetic errors are not real mistakes</button>
     </div>
-    <div class="ans"><b>It locates a belief.</b> Every card in this deck is built around something that is true in a neighbouring case — puts and calls do behave alike in most respects, more time is worth more money, more hedging usually is better. The question marks the place where the neighbouring case stops applying, and finding that place is the entire skill.</div>
+    <div class="ans"><b>It locates a belief.</b> Every card in this deck is built around something that is true in a neighboring case — puts and calls do behave alike in most respects, more time is worth more money, more hedging usually is better. The question marks the place where the neighboring case stops applying, and finding that place is the entire skill.</div>
   </div>
 </section>
 
@@ -178,7 +178,7 @@
         <div class="kv" style="margin-top:20px" id="kv2"></div>
       </div>
     </div>
-    <figcaption>Notice the blue curve flattens onto the green line, never the grey one. The gap between grey and green is interest; the gap between green and blue is everything the stock might still do.</figcaption>
+    <figcaption>Notice the blue curve flattens onto the green line, never the gray one. The gap between gray and green is interest; the gap between green and blue is everything the stock might still do.</figcaption>
   </figure>
 
   <div class="mline">C(K₁) − C(K₂) ≤ (K₂ − K₁) · e<sup>−rT</sup></div>
@@ -186,7 +186,7 @@
 
   <div class="prose">
     <p>So the shortfall at a spot of 130 splits cleanly. Twelve cents of it is interest you will not be paid — the difference between six dollars now and six dollars in six months. The rest is the residual chance that the stock finishes below 106, which at these parameters is about twelve percent. As expiry approaches the second piece collapses and the first shrinks toward nothing, and the spread walks up to six.</p>
-    <p>The desk version of this question is: <em>I am long a deep in-the-money vertical and I want out. Why is the market paying me less than the width?</em> Because the market is buying a bond off you, and bonds trade below par. If rates were zero the ceiling would be exactly six — set the rate slider to zero and watch the green line rise onto the grey one.</p>
+    <p>The desk version of this question is: <em>I am long a deep in-the-money vertical and I want out. Why is the market paying me less than the width?</em> Because the market is buying a bond off you, and bonds trade below par. If rates were zero the ceiling would be exactly six — set the rate slider to zero and watch the green line rise onto the gray one.</p>
   </div>
 
   <div class="try">
@@ -682,7 +682,7 @@
       <button>Black–Scholes failing at the money</button>
       <button>Skew between the call strike and the put strike</button>
     </div>
-    <div class="ans"><b>An unmodelled rate, nearly always.</b> Parity is derived from payoffs alone, so it cannot be broken by a model being wrong — only by an input being wrong or by the prices not being simultaneously tradeable. Those are the first two things to eliminate, in that order.</div>
+    <div class="ans"><b>An unmodeled rate, nearly always.</b> Parity is derived from payoffs alone, so it cannot be broken by a model being wrong — only by an input being wrong or by the prices not being simultaneously tradeable. Those are the first two things to eliminate, in that order.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
@@ -774,7 +774,7 @@
   {t:1,q:"A European call is 40 points in the money with a year to run and no dividend. Can it trade below its intrinsic value of 40?",
    o:["Yes, if the volatility is low enough","No — its floor is S − K·e⁻ʳᵀ, which is above S − K","Only if the stock is hard to borrow","Yes, it converges down to intrinsic"],ok:1,
    why:"At 140 the call is 45.63, and even at zero volatility it could not go below 140 − 100·e⁻⁰·⁰⁵ = 44.88. Holding the call instead of the stock means you have not yet paid the strike, and the interest on that unpaid strike is worth more than nothing.",
-   fig:{title:"Call value, intrinsic, and the true floor",cap:"The green floor sits above the grey intrinsic line by the interest on the strike. The call never touches either.",
+   fig:{title:"Call value, intrinsic, and the true floor",cap:"The green floor sits above the gray intrinsic line by the interest on the strike. The call never touches either.",
      x0:100,x1:180,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
      leg:[["Call value","--blue"],["Intrinsic","--grey"],["S − K·e⁻ʳᵀ","--moss"]],
      f:[S=>P(S,100,1,V,0.05,0,true),S=>Math.max(S-100,0),S=>S-100*Math.exp(-0.05)],
@@ -801,7 +801,7 @@
   {t:1,q:"Volatility falls to zero on a call ten points in the money with a year to run. What is it worth?",
    o:["Ten \u2014 its intrinsic value","14.88 \u2014 the forward intrinsic, S \u2212 K\u00b7e\u207b\u02b3\u1d40","Nothing, since there is no volatility left to pay for","It is undefined"],ok:1,
    why:"With no volatility the stock still grows at the financing rate, so the call settles onto S \u2212 K\u00b7e\u207b\u02b3\u1d40 = 110 \u2212 95.12 = 14.88, not S \u2212 K = 10. Intrinsic value measured against the spot is simply the wrong reference \u2014 the right one is the forward. The mirror limit for a put is max(K\u00b7e\u207b\u02b3\u1d40 \u2212 S, 0), which is why a deep put can trade below its spot intrinsic.",
-   fig:{title:"A ten-point in-the-money call as volatility goes to zero",cap:"The curve lands on the green line, not the grey one. The gap between them is a year of interest on the strike.",
+   fig:{title:"A ten-point in-the-money call as volatility goes to zero",cap:"The curve lands on the green line, not the gray one. The gap between them is a year of interest on the strike.",
      x0:0.001,x1:0.6,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(0),
      leg:[["Call value","--blue"],["S \u2212 K","--grey"],["S \u2212 K\u00b7e\u207b\u02b3\u1d40","--moss"]],
      f:[v=>P(110,100,1,v,0.05,0,true),()=>10,()=>110-100*Math.exp(-0.05)],
@@ -838,7 +838,7 @@
   {t:2,q:"The stock is at 130. What is the most the 100/106 call spread can be worth today, with six months left and rates at 4%?",
    o:["6.00 — the width between the strikes","5.88 — the width discounted, 6 × e⁻ʳᵀ","30.00 — its intrinsic value","There is no ceiling while the stock can keep rising"],ok:1,
    why:"The spread pays at most the width, but it pays it at expiry. Today it is worth at most the present value of that, 5.8812. Push the spot to 500 and the price stops dead at 5.8812 — chapter 02 takes this apart properly.",
-   fig:{title:"The 100/106 call spread against spot",cap:"The blue curve flattens onto the green ceiling, never onto the grey width. Thirty points of extra rally buys nothing.",
+   fig:{title:"The 100/106 call spread against spot",cap:"The blue curve flattens onto the green ceiling, never onto the gray width. Thirty points of extra rally buys nothing.",
      x0:90,x1:200,xf:v=>v.toFixed(0),yf:v=>v.toFixed(1),
      leg:[["Spread","--blue"],["Width","--grey"],["Width × e⁻ʳᵀ","--moss"]],
      f:[S=>P(S,100,0.5,V,R,0,true)-P(S,106,0.5,V,R,0,true),()=>6,()=>6*Math.exp(-R*0.5)],

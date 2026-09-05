@@ -68,7 +68,7 @@
     <table class="ntab">
       <tr><td>F</td><td>The forward price for delivery at T. Not a forecast of the spot price — the price agreed today for a trade that settles later.</td></tr>
       <tr><td>Carry</td><td>The net cost of holding the underlying to the delivery date: financing minus whatever the asset pays you.</td></tr>
-      <tr><td>q</td><td>Continuous dividend yield. A modelling convenience; real shares pay lumps, which chapter 02 handles separately.</td></tr>
+      <tr><td>q</td><td>Continuous dividend yield. A modeling convenience; real shares pay lumps, which chapter 02 handles separately.</td></tr>
       <tr><td>Basis</td><td>The gap between the futures price and spot. It converges to zero at delivery by construction.</td></tr>
       <tr><td>Black-76</td><td>Black–Scholes rewritten for an underlying that is already a forward. The carry term disappears and only discounting is left.</td></tr>
       <tr><td>Multiplier</td><td>How many units of the underlying one contract controls. The difference between a number on a screen and an amount of money.</td></tr>
@@ -165,7 +165,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">The continuous yield <b>q</b> in chapter 01 is a modelling convenience. Real shares pay discrete lumps on announced dates, and the forward drops by each dividend's future value at the moment it goes ex. Getting this right matters because the difference is not small.</p>
+    <p class="lead">The continuous yield <b>q</b> in chapter 01 is a modeling convenience. Real shares pay discrete lumps on announced dates, and the forward drops by each dividend's future value at the moment it goes ex. Getting this right matters because the difference is not small.</p>
     <p>On a 100 stock at 5% over one year, the no-dividend forward is <b>105.1271</b>. Three quarterly dividends of 60 cents pull it to <b>103.2814</b>. A single 2.50 special dividend paid at three months pulls it to <b>102.5316</b> — a bigger effect than the three regular payments combined, and one that arrives with a few weeks' notice.</p>
     <p>Four components make up the carry, and they behave differently.</p>
     <p><b>Financing.</b> The cost of the money, at your rate rather than the government's. It moves with the curve and with your credit.</p>
@@ -234,7 +234,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">Everything in this series so far has been priced per unit of underlying. A real trade is a number of contracts, each controlling a multiple of something, settling in a specific way on a specific date. Getting that chain wrong is not a modelling error, it is a wire transfer.</p>
+    <p class="lead">Everything in this series so far has been priced per unit of underlying. A real trade is a number of contracts, each controlling a multiple of something, settling in a specific way on a specific date. Getting that chain wrong is not a modeling error, it is a wire transfer.</p>
     <p>The multiplier is the first link. A single-stock option on a 172.40 share controls 100 shares — <b>$17,240</b> of notional per contract. An index option with a 100 multiplier on a 5,280 index controls <b>$528,000</b>. An E-mini equity index future with a 50 multiplier on the same index controls <b>$264,000</b>. Three instruments on similar-sounding things, differing by a factor of thirty in what one unit commits you to.</p>
     <p>Then <b>settlement style</b>. A single-stock option is physically settled: exercise and shares move. An index option is <span class="term" data-t="Cash settlement" data-def="Settled by a payment computed from a reference price, with nothing delivered. Standard for index products, because an index cannot be handed over.">cash settled</span>, because there is nothing to deliver — you receive the difference. On a 5,200 call settling at 5,283.47 with a 100 multiplier, that is <b>(5,283.47 − 5,200) × 100 = $8,347</b>, and no position in anything remains afterwards. That distinction changes what happens on expiration weekend entirely: <a href="early-exercise.html#c7" style="color:var(--blue)">page 08's pin risk</a> is a physical-settlement problem and largely evaporates under cash settlement.</p>
     <p>Then <b>exercise style</b>. American for most single-stock options, European for most index options — which is why page 08's early-exercise machinery applies to one and not the other.</p>
@@ -378,7 +378,7 @@
         <div class="kv" style="margin-top:20px" id="kv5"></div>
       </div>
     </div>
-    <figcaption>The grey line is page 08's result, drawn here for comparison and pinned to zero across the whole range. The two coloured curves are the same option on a futures contract. The lower panel shows why: where the blue price curve dips beneath the dashed intrinsic line, exercising immediately is worth more than holding, and the tree finds it.</figcaption>
+    <figcaption>The gray line is page 08's result, drawn here for comparison and pinned to zero across the whole range. The two colored curves are the same option on a futures contract. The lower panel shows why: where the blue price curve dips beneath the dashed intrinsic line, exercising immediately is worth more than holding, and the tree finds it.</figcaption>
   </figure>
 
   <div class="try">

@@ -194,7 +194,7 @@
           <div class="kv" style="margin-top:18px" id="kvM3"></div>
         </div>
       </div>
-      <figcaption>The paths fill a parabola-shaped envelope, not a cone. If uncertainty grew linearly with time — the grey lines — long-dated options would be far more valuable than they are, and the entire term structure of volatility would look different.</figcaption>
+      <figcaption>The paths fill a parabola-shaped envelope, not a cone. If uncertainty grew linearly with time — the gray lines — long-dated options would be far more valuable than they are, and the entire term structure of volatility would look different.</figcaption>
     </figure>
   </div>
 
@@ -440,7 +440,7 @@
       <p>Integrating over the life of the option gives the form used in every simulation on this page:</p>
       <div class="mline">S<sub>T</sub> = S · exp[ (μ − σ²/2)T + σ√T · Z ],&nbsp;&nbsp; Z ~ Normal(0,1)</div>
       <p class="mread">Reads as: <b>take today’s price, apply the drift over T years, then multiply by a random factor whose size is set by σ√T.</b> Z is a single standard normal draw. This one line generates every path on this page.</p>
-      <p>And the sanity check that the correction is right: E[S<sub>T</sub>] = S·e<sup>μT</sup>, with the σ²/2 cancelling exactly. The <em>mean</em> grows at μ; the <em>median</em> grows at μ − σ²/2. Chapter two's histogram shows those two numbers sitting in different places.</p>
+      <p>And the sanity check that the correction is right: E[S<sub>T</sub>] = S·e<sup>μT</sup>, with the σ²/2 canceling exactly. The <em>mean</em> grows at μ; the <em>median</em> grows at μ − σ²/2. Chapter two's histogram shows those two numbers sitting in different places.</p>
     </div>
   </details>
 
@@ -482,7 +482,7 @@
         <div class="kv" style="margin-top:22px" id="kv2"></div>
       </div>
     </div>
-    <figcaption>The histogram is skewed right and bounded below by zero. That asymmetry is not an artifact — it is the direct consequence of modelling returns instead of dollars, and it is why the same absolute move up and down are not equally likely.</figcaption>
+    <figcaption>The histogram is skewed right and bounded below by zero. That asymmetry is not an artifact — it is the direct consequence of modeling returns instead of dollars, and it is why the same absolute move up and down are not equally likely.</figcaption>
   </figure>
 
   <div class="try">
@@ -534,7 +534,7 @@
         </div>
         <div class="figtop"><h3>Running estimate vs path count · log scale</h3></div>
         <canvas id="cv3" height="270"></canvas>
-        <div class="figtop" style="margin:20px 0 6px"><h3>Terminal prices, coloured by payoff</h3></div>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Terminal prices, colored by payoff</h3></div>
         <canvas id="cv3b" height="180"></canvas>
         <div class="legend">
           <span><i class="sw" style="background:var(--moss)"></i>Finished in the money — contributes</span>
@@ -803,7 +803,7 @@
     <div class="prose">
       <p>Delta is unusual in wearing three hats that people use interchangeably without noticing. It is the <b>hedge ratio</b>: hold 0.6 delta and you neutralize your first-order risk by shorting 60 shares per contract. It is the <b>share-measure probability of exercise</b>, which is where it came from in the integral. And it is the <b>equivalent stock position</b> — a 0.6-delta call behaves, for small moves, exactly like 60 shares.</p>
       <p>The third framing is the one that makes risk reports readable: an options book's total delta tells you how many shares of stock you are effectively holding right now, which is why it's the first line on every risk summary and the first thing that gets flattened.</p>
-      <p>Delta's own behaviour is the interesting part. It isn't constant, and the rate at which it changes is gamma — so hedging with delta alone is like navigating with a speedometer and no steering. As expiry approaches, delta compresses from a lazy S-curve into a step function, which is why an at-the-money position on expiration morning can swing from 60 shares equivalent to zero and back on a small move.</p>
+      <p>Delta's own behavior is the interesting part. It isn't constant, and the rate at which it changes is gamma — so hedging with delta alone is like navigating with a speedometer and no steering. As expiry approaches, delta compresses from a lazy S-curve into a step function, which is why an at-the-money position on expiration morning can swing from 60 shares equivalent to zero and back on a small move.</p>
       <p>One relationship worth memorizing: <code>Δ<sub>call</sub> − Δ<sub>put</sub> = e<sup>−qT</sup></code> for the same strike and expiry, which is put-call parity differentiated once. Without dividends that's exactly 1.</p>
       <div class="btnrow" style="margin-left:104px">
         <button class="act ghost" data-greek="delta" data-focus="cvGa">Show delta in the explorer</button>
@@ -1023,8 +1023,8 @@
   <div class="prose">
     <p class="lead">Everything so far could have been a coincidence of arithmetic. This is the chapter where it stops being one. The claim Black and Scholes actually made is not "here is a fair value" — it's <b>"here is a trading strategy that manufactures the option's payoff out of stock and cash, and its cost is the price."</b> If that's true, the price isn't an opinion. It's a cost of goods.</p>
     <p>The simulation sells one option at the model price and then hedges it: hold Δ shares, finance the rest at <code>r</code>, collect dividends at <code>q</code>, and rebalance to the new Δ at every step. No forecasting, no discretion. At expiry, compare what the portfolio is worth to what you owe. The residual is the hedging error.</p>
-    <p><b>Now do the thing that matters.</b> Move the real-world drift μ to −40%, or to +60%. The paths change completely; some chapters' pictures would be unrecognizable. The hedging error distribution does not move. It stays centred on zero, because the replication cost never depended on where the stock was going — only on how much it wobbled on the way. That is why implied volatility is the quoted variable and expected return is not, and it is the single idea that separates pricing an option from having a view on it.</p>
-    <p>What <em>does</em> move the error is rehedging frequency. Hedge continuously and the error vanishes; hedge twenty times and you keep a fat residual whose standard deviation falls roughly like <code>1/√N</code>. That residual is not a modelling defect you can optimize away. It's discretization, and it is a real, funded line item on every options desk.</p>
+    <p><b>Now do the thing that matters.</b> Move the real-world drift μ to −40%, or to +60%. The paths change completely; some chapters' pictures would be unrecognizable. The hedging error distribution does not move. It stays centered on zero, because the replication cost never depended on where the stock was going — only on how much it wobbled on the way. That is why implied volatility is the quoted variable and expected return is not, and it is the single idea that separates pricing an option from having a view on it.</p>
+    <p>What <em>does</em> move the error is rehedging frequency. Hedge continuously and the error vanishes; hedge twenty times and you keep a fat residual whose standard deviation falls roughly like <code>1/√N</code>. That residual is not a modeling defect you can optimize away. It's discretization, and it is a real, funded line item on every options desk.</p>
   </div>
 
   <figure class="bleed">
@@ -1089,7 +1089,7 @@
     <div class="body">
       <p>Hold one option worth V(S,t) and short Δ shares. The portfolio is Π = V − ΔS. Over an instant, apply Itô to V — remembering (dS)² = σ²S²dt:</p>
       <div class="mline">dV = (∂V/∂t) dt + (∂V/∂S) dS + ½ σ²S² (∂²V/∂S²) dt</div>
-      <p class="mread">Reads as: <b>the option changes for three reasons — time passed, the stock moved, and the stock wiggled.</b> That third term is the one ordinary calculus would have discarded, and it is where all the interesting behaviour lives.</p>
+      <p class="mread">Reads as: <b>the option changes for three reasons — time passed, the stock moved, and the stock wiggled.</b> That third term is the one ordinary calculus would have discarded, and it is where all the interesting behavior lives.</p>
       <p>so the portfolio changes by</p>
       <div class="mline">dΠ = [ ∂V/∂t + ½σ²S² ∂²V/∂S² ] dt + [ ∂V/∂S − Δ ] dS</div>
       <p class="mread">Reads as: <b>the portfolio has a predictable part and a random part</b>, and the random part is entirely contained in the second bracket.</p>
@@ -1171,7 +1171,7 @@
       <button>Yes, as long as the stock isn't pinned exactly at the strike</button>
       <button>Impossible to say without the option's delta</button>
     </div>
-    <div class="ans"><b>You're losing.</b> Long gamma does profit from movement in either direction — but you are paying theta every single day for the privilege, and the rent is set by the vol you bought at. At 25 vol you need about 1.31% of daily movement to break even and you're getting 1%, so you bleed the difference. This is the entire long-vol trade compressed into one comparison: <em>realized versus implied</em>, not up versus down. Sell that same option and the arithmetic flips in your favour.</div>
+    <div class="ans"><b>You're losing.</b> Long gamma does profit from movement in either direction — but you are paying theta every single day for the privilege, and the rent is set by the vol you bought at. At 25 vol you need about 1.31% of daily movement to break even and you're getting 1%, so you bleed the difference. This is the entire long-vol trade compressed into one comparison: <em>realized versus implied</em>, not up versus down. Sell that same option and the arithmetic flips in your favor.</div>
   </div>
 
   <details class="derive">
@@ -1398,8 +1398,8 @@
     <span class="lab">Question 3 · chapter 02</span>
     <p class="q">Under the model, which statement about the terminal price distribution is true?</p>
     <div class="opts">
-      <button>It is normal, centred on today's price</button>
-      <button>It is normal, centred on the forward price</button>
+      <button>It is normal, centered on today's price</button>
+      <button>It is normal, centered on the forward price</button>
       <button data-ok="1">It is lognormal: right-skewed, bounded below by zero, with mean above median</button>
       <button>It is lognormal and symmetric in log space, therefore symmetric in price space</button>
     </div>

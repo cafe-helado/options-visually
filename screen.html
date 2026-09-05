@@ -124,7 +124,7 @@
       <button>Because rows contain errors</button>
       <button>Because the deltas are more reliable than the prices</button>
     </div>
-    <div class="ans"><b>The information lives across the column, not down it.</b> Slowness is a symptom. The real cost is that a single row cannot tell you whether a price is high or low — that judgement is always relative to its neighbours, and the neighbours are what the eye is for.</div>
+    <div class="ans"><b>The information lives across the column, not down it.</b> Slowness is a symptom. The real cost is that a single row cannot tell you whether a price is high or low — that judgement is always relative to its neighbors, and the neighbors are what the eye is for.</div>
   </div>
 </section>
 
@@ -168,7 +168,7 @@
         <div class="kv" style="margin-top:20px" id="kv2"></div>
       </div>
     </div>
-    <figcaption>Notice how fast this falls at the short end. Below the red line there is not even one strike inside the expected move, and a spread built there is quantised far more coarsely than its price suggests.</figcaption>
+    <figcaption>Notice how fast this falls at the short end. Below the red line there is not even one strike inside the expected move, and a spread built there is quantized far more coarsely than its price suggests.</figcaption>
   </figure>
 
   <div class="try">
@@ -205,7 +205,7 @@
   <div class="prose">
     <p class="lead">The second conversion is easier because the screen does it for you. Delta is printed, it runs from zero to one on every name and every expiry, and it is the closest thing a chain has to a universal coordinate.</p>
     <p>The rule everyone half-knows is that <b>a 16-delta option is about a one-sigma strike</b>, because 16% is the tail beyond one standard deviation of a normal. It is a good rule and it is worth knowing exactly how good. On a $100 stock at 30 volatility the 16-delta call sits at <b>1.06 sigma</b> at a week, <b>1.13 sigma</b> at a month and <b>1.24 sigma</b> at three months — so inside a quarter it is accurate to about a tenth of a sigma, which is fine. At a year it is <b>1.56 sigma</b> and the rule has stopped being useful.</p>
-    <p>The part almost nobody mentions is the asymmetry. Over the same tenors the 16-delta <em>put</em> sits at <b>0.94</b>, <b>0.88</b>, <b>0.80</b> and <b>0.64</b> sigma — it moves the other way. The lognormal is not symmetric, so equal deltas are not equal distances, and a "16-delta strangle" is not centred on anything.</p>
+    <p>The part almost nobody mentions is the asymmetry. Over the same tenors the 16-delta <em>put</em> sits at <b>0.94</b>, <b>0.88</b>, <b>0.80</b> and <b>0.64</b> sigma — it moves the other way. The lognormal is not symmetric, so equal deltas are not equal distances, and a "16-delta strangle" is not centered on anything.</p>
     <p>One more, because it catches people constantly: the at-the-money call's delta is <b>0.53</b> here, not 0.50. Scanning a column for the 50-delta to find the money will put you one strike low.</p>
   </div>
 
@@ -513,7 +513,7 @@
       <button>Wrong at every tenor</button>
       <button>Exact for calls and wrong for puts</button>
     </div>
-    <div class="ans"><b>A short-dated rule, and the put side is not its mirror.</b> The 16-delta put runs 0.94, 0.88, 0.80 and 0.64 sigma over the same tenors — moving the opposite way. The asymmetry is the lognormal, and it is why a delta-defined strangle is not centred on the spot.</div>
+    <div class="ans"><b>A short-dated rule, and the put side is not its mirror.</b> The 16-delta put runs 0.94, 0.88, 0.80 and 0.64 sigma over the same tenors — moving the opposite way. The asymmetry is the lognormal, and it is why a delta-defined strangle is not centered on the spot.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">

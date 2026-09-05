@@ -315,7 +315,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">The story goes: dealers are long gamma, so they sell rallies and buy dips to stay hedged, which dampens the market. Or they are short gamma, so they buy rallies and sell dips, which amplifies it. Both halves of that are correct as descriptions of hedging behaviour.</p>
+    <p class="lead">The story goes: dealers are long gamma, so they sell rallies and buy dips to stay hedged, which dampens the market. Or they are short gamma, so they buy rallies and sell dips, which amplifies it. Both halves of that are correct as descriptions of hedging behavior.</p>
     <p>What is usually left out is that hedging flow only moves the market <b>if it is large relative to everything else trading</b>. That is a condition, it is quantitative, and it is frequently not met.</p>
     <p>The simulation makes the dependence explicit by putting price impact on a slider. At low impact the three cases — no hedging, long-gamma dealers, short-gamma dealers — are statistically indistinguishable. My first attempt at this figure used an impact coefficient small enough that the effect vanished entirely into the noise, and that failure is worth more than the eventual success: <b>the mechanism is real and its magnitude is an empirical question with a frequently unimpressive answer.</b></p>
     <p>Raise impact enough and the textbook result appears cleanly. Long-gamma dealers pull spot toward the strike — mean distance falls from <b>2.46 to 1.50</b>, and the share finishing within fifty cents rises from <b>12.2% to 19.4%</b>. Short-gamma dealers push it away: mean distance <b>4.41</b>, with only <b>0.8%</b> finishing near the strike.</p>
@@ -366,7 +366,7 @@
       <button>It only works if dealers are short gamma</button>
       <button>Gamma has no effect on the underlying</button>
     </div>
-    <div class="ans"><b>The flow has to be big enough to matter.</b> The hedging behaviour is real and its direction is correctly described, but the price effect is the product of that flow and the market's price impact — and if the gamma is small relative to a day's volume, the product is indistinguishable from zero. That is exactly what the simulation shows at low impact. Add that dealer positioning is estimated from trade-side inference and you have two places for a confident-sounding claim to be quietly wrong.</div>
+    <div class="ans"><b>The flow has to be big enough to matter.</b> The hedging behavior is real and its direction is correctly described, but the price effect is the product of that flow and the market's price impact — and if the gamma is small relative to a day's volume, the product is indistinguishable from zero. That is exactly what the simulation shows at low impact. Add that dealer positioning is estimated from trade-side inference and you have two places for a confident-sounding claim to be quietly wrong.</div>
   </div>
 </section>
 
@@ -758,7 +758,7 @@ const s3={width:1.2,informed:.20,edge:1.5,arrivals:400};
       ["","Fills",mine.f.m.toFixed(0),"of "+s3.arrivals+" arrivals"],
       ["verm","Informed fills",(mine.f.m>0?(mine.i.m/mine.f.m*100).toFixed(1):"0")+"%","share of what you traded"],
       ["","P&L per fill",(mine.f.m>0?(mine.p.m/mine.f.m).toFixed(3):"—"),"edge captured"],
-      ["moss","Best width",WS[bi].toFixed(2),"maximises session P&L"],
+      ["moss","Best width",WS[bi].toFixed(2),"maximizes session P&L"],
       ["","P&L at best",pnl[bi].toFixed(1),"vs yours "+mine.p.m.toFixed(1)]
     ].map(([c,k,v,s])=>`<div class="c ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join("");
     document.getElementById("kv3").innerHTML=kvHTML([

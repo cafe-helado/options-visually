@@ -65,7 +65,7 @@
   <details class="drop">
     <summary>Notation — every symbol used on this page</summary>
     <table class="ntab">
-      <tr><td>σ<sub>R</sub></td><td>Realized volatility over the contract's life, annualised. What actually happened.</td></tr>
+      <tr><td>σ<sub>R</sub></td><td>Realized volatility over the contract's life, annualized. What actually happened.</td></tr>
       <tr><td>σ<sub>R</sub>²</td><td>Realized variance. The quantity that is replicable, and the one contracts are written on.</td></tr>
       <tr><td>K<sub>var</sub></td><td>The fair variance strike, quoted as a volatility. The square root of the fair variance, not a volatility forecast.</td></tr>
       <tr><td>F</td><td>The forward, S·e<sup>rT</sup>. The strip is built around it, not around spot.</td></tr>
@@ -88,7 +88,7 @@
   <div class="prose">
     <p class="lead">People say "volatility" and write down variance, and most of the time nothing goes wrong. It goes wrong here. Variance is the square of volatility, squaring is a convex function, and the expectation of a convex function is not the function of the expectation. So the fair strike of a contract paying realized <em>variance</em> sits strictly above the square of the fair strike of one paying realized <em>volatility</em> — on the same underlying, over the same window, with nothing else different.</p>
     <p>The size of the gap is set by how uncertain the volatility itself is. If you knew realized vol would be exactly 25%, the two contracts would be identical and the gap would be zero. Put some <span class="term" data-t="Vol of vol" data-def="How much the realized volatility itself varies. It is the second-order uncertainty: not how much the stock moves, but how uncertain you are about how much it will move.">uncertainty</span> around that 25% and the gap opens immediately.</p>
-    <p>The figure draws realized volatility as a distribution centred on 25 and reports both numbers. At a vol-of-vol of <b>0.4</b> the mean volatility is still 25.0% but the square root of mean variance is <b>27.1%</b> — a gap of <b>2.08 volatility points</b>. Push vol-of-vol to <b>0.6</b> and the gap is <b>4.93 points</b>, which is not a rounding difference, it is most of a trade.</p>
+    <p>The figure draws realized volatility as a distribution centered on 25 and reports both numbers. At a vol-of-vol of <b>0.4</b> the mean volatility is still 25.0% but the square root of mean variance is <b>27.1%</b> — a gap of <b>2.08 volatility points</b>. Push vol-of-vol to <b>0.6</b> and the gap is <b>4.93 points</b>, which is not a rounding difference, it is most of a trade.</p>
     <p>This matters in one direction more than the other. Someone short a variance swap is short that convexity: their losses grow with the square of how wrong they were, while their gains are capped by volatility not being able to fall below zero. That asymmetry is the whole risk profile of the product and chapter 05 returns to it.</p>
   </div>
 
@@ -116,7 +116,7 @@
         <div class="kv" style="margin-top:20px" id="kv1"></div>
       </div>
     </div>
-    <figcaption>Notice the two markers separating as you raise vol of vol, and notice that only one of them moves. The mean of the distribution stays pinned at the centre while the variance strike walks to the right, because the right tail is being squared and the left tail cannot go below zero. That one-sidedness is why the product is quoted the way it is.</figcaption>
+    <figcaption>Notice the two markers separating as you raise vol of vol, and notice that only one of them moves. The mean of the distribution stays pinned at the center while the variance strike walks to the right, because the right tail is being squared and the left tail cannot go below zero. That one-sidedness is why the product is quoted the way it is.</figcaption>
   </figure>
 
   <div class="try">
@@ -152,7 +152,7 @@
   <div class="prose">
     <p class="lead">Page 01 delta-hedged a call and found a residual that shrank with effort but never vanished. Here is a payoff that behaves completely differently. Take the <b>log contract</b> — a claim paying <b>−(2/T)·ln(S<sub>T</sub>/S<sub>0</sub>)</b> at expiry — delta-hedge it mechanically, and add up the money at the end. The answer is the realized variance of the path. Every time.</p>
     <p>The figure runs a few thousand paths and plots each one's hedged P&amp;L against the realized variance it actually delivered. The result is not a cloud with a trend through it, it is a <b>line</b>: hedging daily, the correlation between the two is <b>0.99998</b> at 10 volatility and still <b>0.99966</b> at 45. Mean hedged P&amp;L matches mean realized variance to five decimal places. The figure opens at thirty volatility and sixty-three hedges rather than 252, where the same correlation reads <b>0.99946</b> &mdash; the gap is discretization, and dragging the hedge count to the top closes it.</p>
-    <p>The reason is a single structural fact. A delta-hedged option's P&amp;L over a small step is <b>½·S²Γ·(realized − implied)</b> — the gamma rent from page 01. That expression is weighted by <span class="term" data-t="Dollar gamma" data-def="S²Γ. The gamma exposure measured in money rather than in shares-per-dollar. It is what decides how much a delta hedge earns from a move of a given percentage size.">dollar gamma</span>, which for a normal option is a bump centred on the strike — so an ordinary option pays you for movement <em>near its strike</em> and almost nothing for movement far away. The log contract's dollar gamma is <b>constant</b>. It pays the same for a 1% move wherever the stock happens to be, which is precisely what "measure the variance" means.</p>
+    <p>The reason is a single structural fact. A delta-hedged option's P&amp;L over a small step is <b>½·S²Γ·(realized − implied)</b> — the gamma rent from page 01. That expression is weighted by <span class="term" data-t="Dollar gamma" data-def="S²Γ. The gamma exposure measured in money rather than in shares-per-dollar. It is what decides how much a delta hedge earns from a move of a given percentage size.">dollar gamma</span>, which for a normal option is a bump centered on the strike — so an ordinary option pays you for movement <em>near its strike</em> and almost nothing for movement far away. The log contract's dollar gamma is <b>constant</b>. It pays the same for a 1% move wherever the stock happens to be, which is precisely what "measure the variance" means.</p>
     <p>So the log contract is not one instrument among many. It is the unique payoff that turns a delta hedge into a variance meter, and everything in the rest of this page is an attempt to build it out of things that actually trade.</p>
   </div>
 
@@ -197,7 +197,7 @@
     <p class="q">Why can't you build a variance meter out of a single at-the-money straddle, delta-hedged?</p>
     <div class="opts">
       <button>You can — a hedged straddle is the standard way to trade variance</button>
-      <button data-ok="1">Its dollar gamma is a hill centred on the strike, so it measures movement near the strike and ignores movement far from it. The measurement depends on where the stock goes, not just how much it moves</button>
+      <button data-ok="1">Its dollar gamma is a hill centered on the strike, so it measures movement near the strike and ignores movement far from it. The measurement depends on where the stock goes, not just how much it moves</button>
       <button>Because a straddle has no vega</button>
       <button>Because straddles cannot be delta-hedged</button>
     </div>
@@ -418,11 +418,11 @@
   </div>
 
   <div class="prose">
-    <p class="lead">The index everyone quotes as "the fear gauge" is the calculation from chapter 03 run on a fixed schedule. It takes out-of-the-money options on two expiries bracketing 30 days, weights each by <b>ΔK/K²</b>, adds them up, interpolates between the two expiries to land exactly on 30 days, and reports the square root as an annualised percentage. There is no model in it, no volatility forecast, and no opinion.</p>
+    <p class="lead">The index everyone quotes as "the fear gauge" is the calculation from chapter 03 run on a fixed schedule. It takes out-of-the-money options on two expiries bracketing 30 days, weights each by <b>ΔK/K²</b>, adds them up, interpolates between the two expiries to land exactly on 30 days, and reports the square root as an annualized percentage. There is no model in it, no volatility forecast, and no opinion.</p>
     <p>Three consequences follow directly from the chapters above, and each explains something people find puzzling about the index.</p>
     <p>First, <b>it is a variance strike, so it carries the skew premium.</b> VIX sits above at-the-money 30-day implied volatility essentially always, and the gap widens when skew steepens. That is chapter 05's 5.4 points, not the market becoming more afraid.</p>
     <p>Second, <b>it inherits the truncation problem.</b> The rulebook stops including strikes once it meets two consecutive zero bids, so the effective wing of the strip is set by what happens to be quoted that morning. In a stressed market more deep puts get bids, the strip extends, and the index rises partly because more of the tail became visible.</p>
-    <p>Third, <b>it is a strike, not an asset.</b> You cannot hold VIX. What trades is a futures contract on where the index will be, which is a different thing with its own term structure and its own roll — and that is the source of the long-run behaviour of every product built on top of it.</p>
+    <p>Third, <b>it is a strike, not an asset.</b> You cannot hold VIX. What trades is a futures contract on where the index will be, which is a different thing with its own term structure and its own roll — and that is the source of the long-run behavior of every product built on top of it.</p>
     <p>The figure runs the calculation on a synthetic chain so you can watch the index move for structural reasons rather than emotional ones: steepen the skew and it rises with volatility unchanged; truncate the quoted wing and it falls with everything else held fixed.</p>
   </div>
 
@@ -546,7 +546,7 @@
       <button>It can be exercised early</button>
       <button>It has no exposure to the volatility surface</button>
     </div>
-    <div class="ans"><b>Constant dollar gamma.</b> Ordinary options have a dollar-gamma hill centred on their strike, so they measure movement only where they are standing. The logarithm is the one payoff whose second derivative cancels the S² and leaves a flat meter.</div>
+    <div class="ans"><b>Constant dollar gamma.</b> Ordinary options have a dollar-gamma hill centered on their strike, so they measure movement only where they are standing. The logarithm is the one payoff whose second derivative cancels the S² and leaves a flat meter.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
@@ -601,7 +601,7 @@
 </main>
 
 <footer>
-  <p class="n">Every figure on this page assumes European options on a single underlying with no dividends, deterministic rates, and — except where chapter 07 removes it — a continuous price path. The jump numbers come from a Merton model with one jump size, which is a caricature of a real tail. Vol of vol in chapter 01 is a parameter on a slider, not a measurement. Real variance swap documentation specifies the return definition, the observation schedule, the treatment of missing days, the cap, and what happens on a corporate action, and every one of those clauses moves the fair value by more than the modelling questions discussed here.</p>
+  <p class="n">Every figure on this page assumes European options on a single underlying with no dividends, deterministic rates, and — except where chapter 07 removes it — a continuous price path. The jump numbers come from a Merton model with one jump size, which is a caricature of a real tail. Vol of vol in chapter 01 is a parameter on a slider, not a measurement. Real variance swap documentation specifies the return definition, the observation schedule, the treatment of missing days, the cap, and what happens on a corporate action, and every one of those clauses moves the fair value by more than the modeling questions discussed here.</p>
 </footer>
 
 <script src="assets/lab.js"></script>
@@ -724,7 +724,7 @@ const money=v=>(v<0?"−$":"$")+Math.abs(v).toLocaleString("en-US",{maximumFract
 const s1={nu:0.40,base:0.25};
 (function(){
   sliders(document.getElementById("ctl1"),[
-    {id:"a1",k:"base",lbl:"σ",name:"Centre of the distribution",min:.08,max:.6,step:.01,fmt:pct},
+    {id:"a1",k:"base",lbl:"σ",name:"Center of the distribution",min:.08,max:.6,step:.01,fmt:pct},
     {id:"b1",k:"nu",lbl:"ν",name:"Vol of vol",min:0,max:.9,step:.01,fmt:v=>v.toFixed(2)}
   ],s1,()=>draw(),"c1");
   window.draw1=draw;

@@ -59,7 +59,7 @@
   <ol>
     <li><b>Chapter 01 is the whole argument.</b> Costs turn a monotone improvement into a U-curve with an interior optimum.</li>
     <li><b>Chapter 04 is the one that changes how you read reports.</b> The same fills score differently depending on a benchmark somebody chose.</li>
-    <li><b>Impact parameters are assumptions, not measurements.</b> Every figure with impact in it has the coefficient on a slider and labelled as such.</li>
+    <li><b>Impact parameters are assumptions, not measurements.</b> Every figure with impact in it has the coefficient on a slider and labeled as such.</li>
   </ol>
   <details class="drop">
     <summary>Notation — every symbol used on this page</summary>
@@ -86,8 +86,8 @@
 
   <div class="prose">
     <p class="lead">Page 01 sold an option, hedged it mechanically, and measured what was left. The answer was clean: the hedging error has a standard deviation that falls like 1/√N, so more rebalancing is monotonically better and the continuous limit is exact. That result is correct and it is also missing something, because every one of those N rebalances is an order that crosses a spread.</p>
-    <p>Charge for them and two forces run in opposite directions. Hedging error still falls like 1/√N. But total turnover <b>rises</b> — each rebalance is smaller as N grows, yet there are more of them, and the sum grows toward √N. So the thing you are minimising is a sum of a decreasing term and an increasing one, which is the classic shape of a problem with an interior answer.</p>
-    <div class="mline">minimise &nbsp; E[cost] + λ · sd(P&amp;L)</div>
+    <p>Charge for them and two forces run in opposite directions. Hedging error still falls like 1/√N. But total turnover <b>rises</b> — each rebalance is smaller as N grows, yet there are more of them, and the sum grows toward √N. So the thing you are minimizing is a sum of a decreasing term and an increasing one, which is the classic shape of a problem with an interior answer.</p>
+    <div class="mline">minimize &nbsp; E[cost] + λ · sd(P&amp;L)</div>
     <p class="mread">Reads as: <b>trade off the money you know you will spend against the uncertainty you are trying to remove.</b> λ is how much you dislike the uncertainty.</p>
     <p>At five basis points of cost and a moderate risk aversion, the objective bottoms out around <b>128 rehedges</b> over a ninety-day option. Hedge less and the residual risk dominates; hedge more and you are paying spread to remove risk you had already mostly removed. The curve is genuinely U-shaped and the minimum moves with both sliders — raise costs and it slides left, raise risk aversion and it slides right.</p>
     <p>One honest note about the scaling. Cost approaches √N only <b>asymptotically</b> — between N = 128 and N = 512 the observed ratio is 1.76 against a predicted 2.0, because at low rebalance counts the initial hedge and the final unwind dominate the turnover and neither scales with N at all.</p>
@@ -169,7 +169,7 @@
     <p class="lead">Having decided to buy fifty thousand shares, you face a second problem that is structurally identical to the first. Trade it all now and you pay a large, <b>certain</b> impact cost — you are the only buyer and you walk the book. Trade it over the day and impact falls, but the price wanders while you work, and where it ends up is <b>uncertain</b>.</p>
     <p>So it is cost against variance again: fast is expensive and predictable, slow is cheap and risky. The optimal trajectory is neither instant nor infinitely patient, and it depends on how much you dislike the uncertainty.</p>
     <p>The figure shows mean slippage and its standard deviation as the order is sliced more finely. Slippage falls quickly at first and then flattens, while the standard deviation keeps shrinking — but both curves are dominated at the fast end by impact and at the slow end by price risk.</p>
-    <p><b>The impact coefficient is an assumption.</b> Real impact models are fitted to proprietary execution data, the parameters differ by name, size and regime, and any number printed here would be invented. It is on a slider and labelled, and the honest use of this figure is to reason about which direction things move rather than to read a number off it.</p>
+    <p><b>The impact coefficient is an assumption.</b> Real impact models are fitted to proprietary execution data, the parameters differ by name, size and regime, and any number printed here would be invented. It is on a slider and labeled, and the honest use of this figure is to reason about which direction things move rather than to read a number off it.</p>
   </div>
 
   <figure class="bleed">
@@ -191,7 +191,7 @@
         <div class="kv" style="margin-top:20px" id="kv2"></div>
       </div>
     </div>
-    <figcaption>The same shape as chapter 01, arising for the same reason: a certain cost that grows with urgency against an uncertain one that grows with patience. Recognising that these are one problem in two costumes is most of what execution theory has to offer.</figcaption>
+    <figcaption>The same shape as chapter 01, arising for the same reason: a certain cost that grows with urgency against an uncertain one that grows with patience. Recognizing that these are one problem in two costumes is most of what execution theory has to offer.</figcaption>
   </figure>
   <div class="try">
     <span class="lab">Try this</span>
@@ -247,7 +247,7 @@
     <p>Against <b>interval VWAP</b>, it comes in at <b>−0.00</b>. Dead on benchmark. The report says the algorithm did precisely what it was asked to do.</p>
     <p>Against <b>arrival price</b>, the same fills cost about <b>1.5</b> — the exact figure moves with the path, and it is reliably close to <em>half the drift over the window</em>, because a uniform execution buys at the average price and the average of a straight line is its midpoint. The report says the execution lost a point and a half against the price at which the decision was made.</p>
     <p>Both numbers are correct. They answer different questions. VWAP asks "did you trade better than the market's average during your window," which is a question about execution skill with the market's path taken as given. Arrival asks "what did the whole process cost relative to the moment you decided," which includes the market moving away from you while you worked.</p>
-    <p>Neither is right in the abstract, and the choice is not innocent. <b>VWAP forgives trend and punishes deviation; arrival punishes delay.</b> A trader measured on VWAP is incentivised to spread out; the same trader measured on arrival is incentivised to hurry. Hand those two mandates to identical traders and you will get systematically different behaviour and each will be optimising correctly.</p>
+    <p>Neither is right in the abstract, and the choice is not innocent. <b>VWAP forgives trend and punishes deviation; arrival punishes delay.</b> A trader measured on VWAP is incentivised to spread out; the same trader measured on arrival is incentivised to hurry. Hand those two mandates to identical traders and you will get systematically different behavior and each will be optimising correctly.</p>
     <p>The practical rule: pick the benchmark that matches why you are trading. Hedging a delta you want gone is an arrival problem, because the risk started when you decided. Rebalancing an index is a VWAP problem, because being average <em>is</em> the objective.</p>
   </div>
 
@@ -294,7 +294,7 @@
       <button>The close, since that is where the book marks</button>
       <button>Whichever is currently flattering</button>
     </div>
-    <div class="ans"><b>Arrival.</b> The reason you are trading is to remove a risk that exists from the moment you decided, so any drift between decision and completion is part of what the hedge cost you — and that is exactly what an arrival benchmark captures and a VWAP benchmark discards. Measuring a hedge against VWAP rewards spreading the order out, which is precisely the behaviour that leaves you exposed for longer. The last answer is a joke with a serious edge to it: the benchmark should be fixed before the trade, because afterwards there is always one that flatters.</div>
+    <div class="ans"><b>Arrival.</b> The reason you are trading is to remove a risk that exists from the moment you decided, so any drift between decision and completion is part of what the hedge cost you — and that is exactly what an arrival benchmark captures and a VWAP benchmark discards. Measuring a hedge against VWAP rewards spreading the order out, which is precisely the behavior that leaves you exposed for longer. The last answer is a joke with a serious edge to it: the benchmark should be fixed before the trade, because afterwards there is always one that flatters.</div>
   </div>
 </section>
 
@@ -310,7 +310,7 @@
     <p class="lead">A dark pool matches without displaying quotes, typically at the midpoint. The appeal is obvious: no spread paid, no information leaked by showing an order. The problem is subtler and it is about <em>who chooses to trade with you</em>.</p>
     <p>When you rest passively, you do not decide when you get filled — your counterparty does. Uninformed flow crosses at random. <b>Informed flow crosses when it is right</b>, which is to say just before the price moves against you. So your fills are not a random sample of moments; they are selected toward the bad ones.</p>
     <p>The simulation makes the bias legible. With no informed flow, the average price move immediately after your fills is <b>+0.00</b> — no bias, as it should be. Raise the informed share to 25% and the average post-fill move is <b>−0.20</b>; at 50% it is <b>−0.41</b>. You are not being unlucky. You are being selected.</p>
-    <p>This is the mirror of the market-maker's problem: page 05 of this series looks at the same phenomenon from the quoting side, where the defence is widening. Here, resting passively, the defences are different — minimum quantity constraints to avoid being pinged by small informed orders, venue selection based on measured post-fill drift, and simply accepting that a mid fill in size is sometimes a warning rather than a win.</p>
+    <p>This is the mirror of the market-maker's problem: page 05 of this series looks at the same phenomenon from the quoting side, where the defense is widening. Here, resting passively, the defenses are different — minimum quantity constraints to avoid being pinged by small informed orders, venue selection based on measured post-fill drift, and simply accepting that a mid fill in size is sometimes a warning rather than a win.</p>
     <p>The number worth carrying: <b>saving half a spread is not worth it if the post-fill drift exceeds half a spread</b>, and whether it does is an empirical question about the venue, measurable from your own fills.</p>
   </div>
 

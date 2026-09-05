@@ -66,7 +66,7 @@
     <summary>Notation — every symbol used on this page</summary>
     <table class="ntab">
       <tr><td>σ(K,T)</td><td>The implied volatility surface: one number for each strike and expiry.</td></tr>
-      <tr><td>F</td><td>Forward price, Se<sup>(r−q)T</sup>. Smiles are naturally centred on the forward, not on spot.</td></tr>
+      <tr><td>F</td><td>Forward price, Se<sup>(r−q)T</sup>. Smiles are naturally centered on the forward, not on spot.</td></tr>
       <tr><td>k</td><td>Log-moneyness, ln(K/F). Zero at the forward, negative for downside strikes.</td></tr>
       <tr><td>Skew</td><td>The slope of the smile in strike. Quoted as the 90–110 or 25-delta vol difference.</td></tr>
       <tr><td>Smile</td><td>The curvature. A pure smile is symmetric; equity surfaces are mostly skew.</td></tr>
@@ -319,7 +319,7 @@
     <div class="mline">Δ<sub>total</sub> = Δ<sub>BS</sub> + vega × ∂σ/∂S</div>
     <p class="mread">Reads as: <b>the direct effect, plus what the moving smile does to you through vega.</b> That second term is vanna's territory — page 01 built it, and this is where it earns its keep.</p>
     <p>The sign is not obvious and matters. With a downward-sloping equity skew, a rise in spot means a fixed strike now sits at lower moneyness on the shifted curve, so its implied vol goes <em>up</em>. Higher vol means a higher call price, which is extra positive delta. On a 100-strike, six-month call at 30 vol with a −0.35 skew, the difference is about <b>0.097 of delta</b> — roughly 10 shares per contract, or a thousand shares on a hundred lots, from nothing but a choice of convention.</p>
-    <p>Neither rule is correct. They are descriptions of surface behaviour that hold in different regimes — <span class="term" data-t="Sticky strike" data-def="The assumption that each strike's implied volatility stays put as spot moves. The alternative, sticky delta, holds volatility fixed by moneyness instead — and the two give different deltas from identical prices.">sticky strike</span> in quiet drifting markets, sticky delta in trending ones — and desks pick one, mark against it, and monitor the error. The one indefensible position is not knowing which one your risk system assumes.</p>
+    <p>Neither rule is correct. They are descriptions of surface behavior that hold in different regimes — <span class="term" data-t="Sticky strike" data-def="The assumption that each strike's implied volatility stays put as spot moves. The alternative, sticky delta, holds volatility fixed by moneyness instead — and the two give different deltas from identical prices.">sticky strike</span> in quiet drifting markets, sticky delta in trending ones — and desks pick one, mark against it, and monitor the error. The one indefensible position is not knowing which one your risk system assumes.</p>
   </div>
 
   <figure class="bleed">
@@ -381,7 +381,7 @@
     <p><b>Butterfly constraint.</b> A density cannot be negative, and by Breeden–Litzenberger the density is the butterfly price. So <code>∂²C/∂K² ≥ 0</code> everywhere. Steepen the skew past a point and the recovered density dips below zero — at which point a butterfly is trading for a negative premium, and you buy it, and you can only make money. The figure highlights the region in red when it happens; in these settings it appears somewhere around a −1.0 skew.</p>
     <p><b>Calendar constraint.</b> Total variance cannot decrease with maturity, since variance accumulates. So <code>σ²T</code> must be non-decreasing in T at a fixed moneyness. Violate it and the forward variance between two expiries is negative — you would be selling the near-dated option and buying the far-dated one for a certain profit.</p>
     <p>There is a third and subtler one worth knowing about. The wings cannot grow arbitrarily fast: if implied vol rises faster than roughly <code>√|k|</code> in the far strikes, the implied density stops integrating to one. This page's own machinery demonstrates it — set a large positive wing curvature and the "density" integrates to <b>1.19</b> instead of 1, which is not a rounding error but a signal that the parameterization is not describing a probability distribution at all.</p>
-    <p>The practical version: any smile you fit needs its wings constrained, and a parameterization that looks great through the listed strikes can be nonsense just outside them. This is why surface fitting in production uses forms that are arbitrage-free by construction rather than whatever curve minimises the error.</p>
+    <p>The practical version: any smile you fit needs its wings constrained, and a parameterization that looks great through the listed strikes can be nonsense just outside them. This is why surface fitting in production uses forms that are arbitrage-free by construction rather than whatever curve minimizes the error.</p>
   </div>
 
   <figure class="bleed">
@@ -545,14 +545,14 @@
       <button>The skew is unusually steep</button>
       <button>The middle strike is illiquid</button>
     </div>
-    <div class="ans"><b>The surface cannot be right.</b> Butterfly and calendar constraints are not modelling preferences — they are the conditions under which the prices correspond to any probability distribution at all, and a violation is a broken mark far more often than it is a trade.</div>
+    <div class="ans"><b>The surface cannot be right.</b> Butterfly and calendar constraints are not modeling preferences — they are the conditions under which the prices correspond to any probability distribution at all, and a violation is a broken mark far more often than it is a trade.</div>
   </div>
 
 </section>
 </main>
 
 <footer>
-  <p class="n">Everything here treats the surface as a static object read at one instant. Real surfaces move, and how they move is the harder question — sticky rules are crude descriptions of that motion, and the difference between them is a live P&amp;L item rather than a modelling nicety. The models in chapter 03 are also deliberately simple: Merton has constant jump parameters, and the mixture has no correlation between spot and volatility. Real calibration uses both mechanisms together, because neither alone reproduces both ends of the term structure.</p>
+  <p class="n">Everything here treats the surface as a static object read at one instant. Real surfaces move, and how they move is the harder question — sticky rules are crude descriptions of that motion, and the difference between them is a live P&amp;L item rather than a modeling nicety. The models in chapter 03 are also deliberately simple: Merton has constant jump parameters, and the mixture has no correlation between spot and volatility. Real calibration uses both mechanisms together, because neither alone reproduces both ends of the term structure.</p>
 </footer>
 
 <script src="assets/lab.js"></script>
@@ -934,8 +934,8 @@ const s6={atm:.30,beta:-.55,gam:.30,T:.5};
       const K=Math.round(S*(1+ri(-15,15)/100));
       const iv=Math.max(.02,v+beta*Math.log(K/(S*Math.exp(.03*T))));
       return{k:"Smile lookup",u:"percent",a:iv*100,
-        t:`A surface is parameterised as σ = ${(v*100).toFixed(0)}% ${beta<0?"−":"+"} ${Math.abs(beta).toFixed(2)}·ln(K/F). Spot is <b>${S}</b>, r = 3%, T = <b>${(T*12).toFixed(0)}</b> months. What is the implied vol at the <b>${K}</b> strike?`,
-        w:`F = ${S}·e^(0.03×${T.toFixed(4)}) = ${(S*Math.exp(.03*T)).toFixed(2)}. ln(K/F) = ${Math.log(K/(S*Math.exp(.03*T))).toFixed(5)}. σ = ${(v*100).toFixed(0)}% + (${beta.toFixed(2)})(${Math.log(K/(S*Math.exp(.03*T))).toFixed(4)}) = <code>${(iv*100).toFixed(2)}%</code>. Note the smile is centred on the forward, not on spot.`};},
+        t:`A surface is parameterized as σ = ${(v*100).toFixed(0)}% ${beta<0?"−":"+"} ${Math.abs(beta).toFixed(2)}·ln(K/F). Spot is <b>${S}</b>, r = 3%, T = <b>${(T*12).toFixed(0)}</b> months. What is the implied vol at the <b>${K}</b> strike?`,
+        w:`F = ${S}·e^(0.03×${T.toFixed(4)}) = ${(S*Math.exp(.03*T)).toFixed(2)}. ln(K/F) = ${Math.log(K/(S*Math.exp(.03*T))).toFixed(5)}. σ = ${(v*100).toFixed(0)}% + (${beta.toFixed(2)})(${Math.log(K/(S*Math.exp(.03*T))).toFixed(4)}) = <code>${(iv*100).toFixed(2)}%</code>. Note the smile is centered on the forward, not on spot.`};},
     ()=>{const veg=ri(5,40)/100,slope=ri(10,60)/1000;
       return{k:"Sticky-delta shift",u:"delta",a:veg*slope*100,
         t:`An option has vega of <b>${veg.toFixed(2)}</b> per vol point. Under sticky-delta, a $1 move in spot changes its implied vol by <b>${(slope*100).toFixed(1)}</b> vol points. How much extra delta does that give you?`,

@@ -258,7 +258,7 @@
         <tr><td>Zero-cost collar</td><td>Protection with no premium</td><td>Long skew, long vanna</td></tr>
         <tr><td>Cash-secured put</td><td>Entry price plus income</td><td>Long downside vol</td></tr>
         <tr><td>Put spread collar</td><td>Cheaper protection, capped</td><td>Skew and wing exposure together</td></tr>
-        <tr><td>Overwriting programme</td><td>Systematic income</td><td>Persistent supply of upside vol</td></tr>
+        <tr><td>Overwriting program</td><td>Systematic income</td><td>Persistent supply of upside vol</td></tr>
       </table>
     </div>
   </figure>
@@ -280,7 +280,7 @@
   </figure>
 
   <div class="prose">
-    <p>One structural asymmetry runs down both lists. The institutional shelf is dominated by <b>selling upside and buying downside</b> — <span class="term" data-t="Overwriting" data-def="Selling calls against stock you already own, usually as a standing programme rather than a view. One of the two structural flows that shapes the single-name surface.">overwriting</span> programmes, collars, protective puts. The volatility shelf is where the other side of that accumulates. That imbalance is not a coincidence and it is chapter 06's subject.</p>
+    <p>One structural asymmetry runs down both lists. The institutional shelf is dominated by <b>selling upside and buying downside</b> — <span class="term" data-t="Overwriting" data-def="Selling calls against stock you already own, usually as a standing program rather than a view. One of the two structural flows that shapes the single-name surface.">overwriting</span> programs, collars, protective puts. The volatility shelf is where the other side of that accumulates. That imbalance is not a coincidence and it is chapter 06's subject.</p>
   </div>
 </section>
 
@@ -361,10 +361,10 @@
   </div>
 
   <div class="prose">
-    <p class="lead">Chapter 04's two shelves are not symmetric. Run down the institutional list and nearly every entry does the same two things: <b>sells upside volatility</b> and <b>buys downside volatility</b>. Overwriting programmes sell calls, month after month, mechanically. Pension and insurance mandates buy puts. Collars do both at once. Structured note issuance leaves dealers with exposures they must hedge in the same direction.</p>
-    <p>None of these are opportunistic. They are mandates, and they recur regardless of where implied volatility is trading — an overwriting programme sells calls in January because it is January, not because calls look rich.</p>
+    <p class="lead">Chapter 04's two shelves are not symmetric. Run down the institutional list and nearly every entry does the same two things: <b>sells upside volatility</b> and <b>buys downside volatility</b>. Overwriting programs sell calls, month after month, mechanically. Pension and insurance mandates buy puts. Collars do both at once. Structured note issuance leaves dealers with exposures they must hedge in the same direction.</p>
+    <p>None of these are opportunistic. They are mandates, and they recur regardless of where implied volatility is trading — an overwriting program sells calls in January because it is January, not because calls look rich.</p>
     <p>Persistent one-way flow has to be absorbed by somebody, and the price of absorbing it is the surface's shape. Downside strikes bid, upside strikes offered, is exactly what a persistent buyer of puts and seller of calls produces in a market where the other side must be paid to warehouse the risk.</p>
-    <p><b>How much of the skew this explains is genuinely contested</b>, and it would be dishonest to present flow as the whole story. Page 02 showed that jumps and correlated stochastic volatility each generate skew from pure modelling assumptions with no flow at all, and index skew persisted through decades with very different flow regimes. The honest position is that skew has several sufficient causes and the observed surface is their sum, with the mix varying by underlying and by tenor.</p>
+    <p><b>How much of the skew this explains is genuinely contested</b>, and it would be dishonest to present flow as the whole story. Page 02 showed that jumps and correlated stochastic volatility each generate skew from pure modeling assumptions with no flow at all, and index skew persisted through decades with very different flow regimes. The honest position is that skew has several sufficient causes and the observed surface is their sum, with the mix varying by underlying and by tenor.</p>
     <p>What is not contested is the trading implication, and it is the one worth taking from this page: <b>when you buy an option you are usually buying it from somebody whose reason has nothing to do with your reason.</b> The overwriter selling you a call has no view on volatility. The pension buying puts is not forecasting a crash. Treating every price as though it encodes a view is a good way to find edge that is not there — and treating persistent flow as though it were information is a good way to be on the wrong side of a mandate that will still be running next quarter.</p>
   </div>
 
@@ -372,7 +372,7 @@
     <div class="split wide">
       <div>
         <div class="figtop">
-          <h3>What a persistent overwriting and put-buying programme leaves behind</h3>
+          <h3>What a persistent overwriting and put-buying program leaves behind</h3>
           <span class="legend" style="margin:0">
             <span><i class="swl" style="background:var(--grey)"></i>Surface with no flow</span>
             <span><i class="swl" style="background:var(--blue)"></i>With structural flow absorbed</span>
@@ -479,7 +479,7 @@
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
     <span class="lab">Question 6 · chapter 02</span>
-    <p class="q">What does the exposure fingerprint normalise against?</p>
+    <p class="q">What does the exposure fingerprint normalize against?</p>
     <div class="opts">
       <button>The notional of the position</button>
       <button data-ok="1">A one-lot at-the-money straddle, so that five structurally different trades can be compared on the same five axes</button>
@@ -546,7 +546,7 @@ const payoffAt=(legs,ST)=>legs.reduce((a,[cp,K,n])=>a+n*Math.max(0,cp===1?ST-K:K
 function valueAt(legs,ST,T){
   return legs.reduce((a,[cp,K,n])=>a+n*bs(ST,K,Math.max(T,1e-9),MKT.vol,MKT.r,MKT.q,cp===1).price,0);
 }
-/* fingerprint, normalised against a one-lot ATM straddle */
+/* fingerprint, normalized against a one-lot ATM straddle */
 function fingerprint(legs){
   const ref=legGreeks([[1,MKT.S,1],[0,MKT.S,1]]);
   const o=legGreeks(legs);

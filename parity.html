@@ -295,7 +295,7 @@
     <p><b>Interest.</b> A conversion is long stock, which costs money to hold, so the converter is effectively lending. A <span class="term" data-t="Reversal" data-def="The opposite of a conversion: short stock, short a put, long a call at the same strike. What a desk puts on when the financing implied by the options is cheap rather than rich.">reversal</span> is short stock, which raises cash, so the reverser is borrowing. The interest component is that financing over the life of the trade, computed on the <em>strike</em> rather than the spot — because K is what the forward settles at.</p>
     <p><b>Dividends.</b> Whoever is long the stock collects them, and the synthetic does not. Dividends therefore <em>subtract</em> from the package: a higher dividend means a lower or more negative revcon price at the same implied rate. Only dividends with an ex-date falling between trade settlement and expiry settlement count. One that goes ex before you settle is already in the stock price; one after expiry is somebody else's problem.</p>
     <div class="mline">r/c = Interest − Dividends &nbsp;&nbsp;⟹&nbsp;&nbsp; C − P = Interest − Div + Comm</div>
-    <p class="mread">Reads as: <b>the package price is financing minus dividends, plus what the broker takes.</b> S and K have cancelled because you trade the synthetic against the stock at the same strike.</p>
+    <p class="mread">Reads as: <b>the package price is financing minus dividends, plus what the broker takes.</b> S and K have canceled because you trade the synthetic against the stock at the same strike.</p>
     <p><b>The dates.</b> This is where the errors live. The clock runs from <em>trade settlement</em> to <em>expiry settlement</em>, not from today to expiry Friday. Options settle T+1, so a Thursday trade settles Friday, but a Friday trade settles Monday — three calendar days. Expiry Friday settles the following Monday. A holiday anywhere in either window pushes the date out and adds a day of interest, and on a large strike a single day is real money.</p>
     <p>The convention is <b>ACT/360</b>: actual calendar days, divided by 360. That 360 is not an approximation of the year, it is the money-market convention that SOFR and EFFR use, and it is what makes the resulting rate directly comparable to your funding.</p>
   </div>
@@ -447,7 +447,7 @@
     <p class="mread">Reads as: <b>what daily rate, compounded every day, produces that same dollar interest.</b></p>
     <p>Under thirty days the two agree to well under a basis point — on the 17-day example they are 2.9647% and 2.9669%, a difference of about a fifth of a basis point. Past a few months the gap widens, and on a jelly roll spanning several months it is worth several basis points, which is more than the spread being competed over.</p>
     <p><b>The trap.</b> Take a jelly roll priced with compound interest at exactly 4.00% and run it back through the simple-rate formula and you get 4.007%, not 4.000%. Nothing is broken — you asked a different question. But if the pricer quotes compound and the screen you compare against quotes simple, you are looking at a spread that is partly a units artifact. Fix the convention before you argue about the number.</p>
-    <p>One more asymmetry worth knowing: for positive rates compound sits slightly above simple, and for negative rates it sits slightly <em>closer to zero</em>. That is ordinary compounding behaviour and not a sign error in the pricer, but it surprises people the first time a negative implied rate comes back less negative under compounding.</p>
+    <p>One more asymmetry worth knowing: for positive rates compound sits slightly above simple, and for negative rates it sits slightly <em>closer to zero</em>. That is ordinary compounding behavior and not a sign error in the pricer, but it surprises people the first time a negative implied rate comes back less negative under compounding.</p>
   </div>
 
   <div class="check">
@@ -778,7 +778,7 @@ const fmtD=d=>DOW[d.getUTCDay()]+" "+iso(d);
 /* settlement: T+1 business day, then roll to a business day */
 const settle=d=>nextBiz(addBiz(nextBiz(d),0)===nextBiz(d)?addBiz(d,1):addBiz(d,1));
 
-/* ═══════════ rate maths ═══════════ */
+/* ═══════════ rate math ═══════════ */
 const simpleRate=(I,K,d)=> d>0 ? (I/K)*(360/d)*100 : 0;
 const compRate=(I,K,d)=> (d>0 && K>I) ? 360*(-1+Math.pow(K/(K-I),1/d))*100 : NaN;
 const intFromSimple=(r,K,d)=> r/100*K*d/360;

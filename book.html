@@ -138,7 +138,7 @@
       <button>That the legs should be equal in size</button>
       <button>That gamma cash is the wrong measure</button>
     </div>
-    <div class="ans"><b>The offset is local.</b> Each leg's gamma is a hill centred on its own strike — the same fact that made page 09's log contract necessary — so a book flat by netting at 102 can be substantially long or short gamma at 95 or 115. This is exactly why chapter 02 exists: a single netted number describes one point, and a matrix describes the neighbourhood.</div>
+    <div class="ans"><b>The offset is local.</b> Each leg's gamma is a hill centered on its own strike — the same fact that made page 09's log contract necessary — so a book flat by netting at 102 can be substantially long or short gamma at 95 or 115. This is exactly why chapter 02 exists: a single netted number describes one point, and a matrix describes the neighborhood.</div>
   </div>
 </section>
 
@@ -153,7 +153,7 @@
   <div class="prose">
     <p class="lead">A greek report is a description of the book at one point, expressed in derivatives. A <span class="term" data-t="Scenario matrix" data-def="A grid of full repricings across spot and volatility. Unlike a greek report it does not degrade with distance from today's spot, which is why limits are set on it.">scenario matrix</span> is the book itself, evaluated at many points. The difference between them is the subject of this page, and the fastest way to see it is to compute both and subtract.</p>
     <p>The grid below moves spot across the columns and volatility down the rows and puts the full repriced P&amp;L in each cell. Every position is revalued from scratch at the new spot and the new volatility — no approximations, no local expansions. This is what the book would actually be worth.</p>
-    <p>Then switch the display to <b>error</b> and you are looking at what a greek report would have missed. At the centre the errors are trivially small, which is exactly what "the greeks are a local approximation" means. Move to the corners and they are enormous: at spot +20% with volatility up 10 points, the book makes <b>$49,061</b> and the greek estimate is short by <b>$29,456</b> — the report would have predicted well under half the move.</p>
+    <p>Then switch the display to <b>error</b> and you are looking at what a greek report would have missed. At the center the errors are trivially small, which is exactly what "the greeks are a local approximation" means. Move to the corners and they are enormous: at spot +20% with volatility up 10 points, the book makes <b>$49,061</b> and the greek estimate is short by <b>$29,456</b> — the report would have predicted well under half the move.</p>
     <p>The asymmetry matters as much as the size. The errors are not symmetric in spot, because gamma is not constant, and they are not symmetric in volatility, because vega is not constant either. A book that looks balanced in the greeks can be strongly convex in one direction and concave in the other, and only the matrix shows it.</p>
     <p>This is why the matrix, not the greek line, is the artefact that gets escalated. A greek report answers "what is the book doing right now"; a matrix answers "what happens if", and the second question is the one a risk committee is actually asking.</p>
   </div>
@@ -181,7 +181,7 @@
         <div class="kv" style="margin-top:20px" id="kv2"></div>
       </div>
     </div>
-    <figcaption>Flip between the three views on the same grid. Full reprice and greek estimate look broadly similar in the middle four cells and diverge everywhere else; the error view makes the pattern obvious in one glance. Notice that the largest error is not in the worst cell — the greeks fail hardest where the book is <em>making</em> money, which is why "the model was conservative" is not a defence.</figcaption>
+    <figcaption>Flip between the three views on the same grid. Full reprice and greek estimate look broadly similar in the middle four cells and diverge everywhere else; the error view makes the pattern obvious in one glance. Notice that the largest error is not in the worst cell — the greeks fail hardest where the book is <em>making</em> money, which is why "the model was conservative" is not a defense.</figcaption>
   </figure>
 
   <div class="try">
@@ -202,7 +202,7 @@
       <button>The greek report, which must have a stale input</button>
       <button>Both, since neither includes correlation</button>
     </div>
-    <div class="ans"><b>Neither is wrong; they answer different questions.</b> Greeks are derivatives evaluated at a point and their accuracy decays with distance from that point — chapter 03 measures how fast. Treating a disagreement as a reconciliation break rather than as expected behaviour is a common and expensive misunderstanding, because the fix people reach for is to "correct" the matrix.</div>
+    <div class="ans"><b>Neither is wrong; they answer different questions.</b> Greeks are derivatives evaluated at a point and their accuracy decays with distance from that point — chapter 03 measures how fast. Treating a disagreement as a reconciliation break rather than as expected behavior is a common and expensive misunderstanding, because the fix people reach for is to "correct" the matrix.</div>
   </div>
 </section>
 
@@ -379,7 +379,7 @@
     <p class="q">A book is inside every greek limit but breaches its worst-case scenario limit. What is the most likely explanation?</p>
     <div class="opts">
       <button>A system error — the two should agree</button>
-      <button data-ok="1">The book is convex. Greeks measure the neighbourhood of today's spot; the scenario limit is set by a corner where higher-order terms dominate, and chapter 03 showed those reach 58% of the move at 20%</button>
+      <button data-ok="1">The book is convex. Greeks measure the neighborhood of today's spot; the scenario limit is set by a corner where higher-order terms dominate, and chapter 03 showed those reach 58% of the move at 20%</button>
       <button>The scenario limit is set too tightly</button>
       <button>The book must have positions in another underlying</button>
     </div>
@@ -743,7 +743,7 @@ let MODE=0;   /* 0 full, 1 taylor, 2 error */
       ["Worst cell",money(worst)],
       ["  at",worstAt],
       ["Largest greek error",money(best)],
-      ["Centre cell","$0 by construction"]
+      ["Center cell","$0 by construction"]
     ]);
   }
 })();

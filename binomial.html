@@ -302,7 +302,7 @@
     <p>So going from a 40-step tree to a 41-step tree does not improve the answer. It moves it to the other side of the truth by about the same distance. Anyone who has tried to tune a tree by nudging N has met this and usually concluded something was broken.</p>
     <p>The cause is where the strike sits relative to the terminal nodes. In a recombining CRR tree the terminal prices are <b>S·u<sup>2j−N</sup></b>, so when N is even one node lands exactly at the starting price and when N is odd the strike falls between two nodes. An at-the-money option therefore sees a structurally different terminal grid depending on the parity of N, and the pricing error inherits that alternation.</p>
     <p>Which points straight at the fix. If consecutive trees sit on opposite sides of the answer by roughly equal amounts, <b>average them</b>. Price with N and with N+1 and take the mean. On this option a 25-step tree is off by <b>+0.1103</b> and the 25/26 average is off by <b>−0.0012</b> — about ninety times better for one extra tree. At N = 400 the raw error is <b>−0.0074</b> and the average is <b>−0.0002</b>.</p>
-    <p>This is the practical content of the chapter: an unaveraged tree is being needlessly bad, and the correction is one line of code. It also generalises — the same idea underlies the Richardson extrapolation used to accelerate almost every first-order numerical scheme.</p>
+    <p>This is the practical content of the chapter: an unaveraged tree is being needlessly bad, and the correction is one line of code. It also generalizes — the same idea underlies the Richardson extrapolation used to accelerate almost every first-order numerical scheme.</p>
   </div>
 
   <figure class="bleed">
@@ -347,7 +347,7 @@
       <button>The volatility input is inconsistent between them</button>
       <button>100 steps is too few for any option</button>
     </div>
-    <div class="ans"><b>Nothing is wrong — that is the sawtooth.</b> This is worth recognising on sight, because the natural response is to hunt for a bug that does not exist. The disagreement between the two trees is itself the useful signal: it is roughly twice the error in either one, so it tells you how far off you are, and averaging removes most of it.</div>
+    <div class="ans"><b>Nothing is wrong — that is the sawtooth.</b> This is worth recognizing on sight, because the natural response is to hunt for a bug that does not exist. The disagreement between the two trees is itself the useful signal: it is roughly twice the error in either one, so it tells you how far off you are, and averaging removes most of it.</div>
   </div>
 </section>
 
@@ -423,7 +423,7 @@
   <div class="chead">
     <div class="cnum">06</div>
     <h2>Greeks fall out of the lattice for free</h2>
-    <p class="dek">You already computed the neighbouring nodes. Delta and gamma are differences between numbers you have.</p>
+    <p class="dek">You already computed the neighboring nodes. Delta and gamma are differences between numbers you have.</p>
   </div>
 
   <div class="prose">
@@ -632,7 +632,7 @@
       <button>Because the risk-neutral probability alternates in sign</button>
       <button>Because odd trees have no central node at expiry</button>
     </div>
-    <div class="ans"><b>The strike's position against the terminal grid alternates with parity.</b> Recognising this on sight saves a bug hunt, and averaging N with N+1 turns the nuisance into roughly two extra decimal places.</div>
+    <div class="ans"><b>The strike's position against the terminal grid alternates with parity.</b> Recognizing this on sight saves a bug hunt, and averaging N with N+1 turns the nuisance into roughly two extra decimal places.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
@@ -663,7 +663,7 @@
 </main>
 
 <footer>
-  <p class="n">Every tree on this page is Cox–Ross–Rubinstein with d = 1/u and constant volatility, priced on a European or American vanilla with no dividends. Real implementations differ in ways that matter: alternative parameterisations (Jarrow–Rudd, Leisen–Reimer, and the trinomial family) have different convergence behaviour and some remove the sawtooth entirely; discrete dividends require either a dividend-stripped lattice or a non-recombining one; and any production pricer has to handle the exercise schedule, settlement convention and corporate-action history of the specific contract. The model's deeper limitation is the one it shares with Black–Scholes — a single volatility and a continuous path — which is why it prices vanillas well and describes markets badly.</p>
+  <p class="n">Every tree on this page is Cox–Ross–Rubinstein with d = 1/u and constant volatility, priced on a European or American vanilla with no dividends. Real implementations differ in ways that matter: alternative parameterisations (Jarrow–Rudd, Leisen–Reimer, and the trinomial family) have different convergence behavior and some remove the sawtooth entirely; discrete dividends require either a dividend-stripped lattice or a non-recombining one; and any production pricer has to handle the exercise schedule, settlement convention and corporate-action history of the specific contract. The model's deeper limitation is the one it shares with Black–Scholes — a single volatility and a continuous path — which is why it prices vanillas well and describes markets badly.</p>
 </footer>
 
 <script src="assets/lab.js"></script>

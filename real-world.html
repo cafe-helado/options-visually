@@ -83,7 +83,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">Black–Scholes is usually introduced as a formula and criticised as a philosophy. Neither is very useful. What is useful is a list of the specific things it assumes, and a number attached to each — because the assumptions do not fail equally, and knowing which ones are expensive is most of what separates using a model from believing it.</p>
+    <p class="lead">Black–Scholes is usually introduced as a formula and criticized as a philosophy. Neither is very useful. What is useful is a list of the specific things it assumes, and a number attached to each — because the assumptions do not fail equally, and knowing which ones are expensive is most of what separates using a model from believing it.</p>
     <p>The table below is that list. Almost every line has already been measured somewhere in this series, which is the point: the failures are not vague, they have magnitudes.</p>
     <p>Three deserve highlighting because their cost is larger than people expect.</p>
     <p><b>Continuous trading.</b> Page 06 showed that adding transaction costs turns "hedge as often as possible" from a theorem into a corner solution that is wrong — the objective becomes a U-curve with a minimum around <b>128 rehedges</b> on a ninety-day option.</p>
@@ -179,7 +179,7 @@
     <p class="q">Your desk doubles its hedging frequency and the realized hedging error barely improves. What does that tell you?</p>
     <div class="opts">
       <button>The hedging system has a bug</button>
-      <button data-ok="1">That the residual is dominated by gaps rather than by discretisation. You are already past the point where more trading helps, and you are now paying page 06's costs for nothing</button>
+      <button data-ok="1">That the residual is dominated by gaps rather than by discretization. You are already past the point where more trading helps, and you are now paying page 06's costs for nothing</button>
       <button>That volatility was mismarked</button>
       <button>That the delta calculation is wrong</button>
     </div>
@@ -342,7 +342,7 @@
     <p><b>The failures are mapped.</b> That is what the surface <em>is</em>. The market has taken the model's inadequacy and priced it strike by strike, so the quoted surface contains exactly the information the model omits. Using Black–Scholes with a surface is not using a broken model; it is using the model as an interpolation scheme with the corrections supplied by the market.</p>
     <p><b>The hedging argument survives in the direction that matters.</b> Chapter 02 showed the error has a floor, not that hedging is pointless — at 256 rebalances the jumpy world's error is still <b>1.89</b> against an unhedged position's many multiples of that. Delta hedging removes the first-order risk exactly as advertised. What it cannot remove is the part that was never first-order.</p>
     <p><b>And the alternatives inherit the same problem.</b> Stochastic volatility, jump-diffusion and local volatility models all fit better and all contain parameters that must be estimated from data that is short, noisy and non-stationary. A more flexible model is not automatically a more accurate one; it is a model with more ways to be confidently wrong.</p>
-    <p>So the working position is neither belief nor rejection. Use the model, quote in its units, take the surface as the market's correction to it, and keep an explicit list of the places where it is not merely imprecise but structurally silent — jumps, liquidity, financing and the behaviour of other people. That list is this series, and its most useful property is that every entry has a number next to it.</p>
+    <p>So the working position is neither belief nor rejection. Use the model, quote in its units, take the surface as the market's correction to it, and keep an explicit list of the places where it is not merely imprecise but structurally silent — jumps, liquidity, financing and the behavior of other people. That list is this series, and its most useful property is that every entry has a number next to it.</p>
   </div>
 
   <figure class="bleed">
@@ -438,7 +438,7 @@
       <button>Uniformly across strikes</button>
       <button>Only in the puts</button>
     </div>
-    <div class="ans"><b>The wings, by a wide margin.</b> And the errors have opposite signs either side of the money, so they accumulate on any directional book rather than cancelling. The model is accurate exactly where it gets checked.</div>
+    <div class="ans"><b>The wings, by a wide margin.</b> And the errors have opposite signs either side of the money, so they accumulate on any directional book rather than canceling. The model is accurate exactly where it gets checked.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">

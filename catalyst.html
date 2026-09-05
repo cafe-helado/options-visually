@@ -60,7 +60,7 @@
   <ol>
     <li><b>One equation carries the page.</b> σ²T = σ<sub>diff</sub>²T + J². Everything else is applying it or checking where it fails.</li>
     <li><b>Chapter 03 is the payoff.</b> A term structure that looks arbitrary becomes flat once one number is removed from it.</li>
-    <li><b>Chapter 05 is the one traders get wrong.</b> The P&amp;L distribution of a fairly priced earnings straddle is not centred on zero in the way people assume.</li>
+    <li><b>Chapter 05 is the one traders get wrong.</b> The P&amp;L distribution of a fairly priced earnings straddle is not centered on zero in the way people assume.</li>
   </ol>
   <details class="drop">
     <summary>Notation — every symbol used on this page</summary>
@@ -84,7 +84,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">Page 01 modelled a stock as pure diffusion — many small independent moves, variance accruing evenly with time. That is a decent description of most days and a terrible description of the morning after an earnings release, when the whole distribution of a quarter's worth of information resolves in a single print.</p>
+    <p class="lead">Page 01 modeled a stock as pure diffusion — many small independent moves, variance accruing evenly with time. That is a decent description of most days and a terrible description of the morning after an earnings release, when the whole distribution of a quarter's worth of information resolves in a single print.</p>
     <p>The fix is not a more complicated process. It is to admit there are two sources of variance and to add them, which you are allowed to do because <b>variance is additive over independent components</b> — the same fact page 01 used to derive √T scaling, applied along a different seam.</p>
     <div class="mline">σ<sub>imp</sub>² · T = σ<sub>diff</sub>² · T + J²</div>
     <p class="mread">Reads as: <b>total variance is the ordinary variance that accumulates with time, plus a fixed lump the event contributes regardless of how far away it is.</b></p>
@@ -353,7 +353,7 @@
         <div class="kv" style="margin-top:20px" id="kv5"></div>
       </div>
     </div>
-    <figcaption>Set realized equal to implied and read the two statistics against each other: a mean at zero and a median well below it. That gap <em>is</em> the trade. Everything about how event vol feels to trade — and most of the behavioural errors around it — comes from the distance between those two numbers.</figcaption>
+    <figcaption>Set realized equal to implied and read the two statistics against each other: a mean at zero and a median well below it. That gap <em>is</em> the trade. Everything about how event vol feels to trade — and most of the behavioral errors around it — comes from the distance between those two numbers.</figcaption>
   </figure>
   <div class="try">
     <span class="lab">Try this</span>
@@ -506,7 +506,7 @@
       <button>The straddle is mispriced</button>
       <button data-ok="1">They are different quantities. A straddle prices the expected <em>absolute</em> move, which is √(2/π) ≈ 0.7979 of a standard deviation — a 25% gap in a number quoted to two decimals</button>
       <button>The straddle excludes the risk-free rate</button>
-      <button>One is annualised and the other is not</button>
+      <button>One is annualized and the other is not</button>
     </div>
     <div class="ans"><b>Expected absolute move versus standard deviation.</b> The 0.8 in the rule of thumb is √(2/π), and treating the implied move as a one-sigma number overstates the odds of staying inside it every single time.</div>
   </div>
@@ -520,7 +520,7 @@
       <button>Positively skewed with a high win rate</button>
       <button>Always negative, since implied exceeds realized</button>
     </div>
-    <div class="ans"><b>Mean zero, median negative, wins one time in three.</b> The gap between mean and median is the whole behavioural problem with event volatility: a correctly priced trade feels wrong two-thirds of the time.</div>
+    <div class="ans"><b>Mean zero, median negative, wins one time in three.</b> The gap between mean and median is the whole behavioral problem with event volatility: a correctly priced trade feels wrong two-thirds of the time.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
