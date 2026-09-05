@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Reading the Screen — Options, visually</title>
+<meta name="description" content="How to read an options chain fast: turning strike distances into standard deviations, delta as a moneyness ruler, what each column is really telling you, and a five-second scan you can run before anyone expects an answer.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Reading the Screen — Options, visually">
+<meta property="og:description" content="How to read an options chain fast: turning strike distances into standard deviations, delta as a moneyness ruler, what each column is really telling you, and a five-second scan you can run before anyone expects an answer.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 17 · Reading the screen</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>A chain is a distribution</span><i></i></a>
+  <a href="#c2"><span>Strike spacing</span><i></i></a>
+  <a href="#c3"><span>Delta is the ruler</span><i></i></a>
+  <a href="#c4"><span>What each column says</span><i></i></a>
+  <a href="#c5"><span>Skew and term, by eye</span><i></i></a>
+  <a href="#c6"><span>The five-second scan</span><i></i></a>
+  <a href="#c7"><span>Drills</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 17</div>
+    <h1>Reading the <em>screen</em></h1>
+    <p class="sub">Sixteen pages of theory, and none of them told you how to look at a chain. The skill is converting what is printed into what matters — strike distances into standard deviations, dollars into deltas — and it takes about five seconds once it is automatic.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">Everything else in this series builds a concept. This page is about a screen — the grid of strikes and expiries a trader looks at several hundred times a day — and the small conversions that turn it from a wall of numbers into a picture. It is the most practical page here and the least theoretical, and it assumes you have met delta and implied volatility somewhere before.</p>
+  <ol>
+    <li><b>Chapter 02 is the one to take away.</b> A strike's distance in dollars means nothing. Its distance in standard deviations means everything, and converting between them in your head is the whole skill.</li>
+    <li><b>Chapter 03 fixes a rule of thumb almost everyone half-knows.</b> The 16-delta option is about a one-sigma strike — inside three months. At a year it is 1.56 sigma, and the put side is not symmetric with the call side at all.</li>
+    <li><b>Chapter 06 is a procedure</b>, not an idea: what to look at first, second and third, on a live chain you can re-parameterise.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>S, K, T</td><td>Spot, strike, time to expiry in years. Thirty days is T = 30/365.</td></tr>
+      <tr><td>σ</td><td>Implied volatility, annualized, as quoted in the IV column.</td></tr>
+      <tr><td>One sigma</td><td>S · σ · √T — the dollar size of a one-standard-deviation move over the option's life. The number this page converts everything into.</td></tr>
+      <tr><td>z</td><td>A strike's distance from spot measured in sigmas: (K − S) / (S·σ·√T). Dimensionless, and comparable across every name on the screen.</td></tr>
+      <tr><td>Δ</td><td>Delta. On a chain it doubles as a moneyness ruler, which is most of what it is used for.</td></tr>
+      <tr><td>Risk reversal</td><td>The 25-delta put's implied volatility minus the 25-delta call's. One number for how skewed a column is.</td></tr>
+      <tr><td>Open interest</td><td>Contracts outstanding. Volume is what traded today; open interest is what is still there.</td></tr>
+      <tr><td>Body / shoulder / wing</td><td>Informal names for strikes inside a quarter sigma, out to about one, and beyond. Not standard, but the distinction is.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>A chain is a distribution printed sideways</h2>
+    <p class="dek">The column of prices down a single expiry is a probability distribution. Once you can see that, the screen stops being a list.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Open any chain and the first instinct is to read it like a table — find the strike you care about, read its row, move on. That is the slow way, and it is the way that misses everything.</p>
+    <p><a href="surface.html" style="color:var(--blue)">Page 02</a> established that the second derivative of call price across strikes is the risk-neutral density. Which means the column you are looking at <em>is</em> a distribution, drawn in a coordinate system nobody would have chosen. Every skill on this page is a way of undoing that coordinate system fast enough to be useful.</p>
+    <p>Three conversions do almost all of it. Turn dollars into sigmas, so strikes on a $30 stock and a $600 stock are comparable. Turn prices into deltas, so moneyness is comparable across expiries. And turn the IV column into a shape rather than a list of numbers — a slope and a curvature, which is what your eye is good at and what arithmetic is slow at.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The same column, as a table and as the density it is</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Implied density</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Spot</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="300"></canvas>
+        <div class="tblwrap" style="margin-top:20px">
+          <table class="rot" id="tab1"></table>
+        </div>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Notice the table and the curve carry identical information. One of them can be read in a glance and the other cannot, and the screen only ever gives you the second.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why is reading a chain row by row the wrong default?</p>
+    <div class="opts">
+      <button>Because it is slow</button>
+      <button data-ok="1">Because the information is in the shape across strikes, not in any single row. A row tells you one price; the column tells you what the market thinks the distribution is</button>
+      <button>Because rows contain errors</button>
+      <button>Because the deltas are more reliable than the prices</button>
+    </div>
+    <div class="ans"><b>The information lives across the column, not down it.</b> Slowness is a symptom. The real cost is that a single row cannot tell you whether a price is high or low — that judgement is always relative to its neighbours, and the neighbours are what the eye is for.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>A strike's distance in dollars is meaningless</h2>
+    <p class="dek">Five points away is 2.33 standard deviations on one stock and 0.12 on another. The conversion is one multiplication and it is the most valuable habit on this page.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Every chain is laid out in dollars, and dollars are the one unit that does not travel. Take four stocks at 30 volatility with thirty days to expiry, all with five-point strike spacing, and ask how far apart the strikes really are.</p>
+    <p>On a <b>$25</b> stock, one standard deviation is $2.15, so consecutive strikes are <b>2.33 sigma</b> apart — you get less than half a strike inside the entire expected move, and the chain is hopelessly coarse. On a <b>$500</b> stock the same five points is <b>0.12 sigma</b> and there are <b>8.6</b> strikes inside one standard deviation. Same spacing on the screen; completely different instruments.</p>
+    <p>The conversion is this, and it should become automatic:</p>
+  </div>
+
+  <div class="mline">one sigma = S · σ · √T        z = (K − S) / (S · σ · √T)</div>
+  <p class="mread">Reads as: <b>multiply the spot by the volatility by the square root of the time, and you have the dollar size of a one-standard-deviation move.</b> Divide any strike's distance by it and you have a number that means the same thing on every name on the screen.</p>
+
+  <div class="prose">
+    <p>The mental shortcut worth carrying is <code>√T</code> for the common tenors: a month is about 0.29, a quarter about 0.5, a year is 1. So a $100 stock at 30 vol has a one-sigma move of about <b>$8.60</b> over a month, <b>$15</b> over a quarter and <b>$30</b> over a year. Those three numbers, held in the head, convert most of a screen without a calculator.</p>
+    <p>The same arithmetic run across expiries is where the intuition really lands. On one stock with one strike spacing, consecutive strikes are <b>3.18 sigma</b> apart on a one-day option and <b>0.17 sigma</b> apart on a one-year one. A weekly chain is a blunt instrument by construction, and that has nothing to do with liquidity — it is geometry.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>How many strikes fit inside one standard deviation</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Strikes per sigma</span>
+            <span><i class="swl" style="background:var(--verm)"></i>One is the coarse limit</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Notice how fast this falls at the short end. Below the red line there is not even one strike inside the expected move, and a spread built there is quantised far more coarsely than its price suggests.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the spot to 25 and predict how many strikes fit inside a one-sigma move on the monthly. Then set it to 500 and see the same screen become a different instrument.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"S":25,"step":5,"days":30}' data-focus="cv2">A $25 stock</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"S":500,"step":5,"days":30}' data-focus="cv2">A $500 stock</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"S":100,"step":5,"days":2}' data-focus="cv2">Two days to expiry</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A $40 stock at 45 volatility, weekly expiry, 2.5-point strikes. Roughly how far apart are the strikes in sigmas?</p>
+    <div class="opts">
+      <button>About 0.1 sigma — the strikes are tight</button>
+      <button data-ok="1">About 1 sigma. One sigma is 40 × 0.45 × √(7/365) = $2.49, so the 2.5-point spacing is essentially the whole expected move</button>
+      <button>About 2.5 sigma</button>
+      <button>You cannot say without the deltas</button>
+    </div>
+    <div class="ans"><b>About one sigma per strike.</b> Which tells you immediately that there are perhaps three strikes worth quoting in that expiry, that a one-strike-wide spread there is a very different animal from a one-strike-wide spread on an index, and that the delta will move in large jumps as you walk down the column. All from one multiplication done before you looked at any prices.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>Delta is the ruler, and the rule of thumb has a shelf life</h2>
+    <p class="dek">The 16-delta option is roughly a one-sigma strike. Roughly holds for about three months, and the put side was never symmetric with the call side.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The second conversion is easier because the screen does it for you. Delta is printed, it runs from zero to one on every name and every expiry, and it is the closest thing a chain has to a universal coordinate.</p>
+    <p>The rule everyone half-knows is that <b>a 16-delta option is about a one-sigma strike</b>, because 16% is the tail beyond one standard deviation of a normal. It is a good rule and it is worth knowing exactly how good. On a $100 stock at 30 volatility the 16-delta call sits at <b>1.06 sigma</b> at a week, <b>1.13 sigma</b> at a month and <b>1.24 sigma</b> at three months — so inside a quarter it is accurate to about a tenth of a sigma, which is fine. At a year it is <b>1.56 sigma</b> and the rule has stopped being useful.</p>
+    <p>The part almost nobody mentions is the asymmetry. Over the same tenors the 16-delta <em>put</em> sits at <b>0.94</b>, <b>0.88</b>, <b>0.80</b> and <b>0.64</b> sigma — it moves the other way. The lognormal is not symmetric, so equal deltas are not equal distances, and a "16-delta strangle" is not centred on anything.</p>
+    <p>One more, because it catches people constantly: the at-the-money call's delta is <b>0.53</b> here, not 0.50. Scanning a column for the 50-delta to find the money will put you one strike low.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Where each delta actually sits, in standard deviations</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Call strikes</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Put strikes</span>
+            <span><i class="swl" style="background:var(--grey)"></i>The rule of thumb</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Notice the two curves are not mirror images and the gap widens with time. That asymmetry is the lognormal, and it is the reason delta-defined structures drift as they age.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Drag the expiry out to a year and watch the rule of thumb fail. Predict first whether the call or the put drifts further.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"days":30}' data-focus="cv3">A month</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"days":90}' data-focus="cv3">A quarter</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"days":365}' data-focus="cv3">A year</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Someone asks for "the 25-delta call" on a one-year chain. How far out is that?</p>
+    <div class="opts">
+      <button>About 0.7 sigma, the same as on any other expiry</button>
+      <button data-ok="1">About 1.11 sigma on the year, against 0.78 on the month. Delta is comparable across expiries as a label but not as a distance</button>
+      <button>Exactly 0.75 sigma, since delta is a probability</button>
+      <button>It cannot be expressed in sigmas</button>
+    </div>
+    <div class="ans"><b>A delta names a strike, not a distance.</b> That is exactly why desks quote in deltas — a 25-delta option has roughly comparable <em>character</em> across expiries even though it sits at very different moneyness. Trouble only starts when someone treats the delta as if it were a fixed number of standard deviations, which is the mistake this chapter exists to prevent.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>What each column is actually telling you</h2>
+    <p class="dek">The IV column is a single number chosen out of a range, and the width of that range is the bid-offer.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A chain prints a lot of columns and they are not equally trustworthy. The one that misleads most is the one that looks most authoritative.</p>
+    <p><b>Implied volatility</b> is computed from a price, and the screen has at least two prices. Take a 105 call on a $100 stock, thirty days out, genuinely worth <b>1.662</b> at 30 volatility. Quote it two cents wide and the implied volatility runs from <b>29.90%</b> to <b>30.10%</b> — a fifth of a point, fine. Quote it <b>ten cents</b> wide, which is unremarkable on a single name, and the band is <b>29.51% to 30.49%</b>: a <b>0.98 volatility point</b> range, and the column shows you one number from inside it. Twenty cents wide and it is nearly two points.</p>
+    <p>So the practical rule is that an IV column is only as precise as the spread it was computed from, and comparing two names' implieds to a decimal place is usually comparing their liquidity. <a href="microstructure.html" style="color:var(--blue)">Page 05</a> takes this much further — on a short-dated wing a single tick can be eleven volatility points.</p>
+    <p><b>Volume and open interest</b> answer different questions and get confused constantly. Volume is what traded today; open interest is what is still outstanding. A strike with enormous volume and no open interest was traded and closed — somebody was in and out. Enormous open interest and no volume is a position somebody is sitting on, and it is the one that matters for pinning.</p>
+    <p><b>The mid</b> is not a price. It is the average of two prices, one of which you can hit and one of which you can lift, and on a wide market it is a number nobody will trade. Every apparent edge under about half a spread is an artifact of quoting the mid.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The volatility band a quote actually implies</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>IV from the offer</span>
+            <span><i class="swl" style="background:var(--verm)"></i>IV from the bid</span>
+            <span><i class="swl" style="background:var(--grey)"></i>The printed mid</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Notice the band widens sharply out in the wings even at constant quote width. The same ten cents is a fifth of a point at the money and several points on a far strike, because vega collapses faster than the spread does.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Two names both show 32.4% implied on the at-the-money. One is quoted a penny wide, the other twenty cents. What can you conclude?</p>
+    <div class="opts">
+      <button>They are priced identically</button>
+      <button data-ok="1">Almost nothing about the second one. Twenty cents on an at-the-money is roughly a two-point volatility band, so "32.4%" there means somewhere between about 31.4 and 33.4</button>
+      <button>The wider one is more expensive</button>
+      <button>The wider one is less liquid but the implied is equally reliable</button>
+    </div>
+    <div class="ans"><b>The number is only as good as the spread behind it.</b> The fourth answer is the tempting one and it is exactly backwards: illiquidity does not merely make a market harder to trade, it makes the derived quantities imprecise, because they are computed from a midpoint that is a guess. Any screen comparison across names should carry the spread alongside the implied, and most do not.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Skew and term structure, read by eye</h2>
+    <p class="dek">Two shapes on a screen, both readable in a glance once you know what you are looking for.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Scan the IV column downward. If the numbers fall as the strike rises, the column is skewed, and how fast they fall is how skewed. On the example chain here — thirty days, 28% at the money — the 90 strike shows <b>32.10%</b> and the 110 shows <b>24.99%</b>, so the column drops seven volatility points across four strikes.</p>
+    <p>The standard way to compress that into one number is the <span class="term" data-t="Risk reversal" data-def="The 25-delta put's implied volatility minus the 25-delta call's. A single number for how much more the downside costs than the upside, and the way skew is quoted between desks.">risk reversal</span>: the 25-delta put's implied minus the 25-delta call's. On this surface it is <b>3.77 points</b> at thirty days, <b>6.47</b> at ninety and <b>12.29</b> at a year, because a skew defined in log-moneyness reaches further out as the strikes spread.</p>
+    <p>Now scan across expiries instead, at the money. A flat term structure is a stock with nothing scheduled. A front month standing well above the back is the screen telling you a <em>date</em> exists — and the size of the step says what the market has priced for it. With a 28% baseline and one event worth a 7% move, the quoted at-the-money runs <b>82.1%</b> at three days, <b>57.8%</b> at a week, <b>37.2%</b> at a month and <b>29.7%</b> at six months. The event has not moved; its share of the remaining variance has. <a href="catalyst.html" style="color:var(--blue)">Page 03</a> is that arithmetic in full.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The two shapes: skew down a column, term structure across them</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Implied vol by strike</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>25-delta strikes</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="300"></canvas>
+        <canvas id="cv5b" height="210" style="margin-top:18px"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Notice the lower panel. A hump at the front is an event; a smooth rise is a market that expects more volatility later; a smooth fall is one that expects less. Three shapes, three completely different trades.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Put an event worth 7% into the term structure and predict what the three-day implied does before you look. Most people guess about 40%.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"J":0.07}' data-focus="cv5b">Add an event</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"J":0}' data-focus="cv5b">Take it out</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"skew":-0.9,"J":0}' data-focus="cv5">A very skewed column</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">The front week shows 82% implied and the six-month shows 30%. What is that?</p>
+    <div class="opts">
+      <button>The front week is wildly overpriced</button>
+      <button data-ok="1">Almost certainly a scheduled event inside the front week. A fixed event contributes a fixed variance, and dividing it by a very short T makes the annualized number enormous</button>
+      <button>A market that expects volatility to collapse</button>
+      <button>A data error</button>
+    </div>
+    <div class="ans"><b>A date, not a mispricing.</b> The giveaway is the size and the shape: an 82% front against a 30% back is far too large to be an opinion about ordinary volatility and far too neat to be an error. Before ever concluding that a front month is expensive, find out what is in it — earnings, an FDA decision, an index reconstitution — because the arithmetic that makes it look expensive is the arithmetic of dividing by a small number.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>The five-second scan</h2>
+    <p class="dek">A procedure, in order. It is short because the point is that it fits in the time before somebody expects an answer.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Everything above is a conversion. This is the order to do them in, and it is worth doing in the same order every time until it stops being a list and becomes a glance.</p>
+    <p><b>One — get the sigma.</b> Spot times the at-the-money implied times √T. One number, and every strike distance on the screen is now readable. On the chain below it is printed at the top of the panel, and after a hundred chains you will be computing it before the page has finished loading.</p>
+    <p><b>Two — locate the money.</b> Not the 50-delta; the strike nearest the <em>forward</em>. On short-dated equity chains they are nearly the same, and on anything long-dated or high-carry they are not.</p>
+    <p><b>Three — read the shape of the IV column.</b> Not the values, the slope. Falling as strikes rise is ordinary equity skew. Falling then rising is a smile, which means the wings are bid on both sides and usually means jump risk. Flat is either an index in a calm week or a screen showing you a model rather than a market.</p>
+    <p><b>Four — check the front against the back.</b> One step at the front is an event. A smooth slope is a view.</p>
+    <p><b>Five — look at the spreads before believing any of it.</b> Everything in steps one to four was computed from mids.</p>
+    <p>The chain below tags every strike as body, shoulder or wing by its distance in sigmas, which is the classification the scan is really producing. It is not standard terminology; the distinction it draws is completely standard.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>A live chain, with the conversions already done</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>Body</span>
+            <span><i class="sw" style="background:var(--ochre)"></i>Shoulder</span>
+            <span><i class="sw" style="background:var(--grey)"></i>Wing</span>
+          </span>
+        </div>
+        <div class="tblwrap">
+          <table class="rot" id="tab6"></table>
+        </div>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>Notice how few rows are actually in play. On a typical monthly chain the body and shoulders are five or six strikes; everything else is a wing, and wings are where the spread is widest and the implied least reliable.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Cut the expiry to three days without changing anything else, and count how many strikes are left that are not wings.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c6" data-patch='{"days":30}' data-focus="tab6">A monthly</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"days":3}' data-focus="tab6">Three days out</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"days":365}' data-focus="tab6">A year out</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why does the scan start with the sigma rather than with the prices?</p>
+    <div class="opts">
+      <button>Because volatility is the most important greek</button>
+      <button data-ok="1">Because until you have it, no strike distance on the screen means anything — every later judgement is relative to that one number</button>
+      <button>Because the prices change too quickly</button>
+      <button>Because the sigma is the hardest number to compute</button>
+    </div>
+    <div class="ans"><b>It is the unit everything else is measured in.</b> Reading prices before you know the scale is like reading a map with no key: you can see that one number is bigger than another and you cannot tell whether the difference matters. It is also the cheapest step — one multiplication — which is why it goes first.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Drill the conversions</h2>
+    <p class="dek">Sigmas, strike distances and deltas, at the speed the screen moves.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Two tiers. The first is the one-sigma move and how far a strike is in sigmas — the arithmetic of chapter 02, which is the whole page compressed. The second adds delta, the risk reversal and the event arithmetic.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:170px"><span class="k">Tier</span>
+          <div class="seg" style="margin-top:5px;max-width:240px">
+            <button id="dT1" aria-pressed="true">Distances</button>
+            <button id="dT2" aria-pressed="false">The rest</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>Tolerances are loose enough for mental arithmetic and tight enough that guessing fails. Estimating is the skill; the calculator is not on the desk when someone asks.</figcaption>
+  </figure>
+
+  <div class="prose" style="margin-top:46px">
+    <p>Six questions across the page.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 02</span>
+    <p class="q">A $100 stock at 30 volatility, thirty days out. How big is a one-sigma move?</p>
+    <div class="opts">
+      <button>$30 — the volatility is 30%</button>
+      <button data-ok="1">About $8.60. S · σ · √T = 100 × 0.30 × √(30/365) = 100 × 0.30 × 0.287</button>
+      <button>About $2.50 — a month is a twelfth of the year</button>
+      <button>$15</button>
+    </div>
+    <div class="ans"><b>$8.60, and the third answer is the interesting wrong one.</b> Dividing the volatility by twelve rather than by √12 is the single most common units error in the subject. Time enters through its square root, always — a month is 0.287 of a year in volatility terms, not 0.083.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">Same stock and expiry, five-point strikes. How many strikes fit inside one standard deviation?</p>
+    <div class="opts">
+      <button>About five</button>
+      <button data-ok="1">About 1.7 — $8.60 of sigma divided by $5 of spacing</button>
+      <button>About 0.6</button>
+      <button>It depends on the deltas</button>
+    </div>
+    <div class="ans"><b>1.7 strikes per sigma.</b> The third answer inverts it, which is worth doing deliberately once: 0.58 is the number of <em>sigmas per strike</em>, and both quantities are useful as long as you know which one you are holding.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">How good is "the 16-delta is the one-sigma strike"?</p>
+    <div class="opts">
+      <button>Exact, by construction</button>
+      <button data-ok="1">Good to about a tenth of a sigma inside three months — 1.06 at a week, 1.13 at a month, 1.24 at a quarter — and it degrades to 1.56 at a year</button>
+      <button>Wrong at every tenor</button>
+      <button>Exact for calls and wrong for puts</button>
+    </div>
+    <div class="ans"><b>A short-dated rule, and the put side is not its mirror.</b> The 16-delta put runs 0.94, 0.88, 0.80 and 0.64 sigma over the same tenors — moving the opposite way. The asymmetry is the lognormal, and it is why a delta-defined strangle is not centred on the spot.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">A 105 call worth 1.66 is quoted ten cents wide. What is the implied volatility?</p>
+    <div class="opts">
+      <button>30.0%, from the mid</button>
+      <button data-ok="1">Somewhere between 29.51% and 30.49%. The quote is a band nearly a full volatility point wide, and the column shows one number from inside it</button>
+      <button>29.9% to 30.1%</button>
+      <button>It cannot be computed without the delta</button>
+    </div>
+    <div class="ans"><b>A band, not a number.</b> Ten cents is unremarkable on a single name and it is already a point of volatility. Comparing two screens' implieds to a decimal place, without their spreads beside them, is usually comparing their liquidity.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 05</span>
+    <p class="q">The front week is 82% implied and the six-month is 30%. What is the most likely explanation?</p>
+    <div class="opts">
+      <button>The front week is very expensive</button>
+      <button data-ok="1">A scheduled event inside the front week. A fixed event variance divided by a very short T produces an enormous annualized number</button>
+      <button>The back month is very cheap</button>
+      <button>The market expects a crash</button>
+    </div>
+    <div class="ans"><b>A date.</b> With a 28% baseline and one event worth a 7% move, the quoted at-the-money runs 82.1% at three days and 29.7% at six months — the event has not changed, only its share of the remaining variance. Find out what is scheduled before calling anything expensive.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 06</span>
+    <p class="q">A strike shows enormous open interest and almost no volume today. What does that tell you?</p>
+    <div class="opts">
+      <button>It is illiquid and should be ignored</button>
+      <button data-ok="1">Somebody is sitting on a position there. Volume is what traded today; open interest is what is still outstanding — and it is the one that matters for pinning into expiry</button>
+      <button>The position was opened and closed today</button>
+      <button>Nothing — the two are the same measurement</button>
+    </div>
+    <div class="ans"><b>An existing position, not today's activity.</b> The third answer describes the opposite pattern — big volume with no open interest is somebody in and out. The two columns answer different questions and the confusion between them is common enough to be worth a deliberate check: <em>today</em>, or <em>outstanding</em>?</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every chain on this page is generated from a smooth parametric surface, which makes it cleaner than any real screen. A real chain has strikes with no market at all, implieds computed from stale mids, and a spot that has moved since the last print — and the wings, where this page's arithmetic is least reliable, are exactly where those problems are worst. The sigma conversion in chapter 02 uses the at-the-money implied for every strike, which is a deliberate simplification: on a skewed surface each strike has its own volatility, and the correct distance uses that one. It changes the numbers in the wings by a fair amount and changes none of the judgements. And every implied volatility here is derived from a mid, which <a href="microstructure.html" style="color:var(--blue)">page 05</a> argues is not a price at all.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* Shared surface for the whole page: a log-moneyness skew with a little
+   curvature, plus an optional scheduled event folded into the variance.
+   Every chapter reads the same one, so the chain in chapter 06 is the same
+   market as the smile in chapter 05. */
+function sigAt(S, K, T, atm, skew, curv, J) {
+  const F = S * Math.exp(0.04 * T);
+  const k = Math.log(K / F);
+  const base = Math.max(0.04, atm + skew * k + curv * k * k);
+  if (!J) return base;
+  return Math.sqrt((base * base * T + J * J) / T);
+}
+const oneSigma = (S, v, T) => S * v * Math.sqrt(T);
+/* The strike carrying a given |delta|, on whatever surface is passed in.
+   The two sides bracket in opposite directions and that is easy to get
+   backwards: a call's delta FALLS as the strike rises, so overshooting the
+   target means the strike is too low; a put's |delta| RISES as the strike
+   rises, so overshooting means it is too high. Writing one comparison for
+   both produced 16-delta puts at eleven sigma before anything noticed. */
+function strikeForDelta(S, T, vf, r, target, isCall) {
+  let lo = isCall ? S * 0.5 : S * 0.05, hi = isCall ? S * 5 : S * 1.6;
+  for (let i = 0; i < 120; i++) {
+    const m = (lo + hi) / 2;
+    if (isCall) {
+      if (bs(S, m, T, vf(m), r, 0, true).delta > target) lo = m; else hi = m;
+    } else {
+      if (-bs(S, m, T, vf(m), r, 0, false).delta > target) hi = m; else lo = m;
+    }
+  }
+  return (lo + hi) / 2;
+}
+/* implied volatility from a price, by bisection — the page needs it to show
+   what a bid-offer does to the IV column */
+function ivFrom(price, S, K, T, r, isCall) {
+  let lo = 0.001, hi = 6;
+  for (let i = 0; i < 160; i++) {
+    const m = (lo + hi) / 2;
+    if (bs(S, K, T, m, r, 0, isCall).price < price) lo = m; else hi = m;
+  }
+  return (lo + hi) / 2;
+}
+
+/* ══════════ hero ══════════
+   A chain, drifting: columns of strike rows with the body lit and the wings
+   fading out — the page's whole argument as a texture. */
+(function(){
+  const cv=document.getElementById("heroCv");let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  function draw(ph){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    const cols=7, rows=15;
+    const padX=w*0.06, padY=h*0.12;
+    const cw=(w-padX*2)/cols, rh=(h-padY*2)/rows;
+    for(let c=0;c<cols;c++){
+      for(let r=0;r<rows;r++){
+        const dz=(r-(rows-1)/2)/((rows-1)/2);
+        const near=Math.exp(-2.2*dz*dz);
+        const pulse=Math.sin(ph*0.7+c*0.5+r*0.12)*0.5+0.5;
+        g.fillStyle=c%2?C("--verm"):C("--blue");
+        g.globalAlpha=0.05+0.16*near*(0.55+0.45*pulse);
+        const bw=cw*(0.30+0.42*near);
+        g.fillRect(padX+c*cw+(cw-bw)/2, padY+r*rh+rh*0.24, bw, rh*0.46);
+      }
+    }
+    g.globalAlpha=1;
+  }
+  function tick(t){if(!t0)t0=t;draw((t-t0)/2500);raf=requestAnimationFrame(tick);}
+  window.drawHero=function(){size();if(RM){draw(0);return;}
+    if(raf)cancelAnimationFrame(raf);t0=0;raf=requestAnimationFrame(tick);};
+})();
+
+/* ══════════ 01 — a chain is a distribution ══════════ */
+const s1={S:100,days:30,atm:0.28,skew:-0.35};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"a1",k:"days",lbl:"T",name:"Days to expiry",min:2,max:365,step:1,fmt:v=>v.toFixed(0)+"d"},
+    {id:"b1",k:"atm",lbl:"σ",name:"At-the-money implied",min:0.08,max:0.9,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"c1s",k:"skew",lbl:"β",name:"Skew",min:-1.2,max:0.4,step:0.02,fmt:v=>v.toFixed(2)}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function draw(){
+    const S=s1.S,T=s1.days/365,r=0.04;
+    const vf=K=>sigAt(S,K,T,s1.atm,s1.skew,0.25,0);
+    /* the density, by second difference of call price in strike */
+    const h=Math.max(0.05,S*0.001);
+    const dens=K=>{
+      const c=x=>bs(S,x,T,vf(x),r,0,true).price;
+      return Math.exp(r*T)*(c(K+h)-2*c(K)+c(K-h))/(h*h);
+    };
+    const lo=S*0.55,hi=S*1.5,xs=[],ys=[];
+    for(let i=0;i<=200;i++){const K=lo+(hi-lo)*i/200;xs.push(K);ys.push(Math.max(0,dens(K)));}
+    const o=Fig(document.getElementById("cv1"),
+      {h:300,x0:lo,x1:hi,y0:0,y1:Math.max.apply(null,ys)*1.14,pad:{l:64,r:14,t:14}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(3),5,4);
+    clip(o,()=>line(o,xs,ys,C("--blue"),2.2));
+    vline(o,S,C("--ochre"),"spot");
+    const sd=oneSigma(S,s1.atm,T);
+    const step=S<50?2.5:(S<200?5:10);
+    const rows=[];
+    for(let K=Math.round((S-2.5*sd)/step)*step;K<=S+2.5*sd;K+=step){
+      if(K<=0)continue;
+      const v=vf(K),cp=K>=S;
+      const o2=bs(S,K,T,v,r,0,cp);
+      rows.push([K,v,Math.abs(o2.delta),o2.price,(K-S)/sd]);
+    }
+    document.getElementById("tab1").innerHTML=
+      "<tr><th style='text-align:left'>Strike</th><th>IV</th><th>Δ</th><th>Price</th><th>σ from spot</th></tr>"+
+      rows.map(([K,v,d,p,z])=>
+        "<tr><td style='text-align:left'>"+K.toFixed(K%1?1:0)+"</td><td>"+(v*100).toFixed(2)+"%</td><td>"+
+        d.toFixed(3)+"</td><td>"+p.toFixed(2)+"</td><td>"+(z>=0?"+":"")+z.toFixed(2)+"</td></tr>").join("");
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Spot",S.toFixed(2)],
+      ["Days to expiry",s1.days.toFixed(0)],
+      ["At-the-money IV",(s1.atm*100).toFixed(2)+"%"],
+      ["One sigma","$"+sd.toFixed(2)],
+      ["Strike spacing","$"+step.toFixed(step%1?1:0)],
+      ["Strikes per sigma",(sd/step).toFixed(2)],
+      ["Rows shown",String(rows.length)],
+      ["Density integrates to",
+        (xs.reduce((a,_,i)=>a+ys[i]*(hi-lo)/200,0)).toFixed(4)]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — strike spacing in sigmas ══════════ */
+const s2={S:100,step:5,days:30,vol:0.30};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"a2",k:"S",lbl:"S",name:"Spot",min:5,max:600,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"b2",k:"step",lbl:"Δ",name:"Strike spacing",min:0.5,max:25,step:0.5,fmt:v=>"$"+v.toFixed(1)},
+    {id:"c2d",k:"days",lbl:"T",name:"Days to expiry",min:1,max:365,step:1,fmt:v=>v.toFixed(0)+"d"},
+    {id:"d2",k:"vol",lbl:"σ",name:"Volatility",min:0.08,max:1.2,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function draw(){
+    const xs=[],ys=[],one=[];
+    for(let d=1;d<=365;d++){
+      xs.push(d);
+      ys.push(oneSigma(s2.S,s2.vol,d/365)/s2.step);
+      one.push(1);
+    }
+    const hi=Math.max(3,Math.min(40,ys[364]*1.12));
+    const o=Fig(document.getElementById("cv2"),
+      {h:310,x0:1,x1:365,y0:0,y1:hi,pad:{l:56,r:14,t:14}});
+    axes(o,v=>v.toFixed(0)+"d",v=>v.toFixed(1),5,4);
+    clip(o,()=>{line(o,xs,one,C("--verm"),1.6,[5,4]);line(o,xs,ys,C("--blue"),2.2);});
+    vline(o,s2.days,C("--ochre"),s2.days+"d");
+    const sd=oneSigma(s2.S,s2.vol,s2.days/365);
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Spot","$"+s2.S.toFixed(2)],
+      ["Volatility",(s2.vol*100).toFixed(1)+"%"],
+      ["√T",Math.sqrt(s2.days/365).toFixed(4)],
+      ["One sigma","$"+sd.toFixed(3)],
+      ["  as % of spot",(sd/s2.S*100).toFixed(2)+"%"],
+      ["Strike spacing","$"+s2.step.toFixed(2)],
+      ["Sigmas per strike",(s2.step/sd).toFixed(3)],
+      ["Strikes per sigma",(sd/s2.step).toFixed(2)],
+      ["Verdict",sd/s2.step<1?"coarser than the move":"finer than the move"]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — delta as the ruler ══════════ */
+const s3={days:30,vol:0.30};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"a3",k:"days",lbl:"T",name:"Days to expiry",min:3,max:730,step:1,fmt:v=>v.toFixed(0)+"d"},
+    {id:"b3",k:"vol",lbl:"σ",name:"Volatility",min:0.08,max:1.0,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  function draw(){
+    const S=100,r=0.04,T=s3.days/365,vf=()=>s3.vol;
+    const sd=oneSigma(S,s3.vol,T);
+    const xs=[],cz=[],pz=[],ref=[];
+    for(let i=1;i<=48;i++){
+      const dl=i/100;                       /* 0.01 .. 0.48 */
+      xs.push(dl);
+      cz.push((strikeForDelta(S,T,vf,r,dl,true)-S)/sd);
+      pz.push((S-strikeForDelta(S,T,vf,r,dl,false))/sd);
+      ref.push(-qnormApprox(dl));
+    }
+    const all=cz.concat(pz,ref).filter(isFinite);
+    const o=Fig(document.getElementById("cv3"),
+      {h:310,x0:0.01,x1:0.48,y0:0,y1:Math.max.apply(null,all)*1.1,pad:{l:56,r:14,t:14}});
+    axes(o,v=>v.toFixed(2),v=>v.toFixed(2),5,4);
+    clip(o,()=>{
+      line(o,xs,ref,C("--grey"),1.5,[5,4]);
+      line(o,xs,pz,C("--verm"),2.1);
+      line(o,xs,cz,C("--blue"),2.2);
+    });
+    vline(o,0.16,C("--ochre"),"16Δ");
+    vline(o,0.25,C("--moss"),"25Δ");
+    const k16c=strikeForDelta(S,T,vf,r,0.16,true), k16p=strikeForDelta(S,T,vf,r,0.16,false);
+    const k25c=strikeForDelta(S,T,vf,r,0.25,true), k25p=strikeForDelta(S,T,vf,r,0.25,false);
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Days to expiry",s3.days.toFixed(0)],
+      ["One sigma","$"+sd.toFixed(3)],
+      ["16Δ call strike",k16c.toFixed(2)],
+      ["  in sigmas",((k16c-S)/sd).toFixed(3)],
+      ["16Δ put strike",k16p.toFixed(2)],
+      ["  in sigmas",((S-k16p)/sd).toFixed(3)],
+      ["  the asymmetry",(((k16c-S)-(S-k16p))/sd).toFixed(3)+" σ"],
+      ["25Δ call, in sigmas",((k25c-S)/sd).toFixed(3)],
+      ["25Δ put, in sigmas",((S-k25p)/sd).toFixed(3)],
+      ["ATM call delta",bs(S,S,T,s3.vol,r,0,true).delta.toFixed(4)]
+    ]);
+  }
+  /* the normal quantile, good enough to draw the reference line */
+  function qnormApprox(p){
+    if(p<=0)return -Infinity; if(p>=1)return Infinity;
+    const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,
+      1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+    const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,
+      6.680131188771972e+01,-1.328068155288572e+01];
+    const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,
+      -2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+    const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,
+      3.754408661907416e+00];
+    const pl=0.02425;
+    let q,rr;
+    if(p<pl){q=Math.sqrt(-2*Math.log(p));
+      return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/
+        ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    if(p>1-pl){q=Math.sqrt(-2*Math.log(1-p));
+      return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/
+        ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    q=p-0.5;rr=q*q;
+    return (((((a[0]*rr+a[1])*rr+a[2])*rr+a[3])*rr+a[4])*rr+a[5])*q/
+      (((((b[0]*rr+b[1])*rr+b[2])*rr+b[3])*rr+b[4])*rr+1);
+  }
+})();
+
+/* ══════════ 04 — what a quote does to the IV column ══════════ */
+const s4={wide:0.10,days:30,atm:0.30};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"a4",k:"wide",lbl:"↔",name:"Quote width",min:0.01,max:0.5,step:0.01,fmt:v=>(v*100).toFixed(0)+"c"},
+    {id:"b4",k:"days",lbl:"T",name:"Days to expiry",min:3,max:365,step:1,fmt:v=>v.toFixed(0)+"d"},
+    {id:"c4v",k:"atm",lbl:"σ",name:"True volatility",min:0.10,max:0.9,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const S=100,r=0.04,T=s4.days/365;
+    const xs=[],up=[],dn=[],mid=[];
+    for(let K=80;K<=125;K+=0.5){
+      const cp=K>=S;
+      const p=bs(S,K,T,s4.atm,r,0,cp).price;
+      xs.push(K);
+      mid.push(s4.atm*100);
+      up.push(ivFrom(p+s4.wide/2,S,K,T,r,cp)*100);
+      dn.push(p-s4.wide/2>0.005?ivFrom(p-s4.wide/2,S,K,T,r,cp)*100:NaN);
+    }
+    const fin=up.concat(dn).filter(isFinite);
+    const o=Fig(document.getElementById("cv4"),
+      {h:310,x0:80,x1:125,y0:Math.max(0,Math.min.apply(null,fin)*0.94),
+       y1:Math.max.apply(null,fin)*1.05,pad:{l:58,r:14,t:14}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(0)+"%",5,4);
+    clip(o,()=>{
+      line(o,xs,mid,C("--grey"),1.5,[5,4]);
+      line(o,xs,up,C("--blue"),2.1);
+      line(o,xs,dn,C("--verm"),2.1);
+    });
+    vline(o,S,C("--ochre"),"spot");
+    const K=105,cp=true,p=bs(S,K,T,s4.atm,r,0,cp).price;
+    const ivHi=ivFrom(p+s4.wide/2,S,K,T,r,cp), ivLo=ivFrom(Math.max(p-s4.wide/2,0.005),S,K,T,r,cp);
+    const atmP=bs(S,S,T,s4.atm,r,0,true).price;
+    const aHi=ivFrom(atmP+s4.wide/2,S,S,T,r,true), aLo=ivFrom(Math.max(atmP-s4.wide/2,0.005),S,S,T,r,true);
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Quote width","$"+s4.wide.toFixed(2)],
+      ["The 105 call is worth",p.toFixed(4)],
+      ["  bid / offer",(p-s4.wide/2).toFixed(3)+" / "+(p+s4.wide/2).toFixed(3)],
+      ["  IV from the bid",(ivLo*100).toFixed(2)+"%"],
+      ["  IV from the offer",(ivHi*100).toFixed(2)+"%"],
+      ["  the band",((ivHi-ivLo)*100).toFixed(2)+" vol pts"],
+      ["At the money, the band",((aHi-aLo)*100).toFixed(2)+" vol pts"],
+      ["  its vega per point",(bs(S,S,T,s4.atm,r,0,true).vega/100).toFixed(4)],
+      ["Wing ÷ body",((ivHi-ivLo)/(aHi-aLo)).toFixed(2)+"×"]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — skew and term structure ══════════ */
+const s5={atm:0.28,skew:-0.35,J:0,days:30};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"a5",k:"atm",lbl:"σ",name:"Baseline volatility",min:0.08,max:0.8,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"b5",k:"skew",lbl:"β",name:"Skew",min:-1.4,max:0.4,step:0.02,fmt:v=>v.toFixed(2)},
+    {id:"c5j",k:"J",lbl:"J",name:"A scheduled event, in %",min:0,max:0.20,step:0.005,fmt:v=>(v*100).toFixed(1)+"%"},
+    {id:"d5",k:"days",lbl:"T",name:"Expiry shown",min:3,max:365,step:1,fmt:v=>v.toFixed(0)+"d"}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function draw(){
+    const S=100,r=0.04,T=s5.days/365;
+    const vf=K=>sigAt(S,K,T,s5.atm,s5.skew,0.25,s5.J);
+    const xs=[],ys=[];
+    for(let K=70;K<=140;K+=0.5){xs.push(K);ys.push(vf(K)*100);}
+    const o=Fig(document.getElementById("cv5"),
+      {h:300,x0:70,x1:140,y0:Math.min.apply(null,ys)*0.9,y1:Math.max.apply(null,ys)*1.06,pad:{l:58,r:14,t:14}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(0)+"%",5,4);
+    clip(o,()=>line(o,xs,ys,C("--blue"),2.2));
+    const kp=strikeForDelta(S,T,vf,r,0.25,false), kc=strikeForDelta(S,T,vf,r,0.25,true);
+    vline(o,kp,C("--ochre"),"25Δ put");
+    vline(o,kc,C("--ochre"),"25Δ call");
+    vline(o,S,C("--grey"),null,[2,4]);
+    /* the term structure, at the money */
+    const ds=[],ts=[];
+    for(let d=3;d<=365;d++){ds.push(d);ts.push(sigAt(S,S,d/365,s5.atm,s5.skew,0.25,s5.J)*100);}
+    const o2=Fig(document.getElementById("cv5b"),
+      {h:210,x0:3,x1:365,y0:Math.min.apply(null,ts)*0.92,y1:Math.max.apply(null,ts)*1.06,pad:{l:58,r:14,t:12}});
+    axes(o2,v=>v.toFixed(0)+"d",v=>v.toFixed(0)+"%",5,3);
+    clip(o2,()=>line(o2,ds,ts,C("--blue"),2.2));
+    vline(o2,s5.days,C("--ochre"),s5.days+"d");
+    const rr=(vf(kp)-vf(kc))*100;
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Expiry shown",s5.days.toFixed(0)+"d"],
+      ["At-the-money IV",(vf(S)*100).toFixed(2)+"%"],
+      ["25Δ put strike",kp.toFixed(2)+"  at "+(vf(kp)*100).toFixed(2)+"%"],
+      ["25Δ call strike",kc.toFixed(2)+"  at "+(vf(kc)*100).toFixed(2)+"%"],
+      ["Risk reversal",rr.toFixed(3)+" pts"],
+      ["Front (3d) IV",(sigAt(S,S,3/365,s5.atm,s5.skew,0.25,s5.J)*100).toFixed(2)+"%"],
+      ["Back (180d) IV",(sigAt(S,S,180/365,s5.atm,s5.skew,0.25,s5.J)*100).toFixed(2)+"%"],
+      ["Front over back",(sigAt(S,S,3/365,s5.atm,s5.skew,0.25,s5.J)
+                        -sigAt(S,S,180/365,s5.atm,s5.skew,0.25,s5.J)).toFixed(4)*100/100 !== 0
+        ? ((sigAt(S,S,3/365,s5.atm,s5.skew,0.25,s5.J)-sigAt(S,S,180/365,s5.atm,s5.skew,0.25,s5.J))*100).toFixed(2)+" pts"
+        : "flat"],
+      ["Reads as",s5.J>0.005?"an event in the front":"no event priced"]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — the five-second scan ══════════ */
+const s6={S:100,days:30,atm:0.28,skew:-0.35,step:5};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"a6",k:"S",lbl:"S",name:"Spot",min:10,max:500,step:1,fmt:v=>"$"+v.toFixed(0)},
+    {id:"b6",k:"days",lbl:"T",name:"Days to expiry",min:2,max:365,step:1,fmt:v=>v.toFixed(0)+"d"},
+    {id:"c6v",k:"atm",lbl:"σ",name:"At-the-money implied",min:0.08,max:1.0,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"d6",k:"skew",lbl:"β",name:"Skew",min:-1.2,max:0.4,step:0.02,fmt:v=>v.toFixed(2)},
+    {id:"e6",k:"step",lbl:"Δ",name:"Strike spacing",min:0.5,max:25,step:0.5,fmt:v=>"$"+v.toFixed(1)}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  function draw(){
+    const S=s6.S,T=s6.days/365,r=0.04;
+    const vf=K=>sigAt(S,K,T,s6.atm,s6.skew,0.25,0);
+    const sd=oneSigma(S,s6.atm,T);
+    const F=S*Math.exp(r*T);
+    const rows=[];
+    const first=Math.max(s6.step,Math.round((S-2.6*sd)/s6.step)*s6.step);
+    for(let K=first;K<=S+2.6*sd;K+=s6.step){
+      const z=(K-S)/sd, cp=K>=F;
+      const o=bs(S,K,T,vf(K),r,0,cp);
+      const az=Math.abs(z);
+      rows.push({K,z,iv:vf(K),d:Math.abs(o.delta),p:o.price,
+        tag:az<0.25?"body":(az<1.1?"shoulder":"wing"),
+        col:az<0.25?"--blue":(az<1.1?"--ochre":"--grey")});
+    }
+    const near=rows.reduce((a,b)=>Math.abs(b.K-F)<Math.abs(a.K-F)?b:a,rows[0]);
+    document.getElementById("tab6").innerHTML=
+      "<tr><th style='text-align:left'>Strike</th><th>σ from spot</th><th>IV</th><th>Δ</th><th>Price</th><th style='text-align:left'>&nbsp;</th></tr>"+
+      rows.map(x=>{
+        const hit=x===near;
+        return "<tr"+(hit?" style='background:rgba(31,76,232,.07)'":"")+
+          "><td style='text-align:left'>"+x.K.toFixed(x.K%1?1:0)+(hit?" ←":"")+"</td><td>"+
+          (x.z>=0?"+":"")+x.z.toFixed(2)+"</td><td>"+(x.iv*100).toFixed(2)+"%</td><td>"+
+          x.d.toFixed(3)+"</td><td>"+x.p.toFixed(2)+"</td>"+
+          "<td style='text-align:left;color:var("+x.col+")'>"+x.tag+"</td></tr>";
+      }).join("");
+    const body=rows.filter(x=>x.tag==="body").length;
+    const shoulder=rows.filter(x=>x.tag==="shoulder").length;
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["1 · one sigma","$"+sd.toFixed(2)],
+      ["   as % of spot",(sd/S*100).toFixed(2)+"%"],
+      ["2 · forward",F.toFixed(2)],
+      ["   nearest strike",near.K.toFixed(near.K%1?1:0)],
+      ["3 · skew, 90 to 110%",
+        ((vf(S*0.9)-vf(S*1.1))*100).toFixed(2)+" pts"],
+      ["4 · front over back",
+        ((sigAt(S,S,7/365,s6.atm,s6.skew,0.25,0)
+         -sigAt(S,S,180/365,s6.atm,s6.skew,0.25,0))*100).toFixed(2)+" pts"],
+      ["Rows on the screen",String(rows.length)],
+      ["  body",String(body)],
+      ["  shoulder",String(shoulder)],
+      ["  wing",String(rows.length-body-shoulder)],
+      ["Strikes per sigma",(sd/s6.step).toFixed(2)]
+    ]);
+  }
+})();
+
+/* ══════════ 07 — the drill ══════════ */
+(function(){
+  let tier=1,sc=0,asked=0,streak=0,best=0,cur=null;
+  const E=id=>document.getElementById(id);
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function make(){
+    const R=Math.random;
+    if(tier===1){
+      const t=Math.floor(R()*3);
+      const S=pick([20,35,50,80,100,150,250,400]);
+      const v=pick([0.18,0.25,0.30,0.40,0.55,0.70]);
+      const d=pick([7,14,30,60,90,180,365]);
+      const sd=S*v*Math.sqrt(d/365);
+      if(t===0) return {kind:"One sigma, in dollars",unit:"$",a:sd,tol:Math.max(0.05,sd*0.03),
+        q:"A <b>$"+S+"</b> stock at <b>"+(v*100).toFixed(0)+"%</b> volatility, <b>"+d+"</b> days to expiry. How big is a one-sigma move?",
+        w:"S · σ · √T = "+S+" × "+v.toFixed(2)+" × √("+d+"/365) = "+S+" × "+v.toFixed(2)+" × "+
+          Math.sqrt(d/365).toFixed(4)+" = <b>$"+sd.toFixed(2)+"</b>."};
+      if(t===1){const step=pick([1,2.5,5,10]);
+        const a=sd/step;
+        return {kind:"Strikes inside one sigma",unit:"",a:a,tol:Math.max(0.05,a*0.04),
+          q:"Same stock: <b>$"+S+"</b> at <b>"+(v*100).toFixed(0)+"%</b>, <b>"+d+"</b> days, with <b>$"+step+"</b> strike spacing. How many strikes fit inside one sigma?",
+          w:"One sigma is $"+sd.toFixed(2)+", so "+sd.toFixed(2)+" / "+step+" = <b>"+a.toFixed(2)+
+            "</b> strikes. Below one and the chain is coarser than the expected move."};}
+      const K=Math.round((S*(1+pick([-0.15,-0.10,-0.05,0.05,0.10,0.15])))*100)/100;
+      const a=(K-S)/sd;
+      return {kind:"A strike's distance, in sigmas",unit:"σ",a:a,tol:Math.max(0.03,Math.abs(a)*0.04),
+        q:"Spot <b>$"+S+"</b>, volatility <b>"+(v*100).toFixed(0)+"%</b>, <b>"+d+"</b> days. How far is the <b>"+
+          K.toFixed(K%1?2:0)+"</b> strike, in sigmas?",
+        w:"One sigma is $"+sd.toFixed(2)+". ("+K.toFixed(2)+" − "+S+") / "+sd.toFixed(2)+" = <b>"+
+          a.toFixed(2)+" σ</b>."};
+    }
+    const t=Math.floor(R()*3);
+    if(t===0){const S=100,v=pick([0.20,0.30,0.45]),d=pick([7,30,90,365]);
+      const T=d/365,sd=S*v*Math.sqrt(T);
+      const k=strikeForDelta(S,T,()=>v,0.04,0.16,true);
+      const a=(k-S)/sd;
+      return {kind:"Where the 16-delta really sits",unit:"σ",a:a,tol:0.06,
+        q:"A <b>$100</b> stock at <b>"+(v*100).toFixed(0)+"%</b>, <b>"+d+"</b> days out. How far out is the 16-delta call, in sigmas?",
+        w:"The 16-delta call strike is "+k.toFixed(2)+" and one sigma is $"+sd.toFixed(2)+
+          ", so it sits at <b>"+a.toFixed(2)+" σ</b>. The rule of thumb says one; it holds to about a tenth inside three months."};}
+    if(t===1){const base=pick([0.22,0.28,0.35]),J=pick([0.05,0.07,0.10]),d=pick([3,7,14,30]);
+      const T=d/365, a=Math.sqrt((base*base*T+J*J)/T)*100;
+      return {kind:"An event in the front month",unit:"%",a:a,tol:1.2,
+        q:"Baseline volatility <b>"+(base*100).toFixed(0)+"%</b>, one scheduled event worth a <b>"+
+          (J*100).toFixed(0)+"%</b> move, <b>"+d+"</b> days to expiry. What does the at-the-money show?",
+        w:"σ = √((σd²T + J²)/T) = √((" + (base*base).toFixed(4) + "×" + T.toFixed(4) + " + " +
+          (J*J).toFixed(4) + ")/" + T.toFixed(4) + ") = <b>" + a.toFixed(1) + "%</b>. " +
+          "The event is fixed; dividing it by a small T is what makes the number large."};}
+    const S=100,d=pick([30,60,90]),T=d/365;
+    const atm=pick([0.24,0.28,0.34]), skew=pick([-0.25,-0.35,-0.50]);
+    const vf=K=>sigAt(S,K,T,atm,skew,0.25,0);
+    const kp=strikeForDelta(S,T,vf,0.04,0.25,false), kc=strikeForDelta(S,T,vf,0.04,0.25,true);
+    const a=(vf(kp)-vf(kc))*100;
+    return {kind:"The 25-delta risk reversal",unit:"pts",a:a,tol:0.5,
+      q:"At-the-money <b>"+(atm*100).toFixed(0)+"%</b>, skew <b>"+skew.toFixed(2)+
+        "</b>, <b>"+d+"</b> days. What is the 25-delta risk reversal?",
+      w:"The 25Δ put sits at "+kp.toFixed(2)+" showing "+(vf(kp)*100).toFixed(2)+
+        "% and the 25Δ call at "+kc.toFixed(2)+" showing "+(vf(kc)*100).toFixed(2)+
+        "%, so the risk reversal is <b>"+a.toFixed(2)+" points</b>."};
+  }
+  function next(){
+    cur=make();
+    E("dKind").textContent=cur.kind;E("dText").innerHTML=cur.q;
+    E("dUnit").textContent=cur.unit;E("dInput").value="";
+    E("drill").classList.remove("done");
+    focusSoft(E("dInput"),E("drill"));
+  }
+  function submit(){
+    if(!cur||E("drill").classList.contains("done"))return;
+    const raw=parseFloat(String(E("dInput").value).replace(/[$,%\sσ]/g,""));
+    asked++;
+    const ok=isFinite(raw)&&Math.abs(raw-cur.a)<=cur.tol;
+    if(ok){sc++;streak++;if(streak>best)best=streak;}else streak=0;
+    E("dVerdict").textContent=ok?"CORRECT":("NOT QUITE — the answer is "+cur.a.toFixed(2));
+    E("dVerdict").className="vd "+(ok?"ok":"no");
+    E("dWork").innerHTML=cur.w;
+    E("dScore").textContent=sc+" / "+asked;
+    E("dStreak").textContent=String(streak);E("dBest").textContent=String(best);
+    E("drill").classList.add("done");
+  }
+  E("dSubmit").addEventListener("click",submit);
+  E("dInput").addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+  E("dNext").addEventListener("click",next);
+  E("dSkip").addEventListener("click",()=>{streak=0;E("dStreak").textContent="0";next();});
+  [1,2].forEach(k=>E("dT"+k).addEventListener("click",()=>{
+    tier=k;[1,2].forEach(j=>E("dT"+j).setAttribute("aria-pressed",j===k?"true":"false"));
+    next();}));
+  window.drawDrill=next;
+  window.__drill=()=>{const o=[];for(let i=0;i<2;i++){tier=i+1;for(let j=0;j<300;j++)o.push(make());}tier=1;return o;};
+})();
+
+function drawAll(){
+  drawHero();draw1();draw2();draw3();draw4();draw5();draw6();drawDrill();
+}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

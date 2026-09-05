@@ -382,6 +382,82 @@ PAGES["questions"] = () => {
     Q.every(q => Math.abs((q.a + Math.max(q.tol * 10, 1)) - q.a) > q.tol));
 };
 
+PAGES["screen"] = () => {
+  const M = load("screen.html", ["bs", "ncdf", "sigAt", "oneSigma",
+    "strikeForDelta", "ivFrom", "__drill", "s1", "s2", "s3", "s4", "s5", "s6"]);
+  const B = M.bs;
+  console.log("    ch02 · a strike's distance in sigmas");
+  eq("$100 at 30 vol, 30 days: one sigma is $8.60",M.oneSigma(100,0.30,30/365),8.601,2e-3);
+  eq("  a $25 stock: 5-wide is 2.33 sigma",5/M.oneSigma(25,0.30,30/365),2.325,2e-3);
+  eq("  a $500 stock: 5-wide is 0.12 sigma",5/M.oneSigma(500,0.30,30/365),0.1163,2e-4);
+  eq("  strikes inside one sigma at $500",M.oneSigma(500,0.30,30/365)/5,8.601,2e-3);
+  eq("one day out, 5-wide is 3.18 sigma",5/M.oneSigma(100,0.30,1/365),3.184,3e-3);
+  eq("one year out, 5-wide is 0.17 sigma",5/M.oneSigma(100,0.30,1),0.1667,2e-4);
+  eq("sqrt(30/365) is 0.287",Math.sqrt(30/365),0.2867,5e-4);
+  eq("a quarter: one sigma is $15",M.oneSigma(100,0.30,0.25),15.0,1e-9);
+  eq("a year: one sigma is $30",M.oneSigma(100,0.30,1),30.0,1e-9);
+  eq("the check: $40 at 45 vol, 7 days -> $2.49",M.oneSigma(40,0.45,7/365),2.492,3e-3);
+  console.log("    ch03 · where the deltas really sit");
+  {const S=100,v=0.30,r=0.04,vf=()=>v;
+   const rows=[[7,1.056,0.937],[30,1.127,0.878],[90,1.237,0.802],[365,1.557,0.640]];
+   for(const [d,wc,wp] of rows){
+     const T=d/365,sd=M.oneSigma(S,v,T);
+     const kc=M.strikeForDelta(S,T,vf,r,0.16,true), kp=M.strikeForDelta(S,T,vf,r,0.16,false);
+     eq("16-delta call at "+d+"d, in sigmas",(kc-S)/sd,wc,4e-3);
+     eq("16-delta put  at "+d+"d, in sigmas",(S-kp)/sd,wp,4e-3);
+   }
+   yes("the call side drifts out with tenor and the put side drifts in",
+     (M.strikeForDelta(S,1,vf,r,0.16,true)-S)/M.oneSigma(S,v,1) >
+     (M.strikeForDelta(S,7/365,vf,r,0.16,true)-S)/M.oneSigma(S,v,7/365) &&
+     (S-M.strikeForDelta(S,1,vf,r,0.16,false))/M.oneSigma(S,v,1) <
+     (S-M.strikeForDelta(S,7/365,vf,r,0.16,false))/M.oneSigma(S,v,7/365));
+   const k25m=M.strikeForDelta(S,30/365,vf,r,0.25,true), k25y=M.strikeForDelta(S,1,vf,r,0.25,true);
+   eq("25-delta call, monthly, in sigmas",(k25m-S)/M.oneSigma(S,v,30/365),0.781,4e-3);
+   eq("25-delta call, yearly, in sigmas",(k25y-S)/M.oneSigma(S,v,1),1.110,4e-3);
+   eq("the at-the-money call delta is 0.53",B(S,S,30/365,v,r,0,true).delta,0.5324,1e-3);}
+  console.log("    ch04 · what a quote does to the IV column");
+  {const S=100,K=105,T=30/365,r=0.04,v=0.30;
+   const p=B(S,K,T,v,r,0,true).price;
+   eq("the 105 call is worth 1.662",p,1.6620,2e-3);
+   const band=w=>(M.ivFrom(p+w/2,S,K,T,r,true)-M.ivFrom(p-w/2,S,K,T,r,true))*100;
+   eq("2c wide is a 0.20 point band",band(0.02),0.20,0.02);
+   eq("10c wide is a 0.98 point band",band(0.10),0.98,0.03);
+   eq("20c wide is a 1.97 point band",band(0.20),1.97,0.05);
+   eq("  IV from the bid at 10c",M.ivFrom(p-0.05,S,K,T,r,true)*100,29.51,0.03);
+   eq("  IV from the offer at 10c",M.ivFrom(p+0.05,S,K,T,r,true)*100,30.49,0.03);
+   yes("the band grows roughly linearly in the width",
+     Math.abs(band(0.20)/band(0.10)-2)<0.05);}
+  console.log("    ch05 · skew and term structure");
+  {const S=100,r=0.04,atm=0.28,skew=-0.35;
+   const T=30/365,vf=K=>M.sigAt(S,K,T,atm,skew,0.25,0);
+   eq("the 90 strike shows 32.10%",vf(90)*100,32.098,0.02);
+   eq("the 110 strike shows 24.99%",vf(110)*100,24.991,0.02);
+   for(const [d,want] of [[30,3.773],[90,6.472],[365,12.293]]){
+     const T2=d/365, vf2=K=>M.sigAt(S,K,T2,atm,skew,0.25,0);
+     const kp=M.strikeForDelta(S,T2,vf2,r,0.25,false), kc=M.strikeForDelta(S,T2,vf2,r,0.25,true);
+     eq("25-delta risk reversal at "+d+"d",(vf2(kp)-vf2(kc))*100,want,0.05);
+   }}
+  console.log("    ch05/06 · an event in the term structure");
+  {const S=100,base=0.28,J=0.07;
+   for(const [d,want] of [[3,82.13],[7,57.78],[30,37.15],[180,29.72]]){
+     eq("baseline 28% plus a 7% event, at "+String(d).padStart(3)+"d",
+       M.sigAt(S,S,d/365,base,0,0,J)*100,want,0.05);
+   }
+   yes("the event's share falls as the horizon grows",
+     M.sigAt(S,S,3/365,base,0,0,J) > M.sigAt(S,S,180/365,base,0,0,J));}
+  console.log("    ch07 · the drill generator");
+  {const Q=M.__drill();
+   yes("every question has a finite answer, prompt, working and tolerance",
+     Q.every(q=>isFinite(q.a)&&q.q&&q.w&&q.tol>0));
+   const kinds={};Q.forEach(q=>{kinds[q.kind]=(kinds[q.kind]||0)+1;});
+   Object.keys(kinds).sort().forEach(k=>console.log("       "+k.padEnd(36)+kinds[k]));
+   yes("six distinct question kinds",Object.keys(kinds).length===6);
+   yes("the exact answer is always accepted",Q.every(q=>Math.abs(q.a-q.a)<=q.tol));
+   yes("an answer well outside the band is rejected",
+     Q.every(q=>Math.abs((q.a+Math.max(q.tol*10,1))-q.a)>q.tol));}
+
+};
+
 /* ── run ─────────────────────────────────────────────────────────────── */
 const only = process.argv[2];
 const names = only ? [only.replace(/\.html$/, "")] : Object.keys(PAGES);
