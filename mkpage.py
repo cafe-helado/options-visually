@@ -23,9 +23,15 @@ head=f"""<!DOCTYPE html>
 {FONTS}
 <link rel="stylesheet" href="assets/lab.css">
 <link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 """
-page=head+open(body_f,encoding="utf-8").read()+'\n<script src="assets/lab.js"></script>\n<script>\n'+open(js_f,encoding="utf-8").read()+'\n</script>\n</body>\n</html>\n'
+page=head+open(body_f,encoding="utf-8").read()+'\n<script src="assets/lab.js"></script>\n<script src="assets/pwa.js" defer></script>\n<script>\n'+open(js_f,encoding="utf-8").read()+'\n</script>\n</body>\n</html>\n'
 open(out_f,"w",encoding="utf-8",newline="").write(page)
 print(out_f, len(page), "bytes")

@@ -435,3 +435,33 @@ footer{
   font-size:14.5px;color:var(--ink2);font-weight:300;
 }
 footer .n{max-width:66ch}
+
+/* ── the service worker's one piece of UI ───────────────────────────────
+   A single line, bottom-centre, that says the series is saved for offline
+   or that a newer one is waiting. It must clear the iOS home indicator, so
+   the bottom inset comes from safe-area-inset-bottom. */
+.pwatoast{
+  position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  transform:translate(-50%,140%);
+  display:flex;align-items:center;gap:14px;
+  max-width:min(560px,calc(100vw - 32px));
+  background:var(--ink);color:var(--chalk);
+  font-family:var(--mono);font-size:12px;letter-spacing:.02em;line-height:1.45;
+  padding:12px 12px 12px 16px;border-radius:3px;
+  box-shadow:0 6px 28px rgba(20,24,26,.28);
+  z-index:9999;opacity:0;
+  transition:transform .34s cubic-bezier(.2,.8,.2,1),opacity .34s;
+}
+.pwatoast.in{transform:translate(-50%,0);opacity:1}
+.pwatoast button{
+  background:none;border:1px solid rgba(237,240,236,.34);color:var(--chalk);
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 11px;border-radius:2px;cursor:pointer;white-space:nowrap;
+}
+.pwatoast button:hover{background:rgba(237,240,236,.12)}
+.pwatoast button.x{
+  border:0;font-size:19px;line-height:1;padding:2px 4px;text-transform:none;
+  color:rgba(237,240,236,.55);letter-spacing:0;
+}
+.pwatoast button.x:hover{color:var(--chalk);background:none}
+@media(prefers-reduced-motion:reduce){.pwatoast{transition:none}}
