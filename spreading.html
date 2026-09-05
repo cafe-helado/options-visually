@@ -196,6 +196,21 @@
       <button>Credit spreads have unlimited risk</button>
     </div>
     <div class="ans"><b>They are describing the same position twice.</b> The bull put spread and the bull call spread on the same strikes are one trade — if one has favourable decay so does the other, because they are identical. What genuinely differs is margin treatment, assignment risk on the short leg (<a href="early-exercise.html" style="color:var(--blue)">page 08</a>) and the eleven cents of interest. Those are worth choosing on; the payoff diagram is not.</div>
+
+  <details class="derive">
+    <summary>Derivation — why the credit and the debit are one trade</summary>
+    <div class="body">
+      <p>Put–call parity holds at every strike separately. Write it at K₁ and again at K₂, for the same expiry and the same underlying:</p>
+      <div class="mline">C(K) − P(K) = S − K·e<sup>−rT</sup></div>
+      <p class="mread">Reads as: <b>at any strike, the call minus the put is the discounted forward.</b> It is an identity about payoffs, so it holds whatever the volatility surface is doing.</p>
+      <p>Now build the call spread and substitute each call for its put using that identity. The stock terms cancel, because there is one of them on each side:</p>
+      <div class="mline">C(K₁) − C(K₂) = [P(K₁) − P(K₂)] + (K₂ − K₁)·e<sup>−rT</sup></div>
+      <p class="mread">Reads as: <b>the call spread you buy equals the put spread you sell, plus the discounted width.</b> Rearranged: debit paid plus credit received equals the width discounted, always.</p>
+      <p>That is the whole result. The two positions are not similar and they are not close relatives — they differ by a fixed amount of money that does not depend on the stock, on the volatility, or on anything you have a view about. Which is why their P&amp;L profiles in the figure above sit parallel across every terminal price rather than crossing anywhere.</p>
+      <p>It also explains the number. The gap is the width minus the discounted width, W·(1 − e<sup>−rT</sup>), which is simply the interest on the width over the life of the trade. At three months and four-and-a-half percent on a ten-wide spread that is about eleven cents. Nobody chooses a strategy for eleven cents; they choose it because one version arrives as a credit, and a credit feels like income.</p>
+      <p><b>Where it breaks.</b> Parity is a European statement. On American options the short leg can be assigned before expiry, and the two versions are then assigned in different circumstances — the put spread on a sell-off, the call spread on a rally into a dividend — so their <em>operational</em> risk genuinely differs even though their theoretical value does not (<a href="early-exercise.html" style="color:var(--blue)">page 08</a>). A hard-to-borrow underlying adds a q term to parity and the gap stops being plain interest (<a href="parity.html" style="color:var(--blue)">page 07</a>). And margin treatment often differs between the two, which is the one real reason to prefer a particular version — and it has nothing to do with premium selling.</p>
+    </div>
+  </details>
   </div>
 </section>
 

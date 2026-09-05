@@ -6,10 +6,10 @@
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#EDF0EC">
 <title>Junior Trader Questions — Options, visually</title>
-<meta name="description" content="Sixteen options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
+<meta name="description" content="Twenty-two options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Junior Trader Questions — Options, visually">
-<meta property="og:description" content="Sixteen options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
+<meta property="og:description" content="Twenty-two options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,7 @@
   <div class="heroInner">
     <div class="eyebrow">An interactive derivation · No. 16</div>
     <h1>The questions they <em>ask</em> you</h1>
-    <p class="sub">Sixteen questions on a ladder, from ones with a single right answer to ones with no formula at all — and six of them worked at full length. Each is a trap built around a plausible wrong answer, and each resolves in a figure you can move.</p>
+    <p class="sub">Twenty-two questions on a ladder, from ones with a single right answer to ones with no formula at all — and six of them worked at full length. Each is a trap built around a plausible wrong answer, and each resolves in a figure you can move.</p>
   </div>
   <div class="scrollcue">Scroll ↓</div>
 </div>
@@ -78,7 +78,7 @@
   <div class="chead">
     <div class="cnum">01</div>
     <h2>Start with the ones that have a single right answer</h2>
-    <p class="dek">Sixteen questions on three rungs. Read, decide, then press — and watch the figure settle it.</p>
+    <p class="dek">Twenty-two questions on three rungs. Read, decide, then press — and watch the figure settle it.</p>
   </div>
 
   <div class="prose">
@@ -791,6 +791,15 @@
      f:[v=>P(S0,100,1,v,0.03,0,true),v=>P(S0,100,1,v,0.03,0,false),()=>100],
      col:["--blue","--verm","--grey"],extra:[{y:100*Math.exp(-0.03),col:"--grey"}]}},
 
+  {t:1,q:"Volatility falls to zero on a call ten points in the money with a year to run. What is it worth?",
+   o:["Ten \u2014 its intrinsic value","14.88 \u2014 the forward intrinsic, S \u2212 K\u00b7e\u207b\u02b3\u1d40","Nothing, since there is no volatility left to pay for","It is undefined"],ok:1,
+   why:"With no volatility the stock still grows at the financing rate, so the call settles onto S \u2212 K\u00b7e\u207b\u02b3\u1d40 = 110 \u2212 95.12 = 14.88, not S \u2212 K = 10. Intrinsic value measured against the spot is simply the wrong reference \u2014 the right one is the forward. The mirror limit for a put is max(K\u00b7e\u207b\u02b3\u1d40 \u2212 S, 0), which is why a deep put can trade below its spot intrinsic.",
+   fig:{title:"A ten-point in-the-money call as volatility goes to zero",cap:"The curve lands on the green line, not the grey one. The gap between them is a year of interest on the strike.",
+     x0:0.001,x1:0.6,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(0),
+     leg:[["Call value","--blue"],["S \u2212 K","--grey"],["S \u2212 K\u00b7e\u207b\u02b3\u1d40","--moss"]],
+     f:[v=>P(110,100,1,v,0.05,0,true),()=>10,()=>110-100*Math.exp(-0.05)],
+     col:["--blue","--grey","--moss"]}},
+
   {t:1,q:"Which has more gamma: the 100 call or the 100 put, same expiry?",
    o:["The call, because it has more delta","The put","They are identical, to the last decimal place","The call, unless the stock is below the strike"],ok:2,
    why:"Identical everywhere. Put–call parity says the call minus the put equals stock minus a bond, and neither a share of stock nor a bond has any gamma at all. The same argument makes their vegas identical.",
@@ -808,6 +817,15 @@
      leg:[["Call","--blue"],["Put","--verm"]],
      f:[r=>P(S0,100,1,V,r,0,true),r=>P(S0,100,1,V,r,0,false)],
      col:["--blue","--verm"],marks:[[0.05,"--ochre","5%"]]}},
+
+  {t:1,q:"An at-the-money call with six months to run. Is its delta exactly 0.50?",
+   o:["Yes \u2014 at the money means an even chance either way","No, it is above a half: 0.58 here, and it climbs with time and volatility","No, it is below a half","Only when rates are zero"],ok:1,
+   why:"Delta is N(d\u2081), and d\u2081 = (ln(S/K) + (r + \u03c3\u00b2/2)T)/\u03c3\u221aT is positive at the money because of the rate and the \u03c3\u00b2/2 term. Even struck exactly at the forward the delta is N(\u03c3\u221aT/2) = 0.535, not 0.500. The half-delta strike sits above the spot, not on it.",
+   fig:{title:"Delta of an at-the-money call against time to expiry",cap:"The curve starts near a half for a very short option and walks away from it. Only an option with no time left has a delta of exactly one half.",
+     x0:0.02,x1:2,xf:v=>v.toFixed(1)+"y",yf:v=>v.toFixed(2),
+     leg:[["ATM call delta","--blue"],["One half","--grey"]],
+     f:[T=>bs(S0,100,T,V,R,0,true).delta,()=>0.5],
+     col:["--blue","--grey"],dash:[null,[5,5]],marks:[[0.5,"--ochre","6m"]]}},
 
   /* ── tier 2 · working ────────────────────────────────────────────── */
   {t:2,q:"The stock is at 130. What is the most the 100/106 call spread can be worth today, with six months left and rates at 4%?",
@@ -848,6 +866,15 @@
      f:[T=>bs(110,100,T,V,R,0,true).delta,T=>bs(90,100,T,V,R,0,true).delta],
      col:["--blue","--verm"],marks:[[0.25,"--ochre","3m"],[1,"--moss","1y"]]}},
 
+  {t:2,q:"You are long a 25-delta call and the stock rallies five percent. Are you longer or shorter?",
+   o:["Longer \u2014 the delta goes from 0.25 to 0.35","Shorter, because there is less time left","Unchanged, since the strike has not moved","Longer, and by more than a 50-delta call would gain on the same move"],ok:0,
+   why:"Longer by 0.095, and that is gamma: a long option gets longer into a rally and shorter into a sell-off, which is the automatic buy-high sell-low you paid the premium for. The fourth answer is the trap \u2014 the 50-delta call gains more on the identical move (+0.104), because gamma peaks near the money rather than out in the wing.",
+   fig:{title:"Delta against spot, for a 25-delta call and a 50-delta call",cap:"Both curves rise, and the steeper one is the at-the-money option. Being far out of the money buys leverage, not gamma.",
+     x0:85,x1:135,xf:v=>v.toFixed(0),yf:v=>v.toFixed(2),
+     leg:[["The 116.75 call","--blue"],["The 100 call","--grey"]],
+     f:[S=>bs(S,116.75,0.5,V,R,0,true).delta,S=>bs(S,100,0.5,V,R,0,true).delta],
+     col:["--blue","--grey"],marks:[[100,"--ochre","100"],[105,"--moss","105"]]}},
+
   {t:2,q:"An at-the-money option, volatility at 15%. Volatility triples to 45%. What happens to its vega?",
    o:["It triples too","It rises, but less than threefold","It barely moves: 0.274 to 0.275","It collapses toward zero"],ok:2,
    why:"An at-the-money option's vega is almost constant in volatility — its volga is nearly zero. That is exactly why wings, not the body, are where volatility-of-volatility is traded: the 130 strike's vega runs from 0.023 to 0.235 over the same range, a factor of ten.",
@@ -865,6 +892,16 @@
      leg:[["One week","--blue"],["Six months","--grey"]],
      f:[S=>bs(S,100,1/52,V,R,0,true).vega/100,S=>bs(S,100,0.5,V,R,0,true).vega/100],
      col:["--blue","--grey"],marks:[[140,"--ochre","140"]]}},
+
+  {t:2,q:"Two identical calls on a stock that pays no dividend, one American and one European. Which is worth more?",
+   o:["The American \u2014 the extra right must be worth something","The same, to within lattice noise. The right to exercise a call early is never used","The European, because it cannot be assigned","The American, but only while it is in the money"],ok:1,
+   why:"Identical. Exercising a call early throws away the interest on the strike and the insurance below it, so it is never optimal without a dividend \u2014 page 08 prices that right at 1.85\u00d710\u207b\u00b9\u00b3. The put is the opposite: the American is strictly dearer, by 0.07 at the 80 strike, 0.52 at the 100 and 2.00 at the 120, because the strike you receive on exercise starts earning interest immediately.",
+   fig:{title:"Time value \u2014 price minus immediate-exercise value \u2014 for the call and the put",cap:"The call\u2019s time value never goes negative, so exercising early never pays. The put\u2019s does, and the depth of that dip is what an American put\u2019s early exercise recovers.",
+     x0:40,x1:160,xf:v=>v.toFixed(0),yf:v=>v.toFixed(1),
+     leg:[["Call time value","--blue"],["Put time value","--verm"]],
+     f:[S=>P(S,100,1,0.25,0.05,0,true)-Math.max(S-100,0),
+        S=>P(S,100,1,0.25,0.05,0,false)-Math.max(100-S,0)],
+     col:["--blue","--verm"],marks:[[100,"--ochre","K"]]}},
 
   /* ── tier 3 · hard ───────────────────────────────────────────────── */
   {t:3,q:"A one-year at-the-money call costs 9.95. You instead roll a one-month option twelve times. What do the twelve cost in total?",
@@ -894,6 +931,17 @@
      f:[T=>bs(100,100,T,0.30,0,0,true).gamma*100*100],
      col:["--blue"],marks:[[0.115,"--verm","6 weeks left"]]}},
 
+  {t:3,q:"A delta-hedged market maker is long a three-month at-the-money call. Where does the money actually come from?",
+   o:["The premium, which decays into their pocket","Rehedging: every move banks \u00bd\u0393(\u0394S)\u00b2, and it has to beat the day\u2019s theta","The bid-offer spread and nothing else","The direction the stock happens to take"],ok:1,
+   why:"Rehedging a long-gamma position means buying as it falls and selling as it rises, and each round trip banks \u00bd\u0393(\u0394S)\u00b2. Theta is the rent on that. Here the breakeven daily move is $1.3086 \u2014 which is exactly the one-standard-deviation daily move at the volatility the option was priced at, and that is no coincidence: Black\u2013Scholes sets theta = \u2212\u00bd\u0393S\u00b2\u03c3\u00b2 precisely so the two cancel.",
+   fig:{title:"Gamma P&L against the size of the day\u2019s move, with the day\u2019s theta",cap:"The parabola crosses the rent line at the one-sigma move. Smaller days lose, larger days win, and at the implied volatility it is a fair bet by construction.",
+     x0:-4,x1:4,xf:v=>(v>=0?"+":"")+v.toFixed(0),yf:v=>v.toFixed(3),
+     leg:[["\u00bd\u0393(\u0394S)\u00b2","--blue"],["One day of theta","--verm"]],
+     f:[m=>0.5*bs(S0,100,0.25,V,0,0,true).gamma*m*m,
+        ()=>-bs(S0,100,0.25,V,0,0,true).theta/365],
+     col:["--blue","--verm"],dash:[null,[5,5]],
+     marks:[[-1.3086,"--moss",null],[1.3086,"--moss","1\u03c3 day"]]}},
+
   {t:3,q:"Stock at 100, six-month 100 call at 5.00, put at 3.50, rates 4%. Parity says the difference should be 1.98 and it is 1.50. Is that free money?",
    o:["Yes — buy the call, sell the put, short the stock","Yes, the put is 48 cents rich","No. It is a 0.96% borrow or dividend rate, which is a quote rather than a mispricing","No, because parity does not apply at the money"],ok:2,
    why:"Solve parity for the borrow term rather than assuming it is zero and the 48 cents becomes 0.96% a year — $48.13 on a hundred shares over six months, which is the whole gap. The option market quotes a borrow rate whether or not anyone intends it to.",
@@ -901,7 +949,18 @@
      x0:-0.01,x1:0.05,xf:v=>(v*100).toFixed(1)+"%",yf:v=>v.toFixed(1),
      leg:[["S·e⁻qᵀ − K·e⁻ʳᵀ","--blue"],["Observed C − P","--verm"]],
      f:[q=>100*Math.exp(-q*0.5)-100*Math.exp(-0.04*0.5),()=>1.5],
-     col:["--blue","--verm"],dash:[null,[5,5]],marks:[[0.009625,"--moss","0.96%"]]}}
+     col:["--blue","--verm"],dash:[null,[5,5]],marks:[[0.009625,"--moss","0.96%"]]}},
+{t:3,q:"A digital pays $1 if the stock is above 100 in three months. Build it out of ordinary options \u2014 and say what breaks.",
+   o:["It cannot be built from vanilla options at all","A call spread of width w bought 1/w times. It converges to 0.4953, but the number of contracts grows without bound","Buy a call and sell the stock against it","Buy the at-the-money straddle"],ok:1,
+   why:"A w-wide call spread bought 1/w times pays $1 above the strike as w shrinks: 0.4966 at ten wide, 0.4953 at one wide, against a true e\u207b\u02b3\u1d40N(d\u2082) = 0.49527. The price converges; the position does not. At a tenth of a point wide you need ten times the contracts, and the digital\u2019s own delta at the strike climbs from 0.03 at three months to 0.36 with two days left. That unhedgeable spike is why a digital is quoted with a spread and hedged as a finite call spread \u2014 you sell the width, not the limit.",
+   fig:{title:"A digital, and the call spreads converging onto it",cap:"The wide spread is a ramp, the narrow one is nearly a step. The limit is a cliff, and nobody can hedge a cliff.",
+     x0:85,x1:115,xf:v=>v.toFixed(0),yf:v=>v.toFixed(2),
+     leg:[["True digital","--blue"],["10 wide, \u00d70.1","--grey"],["2 wide, \u00d70.5","--ochre"]],
+     f:[S=>{const T=0.25,r=0.03,v=V,d2=(Math.log(S/100)+(r-v*v/2)*T)/(v*Math.sqrt(T));
+            return Math.exp(-r*T)*ncdf(d2);},
+        S=>(P(S,95,0.25,V,0.03,0,true)-P(S,105,0.25,V,0.03,0,true))/10,
+        S=>(P(S,99,0.25,V,0.03,0,true)-P(S,101,0.25,V,0.03,0,true))/2],
+     col:["--blue","--grey","--ochre"],dash:[null,[5,5],[2,3]],marks:[[100,"--verm","K"]]}}
   ];
 
   let tier=1,idx=0,answered=false;
@@ -937,7 +996,7 @@
     const [c,globalIdx]=list[idx];
     const tname=["","Warm-up","Working","Hard"][tier];
     E("deckPos").innerHTML=kvHTML([["Tier",tname],
-      ["Card",(idx+1)+" of "+list.length],["Number",String(globalIdx+1).padStart(2,"0")+" of 16"]]);
+      ["Card",(idx+1)+" of "+list.length],["Number",String(globalIdx+1).padStart(2,"0")+" of "+CARDS.length]]);
     E("deckQ").innerHTML=c.q;
     E("deckOpts").innerHTML=c.o.map((t,i)=>
       "<button data-i='"+i+"'>"+t+"</button>").join("");

@@ -5,11 +5,22 @@ no dependencies. All sixteen pages live.
 
 ## Before you change anything
 
-**Run `node check.js`.** It is the only safety net — there is no compiler and no test
-framework. It parses each page against the engine, verifies every `getElementById`
-target exists, catches duplicate ids, resolves internal links, confirms every equation
-has a plain-English reading, checks each self-marking question has an answer, and
-executes every page end to end under a stubbed DOM. Run it before every commit.
+**Run `node check.js`, then `node verify.js`.** There is no compiler and no test
+framework, so these two are the whole safety net.
+
+`check.js` is structural. It parses each page against the engine, verifies every
+`getElementById` target exists, catches duplicate ids, resolves internal links, confirms
+every equation has a plain-English reading, checks each self-marking question has an
+answer, refuses markup inside `<title>` or a meta attribute, and executes every page end
+to end under a stubbed DOM.
+
+`verify.js` is numeric. It loads each page's shipped `<script>` under a stubbed DOM,
+shadows `kvHTML` so every figure readout is captured, and re-derives the numbers the
+prose asserts. `check.js` cannot tell you that a sentence claims 58% where the figure
+beside it computes 42% — this can, and that is exactly what it caught. Adding a claim is
+three lines. **If a number is in the prose and not in `verify.js`, it is not checked.**
+
+Run both before every commit.
 
 ## The rule that produces everything else
 
@@ -37,7 +48,12 @@ script, compute the numbers, then write the sentence. Doing this caught:
 - a benchmark demonstration where both algorithms agreed, defeating the point,
   until the case was re-derived (page 06)
 - an interest floor quoted as $1.47 when it is $1.49, caught by a harness that
-  recomputes every number in the prose from the code that ships (page 08)
+  recomputes every number in the prose from the code that ships
+- an exceedance probability stated backwards on page 03 — the prose said the stock
+  beats the straddle-implied move 58% of the time, the figure two inches away
+  computed 42%, and 58% was the probability of staying *inside* it
+- a benchmark number on page 06 quoted as 1.47 from a single random draw, on a
+  figure that redraws its path every load and returns anywhere from 0.9 to 2.1 (page 08)
 - a variance swap payoff coded in decimals when vega notional is dollars per
   volatility *point* — a clean 100x error that surfaced only because the prose
   carried independently computed numbers to check against (page 09)
@@ -58,7 +74,8 @@ assets/lab.js         engine: Black–Scholes + greeks, plotting, sliders,
 template.html         copy this to start a page
 mkpage.py             assembles a page from a body fragment + a script fragment
 build.py              inlines assets into dist/ for standalone distribution
-check.js              pre-flight; run before every commit
+check.js              structural pre-flight; run before every commit
+verify.js             numeric pre-flight: does the prose match what the pages compute
 ROADMAP.md            all eleven pages, with verified numbers for unbuilt ones
 STYLE-GUIDE.md        design tokens, chapter anatomy, non-negotiables
 README.md             publishing and how to add a page
@@ -71,7 +88,8 @@ README.md             publishing and how to add a page
    interaction and verified numbers written down.
 3. Write `<name>_body.html` and `<name>_js.js`, then
    `python3 mkpage.py <name>_body.html <name>_js.js <name>.html "Title" "Description"`.
-4. `node check.js <name>.html` until it passes.
+4. `node check.js <name>.html` until it passes, then add the page's numeric claims
+   to `verify.js` and run `node verify.js <name>`.
 5. Add the entry to `index.html` (copy a `.entry`, drop `planned`, set `st live`)
    and mark the page live in `ROADMAP.md`.
 6. `python3 build.py` to regenerate `dist/`.
@@ -126,8 +144,9 @@ It teaches nothing new — it re-asks the other fifteen subjects in the shape a 
 comes in, on a difficulty ladder, because recognising gamma and *answering* "you are
 long a 25-delta call and the stock rallies five percent, are you longer?" are
 different skills. Its unit is the card: a question, four options where three are real
-misconceptions, a reason, and a figure spec the shared renderer draws. Adding a card
-is a ~12-line object in the `CARDS` array; the renderer takes `{x0,x1,f:[...],col,
+misconceptions, a reason, and a figure spec the shared renderer draws. Twenty-two of
+them now, in tiers of 8 / 8 / 6. Adding a card is a ~12-line object in the `CARDS`
+array; the renderer takes `{x0,x1,f:[...],col,
 dash,marks,extra}` and works out its own y-range. Keep the tiers honest — a warm-up
 card must have exactly one right answer, and a hard card must have an answer that is
 a *range*, because that is what separates the rungs.

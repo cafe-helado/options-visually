@@ -128,7 +128,7 @@
     <div class="mline">∂²C/∂K² = e<sup>−rT</sup> · f(K)</div>
     <p class="mread">Reads as: <b>the curvature of call price in strike is the risk-neutral density, discounted.</b> This is the Breeden–Litzenberger result, and it is exact.</p>
     <p>So the surface is not merely <em>related</em> to a distribution. Differentiate it twice and the distribution falls out. Below, the recovered density is computed from the smile above by numerical second difference — no model, no fitting — and drawn against the lognormal that a flat volatility would have implied.</p>
-    <p>Flatten the skew slider and the two curves lie on top of each other, because a flat surface <em>is</em> the lognormal assumption. Tilt it and watch the left tail thicken and the right tail thin. At a −0.35 skew the probability of finishing below 70 goes from <b>5.0% to 8.6%</b> — nearly double — while the chance of finishing above 130 falls from 10.2% to 6.6%. That is what the skew has been saying all along, and it is a statement about crashes rather than about volatility.</p>
+    <p>Flatten the skew slider and the two curves lie on top of each other, because a flat surface <em>is</em> the lognormal assumption. Tilt it and watch the left tail thicken and the right tail thin. At a −0.35 skew the probability of finishing below 70 goes from <b>5.1% to 8.1%</b> — up by three fifths — while the chance of finishing above 130 falls from 10.2% to 7.2%. That is what the skew has been saying all along, and it is a statement about crashes rather than about volatility.</p>
   </div>
 
   <figure class="bleed">
@@ -153,7 +153,7 @@
         <div class="kv" id="kv2"></div>
       </div>
     </div>
-    <figcaption>The recovered density is not fitted to anything — it is the second derivative of the prices the smile implies. With a flat surface it reproduces the lognormal to within 0.05%, which is a good check that the machinery is right.</figcaption>
+    <figcaption>The recovered density is not fitted to anything — it is the second derivative of the prices the smile implies. With a flat surface it reproduces the lognormal to within 0.07% of the peak density, which is a good check that the machinery is right.</figcaption>
   </figure>
 
   <div class="check">
@@ -491,7 +491,7 @@
       <button>The realized volatility</button>
       <button>The correlation between strikes</button>
     </div>
-    <div class="ans"><b>The implied density.</b> Under a flat surface it reproduces the lognormal to 0.04%; put a −0.35 skew in and the probability of finishing below 70 goes from 5.0% to 8.6% while the chance of finishing above 130 falls from 10.2% to 6.6%.</div>
+    <div class="ans"><b>The implied density.</b> Under a flat surface it reproduces the lognormal to within 0.07%; put a −0.35 skew in and the probability of finishing below 70 goes from 5.1% to 8.1% while the chance of finishing above 130 falls from 10.2% to 7.2%.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">

@@ -272,7 +272,7 @@
     <div class="mline">Straddle = E |S<sub>T</sub> − S₀| = √(2/π) · S · σ√T ≈ 0.7979 · S · σ√T</div>
     <p class="mread">Reads as: <b>a straddle costs exactly the average size of the move, ignoring direction.</b> Which makes sense — that is what it pays.</p>
     <p>A one-standard-deviation move is <code>S·σ√T</code>, with no 0.7979 in front. So the straddle-derived implied move is about <b>80% of a one-sigma move</b>, and the two get used interchangeably all the time. At 20 vol over 30 days on a $100 stock the straddle is <b>4.57</b> while one sigma is <b>5.73</b> — a 25% difference in a number people quote to two decimals.</p>
-    <p>The consequence is concrete. If you read "the options imply a 4.6% move" and then reason about the probability of exceeding it as though it were a standard deviation, you will overstate how unusual a larger move is. For a lognormal, the stock exceeds the straddle-implied move roughly <b>58%</b> of the time, and exceeds a genuine one-sigma move about 32% of the time. Those are very different claims.</p>
+    <p>The consequence is concrete. If you read "the options imply a 4.6% move" and then reason about the probability of exceeding it as though it were a standard deviation, you will overstate how unusual a larger move is. For a lognormal, the stock exceeds the straddle-implied move about <b>42%</b> of the time, and exceeds a genuine one-sigma move about <b>32%</b> of the time. Both are printed live in the panel beside the figure, and they are very different claims.</p>
   </div>
 
   <figure class="bleed">
@@ -301,11 +301,11 @@
     <p class="q">An earnings preview says "the options are implying a 7% move." The stock moves 8%. Was the market wrong?</p>
     <div class="opts">
       <button>Yes — the move exceeded what was priced</button>
-      <button data-ok="1">Not necessarily. That number is the expected absolute move, which is exceeded more than half the time; being "wrong" would require the average of many such moves to miss</button>
+      <button data-ok="1">Not necessarily. That number is an average, not a threshold — about 42% of moves exceed it, so an 8% print against a 7% implied is an ordinary outcome</button>
       <button>Yes, and the straddle buyer made money by definition</button>
       <button>No — moves always exceed the implied move</button>
     </div>
-    <div class="ans"><b>A single move above the implied move is the base case, not a miss.</b> The straddle price is a mean of absolute moves, and for a right-skewed distribution the majority of outcomes sit above the straddle-implied level while a minority of large ones pull the average up. Roughly 58% of moves exceed it. Judging an implied move from one print is like judging a coin from one flip — and note the second answer's caveat, because a straddle buyer can still lose on an 8% move if the <span class="term" data-t="Vol crush" data-def="The collapse in implied volatility immediately after a scheduled event. Not a mispricing correcting — the event variance has simply been used up and is no longer in the remaining life.">vol crush</span> costs more than the gamma gained, which is chapter 05.</div>
+    <div class="ans"><b>A single move above the implied move says almost nothing.</b> The straddle price is the <em>mean</em> absolute move, and the distribution of absolute moves is right-skewed: the majority of outcomes — about 58% — land <em>below</em> the mean, while a minority of large ones pull the average up to it. So roughly 42% of moves exceed the implied move, against 32% for a genuine one-sigma move. Being wrong would require the average of many such prints to miss, not one of them. Judging an implied move from one print is like judging a coin from one flip — and note the second answer's caveat, because a straddle buyer can still lose on an 8% move if the <span class="term" data-t="Vol crush" data-def="The collapse in implied volatility immediately after a scheduled event. Not a mispricing correcting — the event variance has simply been used up and is no longer in the remaining life.">vol crush</span> costs more than the gamma gained, which is chapter 05.</div>
   </div>
 </section>
 
@@ -320,7 +320,7 @@
   <div class="prose">
     <p class="lead">Buy the straddle the afternoon before the print, sell it the morning after. Two things happen overnight and they pull against each other. The stock gaps, which helps you. And the implied volatility <b>collapses</b>, because J has left the window — every remaining day is now an ordinary day, and the option reprices at σ<sub>diff</sub> instead of σ<sub>imp</sub>. That is the vol crush, and it is not a market overreaction. It is the arithmetic of chapter 01 running in reverse.</p>
     <p>Simulate it a few thousand times with realized event vol set exactly equal to implied — a perfectly fair price, by construction — and look at the distribution.</p>
-    <p>The <b>mean</b> is about zero, as it must be for a fair price. The <b>median</b> is around −0.94, and the win rate is <b>33%</b>. You lose, modestly, in two trades out of three, and the trade is nonetheless fairly priced, because the third outcome is large enough to pay for the other two.</p>
+    <p>The <b>mean</b> is about zero — −0.07, which is the single day of ordinary theta you pay for holding the position overnight, and the residual is what "fairly priced" leaves behind. The <b>median</b> is around <b>−0.94</b>, and the win rate is <b>33%</b>. You lose, modestly, in two trades out of three, and the trade is nonetheless fairly priced, because the third outcome is large enough to pay for the other two.</p>
     <p>This is the single most important thing to understand about event vol, and it is a psychological problem more than a mathematical one. A strategy that loses two thirds of the time feels broken long before the sample is large enough to say anything. Traders abandon fairly priced long-vol event trades constantly, and buy fairly priced short-vol event trades enthusiastically, because a 67% win rate feels like skill until the fourth trade.</p>
     <p>Push realized above implied and the whole distribution shifts right — at 1.5× implied the win rate goes to 52% and the mean to +1.67. Push it below and the picture is brutal: at half implied you win <b>5%</b> of the time. The asymmetry between those two cases is why selling event vol looks so attractive and why it periodically ends careers.</p>
   </div>
@@ -510,7 +510,7 @@
     <p class="q">A fairly priced earnings straddle. What does its P&amp;L distribution look like?</p>
     <div class="opts">
       <button>Symmetric around zero</button>
-      <button data-ok="1">Mean about zero, median about −0.93, and a win rate near 33%. Mostly small losses with occasional large wins</button>
+      <button data-ok="1">Mean about zero, median about −0.94, and a win rate near 33%. Mostly small losses with occasional large wins</button>
       <button>Positively skewed with a high win rate</button>
       <button>Always negative, since implied exceeds realized</button>
     </div>
@@ -793,8 +793,6 @@ const s4={S:100,vol:.20,days:30};
     vline(o,S-st,C("--blue"),null,[4,3]); vline(o,S+st,C("--blue"),"straddle",[4,3]);
     vline(o,S-sd1,C("--verm"),null,[2,4]); vline(o,S+sd1,C("--verm"),"1 sd",[2,4]);
     // probability of exceeding each
-    const pExceed=(m)=>{const up=1-ncdf((Math.log((S+m)/S)-mu+Math.log(S))/sig);
-      return 0;};
     const cum=(x)=>ncdf((Math.log(x)-mu)/sig);
     const pSt=cum(S-st)+(1-cum(S+st)), pSd=cum(S-sd1)+(1-cum(S+sd1));
     document.getElementById("kv4").innerHTML=kvHTML([

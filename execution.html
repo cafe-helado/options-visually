@@ -239,7 +239,7 @@
   <div class="prose">
     <p class="lead">Take a single set of fills — a uniform execution, buying steadily into a rising market. Score it two ways.</p>
     <p>Against <b>interval VWAP</b>, it comes in at <b>−0.00</b>. Dead on benchmark. The report says the algorithm did precisely what it was asked to do.</p>
-    <p>Against <b>arrival price</b>, the same fills cost <b>1.47</b>. The report says the execution lost a point and a half against the price at which the decision was made.</p>
+    <p>Against <b>arrival price</b>, the same fills cost about <b>1.5</b> — the exact figure moves with the path, and it is reliably close to <em>half the drift over the window</em>, because a uniform execution buys at the average price and the average of a straight line is its midpoint. The report says the execution lost a point and a half against the price at which the decision was made.</p>
     <p>Both numbers are correct. They answer different questions. VWAP asks "did you trade better than the market's average during your window," which is a question about execution skill with the market's path taken as given. Arrival asks "what did the whole process cost relative to the moment you decided," which includes the market moving away from you while you worked.</p>
     <p>Neither is right in the abstract, and the choice is not innocent. <b>VWAP forgives trend and punishes deviation; arrival punishes delay.</b> A trader measured on VWAP is incentivised to spread out; the same trader measured on arrival is incentivised to hurry. Hand those two mandates to identical traders and you will get systematically different behaviour and each will be optimising correctly.</p>
     <p>The practical rule: pick the benchmark that matches why you are trading. Hedging a delta you want gone is an arrival problem, because the risk started when you decided. Rebalancing an index is a VWAP problem, because being average <em>is</em> the objective.</p>
@@ -486,7 +486,7 @@
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
     <span class="lab">Question 4 · chapter 04</span>
-    <p class="q">The same fills score on benchmark against interval VWAP and lose 1.47 against arrival. Which report is right?</p>
+    <p class="q">The same fills score on benchmark against interval VWAP and lose about a point and a half against arrival. Which report is right?</p>
     <div class="opts">
       <button>The VWAP one, since it adjusts for market conditions</button>
       <button data-ok="1">Both are arithmetically right. They measure different things: VWAP forgives trend and punishes deviation, arrival punishes delay</button>

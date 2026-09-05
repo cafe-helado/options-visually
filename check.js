@@ -14,6 +14,7 @@
  *   3. no duplicate element ids (silently breaks widgets)
  *   4. every internal href/src resolves to a real file
  *   5. every <div class="mline"> equation has a <p class="mread"> reading
+ *      and nothing but text sits in <title> or a meta content attribute
  *   6. every .check block has exactly one data-ok answer
  *   7. every data-preset names a registered slider group
  *   8. the page executes end to end under a stubbed DOM, and every
@@ -79,6 +80,23 @@ function check(file) {
     const t = x[1].split("#")[0];
     if (t && !fs.existsSync(path.join(ROOT, t))) problems.push("broken link: " + t);
   });
+
+  // 4b. nothing but text belongs in the head. A term gloss applied by a
+  //     search-and-replace over the whole file lands inside <title> or a
+  //     meta content= attribute, where the browser renders the raw markup as
+  //     the tab label. It happened twice, silently, and shipped.
+  const headEnd = h.indexOf("</head>");
+  if (headEnd > 0) {
+    const head = h.slice(0, headEnd);
+    const title = head.match(/<title>([\s\S]*?)<\/title>/);
+    if (title && /<[a-z/]/i.test(title[1]))
+      problems.push("markup inside <title> — it renders as raw text in the browser tab: "
+        + title[1].trim().slice(0, 60));
+    [...head.matchAll(/content="([^"]*)"/g)].forEach(m => {
+      if (/<[a-z/]/i.test(m[1]))
+        problems.push("markup inside a meta content attribute: " + m[1].slice(0, 50));
+    });
+  }
 
   // 5. every equation explained
   const eq = (h.match(/class="mline"/g) || []).length;
