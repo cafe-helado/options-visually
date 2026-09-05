@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Junior Trader Questions — Options, visually</title>
+<meta name="description" content="Sixteen options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Junior Trader Questions — Options, visually">
+<meta property="og:description" content="Sixteen options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 16 · Questions</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>The ladder</span><i></i></a>
+  <a href="#c2"><span>Six wide, never six</span><i></i></a>
+  <a href="#c3"><span>Rolling costs double</span><i></i></a>
+  <a href="#c4"><span>Long gamma, short vega</span><i></i></a>
+  <a href="#c5"><span>The fake arbitrage</span><i></i></a>
+  <a href="#c6"><span>Forty and twenty-five</span><i></i></a>
+  <a href="#c7"><span>Right, and still down</span><i></i></a>
+  <a href="#c8"><span>Method &amp; drills</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 16</div>
+    <h1>The questions they <em>ask</em> you</h1>
+    <p class="sub">Sixteen questions on a ladder, from ones with a single right answer to ones with no formula at all — and six of them worked at full length. Each is a trap built around a plausible wrong answer, and each resolves in a figure you can move.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">The other fifteen pages each build one subject. This one takes the subjects apart and puts them back together in the shape a question comes in — because knowing what gamma is and being able to answer <em>"you are long a 25-delta call and the stock rallies five percent; are you longer or shorter?"</em> turn out to be different skills, and only the second one ever gets tested.</p>
+  <ol>
+    <li><b>Commit to an answer before you press.</b> The whole value of a question is the moment between reading it and knowing. Pressing first spends that moment for nothing.</li>
+    <li><b>Chapter 01 is a ladder in three rungs.</b> Warm-up questions have one right answer and a one-line reason. Working questions need two ideas held at once. Hard ones have no formula — the answer is a range, and the range is the point.</li>
+    <li><b>Chapters 02 to 07 are six questions at full length</b>, in increasing order of difficulty. Each is a real question, asked on real desks, that most people get wrong for an interesting reason.</li>
+    <li><b>Chapter 08 is the method</b> — four moves that will carry you through a question you have never seen — plus a randomized drill at the same three tiers.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>S, K, T</td><td>Spot, strike, and time to expiry in years. T = 0.5 is six months.</td></tr>
+      <tr><td>r, q</td><td>The financing rate and the dividend-or-borrow rate, both continuously compounded.</td></tr>
+      <tr><td>σ</td><td>Volatility, annualized. 25% means one standard deviation of 25% over a year.</td></tr>
+      <tr><td>Intrinsic</td><td>What the option would pay if expiry were now: S − K for a call, K − S for a put, floored at zero.</td></tr>
+      <tr><td>Width</td><td>The distance between the two strikes of a vertical spread. The most it can ever pay at expiry.</td></tr>
+      <tr><td>e<sup>−rT</sup></td><td>The discount factor. A dollar arriving at T is worth this many dollars now — always less than one.</td></tr>
+      <tr><td>Dollar gamma</td><td>S²Γ. The weight the market puts on each moment of a hedged position's life, and the reason two paths with the same volatility pay differently.</td></tr>
+      <tr><td>Implied correlation</td><td>The average pairwise correlation that makes an index's option price consistent with the prices of its components.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Start with the ones that have a single right answer</h2>
+    <p class="dek">Sixteen questions on three rungs. Read, decide, then press — and watch the figure settle it.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A good question is not a test of memory. It is a small trap built around a belief that is almost right, and the useful part of answering it is discovering which of your beliefs was the almost.</p>
+    <p>The deck below runs in three tiers. <b>Warm-up</b> questions have one right answer and a one-sentence reason; if any of them surprises you, that is a gap worth closing before anything else on this page. <b>Working</b> questions need two ideas held at the same time — a bound and a discount factor, a greek and a time horizon. <b>Hard</b> questions have no clean answer at all: the honest response is a range, and knowing why it is a range is the thing being tested.</p>
+    <p>Each card resolves in the chart beside it, drawn live from Black–Scholes rather than stored. Move up a tier only when the current one feels obvious.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3 id="deckTitle">The resolution</h3>
+          <span class="legend" style="margin:0" id="deckLeg"></span>
+        </div>
+        <canvas id="cvA" height="330"></canvas>
+        <p class="dek" id="deckCap" style="margin-top:16px;max-width:64ch">Answer the card first — the chart is the proof, not the hint.</p>
+      </div>
+      <div class="rail panel">
+        <h4>The deck</h4>
+        <div class="seg" style="margin-bottom:16px">
+          <button id="t1" aria-pressed="true">Warm-up</button>
+          <button id="t2" aria-pressed="false">Working</button>
+          <button id="t3" aria-pressed="false">Hard</button>
+        </div>
+        <div class="kv" style="margin-bottom:16px" id="deckPos"></div>
+        <p id="deckQ" style="font-size:17px;line-height:1.5;margin:0 0 14px">Loading…</p>
+        <div class="opts" id="deckOpts" style="margin:0"></div>
+        <div id="deckWhy" style="display:none;font-size:14.5px;line-height:1.6;color:var(--ink2);font-weight:300;margin-top:16px;padding-top:14px;border-top:1px solid var(--hair)"></div>
+        <div class="btnrow" style="margin-top:16px">
+          <button class="act ghost" id="deckPrev">← Back</button>
+          <button class="act" id="deckNext">Next →</button>
+        </div>
+      </div>
+    </div>
+    <figcaption>The three tiers are not three topics. They are the same topics asked with one more thing held constant.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Two warm-up cards ask the same question about a call and about a put: <b>can it trade below its intrinsic value?</b> Predict whether the two answers match, then look at both.</p>
+    <div class="btnrow">
+      <button class="act ghost" id="goCard2">The call — card 2</button>
+      <button class="act ghost" id="goCard3">The put — card 3</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why is a question with a plausible wrong answer worth more than a hard calculation?</p>
+    <div class="opts">
+      <button>Because calculations can be done by a computer</button>
+      <button data-ok="1">Because the wrong answer is a belief you were already carrying. A calculation only tests whether you can execute a method you already trust</button>
+      <button>Because interviewers prefer conceptual questions</button>
+      <button>Because arithmetic errors are not real mistakes</button>
+    </div>
+    <div class="ans"><b>It locates a belief.</b> Every card in this deck is built around something that is true in a neighbouring case — puts and calls do behave alike in most respects, more time is worth more money, more hedging usually is better. The question marks the place where the neighbouring case stops applying, and finding that place is the entire skill.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>A six-wide call spread that can never be worth six</h2>
+    <p class="dek">The stock is far above both strikes and the spread still trades under its width. Two separate reasons, and only one of them ever goes away.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">You own the 100/106 call spread — long the 100 call, short the 106. It is six points wide, so six is the most it can pay at expiry. The stock is at 130, thirty points through the upper strike, six months to run, and the screen says <b>5.35</b>. Why is it not six?</p>
+    <p>The first answer everyone reaches for is that the stock could come back. That is right, it is not the whole answer, and separating the two halves is the point of the question. Push the spot slider to 200, where coming back is out of the question: the spread goes to <b>5.88</b> and stops. It does not go to 6.00, and no amount of further rallying will take it there.</p>
+    <p>What is left is a <span class="term" data-t="Discounting" data-def="Converting a future amount into what it is worth now. Six dollars arriving in six months at 4% is worth 5.88 today, and no arbitrage-free price will pay six for it.">discount factor</span>. At expiry the spread pays six dollars — but it pays them <em>then</em>. Today you can only be paid the present value of a certainty, and 6 × e<sup>−0.04 × 0.5</sup> is 5.8812. The ceiling on a European vertical is not the width. It is the width discounted, which is the price of a zero-coupon bond whose face value is the width.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The spread, its width, and the ceiling it actually has</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Spread value</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Width</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Width × e<sup>−rT</sup></span>
+          </span>
+        </div>
+        <canvas id="cv2" height="320"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Notice the blue curve flattens onto the green line, never the grey one. The gap between grey and green is interest; the gap between green and blue is everything the stock might still do.</figcaption>
+  </figure>
+
+  <div class="mline">C(K₁) − C(K₂) ≤ (K₂ − K₁) · e<sup>−rT</sup></div>
+  <p class="mread">Reads as: <b>a vertical spread can never be worth more than its width discounted back to today.</b> The width is what it pays at expiry; the discount factor is the price of having to wait for it.</p>
+
+  <div class="prose">
+    <p>So the shortfall at a spot of 130 splits cleanly. Twelve cents of it is interest you will not be paid — the difference between six dollars now and six dollars in six months. The rest is the residual chance that the stock finishes below 106, which at these parameters is about twelve percent. As expiry approaches the second piece collapses and the first shrinks toward nothing, and the spread walks up to six.</p>
+    <p>The desk version of this question is: <em>I am long a deep in-the-money vertical and I want out. Why is the market paying me less than the width?</em> Because the market is buying a bond off you, and bonds trade below par. If rates were zero the ceiling would be exactly six — set the rate slider to zero and watch the green line rise onto the grey one.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Predict what happens to the ceiling when you cut the time to two weeks. Does the spread get closer to six, further from it, or neither? Then press.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"S":130,"T":0.0384,"r":0.04}' data-focus="cv2">Two weeks left</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"S":130,"T":0.5,"r":0}' data-focus="cv2">Six months, zero rates</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"S":130,"T":0.5,"r":0.04}' data-focus="cv2">Back to the question</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">The 100/106 call spread with the stock at 500 and six months to run. What is its delta, roughly?</p>
+    <div class="opts">
+      <button>1.00 — both legs are certain to finish in the money</button>
+      <button>0.50 — one leg long, one leg short</button>
+      <button data-ok="1">About zero. Both legs are certain, so the package is a fixed future payment: its exposure is to interest rates, not to the stock</button>
+      <button>Negative, because the short leg dominates</button>
+    </div>
+    <div class="ans"><b>Zero delta, and a rho equal to the bond's.</b> Once both legs are certain the spread stops being an option position at all. It is 6 × e<sup>−rT</sup> of pure discounting: vega zero, gamma zero, and the only thing that moves it is the rate. This is the instrument <a href="parity.html" style="color:var(--blue)">page 07</a> builds out of conversions, arrived at from the other end.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — where the ceiling comes from</summary>
+    <div class="body">
+      <p>Start at expiry. The spread pays min(max(S<sub>T</sub> − K₁, 0), K₂ − K₁), which is bounded above by the width W = K₂ − K₁ and below by zero. It is a bounded, non-negative claim.</p>
+      <div class="mline">0 ≤ payoff at T ≤ W</div>
+      <p class="mread">Reads as: <b>whatever happens, the spread pays somewhere between nothing and the width.</b></p>
+      <p>Now price both bounds. A claim paying exactly W at time T is a zero-coupon bond, worth W·e<sup>−rT</sup> today. A claim paying nothing is worth nothing. Because pricing is linear and monotone — if one payoff is never larger than another, its price is never larger either — the spread's price sits between them.</p>
+      <div class="mline">0 ≤ V₀ ≤ W · e<sup>−rT</sup></div>
+      <p class="mread">Reads as: <b>the discounted width is a hard ceiling, not an approximation.</b> A price above it would be an arbitrage: sell the spread, buy the bond, keep the difference and let both expire.</p>
+      <p>How fast the price approaches that ceiling is governed by the chance of finishing between the strikes. At a spot of 130 the risk-neutral probability of ending below 106 is 11.9%, and that residual is what the remaining fifty-odd cents pays for.</p>
+      <p><b>Where it breaks.</b> On an American spread the short leg can be assigned early, which caps you at the width rather than the discounted width and can hand you the shortfall as a real loss. A hard-to-borrow underlying moves the ceiling again, because the relevant discount is no longer the plain financing rate — <a href="early-exercise.html" style="color:var(--blue)">page 08</a> prices the assignment side and <a href="parity.html" style="color:var(--blue)">page 07</a> the borrow side. And on a futures spread the whole discussion inverts, because there the option itself is discounted rather than the underlying: <a href="forwards.html" style="color:var(--blue)">page 13</a>.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>Four quarterly options cost twice the year</h2>
+    <p class="dek">Same underlying, same strike, same twelve months of coverage. Twice the premium, and the reason is a square root.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">You want a year of upside on a stock at 100. You can buy the one-year at-the-money call for <b>9.95</b>, or you can buy the three-month call four times in a row. The four cost <b>19.93</b>. Same coverage, same strike, same year — and one route costs precisely twice the other.</p>
+    <p>The answer is the most useful single fact in the subject: option value scales with the <em>square root</em> of time, not with time. A three-month option is not a quarter of a one-year option. It is half of one, because √(1/4) = ½. Buy four of them and you have paid 4 × ½ = 2 times the annual price.</p>
+    <p>Generalize and the arithmetic gets brutal. Rolling <em>n</em> times over the same horizon costs about √n times buying the horizon once. Monthly is 3.47×. Weekly is 7.23×. Daily is 15.9×.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>What a year of coverage costs, by how often you buy it</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Total premium</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>√n × the one-shot price</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Notice how tightly the exact premium tracks √n. The rule is not a rough guide — it is the answer, with a small rate correction.</figcaption>
+  </figure>
+
+  <div class="mline">price(T) ∝ √T   ⟹   n × price(T/n) = √n × price(T)</div>
+  <p class="mread">Reads as: <b>cutting the tenor by a factor of n only cuts the price by √n, so buying n of the short ones costs √n times the long one.</b></p>
+
+  <div class="prose">
+    <p>It pays to see where the √T comes from, because it is not a property of options. It is a property of <span class="term" data-t="Independent increments" data-def="Successive price moves that carry no memory of each other. Their variances add, which is what makes standard deviation grow with the square root of time rather than with time itself.">independent increments</span>. Variances add over time, so a year holds four times the variance of a quarter — but standard deviation is the square root of variance, so it is only <em>twice</em> as large. An option's value is essentially proportional to the standard deviation of the terminal price, and it inherits the square root from there.</p>
+    <p>Two consequences a junior trader needs on day one. First: never compare option prices across expiries without dividing by √T, because the raw numbers are meaningless. Second, and more useful: this is why the front end of the curve carries all the gamma and none of the vega. Halving the tenor halves the price but leaves you needing the same percentage move to break even — which is another way of saying gamma doubles as vega halves, and that is the trade in <a href="#c4">chapter 04</a>.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set the roll frequency to 52 and predict the multiple before you look. Most people guess between 3× and 5×. The square root says 7.23.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"n":52}' data-focus="cv3">Roll weekly</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"n":4}' data-focus="cv3">Back to quarterly</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A one-month option is quoted at 2.88 and a four-month at 5.75, both at-the-money on the same stock. Which is dearer in volatility terms?</p>
+    <div class="opts">
+      <button>The four-month, at twice the premium</button>
+      <button>The one-month, because you pay it four times a year</button>
+      <button data-ok="1">Neither — they are the same volatility. Twice the price for four times the tenor is exactly √4, so the curve is flat</button>
+      <button>You cannot tell without knowing the strike</button>
+    </div>
+    <div class="ans"><b>Identical.</b> Dividing each price by √T gives the same number, which is what "the term structure is flat" means in premium terms. The reflex you want is to normalize by √T before any comparison — it turns a table of prices that looks like a slope into one that is flat, and vice versa. <a href="catalyst.html" style="color:var(--blue)">Page 03</a> uses exactly this to strip an earnings date out of a term structure.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — the at-the-money approximation, and how wrong it is</summary>
+    <div class="body">
+      <p>For an at-the-money option with zero rates, the Black–Scholes price collapses to something you can do in your head.</p>
+      <div class="mline">C ≈ 0.4 · S · σ · √T</div>
+      <p class="mread">Reads as: <b>an at-the-money option costs about forty percent of the stock, times the volatility, times the square root of the time.</b></p>
+      <p>It comes from expanding N(d₁) − N(−d₁) about zero. With K = S and r = 0 we have d₁ = σ√T/2, and for small x, 2N(x) − 1 ≈ 2φ(0)x = 0.798x. Substituting gives C ≈ S · 0.798 · σ√T / 2 ≈ 0.399 · S · σ√T.</p>
+      <p>At 25% volatility and one year the approximation reads 9.97 against a true 9.95 — an error of 0.3%. It degrades as σ√T grows, because the linearization of N is only good near zero.</p>
+      <p><b>Where it breaks.</b> The formula assumes zero rates and no dividends, and at long tenors that assumption costs more than the linearization does. Use it to sanity-check a screen, never to quote. And the √T law itself is an assumption about independence: a stock with a scheduled event does not obey it, which is the subject of <a href="catalyst.html" style="color:var(--blue)">page 03</a>, and a stock with jumps obeys it for volatility but not for the shape of the distribution, which is <a href="real-world.html" style="color:var(--blue)">page 15</a>.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>Long gamma and short vega, from one pair of options</h2>
+    <p class="dek">They sound like the same exposure with opposite signs. One variable separates them, and it is time.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Here is the question in its usual form: <em>you think the stock is about to move around a lot, but you also think implied volatility is too high. What do you buy?</em> The answer most people give is "nothing — that is a contradiction." It is not.</p>
+    <p>Gamma and vega are both the convexity of the same position, but they scale in opposite directions with time. Gamma goes as 1/√T; it lives at the front. Vega goes as √T; it lives at the back. So the same instrument at two expiries gives two different mixtures, and any mixture you want is available by choosing the ratio between them.</p>
+    <p>Buy 3.34 of the one-month at-the-money against a sale of one one-year, and the vega nets to zero to the penny. What is left is gamma of 0.169 — eleven times the one-year's own — and the package pays you 1.68 to put on.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Gamma across spot: one long-dated option against a vega-neutral package of short-dated ones</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>The far option alone</span>
+            <span><i class="swl" style="background:var(--blue)"></i>The vega-neutral package</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Notice the package's gamma is not merely larger — it is concentrated. Move the stock a few points and it collapses below the flat line it beat by eleven times at the strike.</figcaption>
+  </figure>
+
+  <div class="mline">Γ ∝ 1/(S σ √T)   ·   ν ∝ S √T   ⟹   Γ/ν ∝ 1/T</div>
+  <p class="mread">Reads as: <b>gamma per unit of vega is inversely proportional to time.</b> A one-month option gives twelve times the gamma per unit of vega that a one-year does, and that ratio is the entire trade.</p>
+
+  <div class="prose">
+    <p>Now the part the question is really testing: what you pay for it. Nothing here is free, and the bill arrives as <span class="term" data-t="Theta" data-def="The value an option loses per day purely from time passing, holding everything else fixed. It is the rent on gamma, and it is charged whether or not the stock moves.">theta</span>. The package bleeds 0.157 a day against the far option's 0.019 — eight and a half times the decay. And that is only the opening rate: theta accelerates, so a month in which the stock does not move at all costs <b>9.58</b>, against the 1.68 you were paid. The stock has to travel about 3.5% by the front expiry just to break even.</p>
+    <p>And the concentration cuts both ways. The gamma advantage is enormous at the strike and gone six points away, because a one-month option that has moved is barely an option any more. That shape is what makes <a href="microstructure.html" style="color:var(--blue)">page 05</a>'s dealer gamma so violent near expiry, and it is why the honest description of this trade is not "long gamma, short vega" but "long gamma <em>here</em>, short vega everywhere, paying rent for the privilege."</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Push the near expiry out to three months and predict what happens to the ratio you need. It falls — but does the gamma advantage fall faster than the theta bill, or slower?</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"Tn":0.25}' data-focus="cv4">Near leg at three months</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"Tn":0.0833}' data-focus="cv4">Back to one month</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"Tf":2}' data-focus="cv4">Far leg at two years</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You want the opposite exposure: short gamma, long vega. What do you do?</p>
+    <div class="opts">
+      <button>Nothing works — the two always carry the same sign</button>
+      <button data-ok="1">Reverse it exactly: sell the front, buy the back. That is a calendar spread, and it is the standard way of expressing "quiet now, higher implieds later"</button>
+      <button>Buy a straddle and sell a strangle</button>
+      <button>Sell the package above, which loses money both ways</button>
+    </div>
+    <div class="ans"><b>Sell the front, buy the back — a long calendar.</b> You collect the front's rapid decay and own the back's vega. The risk is a large move soon, which is precisely the exposure the reversed package was buying. Both trades are bets on the <em>shape</em> of the term structure rather than its level, which makes them the natural companion to <a href="catalyst.html" style="color:var(--blue)">page 03</a>.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>A fifty-cent arbitrage that is really a borrow rate</h2>
+    <p class="dek">Put–call parity is violated on your screen. Before you trade it, work out what the violation is quoting.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The stock is 100. The six-month 100 call is 5.00 and the 100 put is 3.50. Rates are 4%. Parity says call minus put should equal S − K·e<sup>−rT</sup> = <b>1.98</b>, and the screen says <b>1.50</b>. Forty-eight cents of free money. Do you take it?</p>
+    <p>The trade would be: buy the call, sell the put, sell the stock — a package that is short the forward at a good price. To hold it you must borrow shares. Which is the answer: the forty-eight cents is not an arbitrage, it is the market quoting you a <span class="term" data-t="Borrow rate" data-def="What it costs to borrow shares in order to sell them short. It behaves exactly like a dividend in every option formula, and it is the usual explanation for a put-call parity violation that will not close.">borrow rate</span>. Solve parity for the dividend-or-borrow term instead of assuming it is zero and the gap becomes <b>0.96%</b> a year, which on a hundred shares over six months is $48.13 — precisely the forty-eight cents you thought you were being handed.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>What the call-minus-put gap is telling you</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Parity value of C − P</span>
+            <span><i class="swl" style="background:var(--verm)"></i>What the screen shows</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Notice the observed price is not off the line — it is on the line at a different borrow rate. Read the x-axis where the two cross and you have a rate quote, not a mispricing.</figcaption>
+  </figure>
+
+  <div class="mline">C − P = S · e<sup>−qT</sup> − K · e<sup>−rT</sup></div>
+  <p class="mread">Reads as: <b>the call minus the put is the discounted forward price of the stock.</b> With q unknown this is one equation in one unknown, so the option market always quotes a borrow rate whether or not anyone means to.</p>
+
+  <div class="prose">
+    <p>The discipline generalizes past parity. Whenever a no-arbitrage relationship appears broken there are exactly three possibilities, in this order of likelihood. <b>One:</b> a parameter you assumed is wrong — a borrow rate, a dividend, a settlement convention. <b>Two:</b> the prices are not simultaneously tradeable — a stale mid, or your size is a hundred lots and the market is ten. <b>Three:</b> it is real, in which case it will be gone before you can click. Assume the first until you have eliminated it.</p>
+    <p>And the reverse reading is worth more than the arbitrage would have been. Because the relationship holds by construction, the option market becomes a borrow-rate screen: a name whose parity-implied borrow climbs from forty basis points to nine percent is telling you that shorting it has become expensive, usually before the stock-loan desk gets around to saying so. <a href="parity.html" style="color:var(--blue)">Page 07</a> builds the machinery; this is what it is for.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Drag the put price to 3.02 and watch the implied borrow. Then push it to 5.50 and read off what the market would be saying about that name.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"P":3.02}' data-focus="cv5">A name with no borrow</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"P":5.5}' data-focus="cv5">A name that is hard to borrow</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"P":3.5}' data-focus="cv5">Back to the question</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">The same gap appears, but the stock pays no dividend and borrows at ten basis points. Now what?</p>
+    <div class="opts">
+      <button>Take the arbitrage — you have eliminated the explanation</button>
+      <button data-ok="1">Check whether the prices are simultaneously tradeable before anything else. A mid-market quote on an illiquid option is not a price, and the gap is usually inside the two bid-offers</button>
+      <button>Assume the model is wrong</button>
+      <button>Conclude that parity does not hold for at-the-money options</button>
+    </div>
+    <div class="ans"><b>Check the spreads first.</b> Forty-eight cents sounds like a lot until you notice the options are thirty cents wide each: crossing both, plus the stock's spread, can consume the entire gap — and you would be executing against a mid that nobody will trade. <a href="microstructure.html" style="color:var(--blue)">Page 05</a> is about exactly this difference between a price and a quote, and it is the second thing to eliminate, not the last.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Every name at 40 vol, the index at 25</h2>
+    <p class="dek">Nothing here is mispriced. There is a third number in the problem, and nobody quotes it.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Twenty stocks, equally weighted, each with options trading at 40% implied volatility. The index made of exactly those twenty trades at 25%. Someone asks whether the index options are cheap.</p>
+    <p>They are neither cheap nor dear. The gap is not an opinion about volatility at all — it is an opinion about <span class="term" data-t="Implied correlation" data-def="The single average pairwise correlation that reconciles an index's option price with the option prices of its members. It is not quoted anywhere; it is always backed out.">correlation</span>, and it is the only number in the problem that nobody prints on a screen. Back it out and this market is quoting an average pairwise correlation of <b>0.359</b>.</p>
+    <p>The bounds are worth committing to memory, because they make the whole thing intuitive. If the twenty names were independent, diversification would take the index to 40%/√20 = <b>8.94%</b>. If they moved as one, the index would be exactly <b>40%</b>. Every index volatility between those two is a correlation, and 25% sits about a third of the way up.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Index volatility as a function of correlation, with the quoted level marked</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Index vol</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Where the market is</span>
+          </span>
+        </div>
+        <canvas id="cv6" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>Notice the shape: steep at low correlation, flat near one. Most of the index's volatility is bought with the first tenth of correlation, which is why the last tenth is where the money is made and lost.</figcaption>
+  </figure>
+
+  <div class="mline">σ<sub>I</sub>² = σ² · [ ρ + (1 − ρ)/n ]</div>
+  <p class="mread">Reads as: <b>index variance is the average single-name variance scaled by correlation, plus a diversification term that vanishes as the index gets large.</b> Solve it for ρ and you have the only number the market did not tell you.</p>
+
+  <div class="prose">
+    <p>The follow-up is where most people come apart. <em>One of the twenty names halves its volatility, from 40 to 20. What does that do to the index?</em> The instinct is that a name going quiet should calm the index noticeably. It moves it from 25.00% to <b>24.39%</b> — six-tenths of a point — because the name is a twentieth of the weight and it enters through a variance rather than through a level. To move the index a full point you need the whole basket to change, and that is exactly what makes index volatility a correlation instrument rather than a volatility one.</p>
+    <p>Which is the trade: sell the index straddle, buy the twenty single-name straddles, delta-hedge everything, and your P&amp;L is almost free of the volatility level and almost purely a bet on realized correlation. <a href="dispersion.html" style="color:var(--blue)">Page 10</a> runs it, and adds the part that matters — correlation is bounded at one, and it gets there on the day you can least afford it.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Predict the implied correlation for an index at 30% before you move anything. The relationship is quadratic, so a fifth more index volatility is a great deal more than a fifth more correlation.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c6" data-patch='{"si":0.30}' data-focus="cv6">Index at 30%</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"si":0.25}' data-focus="cv6">Back to 25%</button>
+      <button class="act ghost" data-preset="c6" data-patch='{"n":100}' data-focus="cv6">A hundred names instead</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Someone tells you the implied correlation on an index is 1.05. What have they found?</p>
+    <div class="opts">
+      <button>A rich index — sell the index straddle against the components</button>
+      <button>Nothing unusual; correlations above one are common in stressed markets</button>
+      <button data-ok="1">An inconsistency in their inputs. Correlation cannot exceed one, so either the component volatilities are at the wrong strikes, the weights are stale, or the index implied is being read at a different moneyness</button>
+      <button>Evidence that the index is about to fall</button>
+    </div>
+    <div class="ans"><b>A broken calculation, almost always.</b> The usual culprit is comparing an at-the-money index implied against component volatilities taken at a fixed delta — on a skewed surface those are different strikes, and the mismatch surfaces as impossible correlation. The bound is a free consistency check on the whole computation, which is what makes it worth knowing.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>You sold at 30, it realized 25, and you lost</h2>
+    <p class="dek">The hardest question here, because the intuitive answer is a specific number and the true answer is a range.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">You sell a one-year at-the-money option at 30% implied and hedge the delta every day. The year ends, you measure realized volatility, and it comes in at exactly 25%. Five points of edge. How much did you make?</p>
+    <p>The answer everybody gives is vega times the difference: about two dollars a share. The answer is that you made anywhere from <b>−2.61 to +6.12</b> on identical realized volatility, and which one you got was decided entirely by <em>when</em> the volatility arrived.</p>
+    <p>Both paths in the figure realize 25.000% for the year. In one, the market's movement is concentrated in a six-week window at the start; in the other, the same six-week window sits at the end. The first pays 6.12. The second loses 2.61. Nothing else differs — not the volatility, not the implied, not the hedging schedule.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Cumulative hedging P&amp;L on paths with identical realized volatility</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--moss)"></i>Loud window at the start</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Loud window at the end</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Your slider</span>
+          </span>
+        </div>
+        <canvas id="cv7" height="320"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl7"></div>
+        <div class="kv" style="margin-top:20px" id="kv7"></div>
+      </div>
+    </div>
+    <figcaption>Notice the realized-volatility readout never changes as you drag. The one number everybody quotes to describe the year is the one number that does not determine the result.</figcaption>
+  </figure>
+
+  <div class="mline">P&amp;L = ½ ∫ S<sub>t</sub>² Γ<sub>t</sub> ( σ<sub>imp</sub>² − σ<sub>real,t</sub>² ) dt</div>
+  <p class="mread">Reads as: <b>you earn the gap between implied and realized variance, but only in proportion to how much dollar gamma you were carrying at that moment.</b> Volatility that arrives when your gamma is small is volatility you were never paid for; volatility that arrives when your gamma is enormous is charged at full rate.</p>
+
+  <div class="prose">
+    <p>Read the integral and the result stops being surprising. The weight on each moment is S²Γ, the <span class="term" data-t="Dollar gamma" data-def="S²Γ — the money-denominated convexity of a position. It is the weight the hedging P&amp;L puts on each instant, and it peaks at the strike as expiry approaches.">dollar gamma</span>, which for a near-the-money option grows without bound as time runs out. Volatility in the final six weeks is charged against a gamma several times larger than volatility in the first six. A year that is quiet then wild is a completely different trade from a year that is wild then quiet, and the summary statistic — 25% realized — is blind to both.</p>
+    <p>This is the correction to the sentence everyone learns first, that selling options when implied exceeds realized is profitable. It is profitable <em>in expectation, averaged over paths</em>. On any one path the spread around that expectation is enormous, and it is not noise: it is a systematic function of where in the option's life the movement showed up. Which is why a desk measures a short-volatility book in dollar gamma rather than vega, and why <a href="variance.html" style="color:var(--blue)">page 09</a>'s variance swap exists at all — it is the contract engineered to strip this weighting out and pay realized variance flat.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Put the loud window in the middle of the year and predict whether the result is closer to +6 or to −4. Then widen the window to the whole year and watch both extremes collapse toward the textbook answer.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c7" data-patch='{"pos":0.5,"frac":0.12}' data-focus="cv7">Volatility in the middle</button>
+      <button class="act ghost" data-preset="c7" data-patch='{"frac":1}' data-focus="cv7">Spread evenly over the year</button>
+      <button class="act ghost" data-preset="c7" data-patch='{"pos":1,"frac":0.12}' data-focus="cv7">All of it at the end</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are short the same option and the stock gaps 30% away from the strike in week two, then does nothing all year. Realized volatility comes in at 30% — exactly what you sold. Where do you end up?</p>
+    <div class="opts">
+      <button>Flat — implied equalled realized</button>
+      <button>Down heavily, because a 30% gap against a short option is a large loss</button>
+      <button data-ok="1">Up. The gap costs you once, but the remaining eleven months of premium decay against almost no gamma, because the option is far out of the money and its dollar gamma has collapsed</button>
+      <button>It depends on the direction of the gap</button>
+    </div>
+    <div class="ans"><b>Up, and the reason is the same integral.</b> After the gap you carry almost no dollar gamma, so the year's remaining movement costs you nothing while the option's time value decays into your pocket. It is the mirror image of the losing path in the figure — there the volatility landed on top of maximum gamma, here it landed once and left you holding a position that had stopped being sensitive. Realized volatility describes neither case.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — where the dollar-gamma weighting comes from</summary>
+    <div class="body">
+      <p>Hold a short option and hedge its delta continuously at the implied volatility. Over one instant the position's value changes by its theta plus its gamma acting on the realized move, with the delta term hedged away.</p>
+      <div class="mline">dΠ = −Θ dt − ½ Γ (dS)²</div>
+      <p class="mread">Reads as: <b>you collect theta and pay for the square of whatever the stock actually did.</b></p>
+      <p>Black–Scholes fixes theta in terms of the implied volatility that priced the option: Θ = −½ σ<sub>imp</sub>² S² Γ, ignoring the rate terms. And the realized move over that instant has (dS)² = σ<sub>real</sub>² S² dt. Substituting both:</p>
+      <div class="mline">dΠ = ½ S² Γ ( σ<sub>imp</sub>² − σ<sub>real</sub>² ) dt</div>
+      <p class="mread">Reads as: <b>each instant pays the variance difference, weighted by dollar gamma.</b> Integrate over the life and you have the formula above.</p>
+      <p>The weight is the whole story. Two paths with the same integrated realized variance but different placement of that variance relative to the Γ profile produce different integrals — in the figure, nearly nine dollars of difference on an option sold for twelve.</p>
+      <p><b>Where it breaks.</b> The derivation assumes continuous hedging and no jumps, so that (dS)² is genuinely σ²S²dt. Hedge daily and you add the rebalancing error <a href="black-scholes.html" style="color:var(--blue)">page 01</a> measures; add a jump and (dS)² stops scaling with dt at all, which is <a href="real-world.html" style="color:var(--blue)">page 15</a>'s finding that more frequent hedging stops helping. Transaction costs subtract at every rebalance, and <a href="execution.html" style="color:var(--blue)">page 06</a> shows they put a floor under how finely you can hedge in the first place.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>How to take one you have never seen</h2>
+    <p class="dek">Four moves that will carry you through most of them, then a drill at the same three tiers.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Every question on this page yields to the same four moves, applied in order. They are not clever. They are what a trader does out loud while somebody waits.</p>
+    <p><b>One — find the bound, then ask whether it is attained.</b> Almost every options question contains a quantity that cannot be exceeded: a spread cannot beat its width, a call cannot beat the stock, a correlation cannot beat one, an index cannot be more volatile than its members. Name the bound first. Then the real question is nearly always <em>why the price sits below it</em>, and the answer is nearly always some mixture of discounting and residual uncertainty. That was chapters 02 and 06.</p>
+    <p><b>Two — take every variable to its extreme.</b> What happens as T → 0? As σ → ∞? As the stock goes to zero, or to a thousand? Limits are where the structure of a formula shows itself, and they are free — you do not need the formula to work out that a call worth more than the stock would be an arbitrage. Half the warm-up deck is nothing but limits.</p>
+    <p><b>Three — split the answer into what must be true and what is a view.</b> Put–call parity must be true; the borrow rate inside it is a market's opinion. The √T law must be true under independence; whether a given stock has independent increments is a view. This is the move that turned chapter 05 from an arbitrage into a rate quote, and it is the most valuable habit on the list.</p>
+    <p><b>Four — put a number on it, even a rough one.</b> "The spread is worth less than six because of interest" is half an answer. "About twelve cents of interest and fifty-odd cents of remaining optionality" is an answer. Carry three approximations and you can do this in your head: an at-the-money option is 0.4·S·σ·√T, a discount factor is roughly 1 − rT, and one standard deviation of a move is σ√T.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:180px"><span class="k">Tier</span>
+          <div class="seg" style="margin-top:5px;max-width:280px">
+            <button id="dT1" aria-pressed="true">Warm-up</button>
+            <button id="dT2" aria-pressed="false">Working</button>
+            <button id="dT3" aria-pressed="false">Hard</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>Warm-up covers the three approximations and the bounds. Working adds discounting, √T scaling and vega arithmetic. Hard adds implied correlation and the dollar-gamma P&amp;L.</figcaption>
+  </figure>
+
+  <div class="prose" style="margin-top:46px">
+    <p>Six questions drawn from across the page.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 02</span>
+    <p class="q">A 10-wide call spread, one year to run, rates at 5%, and the stock is at a thousand. What is it worth?</p>
+    <div class="opts">
+      <button>10.00 — both legs are certain</button>
+      <button data-ok="1">About 9.51 — the width discounted, 10 × e<sup>−0.05</sup>. The certainty is about the payoff, not about when you get it</button>
+      <button>Slightly more than 10, because of time value on the long leg</button>
+      <button>It depends on the volatility</button>
+    </div>
+    <div class="ans"><b>9.51.</b> Once both legs are certain the position is a zero-coupon bond with a face value of the width, and no amount of further rally changes that. Delta, gamma and vega are all zero; the only greek left is rho.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 03</span>
+    <p class="q">A three-month at-the-money call costs 4.98. What should the one-year cost, on the same volatility?</p>
+    <div class="opts">
+      <button>19.93 — four times as much</button>
+      <button data-ok="1">About 9.95 — twice as much, because price scales with √T and √4 = 2</button>
+      <button>4.98 — the same, since the volatility is the same</button>
+      <button>About 6.60, one and a third times</button>
+    </div>
+    <div class="ans"><b>Twice, not four times.</b> Which is why rolling short-dated options is so expensive: four quarterlies cost 19.93 against 9.95 for the year, and the extra 9.98 buys nothing but the right to change your mind three times.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 04</span>
+    <p class="q">You are long gamma and short vega through a front-month against back-month package. What is the bill?</p>
+    <div class="opts">
+      <button>There is no bill — the package was taken in for a credit</button>
+      <button data-ok="1">Theta, at 0.157 a day against the far option's 0.019 — and it accelerates. A month in which the stock never moves costs 9.58, against 1.68 of credit received</button>
+      <button>The bid-offer on four legs</button>
+      <button>Margin, which is the binding constraint</button>
+    </div>
+    <div class="ans"><b>Theta, and it dwarfs the credit.</b> The credit is not income — it is the market pricing the fact that you own the leg which decays fastest. The package needs the stock to travel about 3.5% inside four weeks just to break even, which is the honest description of every long-gamma position.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 05</span>
+    <p class="q">Put–call parity is off by half a point and will not close. Most likely explanation?</p>
+    <div class="opts">
+      <button>A genuine arbitrage the market has not noticed</button>
+      <button data-ok="1">A parameter you assumed: a borrow rate or a dividend. Solve parity for it instead and the gap becomes a rate — here 0.96% a year, which is $48.13 on a hundred shares over six months</button>
+      <button>Black–Scholes failing at the money</button>
+      <button>Skew between the call strike and the put strike</button>
+    </div>
+    <div class="ans"><b>An unmodelled rate, nearly always.</b> Parity is derived from payoffs alone, so it cannot be broken by a model being wrong — only by an input being wrong or by the prices not being simultaneously tradeable. Those are the first two things to eliminate, in that order.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 06</span>
+    <p class="q">Twenty names at 40 vol, the index at 25, and one name's volatility halves to 20. What does the index do?</p>
+    <div class="opts">
+      <button>Falls by about a point, to 24</button>
+      <button>Falls to 12.5, since a volatility halved</button>
+      <button data-ok="1">Falls to 24.39 — six-tenths of a point. One name is a twentieth of the weight and it enters through a variance, so the effect is small</button>
+      <button>Nothing — index volatility depends only on correlation</button>
+    </div>
+    <div class="ans"><b>24.39% — barely anything.</b> Which is why index volatility trades as a correlation instrument rather than a volatility one: single-name volatility moves it slowly and correlation moves it fast. Halving <em>all twenty</em> takes the index to 12.50%.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 07</span>
+    <p class="q">Sold at 30, realized exactly 25, hedged daily for a year. Your P&amp;L?</p>
+    <div class="opts">
+      <button>About two dollars — vega times five points</button>
+      <button>Exactly the difference between the two Black–Scholes prices</button>
+      <button data-ok="1">Anywhere from −2.61 to +6.12, decided by when the volatility arrived relative to your dollar gamma</button>
+      <button>Positive, guaranteed, because implied exceeded realized</button>
+    </div>
+    <div class="ans"><b>A nine-point range on an option sold for twelve.</b> The hedging P&amp;L is the variance difference weighted by S²Γ at every instant, so volatility arriving in the final weeks — when a near-the-money option's dollar gamma is at its largest — is charged at a completely different rate from volatility arriving in the first month. Realized volatility for the year is blind to this, which is why it is the wrong summary statistic.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every figure here prices on a flat volatility surface with continuous rates and no transaction costs, which makes the answers clean and three of them optimistic. A real skew changes the correlation arithmetic of chapter 06, because index and component implieds get read at different moneyness — <a href="dispersion.html" style="color:var(--blue)">page 10</a> handles it properly. Chapter 07's paths are hedged daily and frictionlessly; <a href="execution.html" style="color:var(--blue)">page 06</a> prices the rebalancing and <a href="real-world.html" style="color:var(--blue)">page 15</a> adds the jumps that break the argument entirely. And the bounds in chapters 02 and 05 assume European exercise: on American options the short leg can be assigned at any moment, which <a href="early-exercise.html" style="color:var(--blue)">page 08</a> prices, and which turns several of these ceilings into things you can be forced through.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script>
+"use strict";
+
+/* ══════════ hero ══════════
+   A ladder: short question-marks of price curves stacked from flat to steep,
+   breathing. Native to the subject in the only way a page of questions can be. */
+(function(){
+  const cv=document.getElementById("heroCv");let w,h,g,raf,t0=0;
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  function draw(ph){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    const padL=w*0.06,padR=w*0.06,padT=h*0.20,padB=h*0.20;
+    const gw=w-padL-padR,gh=h-padT-padB;
+    const X=S=>padL+((S-60)/80)*gw;
+    const Y=v=>padT+gh-(v/48)*gh;
+    for(let i=0;i<7;i++){
+      const T=0.02+Math.pow(1.9,i)*0.02*(0.75+0.5*(Math.sin(ph+i*0.7)*0.5+0.5));
+      g.strokeStyle=i%2?C("--verm"):C("--blue");
+      g.globalAlpha=0.09+0.13*(Math.sin(ph*0.7+i*0.9)*0.5+0.5);
+      g.lineWidth=1.7;g.beginPath();
+      for(let S=60;S<=140;S+=1.5){
+        const p=bs(S,100,T,0.30,0.03,0,true).price;
+        S===60?g.moveTo(X(S),Y(p)):g.lineTo(X(S),Y(p));
+      }
+      g.stroke();
+    }
+    g.globalAlpha=1;
+  }
+  function tick(t){if(!t0)t0=t;draw((t-t0)/2600);raf=requestAnimationFrame(tick);}
+  window.drawHero=function(){size();if(RM){draw(0);return;}
+    if(raf)cancelAnimationFrame(raf);t0=0;raf=requestAnimationFrame(tick);};
+})();
+
+/* ══════════ 01 — the deck ══════════ */
+(function(){
+  const E=id=>document.getElementById(id);
+  const S0=100,R=0.04,V=0.25;
+  const P=(S,K,T,v,r,q,cp)=>bs(S,K,T,v===undefined?V:v,r===undefined?R:r,q||0,cp).price;
+
+  /* Every card: tier, question, four options with one marked ok, the reason,
+     and a figure spec the shared renderer can draw. */
+  const CARDS=[
+  /* ── tier 1 · warm-up ────────────────────────────────────────────── */
+  {t:1,q:"The stock is at 100. Which is worth more, the 95 call or the 105 call, same expiry?",
+   o:["The 95 call","The 105 call","The same — one is as far from the money as the other","It depends on the volatility"],ok:0,
+   why:"The 95 call is worth 10.79 and the 105 call 5.78. Value falls monotonically as the strike rises, because the 95 call pays whatever the 105 call pays and five points more. The difference can never exceed the discounted width.",
+   fig:{title:"Call value against strike",cap:"Every strike to the left dominates every strike to the right. The curve can never be flat and can never turn up.",
+     x0:80,x1:120,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),leg:[["Call value","--blue"]],
+     f:[K=>P(S0,K,0.5,V,R,0,true)],col:["--blue"],
+     marks:[[95,"--moss","95"],[105,"--ochre","105"]]}},
+
+  {t:1,q:"A European call is 40 points in the money with a year to run and no dividend. Can it trade below its intrinsic value of 40?",
+   o:["Yes, if the volatility is low enough","No — its floor is S − K·e⁻ʳᵀ, which is above S − K","Only if the stock is hard to borrow","Yes, it converges down to intrinsic"],ok:1,
+   why:"At 140 the call is 45.63, and even at zero volatility it could not go below 140 − 100·e⁻⁰·⁰⁵ = 44.88. Holding the call instead of the stock means you have not yet paid the strike, and the interest on that unpaid strike is worth more than nothing.",
+   fig:{title:"Call value, intrinsic, and the true floor",cap:"The green floor sits above the grey intrinsic line by the interest on the strike. The call never touches either.",
+     x0:100,x1:180,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
+     leg:[["Call value","--blue"],["Intrinsic","--grey"],["S − K·e⁻ʳᵀ","--moss"]],
+     f:[S=>P(S,100,1,V,0.05,0,true),S=>Math.max(S-100,0),S=>S-100*Math.exp(-0.05)],
+     col:["--blue","--grey","--moss"],marks:[[140,"--ochre","140"]]}},
+
+  {t:1,q:"Same question for a European put, 40 points in the money. Can it trade below its intrinsic value?",
+   o:["No — no option ever trades below intrinsic","Yes. At 10% volatility it is 35.12 against an intrinsic of 40","Only American puts can","Only if there is a dividend"],ok:1,
+   why:"Yes, and this is the asymmetry that makes an American put worth exercising early while an American call is not. Holding a deep put means you have not yet received the strike, and you are not being paid interest on it while you wait.",
+   fig:{title:"Put value, intrinsic, and the true floor",cap:"Here the floor sits below the intrinsic line, and the put dives under it. That gap is the interest you are not being paid on the strike.",
+     x0:40,x1:110,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
+     leg:[["Put at 10% vol","--blue"],["Intrinsic","--grey"],["K·e⁻ʳᵀ − S","--verm"]],
+     f:[S=>P(S,100,1,0.10,0.05,0,false),S=>Math.max(100-S,0),S=>100*Math.exp(-0.05)-S],
+     col:["--blue","--grey","--verm"],marks:[[60,"--ochre","60"]]}},
+
+  {t:1,q:"Volatility rises without limit. What is a call eventually worth?",
+   o:["Unbounded — it rises forever","The stock price, S","The strike, K","The stock plus the strike"],ok:1,
+   why:"A call can never be worth more than the stock, because the stock's payoff dominates it at every price. At 800% volatility a one-year 100 call is 99.99, and its delta is 1.0000 — an infinitely volatile call is simply the stock, since the strike has become irrelevant.",
+   fig:{title:"Call and put value as volatility rises",cap:"Both curves flatten onto ceilings: the call onto the stock, the put onto the discounted strike. Neither is ever crossed.",
+     x0:0.05,x1:6,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(0),
+     leg:[["Call","--blue"],["Put","--verm"],["Ceilings","--grey"]],
+     f:[v=>P(S0,100,1,v,0.03,0,true),v=>P(S0,100,1,v,0.03,0,false),()=>100],
+     col:["--blue","--verm","--grey"],extra:[{y:100*Math.exp(-0.03),col:"--grey"}]}},
+
+  {t:1,q:"Which has more gamma: the 100 call or the 100 put, same expiry?",
+   o:["The call, because it has more delta","The put","They are identical, to the last decimal place","The call, unless the stock is below the strike"],ok:2,
+   why:"Identical everywhere. Put–call parity says the call minus the put equals stock minus a bond, and neither a share of stock nor a bond has any gamma at all. The same argument makes their vegas identical.",
+   fig:{title:"Gamma of the call and of the put, drawn on top of each other",cap:"There is only one visible curve because there is only one curve. The dashed put lies exactly on the solid call.",
+     x0:70,x1:135,xf:v=>v.toFixed(0),yf:v=>v.toFixed(3),
+     leg:[["Call gamma","--blue"],["Put gamma","--verm"]],
+     f:[S=>bs(S,100,0.5,V,R,0,true).gamma,S=>bs(S,100,0.5,V,R,0,false).gamma],
+     col:["--blue","--verm"],dash:[null,[5,5]],marks:[[100,"--ochre","K"]]}},
+
+  {t:1,q:"Rates go from zero to 5%. What happens to a one-year at-the-money call?",
+   o:["Nothing — rates do not matter for equity options","It rises, from 9.95 to 12.34","It falls, because the discount factor shrinks it","It depends which way the stock moves"],ok:1,
+   why:"It rises 24%. Owning a call means deferring payment of the strike, and the higher the rate the more that deferral is worth. The put falls in exact compensation, 9.95 to 7.46, which is put–call parity doing the bookkeeping.",
+   fig:{title:"Call and put against the interest rate",cap:"They move in opposite directions by exactly the same amount. Their difference is the forward, and the forward is what rates actually change.",
+     x0:0,x1:0.12,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(1),
+     leg:[["Call","--blue"],["Put","--verm"]],
+     f:[r=>P(S0,100,1,V,r,0,true),r=>P(S0,100,1,V,r,0,false)],
+     col:["--blue","--verm"],marks:[[0.05,"--ochre","5%"]]}},
+
+  /* ── tier 2 · working ────────────────────────────────────────────── */
+  {t:2,q:"The stock is at 130. What is the most the 100/106 call spread can be worth today, with six months left and rates at 4%?",
+   o:["6.00 — the width between the strikes","5.88 — the width discounted, 6 × e⁻ʳᵀ","30.00 — its intrinsic value","There is no ceiling while the stock can keep rising"],ok:1,
+   why:"The spread pays at most the width, but it pays it at expiry. Today it is worth at most the present value of that, 5.8812. Push the spot to 500 and the price stops dead at 5.8812 — chapter 02 takes this apart properly.",
+   fig:{title:"The 100/106 call spread against spot",cap:"The blue curve flattens onto the green ceiling, never onto the grey width. Thirty points of extra rally buys nothing.",
+     x0:90,x1:200,xf:v=>v.toFixed(0),yf:v=>v.toFixed(1),
+     leg:[["Spread","--blue"],["Width","--grey"],["Width × e⁻ʳᵀ","--moss"]],
+     f:[S=>P(S,100,0.5,V,R,0,true)-P(S,106,0.5,V,R,0,true),()=>6,()=>6*Math.exp(-R*0.5)],
+     col:["--blue","--grey","--moss"],marks:[[130,"--ochre","130"]]}},
+
+  {t:2,q:"Which costs more: the 100 straddle, or the 90/110 strangle on the same expiry?",
+   o:["The strangle — it covers twenty points of range instead of one","The straddle, at 14.04 against 6.39","They cost the same, since they have the same vega","It depends on the skew"],ok:1,
+   why:"The straddle, and by more than twice. Both legs of a straddle are at the money where all the time value lives; the strangle's legs are both out of the money. The strangle is cheaper because it is a smaller position, not because it is better value.",
+   fig:{title:"Value of the straddle and the strangle across spot",cap:"The straddle is above the strangle at every price. Cheaper here means less, never more for your money.",
+     x0:70,x1:130,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
+     leg:[["100 straddle","--blue"],["90/110 strangle","--verm"]],
+     f:[S=>P(S,100,0.5,V,R,0,true)+P(S,100,0.5,V,R,0,false),
+        S=>P(S,110,0.5,V,R,0,true)+P(S,90,0.5,V,R,0,false)],
+     col:["--blue","--verm"],marks:[[100,"--ochre","100"]]}},
+
+  {t:2,q:"You are long the 100 call and short the 100 put, same expiry. What is your position?",
+   o:["A volatility position","Long stock — delta exactly 1.00, with gamma and vega exactly zero","A delta-neutral spread","Long stock, plus a little optionality"],ok:1,
+   why:"Long stock, exactly. The delta is 1.0000 at every price, and the gamma and vega cancel to zero identically. This synthetic is what put–call parity means in practice, and it is the building block of every conversion on page 07.",
+   fig:{title:"Net delta of long call, short put, at the same strike",cap:"A flat line at 1.00. Not approximately flat — the curvature of the two legs cancels exactly.",
+     x0:60,x1:145,xf:v=>v.toFixed(0),yf:v=>v.toFixed(2),y0:0,y1:1.35,
+     leg:[["Call − put delta","--blue"],["Call delta alone","--grey"]],
+     f:[S=>bs(S,100,0.5,V,R,0,true).delta-bs(S,100,0.5,V,R,0,false).delta,
+        S=>bs(S,100,0.5,V,R,0,true).delta],
+     col:["--blue","--grey"]}},
+
+  {t:2,q:"The 100 call with the stock at 110. Which has the larger delta, the three-month or the one-year?",
+   o:["The one-year — more time to move further into the money","The three-month, 0.82 against 0.75","They are identical; delta does not depend on expiry","The one-year, because it has more vega"],ok:1,
+   why:"The three-month. Delta is the risk-neutral probability of finishing in the money (adjusted), and an in-the-money option with little time left is nearly certain. Give it a year and there is ample time to fall back below the strike, so the delta retreats toward one half.",
+   fig:{title:"Delta of a 100 call with the stock at 110, against time to expiry",cap:"More time makes an in-the-money option less certain, not more. Out of the money, this curve runs the other way.",
+     x0:0.02,x1:2,xf:v=>v.toFixed(1)+"y",yf:v=>v.toFixed(2),
+     leg:[["Delta, S = 110","--blue"],["Delta, S = 90","--verm"]],
+     f:[T=>bs(110,100,T,V,R,0,true).delta,T=>bs(90,100,T,V,R,0,true).delta],
+     col:["--blue","--verm"],marks:[[0.25,"--ochre","3m"],[1,"--moss","1y"]]}},
+
+  {t:2,q:"An at-the-money option, volatility at 15%. Volatility triples to 45%. What happens to its vega?",
+   o:["It triples too","It rises, but less than threefold","It barely moves: 0.274 to 0.275","It collapses toward zero"],ok:2,
+   why:"An at-the-money option's vega is almost constant in volatility — its volga is nearly zero. That is exactly why wings, not the body, are where volatility-of-volatility is traded: the 130 strike's vega runs from 0.023 to 0.235 over the same range, a factor of ten.",
+   fig:{title:"Vega against volatility, at the money and in the wing",cap:"The flat blue line is why the at-the-money option is the clean vega instrument. Everything interesting about volga is in the red curve.",
+     x0:0.05,x1:0.75,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(2),
+     leg:[["100 strike","--blue"],["130 strike","--verm"]],
+     f:[v=>bs(S0,100,0.5,v,R,0,true).vega/100,v=>bs(S0,130,0.5,v,R,0,true).vega/100],
+     col:["--blue","--verm"],marks:[[0.15,"--ochre","15%"],[0.45,"--moss","45%"]]}},
+
+  {t:2,q:"A 100 call, stock at 140, one week left. As a risk, what is it?",
+   o:["A leveraged bet on the stock","Stock minus a bond: delta 1.0000, vega 0.000000, and a rho equal to the interest on the strike","A delta-one position with nothing else attached","It still carries meaningful gamma"],ok:1,
+   why:"It has stopped being an option. Its vega prints as zero to six decimal places and its rho equals that of a zero-coupon bond with a face value of 100. The optionality has expired even though the contract has not.",
+   fig:{title:"Vega of a one-week option across spot",cap:"Outside a narrow band around the strike there is nothing left to be volatile about. The same collapse happens to gamma.",
+     x0:80,x1:150,xf:v=>v.toFixed(0),yf:v=>v.toFixed(3),
+     leg:[["One week","--blue"],["Six months","--grey"]],
+     f:[S=>bs(S,100,1/52,V,R,0,true).vega/100,S=>bs(S,100,0.5,V,R,0,true).vega/100],
+     col:["--blue","--grey"],marks:[[140,"--ochre","140"]]}},
+
+  /* ── tier 3 · hard ───────────────────────────────────────────────── */
+  {t:3,q:"A one-year at-the-money call costs 9.95. You instead roll a one-month option twelve times. What do the twelve cost in total?",
+   o:["9.95 — you own a year of coverage either way","119.4 — twelve times the one-month price","About 34.5 — √12 times the year, because price scales with √T","Less than the year, since each option is cheap"],ok:2,
+   why:"Price scales with the square root of time, so a one-month option is not a twelfth of a one-year one — it is about 1/3.46 of it. Twelve of them cost √12 = 3.46 times the annual premium. Chapter 03 is this question at full length.",
+   fig:{title:"Cost of covering one year, by how many times you buy it",cap:"The exact premium sits on the √n curve. Rolling is not a cheaper way to own volatility; it is the same volatility bought √n times over.",
+     x0:1,x1:52,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
+     leg:[["Total premium","--blue"],["√n × the one-shot price","--ochre"]],
+     f:[n=>n*P(S0,100,1/n,V,0,0,true),n=>Math.sqrt(n)*P(S0,100,1,V,0,0,true)],
+     col:["--blue","--ochre"],dash:[null,[5,5]],marks:[[4,"--moss","4"],[12,"--verm","12"]]}},
+
+  {t:3,q:"Twenty names, each at 40% implied volatility. The index of exactly those twenty trades at 25%. What are you being told?",
+   o:["That the index options are cheap against the components","That an average pairwise correlation of 0.36 is being quoted","That the single names are overpriced","Nothing — index volatility is always lower than the average name"],ok:1,
+   why:"The gap is a correlation quote, and it is the only number in the problem nobody prints. At zero correlation the index would sit at 40/√20 = 8.94%; at one it would sit at 40%. Twenty-five per cent solves to ρ = 0.359.",
+   fig:{title:"Index volatility against average pairwise correlation",cap:"Steep at the left, flat at the right. Almost all the index's volatility is bought with the first tenth of correlation.",
+     x0:0,x1:1,xf:v=>v.toFixed(1),yf:v=>(v*100).toFixed(0)+"%",
+     leg:[["Index vol, 20 names at 40%","--blue"],["Quoted level","--ochre"]],
+     f:[p=>0.40*Math.sqrt(p+(1-p)/20),()=>0.25],
+     col:["--blue","--ochre"],dash:[null,[5,5]],marks:[[0.3586,"--moss","ρ = 0.359"]]}},
+
+  {t:3,q:"You sell a one-year at-the-money option at 30% implied, hedge daily, and realized volatility for the year comes in at exactly 25%. What did you make?",
+   o:["About two dollars — vega times five volatility points","Exactly the difference between the two Black–Scholes prices","Anywhere from −2.61 to +6.12, decided by when the volatility arrived","Nothing — daily hedging cancels the edge"],ok:2,
+   why:"The hedging P&L weights each instant by dollar gamma, S²Γ, which for a near-the-money option grows without limit as expiry approaches. The same 25% realized pays six dollars if it arrives early and loses four if it arrives late. Chapter 07 shows both paths.",
+   fig:{title:"Dollar gamma through the life of an at-the-money option",cap:"This is the weight the P&L puts on each moment. Volatility arriving on the right of this chart costs many times what the same volatility costs on the left.",
+     x0:0.01,x1:1,xf:v=>v.toFixed(1)+"y",yf:v=>v.toFixed(0),
+     leg:[["S²Γ, time remaining","--blue"]],
+     f:[T=>bs(100,100,T,0.30,0,0,true).gamma*100*100],
+     col:["--blue"],marks:[[0.115,"--verm","6 weeks left"]]}},
+
+  {t:3,q:"Stock at 100, six-month 100 call at 5.00, put at 3.50, rates 4%. Parity says the difference should be 1.98 and it is 1.50. Is that free money?",
+   o:["Yes — buy the call, sell the put, short the stock","Yes, the put is 48 cents rich","No. It is a 0.96% borrow or dividend rate, which is a quote rather than a mispricing","No, because parity does not apply at the money"],ok:2,
+   why:"Solve parity for the borrow term rather than assuming it is zero and the 48 cents becomes 0.96% a year — $48.13 on a hundred shares over six months, which is the whole gap. The option market quotes a borrow rate whether or not anyone intends it to.",
+   fig:{title:"Parity's call-minus-put against the borrow rate",cap:"The observed price is not off the line. It is on the line, at a borrow rate the screen did not print.",
+     x0:-0.01,x1:0.05,xf:v=>(v*100).toFixed(1)+"%",yf:v=>v.toFixed(1),
+     leg:[["S·e⁻qᵀ − K·e⁻ʳᵀ","--blue"],["Observed C − P","--verm"]],
+     f:[q=>100*Math.exp(-q*0.5)-100*Math.exp(-0.04*0.5),()=>1.5],
+     col:["--blue","--verm"],dash:[null,[5,5]],marks:[[0.009625,"--moss","0.96%"]]}}
+  ];
+
+  let tier=1,idx=0,answered=false;
+  const inTier=()=>CARDS.map((c,i)=>[c,i]).filter(([c])=>c.t===tier);
+
+  function renderChart(c){
+    const F=c.fig,N=220;
+    const xs=[];for(let i=0;i<N;i++)xs.push(F.x0+(F.x1-F.x0)*i/(N-1));
+    const series=F.f.map(fn=>xs.map(fn));
+    let lo=Infinity,hi=-Infinity;
+    series.forEach(ys=>ys.forEach(y=>{if(isFinite(y)){if(y<lo)lo=y;if(y>hi)hi=y;}}));
+    (F.extra||[]).forEach(e=>{if(e.y<lo)lo=e.y;if(e.y>hi)hi=e.y;});
+    if(F.y0!==undefined){lo=F.y0;hi=F.y1;}
+    else{const pad=(hi-lo)*0.10||1;lo-=pad;hi+=pad;}
+    const o=Fig(document.getElementById("cvA"),
+      {h:330,x0:F.x0,x1:F.x1,y0:lo,y1:hi,pad:{l:58,r:14,t:14}});
+    axes(o,F.xf,F.yf,5,4);
+    (F.extra||[]).forEach(e=>{
+      const g=o.g;g.save();g.strokeStyle=C(e.col);g.setLineDash([4,4]);g.lineWidth=1;
+      const y=Math.round(o.Y(e.y))+.5;g.beginPath();g.moveTo(o.P.l,y);g.lineTo(o.P.l+o.pw,y);g.stroke();g.restore();});
+    clip(o,()=>{series.forEach((ys,i)=>
+      line(o,xs,ys,C(F.col[i]),F.col[i]==="--grey"?1.4:2.1,(F.dash||[])[i]));});
+    (F.marks||[]).forEach(([x,col,lab])=>vline(o,x,C(col),lab));
+    E("deckTitle").textContent=F.title;
+    E("deckLeg").innerHTML=(F.leg||[]).map(([n,col])=>
+      '<span><i class="swl" style="background:var('+col+')"></i>'+n+"</span>").join("");
+    E("deckCap").innerHTML=answered?F.cap:"Answer the card first — the chart is the proof, not the hint.";
+  }
+
+  function render(){
+    const list=inTier();
+    if(idx>=list.length)idx=0;if(idx<0)idx=list.length-1;
+    const [c,globalIdx]=list[idx];
+    const tname=["","Warm-up","Working","Hard"][tier];
+    E("deckPos").innerHTML=kvHTML([["Tier",tname],
+      ["Card",(idx+1)+" of "+list.length],["Number",String(globalIdx+1).padStart(2,"0")+" of 16"]]);
+    E("deckQ").innerHTML=c.q;
+    E("deckOpts").innerHTML=c.o.map((t,i)=>
+      "<button data-i='"+i+"'>"+t+"</button>").join("");
+    Array.prototype.forEach.call(E("deckOpts").querySelectorAll("button"),b=>
+      b.addEventListener("click",()=>pick(parseInt(b.getAttribute("data-i"),10))));
+    E("deckWhy").style.display="none";
+    answered=false;
+    renderChart(c);
+  }
+  function pick(i){
+    const c=inTier()[idx][0];
+    if(answered)return;
+    answered=true;
+    Array.prototype.forEach.call(E("deckOpts").querySelectorAll("button"),(b,j)=>{
+      if(j===c.ok)b.classList.add("ok");
+      else if(j===i)b.classList.add("no");
+      b.disabled=true;});
+    E("deckWhy").innerHTML="<b>"+(i===c.ok?"Right.":"Not quite.")+"</b> "+c.why;
+    E("deckWhy").style.display="block";
+    renderChart(c);
+  }
+  function setTier(t){tier=t;idx=0;
+    [1,2,3].forEach(k=>E("t"+k).setAttribute("aria-pressed",k===t?"true":"false"));
+    render();}
+  [1,2,3].forEach(k=>E("t"+k).addEventListener("click",()=>setTier(k)));
+  E("deckNext").addEventListener("click",()=>{idx++;render();});
+  E("deckPrev").addEventListener("click",()=>{idx--;render();});
+  E("goCard2").addEventListener("click",()=>{setTier(1);idx=1;render();
+    document.getElementById("cvA").scrollIntoView({behavior:RM?"auto":"smooth",block:"center"});});
+  E("goCard3").addEventListener("click",()=>{setTier(1);idx=2;render();
+    document.getElementById("cvA").scrollIntoView({behavior:RM?"auto":"smooth",block:"center"});});
+  window.drawDeck=render;
+  window.__deck=CARDS;
+})();
+
+/* ══════════ 02 — a spread that cannot reach its width ══════════ */
+const s2={S:130,T:0.5,r:0.04,sig:0.25,W:6};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"s2S",k:"S",lbl:"S",name:"Spot",min:95,max:220,step:1,fmt:v=>v.toFixed(0)},
+    {id:"s2T",k:"T",lbl:"T",name:"Time to expiry",min:0.01,max:2,step:0.01,fmt:v=>(v*12).toFixed(1)+" mo"},
+    {id:"s2r",k:"r",lbl:"r",name:"Interest rate",min:0,max:0.12,step:0.005,fmt:v=>(v*100).toFixed(1)+"%"},
+    {id:"s2v",k:"sig",lbl:"σ",name:"Volatility",min:0.05,max:0.8,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"s2W",k:"W",lbl:"W",name:"Spread width",min:2,max:20,step:1,fmt:v=>v.toFixed(0)}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function draw(){
+    const K1=100,K2=100+s2.W,df=Math.exp(-s2.r*s2.T);
+    const val=S=>bs(S,K1,s2.T,s2.sig,s2.r,0,true).price-bs(S,K2,s2.T,s2.sig,s2.r,0,true).price;
+    const xs=[],ys=[];
+    for(let S=90;S<=230;S+=1){xs.push(S);ys.push(val(S));}
+    const o=Fig(document.getElementById("cv2"),
+      {h:320,x0:90,x1:230,y0:0,y1:s2.W*1.12,pad:{l:52,r:14,t:14}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(1),5,4);
+    const g=o.g;
+    [[s2.W,"--grey"],[s2.W*df,"--moss"]].forEach(([y,col])=>{
+      g.save();g.strokeStyle=C(col);g.lineWidth=1.4;g.setLineDash([5,4]);
+      const py=Math.round(o.Y(y))+.5;g.beginPath();g.moveTo(o.P.l,py);g.lineTo(o.P.l+o.pw,py);g.stroke();g.restore();});
+    clip(o,()=>line(o,xs,ys,C("--blue"),2.2));
+    vline(o,s2.S,C("--ochre"),"spot");
+    const v=val(s2.S);
+    const d2=(Math.log(s2.S/K2)+(s2.r-s2.sig*s2.sig/2)*s2.T)/(s2.sig*Math.sqrt(s2.T));
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Strikes",K1+" / "+K2],
+      ["Width",s2.W.toFixed(2)],
+      ["Ceiling  W·e⁻ʳᵀ",(s2.W*df).toFixed(4)],
+      ["Spread value",v.toFixed(4)],
+      ["Short of width",(s2.W-v).toFixed(4)],
+      ["  of which interest",(s2.W-s2.W*df).toFixed(4)],
+      ["  of which optionality",(s2.W*df-v).toFixed(4)],
+      ["P(finish above K₂)",(ncdf(d2)*100).toFixed(1)+"%"],
+      ["Spread delta",(bs(s2.S,K1,s2.T,s2.sig,s2.r,0,true).delta-bs(s2.S,K2,s2.T,s2.sig,s2.r,0,true).delta).toFixed(4)],
+      ["Spread vega",((bs(s2.S,K1,s2.T,s2.sig,s2.r,0,true).vega-bs(s2.S,K2,s2.T,s2.sig,s2.r,0,true).vega)/100).toFixed(4)]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — rolling costs √n ══════════ */
+const s3={n:4,sig:0.25,r:0,T:1};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"s3n",k:"n",lbl:"n",name:"Times you buy it",min:1,max:52,step:1,fmt:v=>v.toFixed(0)+"×"},
+    {id:"s3v",k:"sig",lbl:"σ",name:"Volatility",min:0.05,max:0.8,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"s3r",k:"r",lbl:"r",name:"Interest rate",min:0,max:0.10,step:0.005,fmt:v=>(v*100).toFixed(1)+"%"},
+    {id:"s3T",k:"T",lbl:"T",name:"Total horizon",min:0.25,max:3,step:0.25,fmt:v=>v.toFixed(2)+"y"}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  const cost=(n,st)=>n*bs(100,100,st.T/n,st.sig,st.r,0,true).price;
+  function draw(){
+    const one=bs(100,100,s3.T,s3.sig,s3.r,0,true).price;
+    const xs=[],ys=[],zs=[];
+    for(let n=1;n<=52;n++){xs.push(n);ys.push(cost(n,s3));zs.push(Math.sqrt(n)*one);}
+    const hi=Math.max(ys[51],zs[51])*1.06;
+    const o=Fig(document.getElementById("cv3"),
+      {h:310,x0:1,x1:52,y0:0,y1:hi,pad:{l:52,r:14,t:14}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(0),5,4);
+    clip(o,()=>{line(o,xs,zs,C("--ochre"),1.8,[5,5]);line(o,xs,ys,C("--blue"),2.2);});
+    vline(o,s3.n,C("--moss"),s3.n+"×");
+    const c=cost(s3.n,s3);
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Buy it once",one.toFixed(4)],
+      ["Each short option",(c/s3.n).toFixed(4)],
+      ["Buying it "+s3.n+"×",c.toFixed(4)],
+      ["Multiple",(c/one).toFixed(3)+"×"],
+      ["√n says",Math.sqrt(s3.n).toFixed(3)+"×"],
+      ["Extra premium paid",(c-one).toFixed(4)],
+      ["Quarterly (4×)",(cost(4,s3)/one).toFixed(3)+"×"],
+      ["Monthly (12×)",(cost(12,s3)/one).toFixed(3)+"×"],
+      ["Weekly (52×)",(cost(52,s3)/one).toFixed(3)+"×"]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — long gamma, short vega ══════════ */
+const s4={Tn:0.0833,Tf:1,sig:0.25,r:0.04};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"s4n",k:"Tn",lbl:"T₁",name:"Near expiry",min:0.02,max:0.5,step:0.005,fmt:v=>(v*12).toFixed(1)+" mo"},
+    {id:"s4f",k:"Tf",lbl:"T₂",name:"Far expiry",min:0.25,max:3,step:0.05,fmt:v=>(v*12).toFixed(0)+" mo"},
+    {id:"s4v",k:"sig",lbl:"σ",name:"Volatility",min:0.08,max:0.7,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"s4r",k:"r",lbl:"r",name:"Interest rate",min:0,max:0.10,step:0.005,fmt:v=>(v*100).toFixed(1)+"%"}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const K=100;
+    const near=S=>bs(S,K,s4.Tn,s4.sig,s4.r,0,true);
+    const far =S=>bs(S,K,s4.Tf,s4.sig,s4.r,0,true);
+    const ratio=far(100).vega/near(100).vega;
+    const xs=[],pk=[],fr=[];
+    for(let S=80;S<=125;S+=0.5){xs.push(S);
+      pk.push(ratio*near(S).gamma-far(S).gamma);fr.push(far(S).gamma);}
+    const hi=Math.max.apply(null,pk)*1.10;
+    const o=Fig(document.getElementById("cv4"),
+      {h:310,x0:80,x1:125,y0:0,y1:hi,pad:{l:58,r:14,t:14}});
+    axes(o,v=>v.toFixed(0),v=>v.toFixed(3),5,4);
+    clip(o,()=>{line(o,xs,fr,C("--grey"),1.6);line(o,xs,pk,C("--blue"),2.2);});
+    vline(o,K,C("--ochre"),"K");
+    const n0=near(100),f0=far(100);
+    const netVega=(ratio*n0.vega-f0.vega)/100;
+    const netTheta=(ratio*n0.theta-f0.theta)/365;
+    const netPrem=ratio*n0.price-f0.price;
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Buy near, quantity",ratio.toFixed(3)],
+      ["Sell far, quantity","1.000"],
+      ["Net vega (per pt)",netVega.toFixed(6)],
+      ["Far option gamma",f0.gamma.toFixed(5)],
+      ["Package gamma",(ratio*n0.gamma-f0.gamma).toFixed(5)],
+      ["Gamma multiple",((ratio*n0.gamma-f0.gamma)/f0.gamma).toFixed(2)+"×"],
+      ["Net premium",(netPrem<0?"receive ":"pay ")+Math.abs(netPrem).toFixed(3)],
+      ["Package theta / day",netTheta.toFixed(4)],
+      ["Far theta / day",(f0.theta/365).toFixed(4)],
+      ["Decay to near expiry",(netTheta*s4.Tn*365).toFixed(3)]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — the borrow rate hiding in parity ══════════ */
+const s5={Cp:5.0,P:3.5,S:100,K:100,T:0.5,r:0.04};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"s5c",k:"Cp",lbl:"C",name:"Call price",min:1,max:12,step:0.01,fmt:v=>v.toFixed(2)},
+    {id:"s5p",k:"P",lbl:"P",name:"Put price",min:1,max:12,step:0.01,fmt:v=>v.toFixed(2)},
+    {id:"s5S",k:"S",lbl:"S",name:"Spot",min:80,max:120,step:0.5,fmt:v=>v.toFixed(1)},
+    {id:"s5T",k:"T",lbl:"T",name:"Time to expiry",min:0.05,max:2,step:0.05,fmt:v=>(v*12).toFixed(0)+" mo"},
+    {id:"s5r",k:"r",lbl:"r",name:"Interest rate",min:0,max:0.10,step:0.005,fmt:v=>(v*100).toFixed(1)+"%"}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function draw(){
+    const obs=s5.Cp-s5.P, dfr=Math.exp(-s5.r*s5.T);
+    const fwd=q=>s5.S*Math.exp(-q*s5.T)-s5.K*dfr;
+    const xs=[],ys=[],zs=[];
+    for(let q=-0.02;q<=0.10;q+=0.0005){xs.push(q);ys.push(fwd(q));zs.push(obs);}
+    let lo=Math.min(ys[ys.length-1],obs),hi=Math.max(ys[0],obs);
+    const pad=(hi-lo)*0.12||1;
+    const o=Fig(document.getElementById("cv5"),
+      {h:310,x0:-0.02,x1:0.10,y0:lo-pad,y1:hi+pad,pad:{l:56,r:14,t:14}});
+    axes(o,v=>(v*100).toFixed(0)+"%",v=>v.toFixed(1),5,4);
+    clip(o,()=>{line(o,xs,zs,C("--verm"),1.8,[5,5]);line(o,xs,ys,C("--blue"),2.2);});
+    /* solve S·e^-qT − K·e^-rT = obs  →  q = −ln((obs + K·e^-rT)/S)/T */
+    const arg=(obs+s5.K*dfr)/s5.S;
+    const q=arg>0?-Math.log(arg)/s5.T:NaN;
+    if(isFinite(q))vline(o,q,C("--moss"),(q*100).toFixed(2)+"%");
+    const theo=s5.S-s5.K*dfr;
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Parity C − P (q = 0)",theo.toFixed(4)],
+      ["Observed C − P",obs.toFixed(4)],
+      ["Apparent free money",(obs-theo).toFixed(4)],
+      ["Implied borrow / div",isFinite(q)?(q*100).toFixed(3)+"%":"—"],
+      ["On 100 shares, "+(s5.T*12).toFixed(0)+" mo",isFinite(q)?"$"+(100*s5.S*q*s5.T).toFixed(2):"—"],
+      ["Discount factor",dfr.toFixed(5)],
+      ["Forward at q",isFinite(q)?(s5.S*Math.exp((s5.r-q)*s5.T)).toFixed(3):"—"],
+      ["Verdict",Math.abs(obs-theo)<0.03?"consistent with zero borrow":"a rate, not an arbitrage"]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — index vol and implied correlation ══════════ */
+const s6={n:20,sv:0.40,si:0.25};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"s6n",k:"n",lbl:"n",name:"Names in the index",min:2,max:100,step:1,fmt:v=>v.toFixed(0)},
+    {id:"s6s",k:"sv",lbl:"σ",name:"Single-name vol",min:0.10,max:0.80,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"s6i",k:"si",lbl:"σᵢ",name:"Index vol",min:0.05,max:0.80,step:0.005,fmt:v=>(v*100).toFixed(1)+"%"}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  const idxVol=(rho,st)=>st.sv*Math.sqrt(rho+(1-rho)/st.n);
+  const impCorr=st=>((st.si*st.si/(st.sv*st.sv))-1/st.n)/(1-1/st.n);
+  function draw(){
+    const xs=[],ys=[],zs=[];
+    for(let p=0;p<=1.0001;p+=0.005){xs.push(p);ys.push(idxVol(p,s6));zs.push(s6.si);}
+    const o=Fig(document.getElementById("cv6"),
+      {h:310,x0:0,x1:1,y0:0,y1:s6.sv*1.10,pad:{l:52,r:14,t:14}});
+    axes(o,v=>v.toFixed(1),v=>(v*100).toFixed(0)+"%",5,4);
+    clip(o,()=>{line(o,xs,zs,C("--ochre"),1.8,[5,5]);line(o,xs,ys,C("--blue"),2.2);});
+    const rho=impCorr(s6);
+    if(rho>=0&&rho<=1)vline(o,rho,C("--moss"),"ρ = "+rho.toFixed(3));
+    /* one name's vol halved, correlation held fixed */
+    const one=(vols,p)=>{let t=0;const n=vols.length;
+      for(let i=0;i<n;i++)for(let j=0;j<n;j++)t+=vols[i]*vols[j]*(i===j?1:p)/(n*n);
+      return Math.sqrt(t);};
+    const base=[];for(let i=0;i<s6.n;i++)base.push(s6.sv);
+    const cut=base.slice();cut[0]=s6.sv/2;
+    const rr=Math.max(0,Math.min(1,rho));
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Implied correlation",(rho>=0&&rho<=1)?rho.toFixed(4):rho.toFixed(4)+" — impossible"],
+      ["ρ = 0 floor",(idxVol(0,s6)*100).toFixed(2)+"%"],
+      ["ρ = 1 ceiling",(s6.sv*100).toFixed(2)+"%"],
+      ["Quoted index vol",(s6.si*100).toFixed(2)+"%"],
+      ["Diversification term",(1/s6.n).toFixed(4)],
+      ["One name's vol halved",(one(cut,rr)*100).toFixed(3)+"%"],
+      ["  change",((one(cut,rr)-one(base,rr))*100).toFixed(3)+" pts"],
+      ["All vols halved",(one(base.map(v=>v/2),rr)*100).toFixed(3)+"%"]
+    ]);
+  }
+})();
+
+/* ══════════ 07 — same realized vol, opposite P&L ══════════ */
+const s7={pos:0,frac:0.12,vi:0.30,vr:0.25};
+(function(){
+  const N=252,T=1,dt=T/N,K=100,S0=100;
+  /* A path whose local volatility is amp inside a loud window and 0.28·amp
+     outside it, with amp solved so that realized volatility hits the target
+     exactly. Placement of the window is the only free variable. */
+  function build(pos,frac,amp){
+    const S=new Float64Array(N+1);S[0]=S0;
+    const start=(1-frac)*pos;
+    for(let i=1;i<=N;i++){
+      const u=(i-0.5)/N;
+      const loud=(u>=start&&u<start+frac);
+      const w=loud?1:0.28;
+      S[i]=S[i-1]*Math.exp(amp*w*Math.sqrt(dt)*((i%2)?1:-1));
+    }
+    return S;
+  }
+  function realized(S){let s=0;
+    for(let i=1;i<S.length;i++){const x=Math.log(S[i]/S[i-1]);s+=x*x;}
+    return Math.sqrt(s/T);}
+  function solve(pos,frac,target){
+    let lo=0.001,hi=3;
+    for(let k=0;k<60;k++){const m=(lo+hi)/2;
+      if(realized(build(pos,frac,m))<target)lo=m;else hi=m;}
+    return (lo+hi)/2;}
+  /* Short one at-the-money call, delta-hedged daily at the implied vol, r = 0.
+     Returns the cumulative P&L series. */
+  function hedge(S,vi){
+    const out=new Float64Array(N+1);
+    const o0=bs(S[0],K,T,vi,0,0,true);
+    let d=o0.delta, cash=o0.price-d*S[0];
+    const prem=o0.price;
+    for(let i=1;i<=N;i++){
+      const t=Math.max(T-i*dt,1e-9),o=bs(S[i],K,t,vi,0,0,true);
+      cash+=(d-o.delta)*S[i];d=o.delta;
+      out[i]=cash+d*S[i]-o.price;
+    }
+    out[0]=0;out[N]=cash+d*S[N]-Math.max(S[N]-K,0);
+    return {pnl:out,prem:prem};
+  }
+  function run(pos,frac,vi,vr){
+    const amp=solve(pos,frac,vr),S=build(pos,frac,amp);
+    const h=hedge(S,vi);
+    return {S:S,amp:amp,rv:realized(S),pnl:h.pnl,prem:h.prem,final:h.pnl[N]};
+  }
+  let cacheA=null,cacheB=null,ck="";
+  sliders(document.getElementById("ctl7"),[
+    {id:"s7p",k:"pos",lbl:"⇢",name:"When the volatility arrives",min:0,max:1,step:0.02,
+      fmt:v=>v<0.02?"at the start":v>0.98?"at the end":(v*100).toFixed(0)+"% through"},
+    {id:"s7f",k:"frac",lbl:"w",name:"Width of the loud window",min:0.06,max:1,step:0.02,
+      fmt:v=>(v*52).toFixed(0)+" weeks"},
+    {id:"s7i",k:"vi",lbl:"σᵢ",name:"Implied — what you sold",min:0.10,max:0.60,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"},
+    {id:"s7r",k:"vr",lbl:"σᵣ",name:"Realized — what it did",min:0.10,max:0.60,step:0.01,fmt:v=>(v*100).toFixed(0)+"%"}
+  ],s7,()=>draw(),"c7");
+  window.draw7=draw;
+  window.__run7=run;
+  function draw(){
+    const key=s7.vi+"|"+s7.vr;
+    if(key!==ck){ck=key;cacheA=run(0,0.12,s7.vi,s7.vr);cacheB=run(1,0.12,s7.vi,s7.vr);}
+    const live=run(s7.pos,s7.frac,s7.vi,s7.vr);
+    const xs=[];for(let i=0;i<=N;i++)xs.push(i/N);
+    const all=[cacheA.pnl,cacheB.pnl,live.pnl];
+    let lo=0,hi=0;
+    all.forEach(a=>{for(let i=0;i<=N;i++){if(a[i]<lo)lo=a[i];if(a[i]>hi)hi=a[i];}});
+    const pad=(hi-lo)*0.12||1;
+    const o=Fig(document.getElementById("cv7"),
+      {h:320,x0:0,x1:1,y0:lo-pad,y1:hi+pad,pad:{l:54,r:14,t:14}});
+    axes(o,v=>(v*12).toFixed(0)+"mo",v=>v.toFixed(1),5,4);
+    clip(o,()=>{
+      line(o,xs,Array.from(cacheA.pnl),C("--moss"),1.7,null,0.8);
+      line(o,xs,Array.from(cacheB.pnl),C("--verm"),1.7,null,0.8);
+      line(o,xs,Array.from(live.pnl),C("--blue"),2.4);
+    });
+    const start=(1-s7.frac)*s7.pos;
+    vline(o,start,C("--ochre"),"loud");
+    vline(o,Math.min(start+s7.frac,1),C("--ochre"));
+    document.getElementById("kv7").innerHTML=kvHTML([
+      ["Sold for",live.prem.toFixed(3)],
+      ["Realized vol",(live.rv*100).toFixed(3)+"%"],
+      ["Loud-window vol",(live.amp*100).toFixed(1)+"%"],
+      ["Quiet vol",(live.amp*28).toFixed(1)+"%"],
+      ["Your P&L",live.final.toFixed(3)],
+      ["All at the start",cacheA.final.toFixed(3)],
+      ["All at the end",cacheB.final.toFixed(3)],
+      ["Spread between them",(cacheA.final-cacheB.final).toFixed(3)],
+      ["The textbook answer",((bs(S0,K,T,s7.vi,0,0,true).price-bs(S0,K,T,s7.vr,0,0,true).price)).toFixed(3)]
+    ]);
+  }
+})();
+
+/* ══════════ 08 — the drill ══════════ */
+(function(){
+  let tier=1,sc=0,asked=0,streak=0,best=0,cur=null;
+  const E=id=>document.getElementById(id);
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function make(){
+    const R=Math.random;
+    if(tier===1){
+      const t=Math.floor(R()*3);
+      if(t===0){const W=pick([5,10,15,20]),r=pick([0.02,0.04,0.05,0.08]),d=pick([90,180,365]);
+        const a=W*Math.exp(-r*d/365);
+        return{kind:"The ceiling on a vertical",unit:"$",a:a,tol:0.02,
+          q:"A <b>"+W+"</b>-wide call spread with <b>"+d+"</b> days to run, rates at <b>"+(r*100).toFixed(0)+"%</b>, and the stock a mile above both strikes. What is the most it can be worth today?",
+          w:"Width discounted: "+W+" × e^(−"+r+"×"+(d/365).toFixed(3)+") = "+W+" × "+Math.exp(-r*d/365).toFixed(4)+" = <b>"+a.toFixed(3)+"</b>. Not the width — the width is what it pays at expiry, and you have to wait for it."};}
+      if(t===1){const S=pick([50,100,200]),v=pick([0.15,0.20,0.25,0.30,0.40]),T=pick([0.25,0.5,1,2]);
+        const a=0.4*S*v*Math.sqrt(T);
+        return{kind:"At-the-money in your head",unit:"$",a:a,tol:Math.max(0.05,a*0.02),
+          q:"Stock at <b>"+S+"</b>, volatility <b>"+(v*100).toFixed(0)+"%</b>, <b>"+(T*12).toFixed(0)+"</b> months to expiry. Roughly what does the at-the-money option cost?",
+          w:"0.4 · S · σ · √T = 0.4 × "+S+" × "+v.toFixed(2)+" × "+Math.sqrt(T).toFixed(3)+" = <b>"+a.toFixed(2)+"</b>. True Black–Scholes at zero rates is "+bs(S,S,T,v,0,0,true).price.toFixed(2)+"."};}
+      const S=pick([40,80,100,150]),v=pick([0.16,0.24,0.32,0.48]),d=pick([1,5,21,63]);
+      const a=S*v*Math.sqrt(d/252);
+      return{kind:"One standard deviation",unit:"$",a:a,tol:Math.max(0.03,a*0.02),
+        q:"A <b>"+S+"</b> stock at <b>"+(v*100).toFixed(0)+"%</b> volatility. How big is a one-standard-deviation move over <b>"+d+"</b> trading day"+(d>1?"s":"")+"?",
+        w:"S · σ · √(d/252) = "+S+" × "+v.toFixed(2)+" × √("+d+"/252) = "+S+" × "+v.toFixed(2)+" × "+Math.sqrt(d/252).toFixed(4)+" = <b>"+a.toFixed(2)+"</b>."};
+    }
+    if(tier===2){
+      const t=Math.floor(R()*3);
+      if(t===0){const n=pick([2,4,12,52]),one=pick([6,8,10,12,16]);
+        const a=Math.sqrt(n)*one;
+        return{kind:"Rolling versus buying once",unit:"$",a:a,tol:Math.max(0.05,a*0.015),
+          q:"An option covering the whole horizon costs <b>"+one+"</b>. What does it cost to roll <b>"+n+"</b> shorter ones over the same horizon?",
+          w:"Price scales with √T, so n options of tenor T/n cost √n times the one-shot price: √"+n+" × "+one+" = "+Math.sqrt(n).toFixed(3)+" × "+one+" = <b>"+a.toFixed(2)+"</b>."};}
+      if(t===1){const S=pick([100,120]),K=S,r=pick([0.03,0.05,0.08]),T=pick([0.25,0.5,1]),
+          C0=pick([4,5,6,7,8]);
+        const a=C0-(S-K*Math.exp(-r*T));
+        return{kind:"Parity, solved for the put",unit:"$",a:a,tol:0.02,
+          q:"Stock at <b>"+S+"</b>, the <b>"+K+"</b> call with <b>"+(T*12).toFixed(0)+"</b> months to run is <b>"+C0.toFixed(2)+"</b>, rates <b>"+(r*100).toFixed(0)+"%</b>, no dividend. What is the put?",
+          w:"P = C − S + K·e^(−rT) = "+C0.toFixed(2)+" − "+S+" + "+(K*Math.exp(-r*T)).toFixed(4)+" = <b>"+a.toFixed(3)+"</b>."};}
+      const veg=pick([120,250,417,880]),mv=pick([1,2,3,5]),sgn=pick([1,-1]);
+      const a=veg*mv*sgn;
+      return{kind:"Vega into dollars",unit:"$",a:a,tol:Math.max(1,Math.abs(a)*0.005),
+        q:"Your book is <b>"+(veg>0?"+":"")+veg+"</b> vega. Implied volatility "+(sgn>0?"rises":"falls")+" by <b>"+mv+"</b> point"+(mv>1?"s":"")+". What is the P&L?",
+        w:"Vega is dollars per volatility point: "+veg+" × "+(sgn>0?"+":"−")+mv+" = <b>"+(a>0?"+":"")+a.toFixed(0)+"</b>. Sign convention: a positive vega book gains when implieds rise."};
+    }
+    const t=Math.floor(R()*3);
+    if(t===0){const n=pick([10,20,50,100]),sv=pick([0.30,0.35,0.40,0.50]),
+        rho=pick([0.15,0.25,0.35,0.50,0.70]);
+      const a=sv*Math.sqrt(rho+(1-rho)/n)*100;
+      return{kind:"Index volatility from correlation",unit:"%",a:a,tol:0.15,
+        q:"<b>"+n+"</b> equally weighted names, each at <b>"+(sv*100).toFixed(0)+"%</b> volatility, average pairwise correlation <b>"+rho.toFixed(2)+"</b>. Where does the index trade?",
+        w:"σ_I = σ·√(ρ + (1−ρ)/n) = "+(sv*100).toFixed(0)+"% × √("+rho.toFixed(2)+" + "+((1-rho)/n).toFixed(4)+") = <b>"+a.toFixed(2)+"%</b>. The ρ = 0 floor is "+(sv/Math.sqrt(n)*100).toFixed(2)+"% and the ceiling is "+(sv*100).toFixed(0)+"%."};}
+    if(t===1){const n=pick([20,50,100]),sv=pick([0.35,0.40,0.45]),si=pick([0.18,0.22,0.25,0.28]);
+      const a=((si*si/(sv*sv))-1/n)/(1-1/n);
+      return{kind:"Implied correlation",unit:"ρ",a:a,tol:0.01,
+        q:"<b>"+n+"</b> names at <b>"+(sv*100).toFixed(0)+"%</b>, the index at <b>"+(si*100).toFixed(0)+"%</b>. What correlation is being quoted?",
+        w:"ρ = (σ_I²/σ² − 1/n) / (1 − 1/n) = ("+(si*si/(sv*sv)).toFixed(4)+" − "+(1/n).toFixed(4)+") / "+(1-1/n).toFixed(4)+" = <b>"+a.toFixed(4)+"</b>."};}
+    const S=pick([50,100,200]),g=pick([0.02,0.04,0.06]),mv=pick([1,2,3,5]);
+    const a=0.5*g*Math.pow(S*mv/100,2)*100;
+    return{kind:"Gamma P&L on a move",unit:"$",a:a,tol:Math.max(0.5,a*0.02),
+      q:"You are long <b>100</b> options on a <b>"+S+"</b> stock with a gamma of <b>"+g.toFixed(2)+"</b> per option. The stock moves <b>"+mv+"%</b>. What is the gamma P&L, ignoring theta?",
+      w:"½ Γ (ΔS)² per option = ½ × "+g.toFixed(2)+" × ("+(S*mv/100).toFixed(2)+")² = "+(0.5*g*Math.pow(S*mv/100,2)).toFixed(4)+", times 100 options = <b>"+a.toFixed(2)+"</b>. It is the same whichever way the stock went."};
+  }
+  function next(){
+    cur=make();
+    E("dKind").textContent=cur.kind;E("dText").innerHTML=cur.q;
+    E("dUnit").textContent=cur.unit;E("dInput").value="";
+    E("drill").classList.remove("done");
+    focusSoft(E("dInput"),E("drill"));
+  }
+  function submit(){
+    if(!cur||E("drill").classList.contains("done"))return;
+    const raw=parseFloat(String(E("dInput").value).replace(/[$,%\s]/g,""));
+    asked++;
+    const ok=isFinite(raw)&&Math.abs(raw-cur.a)<=cur.tol;
+    if(ok){sc++;streak++;if(streak>best)best=streak;}else streak=0;
+    E("dVerdict").textContent=ok?"CORRECT":("NOT QUITE — the answer is "+cur.a.toFixed(2));
+    E("dVerdict").className="vd "+(ok?"ok":"no");
+    E("dWork").innerHTML=cur.w;
+    E("dScore").textContent=sc+" / "+asked;
+    E("dStreak").textContent=String(streak);E("dBest").textContent=String(best);
+    E("drill").classList.add("done");
+  }
+  E("dSubmit").addEventListener("click",submit);
+  E("dInput").addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+  E("dNext").addEventListener("click",next);
+  E("dSkip").addEventListener("click",()=>{streak=0;E("dStreak").textContent="0";next();});
+  [1,2,3].forEach(k=>E("dT"+k).addEventListener("click",()=>{
+    tier=k;[1,2,3].forEach(j=>E("dT"+j).setAttribute("aria-pressed",j===k?"true":"false"));
+    next();}));
+  window.drawDrill=next;
+  window.__drill=()=>{const o=[];for(let i=0;i<3;i++){tier=i+1;for(let j=0;j<400;j++)o.push(make());}tier=1;return o;};
+})();
+
+function drawAll(){
+  drawHero();drawDeck();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();
+}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

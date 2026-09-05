@@ -519,3 +519,39 @@ Verified: a mixture of 85% at 18 vol and 15% at 42 vol has the variance of a sin
 Variance and shape are separate facts. Pricing a skewed chain at the ATM vol errs
 -73.9% at K=75 and +213.3% at K=125 while being only -2.0% at the money, which is
 why the practice survives: the model is right where it gets checked.
+
+## 16 · The Questions They Ask You  ✅ live (questions.html)
+
+Not from Natenberg's contents — from the gap between his contents and a desk. The
+series could explain every subject and still leave a reader unable to answer a
+question about one. Sixteen cards on three rungs (6 warm-up, 6 working, 4 hard) sharing
+one quantity-versus-axis renderer, then six questions at full length in increasing
+difficulty, then a randomized drill at the same three tiers (nine generators).
+
+Verified, and four of these were wrong in the first draft:
+
+- The 100/106 call spread at a spot of 130 is 5.3478 and its ceiling is 5.8812, not
+  6.00. The shortfall splits exactly: 0.1188 of interest, 0.5334 of the 11.9% chance
+  of finishing below 106. At a spot of 200 it is 5.8807 and stops.
+- Four quarterly at-the-money options cost 19.9342 against 9.9477 for the year —
+  2.0039x. Monthly 3.472x, weekly 7.230x, daily 15.916x, all tracking sqrt(n).
+- A vega-neutral package of 3.3375 one-month options against one one-year has gamma
+  0.16855 against the far option's 0.01532 — 11.00x — and is taken in for a credit of
+  1.6805. The bill is theta: 0.157/day at the open, but it accelerates, and a month in
+  which the stock never moves costs 9.58. Breakeven needs a 3.5% move. The first draft
+  said "roughly 3.30 of decay", which treated theta as linear and was wrong by 3x.
+- Parity off by 0.4801 on a 100 stock solves to a 0.9626% borrow — $48.13 on a hundred
+  shares over six months, the whole gap.
+- Twenty names at 40 vol with the index at 25 gives rho = 0.35855. One name halving to
+  20 moves the index 25.000% -> 24.387%, six-tenths of a point; halving all twenty
+  takes it to 12.500%.
+- Sold at 30 implied, realized exactly 25.000% both times: +6.117 if the loud six-week
+  window sits at the start, -2.605 if it sits at the end. A spread of 8.72 on an option
+  sold for 11.92, and the textbook vega answer is 1.976. The first draft carried -3.91
+  from a prototype whose path construction differed from the shipped one by half a step;
+  the harness caught it.
+- Card 1 quoted the 95 and 105 calls as 9.98 and 4.31. They are 10.79 and 5.78.
+
+The check-16 harness runs 40 deterministic assertions plus a sweep that evaluates all
+16 card figures across their own x-ranges for non-finite values, and 1200 generated
+drill questions for a finite answer, prompt, working and tolerance.

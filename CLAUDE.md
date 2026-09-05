@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. All fifteen pages live.
+no dependencies. All sixteen pages live.
 
 ## Before you change anything
 
@@ -115,11 +115,22 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all fifteen pages are live. Pages 12-15 were added after mapping
+Nothing unbuilt — all sixteen pages are live. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
 catalogue (10-13), and models-versus-reality (23) all missing.
+
+Page 16 is a different kind of page and worth understanding before adding another.
+It teaches nothing new — it re-asks the other fifteen subjects in the shape a question
+comes in, on a difficulty ladder, because recognising gamma and *answering* "you are
+long a 25-delta call and the stock rallies five percent, are you longer?" are
+different skills. Its unit is the card: a question, four options where three are real
+misconceptions, a reason, and a figure spec the shared renderer draws. Adding a card
+is a ~12-line object in the `CARDS` array; the renderer takes `{x0,x1,f:[...],col,
+dash,marks,extra}` and works out its own y-range. Keep the tiers honest — a warm-up
+card must have exactly one right answer, and a hard card must have an answer that is
+a *range*, because that is what separates the rungs.
 
 Still uncovered from that mapping, if more is ever wanted: hedging with options from
 a corporate or portfolio seat (his ch 17), and expiration P&L taught from scratch
