@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Two Rulers — Options, visually</title>
+<meta name="description" content="A standard deviation and a mean absolute deviation are different rulers laid against the same distribution. An option pays for one and the screen quotes the other, and 0.7979 is only the normal distribution&#x27;s answer.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Two Rulers — Options, visually">
+<meta property="og:description" content="A standard deviation and a mean absolute deviation are different rulers laid against the same distribution. An option pays for one and the screen quotes the other, and 0.7979 is only the normal distribution&#x27;s answer.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 18 · Two Rulers</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Two rulers</span><i></i></a>
+  <a href="#c2"><span>What a straddle buys</span><i></i></a>
+  <a href="#c3"><span>Only for a normal</span><i></i></a>
+  <a href="#c4"><span>Fewer wins, bigger</span><i></i></a>
+  <a href="#c5"><span>Measuring with absolutes</span><i></i></a>
+  <a href="#c6"><span>Drill</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 18</div>
+    <h1>The straddle measures <em>something else</em></h1>
+    <p class="sub">A standard deviation and an average absolute move are two different rulers laid against the same distribution. An option pays for one of them and the screen quotes the other, and the gap between the two is twenty-five percent of a number people compare to two decimal places.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede"><a href="catalyst.html">Page 03</a> established the identity in one line: a straddle costs about <code>0.7979·S·σ√T</code>, so the implied move it quotes is about 80% of a one-sigma move. This page is about why that number is 0.7979, what happens when it is not, and what the difference does to a position.</p>
+  <ol>
+    <li><b>Chapter 02 is the conversion to have automatic.</b> Divide a straddle-implied move by <b>0.7979</b> — equivalently multiply by <b>1.2533</b> — to get a standard deviation. Reading the implied move <em>as</em> one sigma understates volatility by <b>20.2%</b> of itself.</li>
+    <li><b>Chapter 03 is the part page 03 does not cover.</b> That 0.7979 is <em>the normal distribution's</em> ratio and nothing more. Under fatter tails it falls — to exactly <b>3/4</b> for a t with six degrees of freedom, and to <b>1/√2</b> for a t with four.</li>
+    <li><b>Chapter 04 is the one that surprises people.</b> Fat tails make the stock exceed the straddle-implied move <em>less</em> often, not more. The straddle buyer wins less frequently and wins bigger.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>σ</td><td>Standard deviation. The root of the average <em>squared</em> deviation.</td></tr>
+      <tr><td>MAD</td><td>Mean absolute deviation — the average of |x − mean|, with no squaring anywhere. A different ruler, not an approximation to the first.</td></tr>
+      <tr><td>√(2/π)</td><td>0.797885. The MAD-to-sigma ratio <em>for a normal distribution</em>.</td></tr>
+      <tr><td>√(π/2)</td><td>1.253314. Its reciprocal, which converts the other way.</td></tr>
+      <tr><td>Implied move</td><td>The straddle price as a percentage of spot. An expected absolute move, not a standard deviation.</td></tr>
+      <tr><td>t(ν)</td><td>Student's t with ν degrees of freedom — the standard fat-tailed comparison. Lower ν, fatter tails.</td></tr>
+      <tr><td>Exceedance</td><td>How often the realized move lands outside the implied one.</td></tr>
+      <tr><td>Efficiency</td><td>How much data an estimator needs to reach a given precision, relative to the best available.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Two rulers, one distribution</h2>
+    <p class="dek">Squaring the deviations before averaging them is a choice, and it produces a different number from not squaring them.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Ask how spread out a distribution is and there are two honest answers. Average the absolute deviations, or average the squared deviations and take the root. Both are legitimate; neither is an approximation to the other.</p>
+    <p>The second is the <b>standard deviation</b>, and it dominates finance for reasons that are mostly about convenience: variances add, so a two-day variance is twice a one-day variance and the √T scaling of <a href="black-scholes.html">page 01</a> follows immediately. Absolute deviations do not add like that, which is why nobody builds a model on them.</p>
+    <p>The first is the <span class="term" data-t="Mean absolute deviation" data-def="The average of the absolute distances from the mean, with no squaring. A measure of spread in its own right, not an approximation to the standard deviation — and the one an option payoff actually references.">mean absolute deviation</span>. It has no such algebra, but it has something else: it is what an option pays. A straddle held to expiry pays <code>|S<sub>T</sub> − K|</code>, an absolute value with no square in sight.</p>
+    <p>Because squaring weights the far observations more heavily, the standard deviation always comes out the larger of the two. For a normal distribution the ratio is <b>√(2/π) = 0.797885</b>, and it is worth seeing where that comes from — it is the average of |z| under a standard normal, which is a one-line integral rather than a fitted constant.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The same distribution, measured twice</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>The distribution</span>
+            <span><i class="swl" style="background:var(--verm)"></i>One σ</span>
+            <span><i class="swl" style="background:var(--moss)"></i>The mean absolute move</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>The green line sits inside the red one, always, and by a fixed 20% for a normal. Everything on this page is a consequence of that gap.</figcaption>
+  </figure>
+
+  <div class="mline">MAD = E|X − μ|          σ = √( E[(X − μ)²] )          for a normal, MAD = √(2/π)·σ ≈ 0.7979·σ</div>
+  <p class="mread">Reads as: <b>average the distances, or average the squared distances and take the root.</b> The squaring is what makes the second larger, because it pays disproportionate attention to the observations far from the middle.</p>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Why is the standard deviation always at least as large as the mean absolute deviation?</p>
+    <div class="opts">
+      <button>Because it uses more data</button>
+      <button data-ok="1">Because squaring before averaging weights large deviations more heavily, and the root does not undo that reweighting</button>
+      <button>Because it is measured from the median</button>
+      <button>They are equal for symmetric distributions</button>
+    </div>
+    <div class="ans"><b>The squaring reweights before the averaging.</b> This is Jensen's inequality doing the work — the root of a mean of squares is never below the mean of the absolute values, with equality only when every deviation is identical. It is also why the standard deviation is the more fragile of the two under fat tails, which is chapter 05.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>What a straddle actually buys</h2>
+    <p class="dek">The payoff is an absolute value, so the price is an expected absolute move. The screen then quotes it next to a volatility, which is a standard deviation.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A straddle struck at the forward pays <code>|S<sub>T</sub> − K|</code>. Its price is therefore the expected absolute move, discounted — and under Black–Scholes that expectation has a closed form which, for realistic vol-times, is almost exactly <b>0.7979·S·σ√T</b>.</p>
+    <p>Take a concrete one. A <b>30-day</b> straddle on a <b>$100</b> stock at <b>30 vol</b> costs <b>$6.860</b>. Quoted as an implied move that is <b>6.86%</b> of spot. The one-standard-deviation move over the same period is <code>0.30 × √(30/365)</code> = <b>8.60%</b>. The ratio of the two is <b>0.7976</b>, which is the theoretical 0.797885 to three decimals.</p>
+    <p>So the conversions, both worth having automatic:</p>
+    <p>Going from a quoted implied move to a volatility, <b>divide by 0.7979</b> or multiply by <b>1.2533</b>. Going the other way, multiply by 0.7979. And treating the implied move as though it were one sigma <b>understates the volatility by 20.2%</b> of itself — or, from the other end, the true sigma is <b>25.3% larger</b> than the number being quoted.</p>
+    <p>The practical consequence is about frequency. If you think the implied move is one sigma you expect the stock to breach it <b>31.7%</b> of the time. It actually breaches it <b>42.5%</b> of the time, because the breakeven sits at 0.80 sigma rather than 1.00. That is a gap of nearly <b>eleven percentage points</b> in how often a straddle you bought finishes in the money, and it is the single most common miscalibration in reading an implied move.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The exact straddle, the approximation, and the sigma behind them</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Exact Black–Scholes</span>
+            <span><i class="swl" style="background:var(--verm)"></i>0.7979·S·σ√T</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>One σ</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The blue and red lines are indistinguishable at any realistic vol-time — the approximation is high by 0.03% at 30 vol and 30 days. The gold line is 25% above both, and is what people mean when they say sigma.</figcaption>
+  </figure>
+
+  <div class="mline">σ = implied move ÷ 0.7979 = implied move × 1.2533          implied move = 0.7979 × σ</div>
+  <p class="mread">Reads as: <b>the quoted move and the standard deviation differ by a fixed factor of about a quarter.</b> Which one a sentence means is almost never stated, and the two get compared to each other constantly.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Push the volatility up and watch the approximation drift above the exact price. Find the vol where the error first exceeds a tenth of a percent.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"v":0.30,"T":30}' data-focus="cv2">30 vol, 30 days</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"v":0.80,"T":30}' data-focus="cv2">80 vol</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"v":0.30,"T":365}' data-focus="cv2">A year out</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A screen shows an implied move of 5%. What is the one-standard-deviation move?</p>
+    <div class="opts">
+      <button>5% — they are the same thing</button>
+      <button data-ok="1">6.27%, being 5% ÷ 0.7979. The implied move is the expected absolute move, which is about 80% of a sigma</button>
+      <button>4.0%</button>
+      <button>10%, since the move is two-sided</button>
+    </div>
+    <div class="ans"><b>6.27%.</b> And the difference matters for more than pedantry: at 5% you expect a breach 31.7% of the time and get 42.5%. Any comparison between a straddle-implied move and a historical standard deviation has to convert one to the other first, or it is off by a quarter before it starts.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>0.7979 is the normal's number, and nothing else's</h2>
+    <p class="dek">Change the shape of the tails and the ratio moves. For a t with six degrees of freedom it is exactly three quarters.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Everything in chapter 02 assumed a normal distribution. The straddle price is an expectation of an absolute value and does not care what shape produced it — but the conversion to a standard deviation does, entirely.</p>
+    <p>Under fatter tails the standard deviation is inflated by the extremes far more than the mean absolute deviation is, so the ratio between them <em>falls</em>. The exact values are unusually clean:</p>
+    <p>A <b>uniform</b> distribution, with no tails at all, gives <b>√3/2 = 0.8660</b>. The <b>normal</b> gives <b>0.7979</b>. A Student <b>t with 6</b> degrees of freedom gives exactly <b>3/4</b>. A <b>t with 4</b> gives exactly <b>1/√2 = 0.7071</b>, which is also the <b>Laplace</b> value. A <b>t with 3</b> gives exactly <b>2/π = 0.6366</b>.</p>
+    <p>Now put that to work. A straddle quotes a 5% expected absolute move. Under a normal that implies a volatility of <b>6.27%</b>. If the true distribution is a t with 4 degrees of freedom — fat, but not absurd for a single name over a month — the same straddle implies <b>7.07%</b>, which is <b>12.8% higher</b>. The option price did not change. The number you wrote down next to it did.</p>
+    <p>This is a real and underappreciated wedge. Every implied volatility on a screen was produced by inverting a model that assumes a normal distribution of log returns. To the extent the truth has fatter tails, the ATM implied vol is a statement about the expected absolute move dressed up as a statement about a standard deviation — and the two drift apart in exactly the situations, like a single name into a binary event, where you care most.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The ratio, against how fat the tails are</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>MAD ÷ σ</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>The normal, 0.7979</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Named cases</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The curve approaches 0.7979 from below as the degrees of freedom rise. Everything to the left of the gold line is a distribution for which the standard conversion understates the volatility.</figcaption>
+  </figure>
+
+  <div class="derive">
+    <span class="lab">Where this comes from</span>
+    <p>For a standardized Student t with ν degrees of freedom, the mean absolute deviation and the standard deviation both have closed forms:</p>
+    <p><b>E|T| = 2√ν · Γ((ν+1)/2) ÷ ( √π · (ν−1) · Γ(ν/2) )</b> and <b>σ = √( ν/(ν−2) )</b>, so the ratio is the first divided by the second. The gamma functions collapse at small integer ν, which is why the values come out as recognizable constants — 2/π at ν = 3, 1/√2 at ν = 4, exactly 3/4 at ν = 6 — and why the limit as ν grows is √(2/π), the normal's value, approached from below.</p>
+    <p><b>Where it breaks:</b> the standard deviation only exists for ν &gt; 2, and the ratio is undefined below that — for a t with 2 degrees of freedom the variance is infinite while the mean absolute deviation is perfectly finite, so the straddle has a price and the volatility does not exist. That is not a pathology invented for a textbook; it is the formal version of the complaint that a single implied volatility cannot describe a distribution whose second moment is dominated by events that have not happened yet, which <a href="real-world.html">page 15</a> takes up directly. The Student t is also only a stand-in — real return distributions are skewed, and skew breaks the symmetry every formula here assumes.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Two markets quote the same 5% implied move, but one has visibly fatter tails. Which has the higher standard deviation?</p>
+    <div class="opts">
+      <button>They are the same — the implied move is the same</button>
+      <button data-ok="1">The fat-tailed one. Its MAD-to-sigma ratio is lower, so the same expected absolute move implies a larger sigma — 7.07% against 6.27% at four degrees of freedom</button>
+      <button>The thin-tailed one</button>
+      <button>You cannot tell without the skew</button>
+    </div>
+    <div class="ans"><b>The fat-tailed one, by 12.8%.</b> The straddle price pins the expected absolute move, and that is all it pins. Converting it to a standard deviation requires a distributional assumption, and the standard one — normality — is the assumption that produces the smallest answer of any realistic candidate.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>Fat tails mean fewer wins, not more</h2>
+    <p class="dek">The straddle buyer's hit rate falls as the tails fatten. The payouts, when they come, get larger.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Here is a result that runs against most people's instinct. If the distribution has fatter tails, does the stock exceed the straddle-implied move more often or less often?</p>
+    <p>Less often. Under a normal, the breach rate is <b>42.49%</b>. Under a t with 30 degrees of freedom it is <b>41.9%</b>; with 10, <b>40.7%</b>; with 6, <b>39.4%</b>; with 4, <b>37.4%</b>. Under a Laplace distribution the answer is exactly <b>e⁻¹ = 36.79%</b>.</p>
+    <p>The reason is that a fat-tailed distribution is not simply "more spread out." It is more concentrated in the middle <em>and</em> more spread in the extremes — that is what excess kurtosis means. The straddle prices the average absolute move, and the average is pulled upward by the rare large outcomes. So the breakeven sits further out relative to the bulk of the distribution, and the many quiet days fall short of it.</p>
+    <p>For a straddle buyer this is the whole character of the trade in one number. Fatter tails do not make the position win more often; they make it <em>lose small more often and win big less often</em>. The expected value can be identical while the path is completely different, which is <a href="questions.html">page 16</a>'s distinction between an edge and a distribution of outcomes arriving in the most concrete possible form.</p>
+    <p>And it explains something that otherwise looks like a puzzle: sellers of options report high hit rates in exactly the markets where their tail risk is worst. The hit rate is high <em>because</em> the tail is fat. Those are the same fact.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>How often the move is breached, against how fat the tails are</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Breach rate</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>The normal, 42.5%</span>
+            <span><i class="swl" style="background:var(--grey)"></i>What a one-sigma reading expects</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Two horizontal lines and a curve that sits between them. The distance from the grey line to the gold one is the error from confusing the two rulers; the slope of the red curve is the effect of the tails on top of it.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You buy a straddle in a market with fat tails. Compared to a normal market at the same price, what changes?</p>
+    <div class="opts">
+      <button>You win more often, because big moves are more likely</button>
+      <button data-ok="1">You win less often — 37.4% against 42.5% at four degrees of freedom — and by more when you do</button>
+      <button>Nothing, since the price is the same</button>
+      <button>You win the same amount but more often</button>
+    </div>
+    <div class="ans"><b>Less often, and larger.</b> Fat tails put more mass near zero as well as far out, and the near-zero mass is what determines the hit rate. This is also why a seller's high hit rate is not evidence of an edge — in the fattest-tailed markets it is a mechanical consequence of the shape, and the losses are waiting in the part of the distribution the hit rate does not describe.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Measuring volatility with absolute values</h2>
+    <p class="dek">The same choice, made on realized data rather than implied. One estimator is steadier and one is honest, and they are not the same one.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The distinction is not only about pricing. Estimating realized volatility offers the identical choice: average the squared returns and take a root, or average the absolute returns and scale by <b>√(π/2) = 1.2533</b>.</p>
+    <p>Under a genuinely normal distribution the squared-return estimator wins, though not by much. Its sampling variance is <b>σ²/2n</b> against the absolute estimator's <b>σ²(π/2 − 1)/n = 0.5708σ²/n</b>, a relative efficiency of <b>87.6%</b> — the absolute version needs <b>14.2%</b> more data for the same precision. Its spread of estimates is wider by <b>√((π/2 − 1) ÷ ½) = 1.068</b>, and the figure below resamples enough times to land there.</p>
+    <p>Now contaminate it. Let 6% of days come from a distribution with four times the volatility — a mild version of what a real return series looks like. The true sigma is <b>1.3784</b>. The squared estimator still converges to it. The absolute estimator converges to <b>1.1800</b> — which is √(π/2) times the mixture's own expected absolute value, and works out to <b>85.6%</b> of the truth. Meanwhile the spreads swap places: the squared estimator's roughly triples while the absolute one's barely moves, leaving it about <b>half</b> as wide.</p>
+    <p>That is the trade, and it is not a free lunch in either direction. The absolute estimator is roughly <b>twice as stable</b> under contamination and <b>biased low</b> for the standard deviation, because it is faithfully measuring a different quantity — the mean absolute deviation — whose relationship to sigma just moved. The squared estimator remains unbiased and becomes wildly noisy.</p>
+    <p>Neither is wrong. The question is which quantity you actually need. If you are sizing against a tail, you want the noisy unbiased one and you should expect it to jump around. If you are tracking whether today is busier than last week, the stable one is telling you what you asked, and its bias is a constant you can ignore.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Two estimators over many samples, clean and contaminated</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>Root mean square</span>
+            <span><i class="sw" style="background:var(--moss)"></i>1.2533 × mean |r|</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>The truth</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Drag the contamination up from zero. The blue histogram widens and stays centered; the green one holds its width and walks to the left. Stability and honesty are trading against each other.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A desk switches from squared returns to absolute returns for its realized-vol number and finds it reads consistently low. Is the new estimator broken?</p>
+    <div class="opts">
+      <button>Yes — it should be scaled differently</button>
+      <button data-ok="1">No. It is unbiased for the mean absolute deviation, and the 1.2533 conversion to sigma only holds for a normal. Fat tails make it read low by construction</button>
+      <button>Yes, the sample is too small</button>
+      <button>No, and the old estimator was the broken one</button>
+    </div>
+    <div class="ans"><b>It is measuring the right thing and converting with the wrong constant.</b> Exactly chapter 03's problem on realized data instead of implied. The estimator is faithful; the 1.2533 that turns it into a volatility assumes a shape the data does not have, and the shortfall is a rough measure of how far from normal the returns are.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>Drill it</h2>
+    <p class="dek">Converting between the two rulers, in both directions, until it is automatic.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The easy tier is the conversion and the straddle price. The hard tier asks for breach rates and for the ratio under distributions that are not normal.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:170px"><span class="k">Tier</span>
+          <div class="seg" style="margin-top:5px;max-width:240px">
+            <button id="dEasy" aria-pressed="true">Converting</button>
+            <button id="dHard" aria-pressed="false">Consequences</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>Two constants carry this entire page: 0.7979 one way and 1.2533 the other. The third worth memorizing is 42.5%.</figcaption>
+  </figure>
+
+  <div class="prose" style="margin-top:46px">
+    <p>Six questions across the page.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">What does a straddle held to expiry actually pay?</p>
+    <div class="opts">
+      <button>The standard deviation of the move</button>
+      <button data-ok="1">The absolute value of the move, |S<sub>T</sub> − K| — so its price is an expected absolute deviation, with no squaring anywhere in it</button>
+      <button>The variance of the move</button>
+      <button>The larger of the call and the put</button>
+    </div>
+    <div class="ans"><b>An absolute value.</b> Which is why the price references the mean absolute deviation rather than the standard deviation, and why a constant appears the moment you try to quote it as a volatility.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">A screen shows a 4% implied move. What is the one-sigma move?</p>
+    <div class="opts">
+      <button>4% — the same number</button>
+      <button data-ok="1">5.01%, being 4% × 1.2533</button>
+      <button>3.19%, being 4% × 0.7979</button>
+      <button>8%</button>
+    </div>
+    <div class="ans"><b>5.01%.</b> The third option applies the conversion backwards, which is the error to watch for — 0.7979 takes you from sigma to the implied move, and 1.2533 takes you back.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 02</span>
+    <p class="q">How often does the stock breach the straddle-implied move, under a normal distribution?</p>
+    <div class="opts">
+      <button>31.7% — it is a one-sigma move</button>
+      <button data-ok="1">42.5%, because the breakeven sits at 0.80 sigma rather than 1.00</button>
+      <button>50%, by symmetry</button>
+      <button>68%</button>
+    </div>
+    <div class="ans"><b>42.5%.</b> The first option is the answer to a different question — how often a genuine one-sigma move is breached — and the eleven-point gap between them is the practical cost of confusing the two rulers.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 03</span>
+    <p class="q">For a Student t with six degrees of freedom, what is the ratio of MAD to sigma?</p>
+    <div class="opts">
+      <button>0.7979, the same as any distribution</button>
+      <button data-ok="1">Exactly 3/4 — lower than the normal, because fatter tails inflate sigma more than they inflate the MAD</button>
+      <button>0.8660</button>
+      <button>1.2533</button>
+    </div>
+    <div class="ans"><b>Exactly three quarters.</b> The ratio is a property of the distribution's shape, not a universal constant: 0.8660 for a uniform, 0.7979 for a normal, 3/4 at six degrees of freedom, 1/√2 at four and 2/π at three.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 04</span>
+    <p class="q">Fatter tails, same straddle price. Does the stock breach the implied move more or less often?</p>
+    <div class="opts">
+      <button>More often — the tails are fatter</button>
+      <button data-ok="1">Less often. 37.4% at four degrees of freedom against 42.5% for a normal, because the extra mass sits near zero as well as far out</button>
+      <button>Exactly as often, since the price is the same</button>
+      <button>It depends on the skew</button>
+    </div>
+    <div class="ans"><b>Less often, and bigger when it does.</b> This is why a high hit rate on short options is not evidence of an edge — in the fattest markets it is a mechanical property of the shape, and the losses live in the part of the distribution a hit rate does not describe.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 05</span>
+    <p class="q">Which realized-volatility estimator is preferable?</p>
+    <div class="opts">
+      <button>Always the root mean square — it is unbiased</button>
+      <button data-ok="1">It depends what you need. RMS is unbiased for sigma and noisy under contamination; 1.2533×mean|r| is about twice as stable and reads 85.6% of the truth once tails appear</button>
+      <button>Always the absolute one — it is robust</button>
+      <button>They give the same answer</button>
+    </div>
+    <div class="ans"><b>Neither dominates.</b> Under a clean normal the RMS estimator is 87.6% efficient — better, but only just. Under contamination the absolute estimator is far steadier and biased low, because it is faithfully measuring a mean absolute deviation whose conversion to sigma has changed underneath it.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">The straddle identity here assumes a strike at the forward and no rates or dividends; away from the forward the price is no longer a pure expected absolute move and the 0.7979 stops applying cleanly, which is why the number belongs to the at-the-money straddle specifically and not to option prices in general. The approximation is also always high — it truncates an expansion — by 0.03% at thirty vol and thirty days and by 0.22% at eighty vol, so it is a quoting convenience rather than a pricing tool. Every distribution compared in chapters 03 and 04 is symmetric, and real equity returns are not; skew breaks the symmetry that lets a single ratio describe both sides of the move, and a put-side implied move and a call-side one are genuinely different numbers on a skewed surface. The Student t is a convenient stand-in for fat tails rather than a claim about what returns are, and its degrees-of-freedom parameter is not something anyone can estimate reliably — <a href="real-world.html">page 15</a> is about that gap. The estimator comparison in chapter 05 uses a two-regime contamination, which is a mild caricature of a real return series: actual volatility clusters, so the extreme days arrive together rather than independently, and that makes both estimators noisier than shown here.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* line() takes arrays, not a function — passing one draws nothing at all.
+   Anything plotted from a formula on this page goes through here. */
+function curve(o, f, col, w, dash) {
+  const n = 260, xs = [], ys = [];
+  for (let i = 0; i <= n; i++) {
+    const x = o.x0 + (o.x1 - o.x0) * i / n;
+    xs.push(x); ys.push(f(x));
+  }
+  line(o, xs, ys, col, w, dash);
+}
+
+/* ── the two rulers ──────────────────────────────────────────────────────
+   MAD_over_sigma is the whole page in one function. For a normal it is
+   sqrt(2/pi); everything else here is that number for some other shape. */
+const ROOT_2_PI = Math.sqrt(2 / Math.PI);      /* 0.797885 — sigma to implied move */
+const ROOT_PI_2 = Math.sqrt(Math.PI / 2);      /* 1.253314 — and back again */
+
+/* log-gamma, so the Student-t ratio survives large degrees of freedom.
+   Computing Gamma directly overflows around nu = 350 and returns NaN, which
+   is exactly how the first draft of this page lost its right-hand tail. */
+const LANCZOS = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+  -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+  9.9843695780195716e-6, 1.5056327351493116e-7];
+function lgamma(z) {
+  if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lgamma(1 - z);
+  z -= 1;
+  let x = 0.99999999999980993;
+  for (let i = 0; i < 8; i++) x += LANCZOS[i] / (z + i + 1);
+  const t = z + 7.5;
+  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+}
+/* MAD / sigma for a standardized Student t. Exact, in log space:
+     E|T| = 2 sqrt(v) G((v+1)/2) / ( sqrt(pi) (v-1) G(v/2) )
+     sd   = sqrt( v / (v-2) )
+   The gammas collapse at small integer v, which is why the values come out
+   as 2/pi, 1/sqrt(2) and exactly 3/4. */
+function tRatio(v) {
+  if (!(v > 2)) return NaN;
+  const logAbs = Math.log(2) + 0.5 * Math.log(v) + lgamma((v + 1) / 2)
+    - 0.5 * Math.log(Math.PI) - Math.log(v - 1) - lgamma(v / 2);
+  return Math.exp(logAbs) / Math.sqrt(v / (v - 2));
+}
+const NAMED = [
+  { n: "Uniform", r: Math.sqrt(3) / 2, note: "no tails at all" },
+  { n: "Normal", r: ROOT_2_PI, note: "what every model assumes" },
+  { n: "t, 6 df", r: 0.75, note: "exactly three quarters" },
+  { n: "t, 4 df", r: 1 / Math.SQRT2, note: "same as a Laplace" },
+  { n: "t, 3 df", r: 2 / Math.PI, note: "exactly 2/pi" }
+];
+
+/* ── straddles ───────────────────────────────────────────────────────────
+   Exact at-the-money-forward Black-Scholes, and the approximation people
+   quote. Keeping both lets the page show the error rather than assert it. */
+const straddleExact = (S, v, T) => 2 * S * (2 * ncdf(v * Math.sqrt(T) / 2) - 1);
+const straddleApprox = (S, v, T) => ROOT_2_PI * S * v * Math.sqrt(T);
+const impliedMove = (S, v, T) => straddleExact(S, v, T) / S;
+const oneSigma = (v, T) => v * Math.sqrt(T);
+/* the conversions the chapter exists to make automatic */
+const moveToSigma = m => m * ROOT_PI_2;
+const sigmaToMove = s => s * ROOT_2_PI;
+
+/* ── how often the move is breached ──────────────────────────────────────
+   Normal case is closed form. For the t we need P(|T| > ratio) with T
+   standardized, which is a numeric integral — cheap enough at this size and
+   more honest than a simulation that would wobble between reloads. */
+const breachNormal = () => 2 * (1 - ncdf(ROOT_2_PI));
+function tPdfStd(x, v) {                       /* standardized t density */
+  const s = Math.sqrt(v / (v - 2));
+  const y = x * s;
+  const lg = lgamma((v + 1) / 2) - lgamma(v / 2) - 0.5 * Math.log(v * Math.PI)
+    - ((v + 1) / 2) * Math.log(1 + y * y / v);
+  return Math.exp(lg) * s;
+}
+function breachT(v) {
+  if (!(v > 2)) return NaN;
+  const a = tRatio(v);
+  /* integrate the centre and subtract, which converges far faster than
+     chasing a fat tail out to infinity */
+  const N = 4000, hi = a;
+  let s = 0;
+  for (let i = 0; i < N; i++) {
+    const x0 = hi * i / N, x1 = hi * (i + 1) / N, xm = (x0 + x1) / 2;
+    s += (tPdfStd(x0, v) + 4 * tPdfStd(xm, v) + tPdfStd(x1, v)) * (x1 - x0) / 6;
+  }
+  return Math.max(0, 1 - 2 * s);
+}
+/* what someone expects if they read the implied move as one sigma */
+const breachOneSigma = () => 2 * (1 - ncdf(1));
+
+/* ── estimating volatility two ways ──────────────────────────────────────
+   Same sample, two estimators. The contamination is a two-regime mixture,
+   which is the mildest departure from normality worth drawing. */
+function estimatorRun(seed, n, contam, mult, trials) {
+  const rmsAll = [], madAll = [];
+  let s = (seed | 0) || 12345;
+  const u = () => { s ^= s << 13; s |= 0; s ^= s >>> 17; s ^= s << 5; s |= 0; return (s >>> 0) / 4294967296; };
+  let spare = null;
+  const nrm = sd => {
+    if (spare !== null) { const z = spare; spare = null; return sd * z; }
+    let a = 0, b = 0;
+    while (a === 0) a = u();
+    while (b === 0) b = u();
+    const q = Math.sqrt(-2 * Math.log(a));
+    spare = q * Math.sin(2 * Math.PI * b);
+    return sd * q * Math.cos(2 * Math.PI * b);
+  };
+  for (let t = 0; t < trials; t++) {
+    let ss = 0, sa = 0;
+    for (let i = 0; i < n; i++) {
+      const x = (contam > 0 && u() < contam) ? nrm(mult) : nrm(1);
+      ss += x * x; sa += Math.abs(x);
+    }
+    rmsAll.push(Math.sqrt(ss / n));
+    madAll.push(ROOT_PI_2 * (sa / n));
+  }
+  const mean = a => a.reduce((p, q) => p + q, 0) / a.length;
+  const sdev = a => { const m = mean(a); return Math.sqrt(a.reduce((p, q) => p + (q - m) * (q - m), 0) / (a.length - 1)); };
+  const truth = Math.sqrt((1 - contam) * 1 + contam * mult * mult);
+  return { rms: rmsAll, mad: madAll, truth: truth,
+    rmsMean: mean(rmsAll), madMean: mean(madAll),
+    rmsSd: sdev(rmsAll), madSd: sdev(madAll) };
+}
+
+/* ══════════ hero ══════════ */
+(function () {
+  const cv = document.getElementById("heroCv"); let w, h, g, raf, t0 = 0;
+  function size() {
+    const dpr = window.devicePixelRatio || 1;
+    w = cv.clientWidth; h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr;
+    g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function draw(ph) {
+    g.fillStyle = C("--chalk"); g.fillRect(0, 0, w, h);
+    const padX = w * 0.08, gw = w - padX * 2, base = h * 0.80, amp = h * 0.46;
+    const mid = padX + gw / 2;
+    const sc = gw / 8;                    /* pixels per sigma */
+    /* the normal curve */
+    g.strokeStyle = C("--hair"); g.lineWidth = 2; g.beginPath();
+    for (let i = 0; i <= 240; i++) {
+      const z = -4 + 8 * i / 240;
+      const x = mid + z * sc, y = base - npdf(z) / 0.4 * amp;
+      if (i) g.lineTo(x, y); else g.moveTo(x, y);
+    }
+    g.stroke();
+    /* the two rulers, breathing in and out together */
+    const grow = 0.5 + 0.5 * Math.sin(ph * 0.6);
+    const pairs = [[1, "--verm"], [ROOT_2_PI, "--moss"]];
+    pairs.forEach(([r, col], k) => {
+      const rr = r * grow;
+      g.strokeStyle = C(col); g.lineWidth = 2; g.globalAlpha = 0.9;
+      [-1, 1].forEach(sgn => {
+        const x = mid + sgn * rr * sc;
+        g.beginPath();
+        g.moveTo(x, base);
+        g.lineTo(x, base - npdf(sgn * rr) / 0.4 * amp - 8 - k * 10);
+        g.stroke();
+      });
+      g.globalAlpha = 1;
+    });
+    g.strokeStyle = C("--ink"); g.globalAlpha = 0.25; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padX, base); g.lineTo(padX + gw, base); g.stroke();
+    g.globalAlpha = 1;
+  }
+  function tick(t) { if (!t0) t0 = t; draw((t - t0) / 1000); raf = requestAnimationFrame(tick); }
+  window.drawHero = function () {
+    size(); if (RM) { draw(2.6); return; }
+    if (raf) cancelAnimationFrame(raf); t0 = 0; raf = requestAnimationFrame(tick);
+  };
+})();
+
+/* ══════════ 01 — two rulers ══════════ */
+const s1 = { vol: 30, T: 30, S: 100 };
+(function () {
+  sliders(document.getElementById("ctl1"), [
+    { id: "a1", k: "vol", lbl: "σ", name: "Implied volatility", min: 5, max: 120, step: 1, fmt: v => v.toFixed(0) + "%" },
+    { id: "b1", k: "T", lbl: "T", name: "Days to expiry", min: 1, max: 365, step: 1, fmt: v => v.toFixed(0) + "d" },
+    { id: "c1", k: "S", lbl: "S", name: "Spot", min: 10, max: 500, step: 5, fmt: v => "$" + v.toFixed(0) }
+  ], s1, () => draw(), "c1");
+  window.draw1 = draw;
+  function draw() {
+    const v = s1.vol / 100, T = s1.T / 365;
+    const sig = oneSigma(v, T), mad = sig * ROOT_2_PI;
+    const lim = Math.max(sig * 3.6, 1e-4);
+    const o = Fig(document.getElementById("cv1"),
+      { h: 320, x0: -lim * 100, x1: lim * 100, y0: 0, y1: 0.44 / (sig * 100) * 1.12,
+        pad: { l: 62, r: 14, t: 14 } });
+    axes(o, x => x.toFixed(1) + "%", () => "", 7, 0);
+    const pdf = x => npdf(x / 100 / sig) / (sig * 100);
+    curve(o, pdf, C("--blue"), 2.2);
+    vline(o, sig * 100, C("--verm"), "1σ");
+    vline(o, -sig * 100, C("--verm"), "");
+    vline(o, mad * 100, C("--moss"), "MAD");
+    vline(o, -mad * 100, C("--moss"), "");
+    const stEx = straddleExact(s1.S, v, T);
+    document.getElementById("kv1").innerHTML = kvHTML([
+      ["One σ move", (sig * 100).toFixed(3) + "%", "verm"],
+      ["— in dollars", "$" + (sig * s1.S).toFixed(3)],
+      ["Mean absolute move", (mad * 100).toFixed(3) + "%", "moss"],
+      ["— in dollars", "$" + (mad * s1.S).toFixed(3)],
+      ["Ratio", (mad / sig).toFixed(6)],
+      ["— which is √(2/π)", ROOT_2_PI.toFixed(6), "grey"],
+      ["The straddle costs", "$" + stEx.toFixed(3), "blue"],
+      ["— as a % of spot", (stEx / s1.S * 100).toFixed(3) + "%"],
+      ["MAD is smaller by", ((1 - ROOT_2_PI) * 100).toFixed(2) + "%"]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — what a straddle buys ══════════ */
+const s2 = { v: 0.30, T: 30, S: 100 };
+(function () {
+  sliders(document.getElementById("ctl2"), [
+    { id: "a2", k: "v", lbl: "σ", name: "Implied volatility", min: 0.05, max: 1.50, step: 0.01, fmt: v => (v * 100).toFixed(0) + "%" },
+    { id: "b2", k: "T", lbl: "T", name: "Days to expiry", min: 1, max: 730, step: 1, fmt: v => v.toFixed(0) + "d" },
+    { id: "c2s", k: "S", lbl: "S", name: "Spot", min: 10, max: 500, step: 5, fmt: v => "$" + v.toFixed(0) }
+  ], s2, () => draw(), "c2");
+  window.draw2 = draw;
+  function draw() {
+    const T = s2.T / 365;
+    const o = Fig(document.getElementById("cv2"),
+      { h: 320, x0: 0.05, x1: 1.5, y0: 0,
+        y1: oneSigma(1.5, T) * s2.S * 1.12, pad: { l: 66, r: 14, t: 14 } });
+    axes(o, x => (x * 100).toFixed(0) + "%", y => "$" + y.toFixed(1), 6, 5);
+    curve(o, v => oneSigma(v, T) * s2.S, C("--ochre"), 2.0);
+    curve(o, v => straddleApprox(s2.S, v, T), C("--verm"), 2.6);
+    curve(o, v => straddleExact(s2.S, v, T), C("--blue"), 1.6, [6, 4]);
+    vline(o, s2.v, C("--ink"), (s2.v * 100).toFixed(0) + " vol");
+    const ex = straddleExact(s2.S, s2.v, T), ap = straddleApprox(s2.S, s2.v, T);
+    const mv = ex / s2.S, sg = oneSigma(s2.v, T);
+    document.getElementById("kv2").innerHTML = kvHTML([
+      ["Straddle, exact", "$" + ex.toFixed(4), "blue"],
+      ["Straddle, 0.7979 rule", "$" + ap.toFixed(4), "verm"],
+      ["Approximation error", ((ap / ex - 1) * 100).toFixed(4) + "%",
+        Math.abs(ap / ex - 1) > 0.001 ? "ochre" : "grey"],
+      ["Implied move", (mv * 100).toFixed(3) + "%"],
+      ["One σ move", (sg * 100).toFixed(3) + "%", "ochre"],
+      ["Ratio of the two", (mv / sg).toFixed(5)],
+      ["σ from the implied move", (moveToSigma(mv) / Math.sqrt(T) * 100).toFixed(3) + "%"],
+      ["Breach rate", (breachNormal() * 100).toFixed(2) + "%", "verm"],
+      ["— if you read it as 1σ", (breachOneSigma() * 100).toFixed(2) + "%", "grey"]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — only for a normal ══════════ */
+const s3 = { df: 6, move: 5 };
+(function () {
+  sliders(document.getElementById("ctl3"), [
+    { id: "a3", k: "df", lbl: "ν", name: "Degrees of freedom", min: 2.2, max: 60, step: 0.1, fmt: v => v.toFixed(1) },
+    { id: "b3", k: "move", lbl: "m", name: "The quoted implied move", min: 0.5, max: 20, step: 0.1, fmt: v => v.toFixed(1) + "%" }
+  ], s3, () => draw(), "c3");
+  window.draw3 = draw;
+  window.__named = () => NAMED;
+  function draw() {
+    const o = Fig(document.getElementById("cv3"),
+      { h: 320, x0: 2.2, x1: 60, y0: 0.60, y1: 0.90, pad: { l: 62, r: 14, t: 14 } });
+    axes(o, x => x.toFixed(0), y => y.toFixed(2), 6, 5);
+    curve(o, tRatio, C("--blue"), 2.4);
+    hline_(o, ROOT_2_PI, C("--ochre"), "normal, 0.7979");
+    const g = o.g;
+    [[3, 2 / Math.PI], [4, 1 / Math.SQRT2], [6, 0.75]].forEach(([v, r]) => {
+      g.save(); g.fillStyle = C("--verm");
+      g.beginPath(); g.arc(o.X(v), o.Y(r), 4, 0, 6.2832); g.fill(); g.restore();
+    });
+    vline(o, s3.df, C("--ink"), "ν = " + s3.df.toFixed(1));
+    const r = tRatio(s3.df);
+    const mv = s3.move / 100;
+    document.getElementById("kv3").innerHTML = kvHTML([
+      ["Degrees of freedom", s3.df.toFixed(1)],
+      ["MAD ÷ σ", r.toFixed(6), "blue"],
+      ["— the normal's value", ROOT_2_PI.toFixed(6), "ochre"],
+      ["Quoted implied move", (mv * 100).toFixed(2) + "%"],
+      ["σ under a normal", (mv / ROOT_2_PI * 100).toFixed(3) + "%"],
+      ["σ under this t", (mv / r * 100).toFixed(3) + "%", "verm"],
+      ["Understated by", ((r > 0 ? (ROOT_2_PI / r - 1) : 0) * 100).toFixed(2) + "%", "verm"],
+      ["t, 3 df", (2 / Math.PI).toFixed(4) + "  = 2/π", "grey"],
+      ["t, 4 df", (1 / Math.SQRT2).toFixed(4) + "  = 1/√2", "grey"],
+      ["t, 6 df", "0.7500  exactly", "grey"]
+    ]);
+  }
+  /* a horizontal reference line — the options engine has vline but not this */
+  function hline_(o, y, col, label) {
+    if (y < o.y0 || y > o.y1) return;
+    const g = o.g; g.save();
+    g.strokeStyle = col; g.lineWidth = 1; g.setLineDash([4, 3]);
+    const py = Math.round(o.Y(y)) + 0.5;
+    g.beginPath(); g.moveTo(o.P.l, py); g.lineTo(o.P.l + o.pw, py); g.stroke();
+    if (label) {
+      g.setLineDash([]); g.fillStyle = col; g.textAlign = "left"; g.textBaseline = "bottom";
+      g.font = "9.5px 'IBM Plex Mono', monospace";
+      g.fillText(label, o.P.l + 4, py - 3);
+    }
+    g.restore();
+  }
+  window.__hline = hline_;
+})();
+
+/* ══════════ 04 — fewer wins, bigger ══════════ */
+const s4 = { df: 6 };
+(function () {
+  sliders(document.getElementById("ctl4"), [
+    { id: "a4", k: "df", lbl: "ν", name: "Degrees of freedom", min: 2.5, max: 60, step: 0.1, fmt: v => v.toFixed(1) }
+  ], s4, () => draw(), "c4");
+  window.draw4 = draw;
+  window.__breach = { normal: breachNormal, t: breachT, oneSigma: breachOneSigma };
+  function draw() {
+    const o = Fig(document.getElementById("cv4"),
+      { h: 320, x0: 2.5, x1: 60, y0: 0.30, y1: 0.46, pad: { l: 62, r: 14, t: 14 } });
+    axes(o, x => x.toFixed(0), y => (y * 100).toFixed(0) + "%", 6, 5);
+    curve(o, breachT, C("--verm"), 2.4);
+    window.__hline(o, breachNormal(), C("--ochre"), "normal, 42.5%");
+    window.__hline(o, breachOneSigma(), C("--grey"), "what a 1σ reading expects, 31.7%");
+    vline(o, s4.df, C("--ink"), "ν = " + s4.df.toFixed(1));
+    const b = breachT(s4.df);
+    document.getElementById("kv4").innerHTML = kvHTML([
+      ["Degrees of freedom", s4.df.toFixed(1)],
+      ["Breach rate", (b * 100).toFixed(2) + "%", "verm"],
+      ["— under a normal", (breachNormal() * 100).toFixed(2) + "%", "ochre"],
+      ["— fewer breaches by", ((breachNormal() - b) * 100).toFixed(2) + " pts"],
+      ["Straddle finishes in", (b * 100).toFixed(1) + "% of the time"],
+      ["A 1σ reading expects", (breachOneSigma() * 100).toFixed(2) + "%", "grey"],
+      ["— that error alone is", ((breachNormal() - breachOneSigma()) * 100).toFixed(2) + " pts"],
+      ["MAD ÷ σ here", tRatio(s4.df).toFixed(5)],
+      ["Laplace, for reference", (Math.exp(-1) * 100).toFixed(2) + "%  = e⁻¹", "grey"]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — measuring with absolutes ══════════ */
+const s5 = { contam: 6, mult: 4, n: 252 };
+(function () {
+  sliders(document.getElementById("ctl5"), [
+    { id: "a5", k: "contam", lbl: "c", name: "Share of wild days", min: 0, max: 25, step: 1, fmt: v => v.toFixed(0) + "%" },
+    { id: "b5", k: "mult", lbl: "×", name: "How much wilder they are", min: 1.5, max: 8, step: 0.5, fmt: v => v.toFixed(1) + "×" },
+    { id: "c5", k: "n", lbl: "n", name: "Days in each sample", min: 21, max: 504, step: 21, fmt: v => v.toFixed(0) + "d" }
+  ], s5, () => draw(), "c5");
+  window.draw5 = draw;
+  window.__est = estimatorRun;
+  function draw() {
+    const R = estimatorRun(4242, Math.round(s5.n), s5.contam / 100, s5.mult, 1600);
+    const all = R.rms.concat(R.mad);
+    let lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+    const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
+    const NB = 46, w = (hi - lo) / NB;
+    const bin = arr => {
+      const c = new Float64Array(NB);
+      arr.forEach(v => { const k = Math.floor((v - lo) / w); if (k >= 0 && k < NB) c[k]++; });
+      return c;
+    };
+    const b1 = bin(R.rms), b2 = bin(R.mad);
+    let top = 0;
+    for (let i = 0; i < NB; i++) top = Math.max(top, b1[i], b2[i]);
+    const o = Fig(document.getElementById("cv5"),
+      { h: 320, x0: lo, x1: hi, y0: 0, y1: top * 1.14, pad: { l: 58, r: 14, t: 14 } });
+    axes(o, x => x.toFixed(2), y => y.toFixed(0), 6, 4);
+    const g = o.g;
+    const bars = (c, col, alpha) => {
+      g.save(); g.fillStyle = C(col); g.globalAlpha = alpha;
+      for (let i = 0; i < NB; i++) {
+        if (!c[i]) continue;
+        const x0 = o.X(lo + i * w), x1 = o.X(lo + (i + 1) * w);
+        g.fillRect(x0, o.Y(c[i]), Math.max(x1 - x0 - 0.8, 1), o.Y(0) - o.Y(c[i]));
+      }
+      g.restore();
+    };
+    bars(b1, "--blue", 0.62);
+    bars(b2, "--moss", 0.62);
+    vline(o, R.truth, C("--ochre"), "true σ " + R.truth.toFixed(3));
+    document.getElementById("kv5").innerHTML = kvHTML([
+      ["True σ", R.truth.toFixed(4), "ochre"],
+      ["RMS estimator, mean", R.rmsMean.toFixed(4), "blue"],
+      ["— spread of estimates", R.rmsSd.toFixed(4)],
+      ["— reads", (R.rmsMean / R.truth * 100).toFixed(1) + "% of truth"],
+      ["MAD estimator, mean", R.madMean.toFixed(4), "moss"],
+      ["— spread of estimates", R.madSd.toFixed(4)],
+      ["— reads", (R.madMean / R.truth * 100).toFixed(1) + "% of truth",
+        R.madMean / R.truth < 0.95 ? "verm" : "grey"],
+      ["Spread ratio, MAD ÷ RMS", (R.madSd / R.rmsSd).toFixed(4),
+        R.madSd < R.rmsSd ? "moss" : "grey"],
+      ["Steadier here", R.madSd < R.rmsSd ? "the MAD one" : "the RMS one",
+        R.madSd < R.rmsSd ? "moss" : "blue"]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — the drill ══════════ */
+(function () {
+  const E = id => document.getElementById(id);
+  let cur = null, sc = 0, asked = 0, streak = 0, best = 0, hard = false;
+  const R = Math.random;
+  const pick = a => a[Math.floor(R() * a.length)];
+  function make() {
+    if (!hard) {
+      const t = Math.floor(R() * 4);
+      if (t === 0) {
+        const m = pick([2, 3, 4, 5, 6, 8, 10]);
+        const a = moveToSigma(m);
+        return { kind: "Implied move to sigma", unit: "%", a: a, tol: 0.02,
+          q: "A screen quotes an implied move of <b>" + m + "%</b>. What is the one-sigma move?",
+          w: m + "% × 1.2533 = <b>" + a.toFixed(3) + "%</b>. Dividing by 0.7979 is the same step." };
+      }
+      if (t === 1) {
+        const sg = pick([3, 4, 5, 6, 8, 12]);
+        const a = sigmaToMove(sg);
+        return { kind: "Sigma to implied move", unit: "%", a: a, tol: 0.02,
+          q: "A one-sigma move is <b>" + sg + "%</b>. What straddle-implied move goes with it?",
+          w: sg + "% × 0.7979 = <b>" + a.toFixed(3) + "%</b> — about four fifths, always." };
+      }
+      if (t === 2) {
+        const S = pick([50, 100, 200]), v = pick([0.20, 0.30, 0.40, 0.60]), d = pick([7, 30, 60, 90]);
+        const a = straddleExact(S, v, d / 365);
+        return { kind: "Price the straddle", unit: "$", a: a, tol: Math.max(0.01, a * 0.01),
+          q: "A <b>" + d + "-day</b> at-the-money straddle on a <b>$" + S + "</b> stock at <b>" +
+            (v * 100).toFixed(0) + " vol</b>. What does it cost?",
+          w: "0.7979 × " + S + " × " + v.toFixed(2) + " × √(" + d + "/365) = <b>$" +
+            a.toFixed(3) + "</b>, and exact Black–Scholes agrees to within a twentieth of a percent." };
+      }
+      const S = pick([50, 100, 200]), v = pick([0.20, 0.30, 0.45]), d = pick([30, 60, 90]);
+      const a = impliedMove(S, v, d / 365) * 100;
+      return { kind: "The implied move as a percent", unit: "%", a: a, tol: Math.max(0.02, a * 0.01),
+        q: "<b>" + d + "</b> days at <b>" + (v * 100).toFixed(0) +
+          " vol</b>. What implied move does the straddle quote?",
+        w: "0.7979 × " + v.toFixed(2) + " × √(" + d + "/365) = <b>" + a.toFixed(3) +
+          "%</b> of spot. The one-sigma move is " + (oneSigma(v, d / 365) * 100).toFixed(3) + "%." };
+    }
+    const t = Math.floor(R() * 3);
+    if (t === 0) {
+      const v = pick([3, 4, 6, 10, 20]);
+      const a = tRatio(v);
+      return { kind: "The ratio under fat tails", unit: "", a: a, tol: 0.004,
+        q: "For a standardized Student t with <b>" + v +
+          "</b> degrees of freedom, what is MAD ÷ σ?",
+        w: "<b>" + a.toFixed(4) + "</b>" +
+          (v === 3 ? " — exactly 2/π" : v === 4 ? " — exactly 1/√2" : v === 6 ? " — exactly 3/4" : "") +
+          ", below the normal's 0.7979 because fatter tails inflate σ more than the MAD." };
+    }
+    if (t === 1) {
+      const v = pick([4, 6, 10, 30]);
+      const a = breachT(v) * 100;
+      return { kind: "Breach rate under fat tails", unit: "%", a: a, tol: 0.35,
+        q: "With <b>" + v + "</b> degrees of freedom, how often does the move exceed " +
+          "the straddle-implied one?",
+        w: "<b>" + a.toFixed(2) + "%</b>, against 42.49% for a normal — fatter tails mean " +
+          "fewer breaches, because the extra mass sits near zero as well as far out." };
+    }
+    const m = pick([3, 4, 5, 6, 8]), v = pick([4, 6, 10]);
+    const a = m / tRatio(v);
+    return { kind: "Sigma implied by a fat-tailed market", unit: "%", a: a, tol: 0.03,
+      q: "A straddle quotes a <b>" + m + "%</b> move and the distribution is a t with <b>" +
+        v + "</b> degrees of freedom. What is σ?",
+      w: m + "% ÷ " + tRatio(v).toFixed(4) + " = <b>" + a.toFixed(3) +
+        "%</b>, against " + (m / ROOT_2_PI).toFixed(3) + "% if you had assumed a normal." };
+  }
+  function next() {
+    cur = make();
+    E("dKind").textContent = cur.kind; E("dText").innerHTML = cur.q;
+    E("dUnit").textContent = cur.unit; E("dInput").value = "";
+    E("drill").classList.remove("done");
+    focusSoft(E("dInput"), E("drill"));
+  }
+  function submit() {
+    if (!cur || E("drill").classList.contains("done")) return;
+    const raw = parseFloat(String(E("dInput").value).replace(/[$,%\s]/g, ""));
+    asked++;
+    const ok = isFinite(raw) && Math.abs(raw - cur.a) <= cur.tol;
+    if (ok) { sc++; streak++; if (streak > best) best = streak; } else streak = 0;
+    E("dVerdict").textContent = ok ? "CORRECT" : ("NOT QUITE — the answer is " + cur.a.toFixed(4));
+    E("dVerdict").className = "vd " + (ok ? "ok" : "no");
+    E("dWork").innerHTML = cur.w;
+    E("dScore").textContent = sc + " / " + asked;
+    E("dStreak").textContent = String(streak); E("dBest").textContent = String(best);
+    E("drill").classList.add("done");
+  }
+  E("dSubmit").addEventListener("click", submit);
+  E("dInput").addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+  E("dNext").addEventListener("click", next);
+  E("dSkip").addEventListener("click", () => { streak = 0; E("dStreak").textContent = "0"; next(); });
+  E("dEasy").addEventListener("click", () => {
+    hard = false; E("dEasy").setAttribute("aria-pressed", "true");
+    E("dHard").setAttribute("aria-pressed", "false"); next();
+  });
+  E("dHard").addEventListener("click", () => {
+    hard = true; E("dHard").setAttribute("aria-pressed", "true");
+    E("dEasy").setAttribute("aria-pressed", "false"); next();
+  });
+  window.drawDrill = next;
+  window.__drill = () => {
+    const o = [];
+    [false, true].forEach(h => { hard = h; for (let j = 0; j < 400; j++) o.push(make()); });
+    hard = false; return o;
+  };
+})();
+
+function drawAll() {
+  drawHero(); draw1(); draw2(); draw3(); draw4(); draw5(); drawDrill();
+}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

@@ -555,3 +555,26 @@ Verified, and four of these were wrong in the first draft:
 The check-16 harness runs 40 deterministic assertions plus a sweep that evaluates all
 16 card figures across their own x-ranges for non-finite values, and 1200 generated
 drill questions for a finite answer, prompt, working and tolerance.
+
+## 18 · Two Rulers  ✅ live (rulers.html)
+
+Standard deviation against mean absolute deviation. Page 03 established the
+identity in one line — a straddle costs about 0.7979·S·σ√T — and this page is
+about why that constant is what it is and what happens when it is not.
+
+Verified numbers: √(2/π) = 0.797885 and √(π/2) = 1.253314; a 30-day 30-vol
+straddle on $100 costs $6.8603 against the approximation's $6.8624, an error
+of 0.030%, and the approximation is always high. Implied move 6.8603% against
+a one-sigma move of 8.6007%, ratio 0.79764. Breach rate 42.49% against the
+31.73% a one-sigma reading expects, a gap of 10.75 points.
+
+The MAD-to-sigma ratio by distribution: uniform √3/2 = 0.8660, normal 0.7979,
+t(6) exactly 3/4, t(4) exactly 1/√2, t(3) exactly 2/π. A 5% implied move
+therefore implies 6.267% under a normal and 7.071% under t(4), higher by
+12.84%. Breach rates fall as tails fatten: 41.95% at 30 df, 40.75% at 10,
+39.38% at 6, 37.39% at 4, against the Laplace's exact e⁻¹ = 36.79%.
+
+Estimators: relative efficiency of the absolute estimator is 87.6% under a
+clean normal, needing 14.2% more data. With 6% of days at 4x vol the true
+sigma is 1.3784; RMS reads it correctly with a spread of 0.155 while the
+absolute estimator reads 85.6% of it with a spread of 0.080.

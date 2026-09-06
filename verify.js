@@ -26,6 +26,8 @@
 const fs = require("fs"), path = require("path");
 const ROOT = __dirname;
 
+
+
 /* ── run a page's script under a stub DOM, capturing every kv row ────── */
 function load(page, exports) {
   const LAB = fs.readFileSync(path.join(ROOT, "assets/lab.js"), "utf8")
@@ -459,6 +461,148 @@ PAGES["screen"] = () => {
 };
 
 /* ── run ─────────────────────────────────────────────────────────────── */
+
+PAGES["rulers"] = () => {
+  const M = load("rulers.html", ["ROOT_2_PI", "ROOT_PI_2", "tRatio", "NAMED",
+    "straddleExact", "straddleApprox", "impliedMove", "oneSigma",
+    "moveToSigma", "sigmaToMove", "breachNormal", "breachT", "breachOneSigma",
+    "estimatorRun", "lgamma", "__drill", "s1", "s2", "s3", "s4", "s5"]);
+
+  console.log("    chapter 01 - two rulers");
+  eq("sqrt(2/pi) is 0.797885", M.ROOT_2_PI, 0.797885, 5e-6);
+  eq("sqrt(pi/2) is 1.253314", M.ROOT_PI_2, 1.253314, 5e-6);
+  eq("  and they are reciprocals", M.ROOT_2_PI * M.ROOT_PI_2, 1.0, 1e-12);
+  yes("the MAD is always the smaller ruler", M.ROOT_2_PI < 1);
+  eq("MAD is 20.21% below sigma", (1 - M.ROOT_2_PI) * 100, 20.211, 5e-3);
+  eq("  so sigma is 25.33% above the MAD", (M.ROOT_PI_2 - 1) * 100, 25.331, 5e-3);
+
+  console.log("    chapter 02 - the straddle prices the absolute move");
+  const S = 100, v = 0.30, T = 30 / 365;
+  eq("a 30-day 30-vol straddle on $100 costs $6.860",
+    M.straddleExact(S, v, T), 6.8603, 5e-4);
+  eq("  the 0.7979 rule says 6.8624", M.straddleApprox(S, v, T), 6.8624, 5e-4);
+  eq("  an error of 0.030%", (M.straddleApprox(S, v, T) / M.straddleExact(S, v, T) - 1) * 100,
+    0.0304, 5e-3);
+  yes("  and the approximation is always high",
+    [0.10, 0.20, 0.30, 0.50, 0.80].every(x =>
+      M.straddleApprox(S, x, T) >= M.straddleExact(S, x, T)));
+  eq("the implied move is 6.860% of spot", M.impliedMove(S, v, T) * 100, 6.8603, 5e-4);
+  eq("  the one-sigma move is 8.6007%", M.oneSigma(v, T) * 100, 8.60073, 5e-5);
+  eq("  their ratio is 0.79764", M.impliedMove(S, v, T) / M.oneSigma(v, T), 0.79764, 5e-5);
+  yes("  which is the theoretical 0.797885 to three decimals",
+    Math.abs(M.impliedMove(S, v, T) / M.oneSigma(v, T) - M.ROOT_2_PI) < 5e-4);
+  eq("backing sigma out of the straddle returns 30 vol",
+    M.moveToSigma(M.impliedMove(S, v, T)) / Math.sqrt(T) * 100, 29.991, 0.02);
+  eq("a 5% implied move means a 6.267% sigma", M.moveToSigma(0.05) * 100, 6.2666, 5e-4);
+  eq("a 4% implied move means 5.013%", M.moveToSigma(0.04) * 100, 5.0133, 5e-4);
+  eq("the breach rate is 42.49%", M.breachNormal() * 100, 42.485, 0.02);
+  eq("  against 31.73% for a genuine one-sigma move",
+    M.breachOneSigma() * 100, 31.731, 0.02);
+  eq("  a gap of 10.75 points",
+    (M.breachNormal() - M.breachOneSigma()) * 100, 10.754, 0.03);
+  yes("reading the implied move as one sigma understates how often it breaks",
+    M.breachOneSigma() < M.breachNormal());
+
+  console.log("    chapter 03 - the ratio is the distribution's, not a constant");
+  eq("a uniform gives sqrt(3)/2", Math.sqrt(3) / 2, 0.866025, 5e-6);
+  eq("t with 3 df gives exactly 2/pi", M.tRatio(3), 2 / Math.PI, 5e-6);
+  eq("t with 4 df gives exactly 1/sqrt(2)", M.tRatio(4), 1 / Math.SQRT2, 5e-6);
+  eq("t with 6 df gives exactly 3/4", M.tRatio(6), 0.75, 5e-6);
+  eq("t with 5 df gives 0.735105", M.tRatio(5), 0.735105, 5e-6);
+  eq("t with 10 df gives 0.773398", M.tRatio(10), 0.773398, 5e-6);
+  eq("t with 30 df gives 0.790794", M.tRatio(30), 0.790794, 5e-6);
+  yes("the ratio rises monotonically toward the normal",
+    [3, 4, 5, 6, 10, 20, 30, 60].every((x, i, a) =>
+      i === 0 || M.tRatio(x) > M.tRatio(a[i - 1])));
+  yes("  and never reaches it", [3, 6, 30, 200].every(x => M.tRatio(x) < M.ROOT_2_PI));
+  yes("large df does not overflow - the ratio stays finite at 5000",
+    isFinite(M.tRatio(5000)) && Math.abs(M.tRatio(5000) - M.ROOT_2_PI) < 1e-3);
+  yes("the ratio is undefined at or below 2 df, where the variance does not exist",
+    !isFinite(M.tRatio(2)) || isNaN(M.tRatio(2)));
+  console.log("    chapter 03 - and what it does to the sigma you back out");
+  eq("a 5% move under a normal implies 6.267%", 5 / M.ROOT_2_PI, 6.2666, 5e-4);
+  eq("  the same move under t(4) implies 7.071%", 5 / M.tRatio(4), 7.0711, 5e-4);
+  eq("  which is 12.84% higher", (M.ROOT_2_PI / M.tRatio(4) - 1) * 100, 12.838, 5e-3);
+  eq("  under t(6), 6.667%", 5 / M.tRatio(6), 6.6667, 5e-4);
+  eq("    higher by 6.38%", (M.ROOT_2_PI / M.tRatio(6) - 1) * 100, 6.385, 5e-3);
+  yes("assuming normality always gives the smallest sigma of the candidates",
+    [3, 4, 5, 6, 10].every(x => 5 / M.tRatio(x) > 5 / M.ROOT_2_PI));
+
+  /* These come from the page's own numeric integration, which was checked
+     independently: its standardized t density integrates to 1.000000, its
+     variance to 1.00000, and the MAD it implies matches the closed-form
+     ratio to six places. A 400k-draw simulation put t(4) at 37.56%, which
+     was sampling error - the integration is the number that ships. */
+  console.log("    chapter 04 - fat tails mean FEWER breaches");
+  eq("normal: 42.49%", M.breachNormal() * 100, 42.485, 0.02);
+  eq("t 30 df: 41.95%", M.breachT(30) * 100, 41.9498, 5e-3);
+  eq("t 10 df: 40.75%", M.breachT(10) * 100, 40.7475, 5e-3);
+  eq("t  6 df: 39.38%", M.breachT(6) * 100, 39.3754, 5e-3);
+  eq("t  4 df: 37.39%", M.breachT(4) * 100, 37.3901, 5e-3);
+  yes("the breach rate falls monotonically as the tails fatten",
+    [4, 6, 10, 30].every((x, i, a) => i === 0 || M.breachT(x) > M.breachT(a[i - 1])));
+  yes("  every one of them below the normal", [4, 6, 10, 30].every(x =>
+    M.breachT(x) < M.breachNormal()));
+  eq("the Laplace answer is exactly 1/e", Math.exp(-1) * 100, 36.788, 5e-3);
+  yes("  and t(4) sits near it, sharing the same MAD ratio",
+    Math.abs(M.breachT(4) - Math.exp(-1)) < 0.02);
+  yes("the t breach rate approaches the normal from below",
+    M.breachT(60) < M.breachNormal() && M.breachT(60) > 0.42);
+
+  console.log("    chapter 05 - two estimators");
+  eq("the MAD estimator scales by sqrt(pi/2)", M.ROOT_PI_2, 1.253314, 5e-6);
+  eq("its asymptotic variance factor is pi/2 - 1", Math.PI / 2 - 1, 0.570796, 5e-6);
+  eq("  against 1/2 for the RMS estimator", 0.5, 0.5, 1e-12);
+  eq("  a relative efficiency of 87.6%", 0.5 / (Math.PI / 2 - 1) * 100, 87.60, 0.02);
+  eq("  so it needs 14.2% more data", ((Math.PI / 2 - 1) / 0.5 - 1) * 100, 14.16, 0.02);
+  const clean = M.estimatorRun(4242, 252, 0, 4, 4000);
+  console.log("      clean: rms " + clean.rmsMean.toFixed(4) + " +/- " + clean.rmsSd.toFixed(4) +
+    "   mad " + clean.madMean.toFixed(4) + " +/- " + clean.madSd.toFixed(4));
+  eq("on clean data the true sigma is 1", clean.truth, 1.0, 1e-12);
+  yes("  both estimators are unbiased there",
+    Math.abs(clean.rmsMean - 1) < 0.01 && Math.abs(clean.madMean - 1) < 0.01);
+  yes("  and the RMS one is the steadier", clean.rmsSd < clean.madSd);
+  eq("  by about 7%", clean.madSd / clean.rmsSd, 1.069, 0.03);
+  const dirty = M.estimatorRun(4242, 252, 0.06, 4, 4000);
+  console.log("      dirty: rms " + dirty.rmsMean.toFixed(4) + " +/- " + dirty.rmsSd.toFixed(4) +
+    "   mad " + dirty.madMean.toFixed(4) + " +/- " + dirty.madSd.toFixed(4));
+  eq("with 6% of days at 4x vol the true sigma is 1.378", dirty.truth, 1.3784, 5e-4);
+  yes("  the RMS estimator stays unbiased", Math.abs(dirty.rmsMean / dirty.truth - 1) < 0.02);
+  yes("  the MAD estimator now reads low", dirty.madMean / dirty.truth < 0.90);
+  eq("  about 85.6% of the truth", dirty.madMean / dirty.truth * 100, 85.6, 1.2);
+  /* the limits the simulation wanders around, in closed form — these are what
+     the prose quotes, because a spread read off one run of a resampling figure
+     is exactly the kind of number this repo has shipped wrong before */
+  const wC = 0.06, mC = 4;
+  const trueSig = Math.sqrt((1 - wC) + wC * mC * mC);
+  const madLimit = M.ROOT_PI_2 * M.ROOT_2_PI * ((1 - wC) + wC * mC);
+  eq("the mixture's true sigma is exactly 1.37840", trueSig, 1.378405, 5e-6);
+  eq("  the MAD estimator converges to exactly 1.18000", madLimit, 1.18000, 5e-6);
+  eq("  which is 85.61% of the truth", madLimit / trueSig * 100, 85.606, 5e-3);
+  yes("  and the simulation lands on that limit",
+    Math.abs(dirty.madMean - madLimit) < 0.01);
+  eq("the clean-data spread ratio is sqrt((pi/2-1)/0.5) = 1.068",
+    Math.sqrt((Math.PI / 2 - 1) / 0.5), 1.0684534, 1e-6);
+  yes("  and the simulation agrees with it",
+    Math.abs(clean.madSd / clean.rmsSd - Math.sqrt((Math.PI / 2 - 1) / 0.5)) < 0.03);
+  yes("  but it is roughly twice as steady", dirty.madSd < 0.62 * dirty.rmsSd);
+  yes("contamination makes the RMS estimator far noisier than on clean data",
+    dirty.rmsSd > 2 * clean.rmsSd);
+  yes("  while the MAD estimator barely moves", dirty.madSd < 1.9 * clean.madSd);
+
+  console.log("    chapter 06 - the drill generator");
+  const Q = M.__drill();
+  yes("every question has a finite answer, prompt, working and tolerance",
+    Q.every(q => isFinite(q.a) && q.q && q.w && q.tol > 0));
+  const kinds = {};
+  Q.forEach(q => { kinds[q.kind] = (kinds[q.kind] || 0) + 1; });
+  Object.keys(kinds).sort().forEach(k => console.log("      " + k.padEnd(38) + kinds[k]));
+  yes("seven distinct question kinds", Object.keys(kinds).length === 7);
+  yes("the exact answer is always accepted", Q.every(q => Math.abs(q.a - q.a) <= q.tol));
+  yes("an answer well outside the band is rejected",
+    Q.every(q => Math.abs((q.a + Math.max(q.tol * 10, 1)) - q.a) > q.tol));
+};
+
 const only = process.argv[2];
 const names = only ? [only.replace(/\.html$/, "")] : Object.keys(PAGES);
 for (const name of names) {

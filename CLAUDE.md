@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. All seventeen pages live.
+no dependencies. All eighteen pages live.
 
 ## Before you change anything
 
@@ -57,6 +57,10 @@ script, compute the numbers, then write the sentence. Doing this caught:
 - a variance swap payoff coded in decimals when vega notional is dollars per
   volatility *point* — a clean 100x error that surfaced only because the prose
   carried independently computed numbers to check against (page 09)
+- a breach rate on page 18 quoted from a 400k-draw simulation when the page
+  integrates it exactly; the simulation said 37.56% and the truth is 37.39%,
+  and the same page's estimator figures were quoted from one run of a
+  resampling chart until they were replaced with the closed-form limits
 
 If a number appears in the text, it was computed first. Where a figure rests on an
 assumption that cannot be measured — price impact, dealer positioning, spread
@@ -135,7 +139,7 @@ Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proo
 
 ## Offline, and installing to a phone
 
-The series is a PWA. `sw.js` precaches all seventeen pages plus the engine on
+The series is a PWA. `sw.js` precaches all eighteen pages plus the engine on
 install — about 2MB — and serves everything from that cache afterwards, so the
 whole thing works with no network. Three strategies, and the split is deliberate:
 
@@ -174,7 +178,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all seventeen pages are live. Pages 12-15 were added after mapping
+Nothing unbuilt — all eighteen pages are live. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
@@ -200,6 +204,17 @@ page here and it was the most requested thing missing.
 Still uncovered from that mapping, if more is ever wanted: hedging with options from
 a corporate or portfolio seat (his ch 17), and expiration P&L taught from scratch
 (ch 4), which this series assumes.
+
+## The `line()` trap
+
+`line(o, xs, ys, col, w, dash)` takes **arrays**. Handing it a function is a
+*silent* no-op — `xs.length` is `undefined`, the loop never runs, and the curve
+simply does not appear. Nothing catches it on its own: `check.js` executes the
+page happily, `verify.js` only re-derives numbers, and the figure still draws
+its axes so it looks finished. It cost five curves on the companion series
+before a pixel sample found them. `check.js` now refuses a `line()` whose third
+argument is a color or whose second is a function; pages that plot a sampled
+function carry a local `curve(o, f, col, w)` helper instead.
 
 ## Two traps this repo has already fallen into twice
 
