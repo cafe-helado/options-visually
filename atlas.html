@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>The Greek Atlas — Options, visually</title>
+<meta name="description" content="Every structure on every axis. Which greeks are secretly the same number, why a covered call is a short put to twelve decimals, how profiles change sign across spot and explode with time, and why every delta-hedged structure breaks even on the same move until skew separates them.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Greek Atlas — Options, visually">
+<meta property="og:description" content="Every structure on every axis. Which greeks are secretly the same number, why a covered call is a short put to twelve decimals, how profiles change sign across spot and explode with time, and why every delta-hedged structure breaks even on the same move until skew separates them.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">← Options, visually</a>
+    <span class="num">No. 19 · The Greek Atlas</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Four axes, not seven</span><i></i></a>
+  <a href="#c2"><span>The atlas</span><i></i></a>
+  <a href="#c3"><span>A profile, not a number</span><i></i></a>
+  <a href="#c4"><span>What time does</span><i></i></a>
+  <a href="#c5"><span>The same breakeven</span><i></i></a>
+  <a href="#c6"><span>In fund units</span><i></i></a>
+  <a href="#c7"><span>Drill</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 19</div>
+    <h1>Every structure, on <em>every</em> axis</h1>
+    <p class="sub">Page 04 reduced a structure to five bars at one point in space. This is the atlas underneath that: what each greek actually looks like across spot and time, which of them are secretly the same number, and what any of it is worth to a desk that hedges its delta away.</p>
+  </div>
+  <div class="scrollcue">Scroll ↓</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede"><a href="structures.html">Page 04</a>'s fingerprint is a snapshot — one spot, one expiry, five bars. It is the right first tool and it hides three things that decide whether a trade works. This page is those three things.</p>
+  <ol>
+    <li><b>Chapter 01 is the one that reorganizes everything.</b> At a flat volatility, <b>theta and gamma are the same number</b> in different units, always. <b>Vega joins them</b> whenever every leg shares an expiry. So a single-expiry structure has four independent axes, not seven, and no amount of strike selection will make it long gamma and short vega.</li>
+    <li><b>Chapter 03 is why a bar chart is not enough.</b> A butterfly's gamma is negative at the money and <em>positive</em> in the wings — it changes sign at spot <b>91.45</b> on the example here. A single number for "gamma" describes one point and misleads everywhere else.</li>
+    <li><b>Chapter 02 shows an identity the vocabulary hides.</b> A covered call is a short put — every greek identical to twelve decimals, delta included. A covered put is a short call. Stock touches delta and nothing else, so "covered" is a statement about direction, and direction is what a volatility fund hedges away first.</li>
+    <li><b>Chapter 05 is the result to carry to a desk.</b> Delta-hedged at a flat vol, <em>every</em> structure breaks even on the same daily move — <b>1.570%</b> for a 30-vol name. The structure decides where across spot your gamma sits, never what move it takes to pay for itself. Skew is what breaks that, and the size of the break is the trade.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation — every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>Γ gamma</td><td>How fast delta changes with spot. What a hedged position earns from movement.</td></tr>
+      <tr><td>θ theta</td><td>What the position pays per unit time.</td></tr>
+      <tr><td>ν vega</td><td>Sensitivity to the implied volatility mark, quoted per volatility point.</td></tr>
+      <tr><td>vanna</td><td>∂vega/∂S — how your vega changes as spot moves. The skew axis.</td></tr>
+      <tr><td>volga</td><td>∂vega/∂σ — how your vega changes as vol moves. The convexity-of-vol axis.</td></tr>
+      <tr><td>charm</td><td>∂delta/∂t — how your delta drifts purely from time passing.</td></tr>
+      <tr><td>Delta-hedged</td><td>Holding the structure with an offsetting stock position, rebalanced, so direction is removed and only the volatility terms remain.</td></tr>
+      <tr><td>Vega notional</td><td>Dollars earned per one point of implied volatility. How a volatility fund sizes anything.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Four axes, not seven</h2>
+    <p class="dek">Three of the greeks people quote separately are one number wearing different units. Knowing which three saves a great deal of wasted structuring.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Write out the greeks of a single option with zero rates and two identities fall out that are usually left in the appendix:</p>
+    <p>Look at what is <em>not</em> in each. Theta carries <b>σ²</b> and no <b>T</b>; vega carries <b>T</b>. That difference decides everything on this page.</p>
+    <p>Because theta is a fixed multiple of gamma with no expiry in the constant, <b>theta and gamma stay locked together across any mix of strikes and any mix of expiries</b>, as long as every leg is marked at the same volatility. Sum any weights you like: the ratio survives.</p>
+    <p>Vega is different. Its constant carries <b>T</b>, so vega tracks gamma only while every leg shares one expiry. Mix expiries and the link breaks — which is precisely what a calendar is for. A <b>30-day/90-day</b> calendar on the example here runs gamma <b>−0.0196</b> and vega <b>+8.33</b>: short gamma and long vega at once, which no single-expiry structure can do at any strikes and any weights.</p>
+    <p>So the honest count of independent axes at one expiry is four — <b>direction</b>, the fused <b>gamma-theta-vega</b> axis, <b>vanna</b> and <b>volga</b>. Adding a second expiry unlocks a fifth: the gamma/vega split itself. That is the whole structural reason calendars exist and it is not a matter of taste.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The two ratios, across strikes and across expiries</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>theta ÷ (−½ΓS²σ²)</span>
+            <span><i class="swl" style="background:var(--blue)"></i>vega ÷ (ΓS²σT)</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>one</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Both ratios sit exactly on one at every strike. Switch the axis to expiry and the theta line stays flat while the vega line does not — that gap is a calendar.</figcaption>
+  </figure>
+
+  <div class="mline">θ = −½ · Γ · S² · σ²          ν = Γ · S² · σ · T          (r = q = 0)</div>
+  <p class="mread">Reads as: <b>theta is gamma priced in time, and vega is gamma priced in time and expiry.</b> The missing T on the left is why theta never separates from gamma, and the T on the right is the only handle you have.</p>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You want to be long gamma and short vega. What strikes do you pick?</p>
+    <div class="opts">
+      <button>Far out-of-the-money options, where gamma is high relative to vega</button>
+      <button data-ok="1">No strikes will do it. At one expiry gamma and vega are the same number times a constant, so you need two expiries — long the near option, short the far one</button>
+      <button>At-the-money options with a wide strangle against them</button>
+      <button>A butterfly, which is long gamma in the wings</button>
+    </div>
+    <div class="ans"><b>It is impossible at a single expiry.</b> ν = Γ·S²σT with the same T for every leg, so any weighted sum scales both identically — the signs cannot differ. A reverse calendar does it: short the 90-day, long the 30-day gives positive gamma and negative vega. Every other answer here is strike selection, which cannot change a ratio that does not depend on strike.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The atlas</h2>
+    <p class="dek">Twelve structures, every axis, one scale. Pick a greek and read down the column.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Sixteen structures, normalized against a one-lot at-the-money straddle at the same spot, expiry and vol, so the columns are comparable and the straddle reads <b>1.00</b> by construction.</p>
+    <p>Two readings the table gives up immediately. <b>Sign before size</b> — most structures are obvious once you know whether they are long or short each axis, and the magnitudes only matter afterwards. And <b>look for the zeros</b>, because what a structure does <em>not</em> have is usually more informative than what it does.</p>
+    <p>The pairs worth staring at are the ones that separate vanna from volga, since that is where structures stop being interchangeable. A <b>straddle</b> has essentially no vanna (<b>0.005</b>) and no volga (<b>−0.006</b>) — it is a pure bet on the fused axis and nothing else. A <b>strangle</b> has the same near-zero vanna but volga of <b>+0.95</b>: it is a straddle plus a bet that vol moves <em>a lot</em>. A <b>risk reversal</b> inverts that — vanna <b>+0.057</b>, volga <b>−0.016</b> — a pure skew position with almost no view on vol convexity.</p>
+    <p>That is why all three exist and why substituting one for another is not a cosmetic choice. They are long different things.</p>
+    <p>And then the atlas does something a payoff diagram cannot: it shows you two rows that are <em>the same row</em>.</p>
+  </div>
+
+  <div class="prose" style="margin-top:8px">
+    <p><b>A covered call is a short put.</b> Not similar to one — identical, greek for greek. Long stock at 100 against a short 100-strike call gives delta <b>+0.4828</b>, gamma <b>−0.50</b>, vega <b>−0.50</b>, vanna <b>−0.0025</b>, volga <b>+0.0031</b>. A naked short 100-strike put gives delta <b>+0.4828</b>, gamma <b>−0.50</b>, vega <b>−0.50</b>, vanna <b>−0.0025</b>, volga <b>+0.0031</b>. Every figure agrees to twelve decimals, because put-call parity says they are the same instrument written two ways.</p>
+    <p>The mirror holds too: a <b>covered put</b> — short stock against a short put — is a <b>short call</b>, delta <b>−0.5172</b> and all.</p>
+    <p>Notice also what the stock leg touches. Comparing a covered call against a <em>naked</em> short call, every greek is identical except delta: gamma <b>−0.0463</b>, vega <b>−11.43</b>, theta <b>+20.85</b>, vanna and volga all unchanged. Stock has delta one and no other greek, so covering a position is a statement about direction and about nothing else.</p>
+    <p>Which lands hard on a volatility desk. Hedge the delta out of a covered call and what remains is a short at-the-money option — short gamma, short vega, collecting theta, breaking even on the same <b>1.5703%</b> daily move as everything else in chapter 05. The premium collected, <b>$343</b> a contract, is not income; it is the price of the volatility you just sold. The word "covered" describes the delta leg, and the delta leg is the part a vol fund removes before it starts.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Every structure on the selected axis</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--moss)"></i>Long the axis</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Short it</span>
+            <span><i class="sw" style="background:var(--ochre)"></i>Selected</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="430"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Switch the axis and watch the ordering scramble completely — a structure near the top on gamma can sit at the bottom on volga. Watch too that the covered call and the short put never separate on any axis, on any setting. They are one row printed twice.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Find the two structures that are near-mirror images on every axis, and the pair that agree on the fused axis but disagree on volga.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"axis":3}' data-focus="cv2">Vanna</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"axis":4}' data-focus="cv2">Volga</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"axis":0}' data-focus="cv2">Delta</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A straddle and a strangle both read long on the gamma-vega-theta axis. What separates them?</p>
+    <div class="opts">
+      <button>Nothing but cost — the strangle is a cheaper straddle</button>
+      <button data-ok="1">Volga. The straddle's is about zero and the strangle's is +0.95, so the strangle is additionally long the size of the vol move rather than just its direction</button>
+      <button>Vanna — the strangle is a skew position</button>
+      <button>The strangle is short gamma</button>
+    </div>
+    <div class="ans"><b>Volga, and it is the whole difference.</b> An at-the-money straddle has its vega maximized already, so a vol move barely changes it. A strangle's wings gain vega as vol rises, which is why a strangle outperforms in a genuine vol explosion and underperforms in a grind. The first option is the common description and it is wrong in a way that costs money in exactly the scenario people buy strangles for.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>A profile, not a number</h2>
+    <p class="dek">A butterfly is short gamma at the money and long gamma in the wings. One number for its gamma is right at one spot and wrong everywhere else.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Every entry in chapter 02's atlas is a reading at one spot. Move spot and the readings do not merely shrink — several of them <b>change sign</b>.</p>
+    <p>The butterfly is the clearest case. At the money its gamma is <b>−0.16</b> of a straddle's; at spot <b>92</b> it is <b>−0.015</b>, and below <b>91.45</b> it turns <em>positive</em>. You are short gamma in the body and long it in the wings, which is what the structure is: a short straddle with insurance bolted on.</p>
+    <p>The same is true of the iron condor, which flips at both edges, and of the ratio spread, whose gamma gets steadily more negative as spot rises toward the short strikes and then recovers past them.</p>
+    <p>This is not a technicality. A desk that is short a butterfly and reads "short gamma −0.16" has described the position at the only spot where it is currently sitting. The interesting question — what happens if the underlying moves five percent — is answered by the shape, and the shape is the opposite sign.</p>
+    <p>The practical habit is to read a greek as a <em>curve over spot</em> and note where it crosses zero. Those crossings are where the position changes character, and they are the levels at which a hedge that was working stops.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The selected greek, across spot</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>The structure</span>
+            <span><i class="swl" style="background:var(--grey)"></i>A straddle, for scale</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Zero, and the crossings</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="330"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Every crossing of the gold line is a spot level where the position changes sign on that axis. Those are the levels worth writing down before putting a trade on, not after.</figcaption>
+  </figure>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your risk report says a long butterfly is short gamma. Where is that true?</p>
+    <div class="opts">
+      <button>Everywhere — it is a short-gamma structure</button>
+      <button data-ok="1">Only near the body. Outside the wings the gamma is positive, so a large move turns the position long gamma exactly when the move is happening</button>
+      <button>Nowhere — butterflies are long gamma</button>
+      <button>Only at expiry</button>
+    </div>
+    <div class="ans"><b>Near the body only, and the sign flips at the wings.</b> That is the structure's entire appeal: it is short gamma where you expect to sit and long gamma where you would be hurt. A risk number quoted at current spot describes the first half and hides the second, which is why the profile matters more than the reading.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>What time does to a profile</h2>
+    <p class="dek">Gamma concentrates and explodes; vega drains away. Both at rates you can compute exactly.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A structure's profile is not fixed. As expiry approaches, at-the-money gamma grows like <b>1/√T</b> while vega shrinks like <b>√T</b>, and the position you put on stops being the position you are holding.</p>
+    <p>Concretely, on the 30-vol example: an at-the-money straddle's gamma goes from <b>0.0535</b> at 90 days to <b>0.0927</b> at 30 days to <b>0.508</b> at one day. Moving from 30 days to 7 multiplies gamma by <b>2.072</b>, against a theoretical <b>√(30/7) = 2.070</b>. Over the same move vega multiplies by <b>0.483</b>, against <b>√(7/30) = 0.483</b>.</p>
+    <p>So a short-dated book is a gamma book whatever anyone intended, and a long-dated book is a vega book. The transition is not a decision you make; it happens to you at a rate the square root sets.</p>
+    <p>The effect is sharper for structures with a zero crossing. A butterfly's gamma at the body goes from <b>−0.0029</b> at 90 days to <b>−0.505</b> at one day — a factor of <b>170</b> — while its gamma out at 93 turns <em>positive</em> somewhere between 30 and 14 days and keeps climbing. The structure does not just get bigger; the geography of it redraws itself. That is what makes short-dated butterflies and condors so much livelier than their greeks at inception suggest.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The profile at four expiries</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--hair)"></i>90 days</span>
+            <span><i class="swl" style="background:var(--grey)"></i>30 days</span>
+            <span><i class="swl" style="background:var(--blue)"></i>7 days</span>
+            <span><i class="swl" style="background:var(--verm)"></i>1 day</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="330"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Watch the curve narrow and grow at the same time. The area under it is roughly conserved — gamma is not created by time passing, it is concentrated into a smaller and smaller band of spot.</figcaption>
+  </figure>
+
+  <div class="mline">Γ<sub>ATM</sub> ∝ 1 ÷ √T          ν<sub>ATM</sub> ∝ √T</div>
+  <p class="mread">Reads as: <b>halving the time left multiplies gamma by 1.41 and multiplies vega by 0.71.</b> A position drifts from a vega trade to a gamma trade without anyone doing anything.</p>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You hold a 30-day straddle and do nothing. Three weeks later, what has changed?</p>
+    <div class="opts">
+      <button>Nothing but the value — the greeks are properties of the structure</button>
+      <button data-ok="1">Gamma has roughly doubled and vega has roughly halved. A vega position has become a gamma position without any trade being made</button>
+      <button>Gamma and vega have both fallen</button>
+      <button>Vega has risen as expiry approaches</button>
+    </div>
+    <div class="ans"><b>30 days to 7 multiplies gamma by 2.07 and vega by 0.48.</b> Both follow from the square root of time and neither is optional. It is the reason a book has to be re-sized as it ages rather than merely re-hedged, and the reason "I am long vega" is a statement with a shelf life.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Delta-hedged, they all break even on the same move</h2>
+    <p class="dek">At a flat volatility every structure on this page needs an identical daily move to pay its theta. Skew is what breaks that, and the break is the trade.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A delta-hedged position's daily P&L, to second order, is gamma against theta. Set the two equal and solve for the move that breaks even:</p>
+    <p>Substitute chapter 01's identity <code>θ = −½ΓS²σ²</code> and the gamma cancels completely. What is left is <b>σ/√365</b> — the implied daily move, and nothing else. For a 30-vol name that is <b>1.5703%</b>.</p>
+    <p>So at a flat volatility, a straddle, a strangle, a butterfly, a condor, a ratio, a calendar and a diagonal <b>all break even on exactly the same 1.5703% move</b>. Not approximately — identically, to every decimal, because the structure-dependent term divided out.</p>
+    <p>That is worth sitting with, because it kills a whole family of intuitions. A structure cannot make a hedged position "cheaper to carry" or "easier to break even on." What a structure decides is <em>where across spot</em> your gamma is concentrated and <em>what sign</em> it has there. The breakeven per unit of gamma is fixed by the vol you paid.</p>
+    <p><b>And then skew breaks it.</b> Mark each strike at its own implied volatility and theta stops tracking gamma, because each leg's theta carries its own <b>σ<sub>i</sub>²</b>. On a downward skew of 40 basis points of vol per point of strike, the breakevens separate: a straddle still needs <b>1.5703%</b>, but a <b>put spread</b> needs only <b>1.1185%</b>, a <b>risk reversal</b> <b>1.3277%</b>, and a <b>butterfly</b> needs <b>1.5957%</b> — slightly more.</p>
+    <p>Every one of those gaps is a structure that is short the expensive strikes and long the cheap ones, or the reverse. That difference is the only thing that makes one hedged structure genuinely better carry than another, and it is a statement about the surface rather than about the shape. Which is <a href="surface.html">page 02</a>'s point arriving with a number attached.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Breakeven daily move, flat vol against a skewed surface</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--grey)"></i>Flat vol</span>
+            <span><i class="sw" style="background:var(--blue)"></i>With skew</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>The implied daily move</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="340"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Set the skew to zero and every bar collapses onto the gold line. Everything that separates them afterwards came from the surface, not from the structure.</figcaption>
+  </figure>
+
+  <div class="derive">
+    <span class="lab">Where this comes from</span>
+    <p>Over one day a delta-hedged position earns <b>½·Γ·(ΔS)²</b> from the move and pays <b>θ/365</b> in carry. Breaking even means <b>½·Γ·(ΔS)² = −θ/365</b>, so <b>ΔS = √(−2θ / (365·Γ))</b>.</p>
+    <p>With <b>θ = −½ΓS²σ²</b> that becomes <b>ΔS = √(ΓS²σ²/(365Γ)) = S·σ/√365</b>, and as a percentage of spot it is just <b>σ/√365</b>. Gamma appears in both the numerator and the denominator and leaves. Nothing about strikes, weights or expiries survives the cancellation, which is why the answer is the same for every structure.</p>
+    <p><b>Where it breaks:</b> the cancellation needs one volatility. With a surface, <b>θ = −½S²·Σ Γ<sub>i</sub>σ<sub>i</sub>²</b> while gamma is <b>Σ Γ<sub>i</sub></b>, and the two no longer differ by a constant — the breakeven becomes a gamma-weighted average of the leg volatilities rather than a single number. It also assumes continuous hedging and a second-order expansion: on a genuine jump the (ΔS)² term understates a long-gamma position's gain and understates a short one's loss, which is <a href="real-world.html">page 15</a>'s subject. And it uses σ√(1/365) as the daily move, which prices calendar days; a desk hedging on trading days should use √(1/252) and gets 1.890% instead.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Someone proposes a butterfly instead of a short straddle because "it is easier to break even on." At a flat vol, are they right?</p>
+    <div class="opts">
+      <button>Yes — the butterfly has less gamma so it needs less movement</button>
+      <button data-ok="1">No. Both break even on the same σ/√365 move, because the gamma cancels. The butterfly caps the loss and moves where the gamma sits; it does not change the breakeven</button>
+      <button>Yes, because the butterfly is cheaper</button>
+      <button>No, the butterfly needs a larger move</button>
+    </div>
+    <div class="ans"><b>Identical breakevens, at a flat vol.</b> Less gamma means less theta in exactly the same proportion. The butterfly's real arguments are that the wings cap the tail and that the gamma changes sign out there — both genuine and neither about breakeven. Once skew is on, the comparison becomes real again, and on a normal equity surface the butterfly is the slightly worse carry, not the better one.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>In fund units</h2>
+    <p class="dek">A volatility desk does not size in lots. It sizes in dollars per volatility point, and every other number follows from that one.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Delta-hedged, a position's daily P&L decomposes into five terms. Everything a volatility fund does is an opinion about which of them it wants:</p>
+    <p>Put a fund's numbers on it. A one-lot 30-day at-the-money straddle at 30 vol on a $100 stock carries <b>$22.85</b> of vega per volatility point and pays <b>$11.43</b> of theta per day, per contract.</p>
+    <p>A desk wanting <b>$100,000 of vega per point</b> therefore holds about <b>4,376</b> contracts. That is <b>$43.8m</b> of option notional and <b>$3.0m</b> of premium, and it bleeds <b>$50,000 a day</b> in theta.</p>
+    <p>Against that bleed, a <b>1%</b> move earns <b>$20,278</b> of gamma, a <b>2%</b> move earns <b>$81,111</b>, and a <b>3%</b> move earns <b>$182,500</b>. The gamma grows with the <em>square</em> of the move while theta is linear in time, which is the entire asymmetry the position exists to harvest. Breakeven is the same 1.570% as ever.</p>
+    <p>And the number that reframes the whole position: <b>one point of implied vol is worth $100,000, which is two days of theta.</b> A desk long this straddle is not primarily running a gamma trade at all — a two-point mark-up covers four days of carry, and the vol mark will move by two points long before the realized path has settled anything. The gamma-theta duel is the story people tell; the vega mark is usually the P&L.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>One day of P&L, decomposed</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--moss)"></i>Gamma</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Theta</span>
+            <span><i class="sw" style="background:var(--blue)"></i>Vega</span>
+            <span><i class="sw" style="background:var(--ochre)"></i>Vanna and volga</span>
+          </span>
+        </div>
+        <canvas id="cv6" height="330"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Controls</h4>
+        <div id="ctl6"></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>Drag the vol move to one point and watch it dominate everything else on the chart. That is what it means to say a fund is in the volatility business rather than the movement business.</figcaption>
+  </figure>
+
+  <div class="mline">dP&L = ½Γ(ΔS)² + θΔt + ν·Δσ + vanna·ΔS·Δσ + ½·volga·(Δσ)²</div>
+  <p class="mread">Reads as: <b>movement, carry, the vol mark, the two moving together, and the vol move being large.</b> The first two are the trade people describe; the third is usually the one that pays or does not.</p>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A desk is long $100k of vega per point in 30-day straddles and pays $50k a day in theta. What is the position really about?</p>
+    <div class="opts">
+      <button>Gamma — it needs the stock to move more than implied</button>
+      <button data-ok="1">Mostly the vol mark. One point of vol is $100k, two days of theta, and the mark moves by that long before realized settles anything</button>
+      <button>Nothing — the position is delta hedged so it has no exposure</button>
+      <button>Carry — it collects theta</button>
+    </div>
+    <div class="ans"><b>The vega mark dominates over any short horizon.</b> The gamma-theta duel resolves over weeks; the vol mark moves points in a session. This is why volatility funds report in vega notional and why "we were right about realized and lost money anyway" is an ordinary sentence — the fourth option has the sign backwards, since a long straddle pays theta rather than collecting it.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Drill it</h2>
+    <p class="dek">The conversions a volatility desk does in its head.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The easy tier is the identities from chapter 01 and the breakeven from chapter 05. The hard tier is fund sizing — vega notional to contracts, and contracts to a daily bleed.</p>
+  </div>
+
+  <figure>
+    <div class="drill" id="drill">
+      <div class="dstats">
+        <div class="c"><span class="k">Correct</span><span class="v" id="dScore">0 / 0</span></div>
+        <div class="c"><span class="k">Streak</span><span class="v" id="dStreak" style="color:var(--moss)">0</span></div>
+        <div class="c"><span class="k">Best</span><span class="v" id="dBest">0</span></div>
+        <div class="c" style="flex:1;min-width:170px"><span class="k">Tier</span>
+          <div class="seg" style="margin-top:5px;max-width:240px">
+            <button id="dEasy" aria-pressed="true">Identities</button>
+            <button id="dHard" aria-pressed="false">Fund sizing</button>
+          </div>
+        </div>
+      </div>
+      <span class="qn" id="dKind">Question</span>
+      <p class="qt" id="dText">Loading…</p>
+      <div class="ansrow">
+        <input type="text" inputmode="decimal" id="dInput" placeholder="your answer" aria-label="Your answer">
+        <span class="unit" id="dUnit"></span>
+        <button class="act" id="dSubmit">Check</button>
+        <button class="act ghost" id="dSkip">Skip</button>
+      </div>
+      <div class="verdict">
+        <div class="vd" id="dVerdict"></div>
+        <div class="work" id="dWork"></div>
+        <div class="btnrow"><button class="act" id="dNext">Next question</button></div>
+      </div>
+    </div>
+    <figcaption>The one to have automatic: the delta-hedged breakeven daily move is σ/√365, whatever the structure.</figcaption>
+  </figure>
+
+  <div class="prose" style="margin-top:46px">
+    <p>Six questions across the page.</p>
+  </div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 01</span>
+    <p class="q">Which greeks are locked together across any mix of expiries at a flat vol?</p>
+    <div class="opts">
+      <button>Gamma and vega</button>
+      <button data-ok="1">Gamma and theta, since θ = −½ΓS²σ² has no T in it. Vega joins them only at a single expiry</button>
+      <button>Vega and theta</button>
+      <button>None of them — all three are independent</button>
+    </div>
+    <div class="ans"><b>Gamma and theta, always.</b> Vega carries a T in its constant and gamma does not, which is why mixing expiries separates vega from the pair — and why a calendar can be short gamma and long vega at the same time when no single-expiry structure can.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 01</span>
+    <p class="q">Can a single-expiry structure be long gamma and short vega?</p>
+    <div class="opts">
+      <button>Yes, with far out-of-the-money strikes</button>
+      <button data-ok="1">No. ν = ΓS²σT with one T, so every leg scales identically and the signs cannot differ</button>
+      <button>Yes, with a ratio spread</button>
+      <button>Only if the vol surface is skewed</button>
+    </div>
+    <div class="ans"><b>Impossible at one expiry, at any strikes.</b> A reverse calendar — long the near option, short the far — is the trade that does it. Strike selection cannot help, because the constant relating vega to gamma does not depend on strike.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">Where is a long butterfly's gamma positive?</p>
+    <div class="opts">
+      <button>Nowhere — it is a short-gamma structure</button>
+      <button data-ok="1">In the wings. It is negative near the body and changes sign around 91.45 on the example here, so a large move flips the position long gamma</button>
+      <button>Everywhere — it is long two options and short two</button>
+      <button>Only at expiry</button>
+    </div>
+    <div class="ans"><b>Short in the body, long in the wings.</b> That is the structure. A risk report quoting one gamma number describes the body and hides the wings, which is exactly the part that matters when the move that worries you arrives.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">A 30-day straddle ages to 7 days. What happens to its gamma and vega?</p>
+    <div class="opts">
+      <button>Both roughly double</button>
+      <button data-ok="1">Gamma multiplies by 2.07 and vega by 0.48 — √(30/7) and √(7/30). A vega position becomes a gamma position on its own</button>
+      <button>Both roughly halve</button>
+      <button>Gamma halves and vega doubles</button>
+    </div>
+    <div class="ans"><b>Gamma up 2.07×, vega down to 0.48×.</b> Both are the square root of the time ratio and neither is optional. A book has to be re-sized as it ages, not merely re-hedged, and "I am long vega" has a shelf life measured in weeks.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 05</span>
+    <p class="q">At a flat 30 vol, which delta-hedged structure needs the smallest daily move to break even?</p>
+    <div class="opts">
+      <button>The butterfly, because it has the least gamma</button>
+      <button data-ok="1">None of them — every structure needs the same 1.570%, because the gamma cancels out of √(−2θ/365Γ)</button>
+      <button>The straddle, because it has the most gamma</button>
+      <button>The calendar, because it is short gamma</button>
+    </div>
+    <div class="ans"><b>They are identical, to every decimal.</b> Less gamma buys proportionally less theta. What a structure decides is where across spot the gamma sits and what sign it has there — never the breakeven. Skew is the only thing that separates them, and on an equity surface it moves a put spread down to about 1.12%.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 06</span>
+    <p class="q">A desk holds $100k of vega per point in 30-day ATM straddles at 30 vol. How much theta does it pay daily?</p>
+    <div class="opts">
+      <button>$100,000 — the same as the vega</button>
+      <button data-ok="1">$50,000. One vol point is worth exactly two days of theta for a 30-day option</button>
+      <button>$11,430</button>
+      <button>$22,850</button>
+    </div>
+    <div class="ans"><b>$50,000, which is two days per vol point.</b> The last two options are the per-contract figures — $11.43 of theta and $22.85 of vega — and the ratio between them is what generalizes: vega ÷ daily theta = 2T·365/... in short, a 30-day option gives two days of carry per point, and a 90-day one gives six.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Every identity here assumes zero rates and no dividends, which is where θ = −½ΓS²σ² comes from; with rates the theta picks up a term in rK·e^(−rT)·N(d₂) and the collinearity with gamma becomes approximate rather than exact, though at present short rates and one-month expiries the error is well under a percent. The breakeven derivation is a second-order expansion and assumes continuous delta hedging: a real desk hedges discretely, which adds the variance <a href="execution.html">page 06</a> measures, and a genuine jump breaks the (ΔS)² term entirely. The daily move uses calendar days, σ/√365; a desk that hedges only on trading days should use σ/√252 and gets 1.890% rather than 1.570% for the same 30 vol, and the two conventions are mixed constantly. The skew used in chapter 05 is a linear 40 basis points of vol per point of strike, which is a caricature of a real surface — actual skew is convex and steepens into expiry, so the separations shown are the right sign and roughly the right size rather than a quotation. The atlas normalizes against a one-lot ATM straddle at one spot and one expiry; every entry moves the moment any of those change, which is chapters 03 and 04. And the fund figures assume a hundred-share contract with no financing, borrow or margin cost, all of which a real desk pays and none of which appear in any greek.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* line() takes arrays, not a function — passing one draws nothing at all.
+   Anything plotted from a formula on this page goes through here. */
+function curve(o, f, col, w, dash) {
+  const n = 260, xs = [], ys = [];
+  for (let i = 0; i <= n; i++) {
+    const x = o.x0 + (o.x1 - o.x0) * i / n;
+    xs.push(x); ys.push(f(x));
+  }
+  line(o, xs, ys, col, w, dash);
+}
+/* the options engine has vline but not its horizontal twin */
+function hline(o, y, col, label, dash) {
+  if (y < o.y0 || y > o.y1) return;
+  const g = o.g; g.save();
+  g.strokeStyle = col; g.lineWidth = 1; g.setLineDash(dash || [4, 3]);
+  const py = Math.round(o.Y(y)) + 0.5;
+  g.beginPath(); g.moveTo(o.P.l, py); g.lineTo(o.P.l + o.pw, py); g.stroke();
+  if (label) {
+    g.setLineDash([]); g.fillStyle = col; g.textAlign = "left"; g.textBaseline = "bottom";
+    g.font = "9.5px 'IBM Plex Mono', monospace";
+    g.fillText(label, o.P.l + 4, py - 3);
+  }
+  g.restore();
+}
+
+/* ── the world ───────────────────────────────────────────────────────── */
+const BASE = { S: 100, T: 30 / 365, T2: 90 / 365, V: 0.30, MULT: 100 };
+
+/* A leg is [strike, quantity, kind, expiry].
+   kind: 1 call, 0 put, 2 STOCK — stock carries delta one per share and no
+   other greek at all, which is the whole content of the covered structures. */
+const CALL = 1, PUT = 0, STOCK = 2;
+function legGreeks(leg, S, T1, T2, volOf) {
+  const [k, q, kind, which] = leg;
+  if (kind === STOCK) {
+    return { price: q * S, delta: q, gamma: 0, vega: 0, theta: 0,
+      vanna: 0, volga: 0, charm: 0 };
+  }
+  const T = which === 2 ? T2 : T1;
+  const v = volOf(k);
+  const b = bs(S, k, T, v, 0, 0, kind === CALL);
+  return { price: q * b.price, delta: q * b.delta, gamma: q * b.gamma,
+    vega: q * b.vega, theta: q * b.theta, vanna: q * b.vanna,
+    volga: q * b.volga, charm: q * b.charm };
+}
+function greeksOf(legs, S, T1, T2, volOf) {
+  const o = { price: 0, delta: 0, gamma: 0, vega: 0, theta: 0, vanna: 0, volga: 0, charm: 0 };
+  for (const leg of legs) {
+    const g = legGreeks(leg, S, T1, T2, volOf);
+    for (const key of Object.keys(o)) o[key] += g[key];
+  }
+  return o;
+}
+const flatVol = v => () => v;
+/* a linear downward skew, in vol points per point of strike */
+const skewVol = (v, slope) => k => v + (BASE.S - k) * slope;
+
+/* ── the sixteen ─────────────────────────────────────────────────────── */
+const STRUCTS = [
+  { n: "Long straddle",  legs: [[100, 1, CALL, 1], [100, 1, PUT, 1]] },
+  { n: "Long strangle",  legs: [[105, 1, CALL, 1], [95, 1, PUT, 1]] },
+  { n: "Call spread",    legs: [[100, 1, CALL, 1], [105, -1, CALL, 1]] },
+  { n: "Put spread",     legs: [[100, 1, PUT, 1], [95, -1, PUT, 1]] },
+  { n: "Risk reversal",  legs: [[105, 1, CALL, 1], [95, -1, PUT, 1]] },
+  { n: "Butterfly",      legs: [[95, 1, CALL, 1], [100, -2, CALL, 1], [105, 1, CALL, 1]] },
+  { n: "Iron condor",    legs: [[110, 1, CALL, 1], [105, -1, CALL, 1],
+                                [95, -1, PUT, 1], [90, 1, PUT, 1]] },
+  { n: "Call ratio 1×2", legs: [[100, 1, CALL, 1], [105, -2, CALL, 1]] },
+  { n: "Put backspread", legs: [[100, -1, PUT, 1], [95, 2, PUT, 1]] },
+  { n: "Collar",         legs: [[105, -1, CALL, 1], [95, 1, PUT, 1]] },
+  { n: "Calendar",       legs: [[100, -1, CALL, 1], [100, 1, CALL, 2]] },
+  { n: "Diagonal",       legs: [[100, -1, CALL, 1], [105, 1, CALL, 2]] },
+  { n: "Covered call",   legs: [[0, 1, STOCK, 1], [100, -1, CALL, 1]] },
+  { n: "Short put",      legs: [[100, -1, PUT, 1]] },
+  { n: "Covered put",    legs: [[0, -1, STOCK, 1], [100, -1, PUT, 1]] },
+  { n: "Short call",     legs: [[100, -1, CALL, 1]] }
+];
+const AXES = ["delta", "gamma", "vega", "vanna", "volga"];
+const AXNAME = { delta: "Delta", gamma: "Gamma ≡ theta", vega: "Vega",
+  vanna: "Vanna", volga: "Volga" };
+
+/* the yardstick everything is normalized against */
+function yardstick(S, T1, V) {
+  return greeksOf([[100, 1, CALL, 1], [100, 1, PUT, 1]], S, T1, T1, flatVol(V));
+}
+/* The yardstick is always a straddle at spot 100 — NOT at the spot being
+   plotted. Rebuilding it per spot divides the profile by a moving denominator
+   and quietly reshapes it; rebuilding it per expiry cancels chapter 04's whole
+   point, since the straddle would then read 1.00 at every expiry. `refT` lets
+   a caller pin the reference expiry for exactly that reason. */
+function normalized(st, S, T1, T2, V, volOf, refT) {
+  const y = yardstick(BASE.S, refT === undefined ? T1 : refT, V);
+  const g = greeksOf(st.legs, S, T1, T2, volOf || flatVol(V));
+  return { raw: g,
+    delta: g.delta,
+    gamma: g.gamma / y.gamma,
+    vega: g.vega / y.vega,
+    vanna: g.vanna / Math.abs(y.vega),
+    volga: g.volga / Math.abs(y.vega) };
+}
+
+/* ── the two identities chapter 01 is about ──────────────────────────── */
+const thetaRatio = (g, S, V) => g.theta / (-0.5 * g.gamma * S * S * V * V);
+const vegaRatio = (g, S, V, T) => g.vega / (g.gamma * S * S * V * T);
+/* the delta-hedged daily breakeven, as a percentage of spot */
+function breakeven(g, S) {
+  if (!g.gamma) return NaN;
+  return Math.sqrt(Math.abs(2 * (g.theta / 365) / g.gamma)) / S * 100;
+}
+const impliedDaily = v => v / Math.sqrt(365) * 100;
+
+/* ── the five-term daily P&L a hedged book actually earns ────────────── */
+function decompose(g, S, dsPct, dvolPts) {
+  const dS = S * dsPct / 100, dv = dvolPts / 100;
+  return {
+    gamma: 0.5 * g.gamma * dS * dS,
+    theta: g.theta / 365,
+    vega: g.vega * dv,
+    vanna: g.vanna * dS * dv,
+    volga: 0.5 * g.volga * dv * dv
+  };
+}
+const totalOf = d => d.gamma + d.theta + d.vega + d.vanna + d.volga;
+/* fund sizing: contracts for a target vega notional per volatility point */
+function fundSize(g, target, mult) {
+  const vegaPerPoint = g.vega / 100 * mult;
+  const lots = target / vegaPerPoint;
+  return { vegaPerPoint: vegaPerPoint, lots: lots,
+    thetaDay: lots * (-g.theta / 365) * mult,
+    notional: lots * BASE.S * mult };
+}
+
+/* ══════════ hero ══════════ */
+(function () {
+  const cv = document.getElementById("heroCv"); let w, h, g, raf, t0 = 0;
+  function size() {
+    const dpr = window.devicePixelRatio || 1;
+    w = cv.clientWidth; h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr;
+    g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  /* a gamma profile sweeping through expiries — narrowing and growing */
+  function draw(ph) {
+    g.fillStyle = C("--chalk"); g.fillRect(0, 0, w, h);
+    const padX = w * 0.07, gw = w - padX * 2, base = h * 0.84;
+    const days = [90, 45, 21, 9, 4];
+    days.forEach((d, i) => {
+      const t = d / 365;
+      const grow = Math.min(1, Math.max(0, ph * 0.8 - i * 0.35));
+      if (grow <= 0) return;
+      const peak = bs(100, 100, t, 0.30, 0, 0, true).gamma * 2;
+      g.strokeStyle = C(i === days.length - 1 ? "--verm" : "--blue");
+      g.globalAlpha = (0.20 + 0.16 * i) * grow;
+      g.lineWidth = 1.8;
+      g.beginPath();
+      for (let j = 0; j <= 200; j++) {
+        const s = 78 + 44 * j / 200;
+        const gm = (bs(s, 100, t, 0.30, 0, 0, true).gamma * 2) / 0.62;
+        const x = padX + gw * (s - 78) / 44;
+        const y = base - gm * h * 0.66 * grow;
+        if (j) g.lineTo(x, y); else g.moveTo(x, y);
+      }
+      g.stroke();
+    });
+    g.globalAlpha = 0.28; g.strokeStyle = C("--ink"); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padX, base); g.lineTo(padX + gw, base); g.stroke();
+    g.globalAlpha = 1;
+  }
+  function tick(t) { if (!t0) t0 = t; draw((t - t0) / 1100); raf = requestAnimationFrame(tick); }
+  window.drawHero = function () {
+    size();
+    /* Paint once synchronously before handing over to the animation. Setting
+       canvas.width in size() clears the bitmap, and requestAnimationFrame is
+       throttled to nothing in a backgrounded or hidden pane — so a hero that
+       only ever draws from inside the rAF loop can sit blank indefinitely.
+       This was blank until it was pixel-sampled. */
+    draw(RM ? 4 : 0.9);
+    if (RM) return;
+    if (raf) cancelAnimationFrame(raf); t0 = 0; raf = requestAnimationFrame(tick);
+  };
+})();
+
+/* ══════════ 01 — four axes, not seven ══════════ */
+const s1 = { mode: 0, vol: 30, days: 30 };
+(function () {
+  sliders(document.getElementById("ctl1"), [
+    { id: "a1", k: "mode", lbl: "x", name: "Sweep across", min: 0, max: 1, step: 1,
+      fmt: v => v < 0.5 ? "strikes" : "expiries" },
+    { id: "b1", k: "vol", lbl: "σ", name: "Volatility", min: 8, max: 90, step: 1,
+      fmt: v => v.toFixed(0) + "%" },
+    { id: "c1", k: "days", lbl: "T", name: "Days to expiry", min: 5, max: 365, step: 5,
+      fmt: v => v.toFixed(0) + "d" }
+  ], s1, () => draw(), "c1");
+  window.draw1 = draw;
+  function draw() {
+    const V = s1.vol / 100, T = s1.days / 365, S = BASE.S;
+    const byStrike = s1.mode < 0.5;
+    const o = Fig(document.getElementById("cv1"),
+      { h: 320, x0: byStrike ? 75 : 5, x1: byStrike ? 130 : 365,
+        y0: 0.4, y1: 1.6, pad: { l: 62, r: 14, t: 14 } });
+    axes(o, x => byStrike ? x.toFixed(0) : x.toFixed(0) + "d", y => y.toFixed(2), 6, 5);
+    /* both ratios, measured on a single call */
+    curve(o, x => {
+      const k = byStrike ? x : 100, t = byStrike ? T : x / 365;
+      const b = bs(S, k, t, V, 0, 0, true);
+      return thetaRatio(b, S, V);
+    }, C("--verm"), 2.6);
+    curve(o, x => {
+      const k = byStrike ? x : 100, t = byStrike ? T : x / 365;
+      const b = bs(S, k, t, V, 0, 0, true);
+      /* measured against the CURRENT expiry T, which is the point: fix T and
+         the ratio is one; sweep T and it walks away */
+      return vegaRatio(b, S, V, T);
+    }, C("--blue"), 2.0, [6, 4]);
+    hline(o, 1, C("--ochre"), "one");
+    const cal = greeksOf(STRUCTS.find(x => x.n === "Calendar").legs, S, T, BASE.T2, flatVol(V));
+    const strd = yardstick(S, T, V);
+    document.getElementById("kv1").innerHTML = kvHTML([
+      ["Sweeping", byStrike ? "strike, expiry fixed" : "expiry, strike fixed"],
+      ["theta ÷ (−½ΓS²σ²)", "1.000000 everywhere", "verm"],
+      ["vega ÷ (ΓS²σT)", byStrike ? "1.000000 everywhere" : "walks with T", "blue"],
+      ["A straddle: gamma", strd.gamma.toFixed(6)],
+      ["— vega", strd.vega.toFixed(4)],
+      ["— theta", strd.theta.toFixed(3)],
+      ["A 30/90 calendar: gamma", cal.gamma.toFixed(5), "verm"],
+      ["— vega", cal.vega.toFixed(4), "moss"],
+      ["— signs differ?", (cal.gamma * cal.vega < 0) ? "YES — impossible at one expiry" : "no",
+        (cal.gamma * cal.vega < 0) ? "ochre" : "grey"]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — the atlas ══════════ */
+const s2 = { axis: 1, vol: 30, days: 30 };
+(function () {
+  sliders(document.getElementById("ctl2"), [
+    { id: "a2", k: "axis", lbl: "◧", name: "Which axis", min: 0, max: 4, step: 1,
+      fmt: v => AXNAME[AXES[Math.round(v)]] },
+    { id: "b2", k: "vol", lbl: "σ", name: "Volatility", min: 8, max: 90, step: 1,
+      fmt: v => v.toFixed(0) + "%" },
+    { id: "c2", k: "days", lbl: "T", name: "Days to the near expiry", min: 5, max: 120, step: 5,
+      fmt: v => v.toFixed(0) + "d" }
+  ], s2, () => draw(), "c2");
+  window.draw2 = draw;
+  window.__atlas = (S, T1, T2, V) => STRUCTS.map(st => {
+    const n = normalized(st, S, T1, T2, V);
+    return { n: st.n, delta: n.delta, gamma: n.gamma, vega: n.vega,
+      vanna: n.vanna, volga: n.volga, raw: n.raw };
+  });
+  function draw() {
+    const V = s2.vol / 100, T = s2.days / 365, S = BASE.S;
+    const key = AXES[Math.max(0, Math.min(4, Math.round(s2.axis)))];
+    const rows = STRUCTS.map(st => ({ n: st.n, v: normalized(st, S, T, BASE.T2, V)[key] }));
+    let lim = 0;
+    rows.forEach(r => { if (isFinite(r.v) && Math.abs(r.v) > lim) lim = Math.abs(r.v); });
+    lim = Math.max(lim * 1.20, 0.2);
+    const o = Fig(document.getElementById("cv2"),
+      { h: 440, x0: -lim, x1: lim, y0: -0.7, y1: STRUCTS.length - 0.3,
+        pad: { l: 108, r: 18, t: 12 } });
+    axes(o, x => x.toFixed(2), () => "", 6, 0);
+    const g = o.g, bh = o.ph / (STRUCTS.length + 1.5);
+    /* the identity pairs, drawn adjacent so they can be compared by eye */
+    rows.forEach((r, i) => {
+      const y = STRUCTS.length - 1 - i;
+      const isPair = r.n.indexOf("Covered") === 0 || r.n === "Short put" || r.n === "Short call";
+      g.fillStyle = C(isPair ? "--ink" : "--ink2");
+      g.font = (isPair ? "600 " : "") + "10px 'IBM Plex Mono', monospace";
+      g.textAlign = "right"; g.textBaseline = "middle";
+      g.fillText(r.n, o.P.l - 7, o.Y(y));
+      if (!isFinite(r.v)) return;
+      g.save();
+      g.fillStyle = C(r.v >= 0 ? "--moss" : "--verm");
+      g.globalAlpha = isPair ? 0.95 : 0.72;
+      const x0 = o.X(0), x1 = o.X(r.v);
+      g.fillRect(Math.min(x0, x1), o.Y(y) - bh / 2, Math.abs(x1 - x0), bh);
+      g.restore();
+      g.fillStyle = C("--ink2"); g.font = "9px 'IBM Plex Mono', monospace";
+      g.textAlign = r.v >= 0 ? "left" : "right"; g.textBaseline = "middle";
+      g.fillText(r.v.toFixed(3), x1 + (r.v >= 0 ? 4 : -4), o.Y(y));
+    });
+    vline(o, 0, C("--ink"), "");
+    const cc = normalized(STRUCTS.find(x => x.n === "Covered call"), S, T, BASE.T2, V);
+    const sp = normalized(STRUCTS.find(x => x.n === "Short put"), S, T, BASE.T2, V);
+    const same = AXES.every(a => Math.abs(cc[a] - sp[a]) < 1e-9);
+    document.getElementById("kv2").innerHTML = kvHTML([
+      ["Axis", AXNAME[key], "ochre"],
+      ["Structures", String(STRUCTS.length)],
+      ["Longest", rows.slice().sort((a, b) => b.v - a.v)[0].n, "moss"],
+      ["Shortest", rows.slice().sort((a, b) => a.v - b.v)[0].n, "verm"],
+      ["Covered call, this axis", cc[key].toFixed(6)],
+      ["Short put, this axis", sp[key].toFixed(6)],
+      ["— identical?", same ? "on EVERY axis" : "no", same ? "moss" : "verm"],
+      ["Covered put ≡", "short call", "grey"],
+      ["Stock touches", "delta, and nothing else", "grey"]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — a profile, not a number ══════════ */
+const s3 = { which: 5, axis: 1, vol: 30, days: 30 };
+(function () {
+  sliders(document.getElementById("ctl3"), [
+    { id: "a3", k: "which", lbl: "#", name: "Structure", min: 0, max: STRUCTS.length - 1, step: 1,
+      fmt: v => STRUCTS[Math.round(v)].n },
+    { id: "b3", k: "axis", lbl: "◧", name: "Which greek", min: 0, max: 4, step: 1,
+      fmt: v => AXNAME[AXES[Math.round(v)]] },
+    { id: "c3", k: "vol", lbl: "σ", name: "Volatility", min: 8, max: 90, step: 1,
+      fmt: v => v.toFixed(0) + "%" },
+    { id: "d3", k: "days", lbl: "T", name: "Days to expiry", min: 2, max: 120, step: 1,
+      fmt: v => v.toFixed(0) + "d" }
+  ], s3, () => draw(), "c3");
+  window.draw3 = draw;
+  window.__profile = (name, key, S, T, V) => {
+    const st = STRUCTS.find(x => x.n === name);
+    return normalized(st, S, T, BASE.T2, V)[key];
+  };
+  /* every spot where the chosen greek crosses zero */
+  window.__crossings = (name, key, T, V) => {
+    const st = STRUCTS.find(x => x.n === name), out = [];
+    const at = s => normalized(st, s, T, BASE.T2, V)[key];
+    let prevS = 78, prev = at(78);
+    for (let s = 78.05; s <= 124; s += 0.05) {
+      const cur = at(s);
+      if (prev * cur < 0) {
+        /* bisect inside the bracket — reporting the scan's grid point puts the
+           crossing up to a step late, which is how the prose came to say 91.45
+           while the panel said 91.50 */
+        let lo = prevS, hi = s, flo = prev;
+        for (let i = 0; i < 40; i++) {
+          const m = (lo + hi) / 2, fm = at(m);
+          if (flo * fm < 0) hi = m; else { lo = m; flo = fm; }
+        }
+        out.push(Math.round((lo + hi) / 2 * 100) / 100);
+      }
+      prevS = s; prev = cur;
+    }
+    return out;
+  };
+  function draw() {
+    const V = s3.vol / 100, T = s3.days / 365;
+    const st = STRUCTS[Math.max(0, Math.min(STRUCTS.length - 1, Math.round(s3.which)))];
+    const key = AXES[Math.max(0, Math.min(4, Math.round(s3.axis)))];
+    const at = s => normalized(st, s, T, BASE.T2, V)[key];
+    const yd = s => normalized(STRUCTS[0], s, T, BASE.T2, V)[key];
+    let lo = 0, hi = 0;
+    for (let s = 78; s <= 124; s += 0.5) {
+      const a = at(s), b = yd(s);
+      [a, b].forEach(v => { if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } });
+    }
+    const pad = Math.max((hi - lo) * 0.12, 0.05);
+    const o = Fig(document.getElementById("cv3"),
+      { h: 340, x0: 78, x1: 124, y0: lo - pad, y1: hi + pad, pad: { l: 66, r: 14, t: 14 } });
+    axes(o, x => x.toFixed(0), y => y.toFixed(2), 6, 5);
+    hline(o, 0, C("--ochre"), "zero");
+    curve(o, yd, C("--grey"), 1.6, [5, 4]);
+    curve(o, at, C("--blue"), 2.6);
+    const cross = window.__crossings(st.n, key, T, V);
+    cross.forEach(c => vline(o, c, C("--ochre"), c.toFixed(2)));
+    vline(o, 100, C("--ink"), "");
+    document.getElementById("kv3").innerHTML = kvHTML([
+      ["Structure", st.n, "blue"],
+      ["Axis", AXNAME[key], "ochre"],
+      ["At spot 100", at(100).toFixed(4)],
+      ["At spot 92", at(92).toFixed(4)],
+      ["At spot 108", at(108).toFixed(4)],
+      ["Sign changes at", cross.length ? cross.map(c => c.toFixed(2)).join(", ") : "nowhere",
+        cross.length ? "ochre" : "grey"],
+      ["— how many", String(cross.length)],
+      ["Peak magnitude", Math.max(Math.abs(lo), Math.abs(hi)).toFixed(4)],
+      ["A straddle here", yd(100).toFixed(4), "grey"]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — what time does ══════════ */
+const s4 = { which: 0, axis: 1, vol: 30 };
+(function () {
+  sliders(document.getElementById("ctl4"), [
+    { id: "a4", k: "which", lbl: "#", name: "Structure", min: 0, max: STRUCTS.length - 1, step: 1,
+      fmt: v => STRUCTS[Math.round(v)].n },
+    { id: "b4", k: "axis", lbl: "◧", name: "Which greek", min: 0, max: 4, step: 1,
+      fmt: v => AXNAME[AXES[Math.round(v)]] },
+    { id: "c4", k: "vol", lbl: "σ", name: "Volatility", min: 8, max: 90, step: 1,
+      fmt: v => v.toFixed(0) + "%" }
+  ], s4, () => draw(), "c4");
+  window.draw4 = draw;
+  window.__atTime = (name, key, days, S, V) => {
+    const st = STRUCTS.find(x => x.n === name);
+    return normalized(st, S, days / 365, BASE.T2, V, null, 30 / 365)[key];
+  };
+  function draw() {
+    const V = s4.vol / 100;
+    const st = STRUCTS[Math.max(0, Math.min(STRUCTS.length - 1, Math.round(s4.which)))];
+    const key = AXES[Math.max(0, Math.min(4, Math.round(s4.axis)))];
+    const DAYS = [[90, "--hair"], [30, "--grey"], [7, "--blue"], [1, "--verm"]];
+    let lo = 0, hi = 0;
+    DAYS.forEach(([d]) => {
+      for (let s = 78; s <= 124; s += 0.5) {
+        const v = normalized(st, s, d / 365, BASE.T2, V)[key];
+        if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; }
+      }
+    });
+    const pad = Math.max((hi - lo) * 0.10, 0.05);
+    const o = Fig(document.getElementById("cv4"),
+      { h: 340, x0: 78, x1: 124, y0: lo - pad, y1: hi + pad, pad: { l: 66, r: 14, t: 14 } });
+    axes(o, x => x.toFixed(0), y => y.toFixed(2), 6, 5);
+    hline(o, 0, C("--ochre"), "");
+    DAYS.forEach(([d, col]) => {
+      curve(o, s => normalized(st, s, d / 365, BASE.T2, V, null, 30 / 365)[key],
+        C(col), d === 1 ? 2.6 : 2.0);
+    });
+    vline(o, 100, C("--ink"), "");
+    const g30 = yardstick(BASE.S, 30 / 365, V), g7 = yardstick(BASE.S, 7 / 365, V);
+    document.getElementById("kv4").innerHTML = kvHTML([
+      ["Structure", st.n, "blue"],
+      ["Axis", AXNAME[key]],
+      ["At 90 days", normalized(st, 100, 90 / 365, BASE.T2, V, null, 30 / 365)[key].toFixed(4)],
+      ["At 30 days", normalized(st, 100, 30 / 365, BASE.T2, V, null, 30 / 365)[key].toFixed(4)],
+      ["At 7 days", normalized(st, 100, 7 / 365, BASE.T2, V, null, 30 / 365)[key].toFixed(4)],
+      ["At 1 day", normalized(st, 100, 1 / 365, BASE.T2, V, null, 30 / 365)[key].toFixed(4), "verm"],
+      ["Straddle gamma, 30→7d", (g7.gamma / g30.gamma).toFixed(3) + "×", "moss"],
+      ["— theory √(30/7)", Math.sqrt(30 / 7).toFixed(3) + "×", "grey"],
+      ["Straddle vega, 30→7d", (g7.vega / g30.vega).toFixed(3) + "×", "verm"]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — the same breakeven ══════════ */
+const s5 = { skew: 0.4, vol: 30, days: 30 };
+(function () {
+  sliders(document.getElementById("ctl5"), [
+    { id: "a5", k: "skew", lbl: "↘", name: "Skew, vol points per strike point",
+      min: 0, max: 1.2, step: 0.05, fmt: v => v.toFixed(2) },
+    { id: "b5", k: "vol", lbl: "σ", name: "At-the-money volatility", min: 8, max: 90, step: 1,
+      fmt: v => v.toFixed(0) + "%" },
+    { id: "c5", k: "days", lbl: "T", name: "Days to expiry", min: 5, max: 120, step: 5,
+      fmt: v => v.toFixed(0) + "d" }
+  ], s5, () => draw(), "c5");
+  window.draw5 = draw;
+  window.__breakeven = (name, S, T, V, slope) => {
+    const st = STRUCTS.find(x => x.n === name);
+    const g = greeksOf(st.legs, S, T, BASE.T2, slope ? skewVol(V, slope / 100) : flatVol(V));
+    return breakeven(g, S);
+  };
+  window.__impliedDaily = impliedDaily;
+  function draw() {
+    const V = s5.vol / 100, T = s5.days / 365, S = BASE.S;
+    const slope = s5.skew / 100;
+    /* only the single-expiry structures with usable gamma */
+    const show = ["Long straddle", "Long strangle", "Call spread", "Put spread",
+      "Risk reversal", "Butterfly", "Iron condor", "Call ratio 1×2", "Covered call"];
+    const rows = show.map(n => {
+      const st = STRUCTS.find(x => x.n === n);
+      const flat = breakeven(greeksOf(st.legs, S, T, BASE.T2, flatVol(V)), S);
+      const sk = breakeven(greeksOf(st.legs, S, T, BASE.T2, skewVol(V, slope)), S);
+      return { n: n, flat: flat, sk: sk };
+    });
+    const imp = impliedDaily(V);
+    let lo = imp, hi = imp;
+    rows.forEach(r => { [r.flat, r.sk].forEach(v => { if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } }); });
+    const pad = Math.max((hi - lo) * 0.18, 0.08);
+    const o = Fig(document.getElementById("cv5"),
+      { h: 350, x0: Math.max(0, lo - pad), x1: hi + pad, y0: -0.7, y1: rows.length - 0.3,
+        pad: { l: 104, r: 18, t: 12 } });
+    axes(o, x => x.toFixed(2) + "%", () => "", 6, 0);
+    const g = o.g, bh = o.ph / (rows.length + 1.6);
+    rows.forEach((r, i) => {
+      const y = rows.length - 1 - i;
+      g.fillStyle = C("--ink2"); g.font = "10px 'IBM Plex Mono', monospace";
+      g.textAlign = "right"; g.textBaseline = "middle";
+      g.fillText(r.n, o.P.l - 7, o.Y(y));
+      [[r.flat, "--grey", -0.26], [r.sk, "--blue", 0.26]].forEach(([v, col, off]) => {
+        if (!isFinite(v)) return;
+        g.save(); g.fillStyle = C(col); g.globalAlpha = 0.85;
+        g.fillRect(o.X(o.x0), o.Y(y) + off * bh - bh * 0.24,
+          o.X(v) - o.X(o.x0), bh * 0.48);
+        g.restore();
+      });
+      g.fillStyle = C("--ink2"); g.font = "9px 'IBM Plex Mono', monospace";
+      g.textAlign = "left"; g.textBaseline = "middle";
+      g.fillText(r.sk.toFixed(3) + "%", o.X(r.sk) + 4, o.Y(y) + 0.26 * bh);
+    });
+    vline(o, imp, C("--ochre"), "σ/√365 = " + imp.toFixed(3) + "%");
+    const spread = rows.reduce((a, r) => Math.max(a, Math.abs(r.sk - imp)), 0);
+    document.getElementById("kv5").innerHTML = kvHTML([
+      ["Implied daily move", imp.toFixed(4) + "%", "ochre"],
+      ["Flat-vol breakeven", "identical for all", "grey"],
+      ["— every structure", rows[0].flat.toFixed(4) + "%"],
+      ["Skew", s5.skew.toFixed(2) + " pts per strike pt"],
+      ["Straddle, skewed", rows[0].sk.toFixed(4) + "%"],
+      ["Put spread, skewed", rows.find(r => r.n === "Put spread").sk.toFixed(4) + "%", "moss"],
+      ["Butterfly, skewed", rows.find(r => r.n === "Butterfly").sk.toFixed(4) + "%", "verm"],
+      ["Widest gap from implied", spread.toFixed(4) + " pts", "blue"],
+      ["Trading-day convention", (V / Math.sqrt(252) * 100).toFixed(3) + "%", "grey"]
+    ]);
+  }
+})();
+
+/* ══════════ 06 — in fund units ══════════ */
+const s6 = { ds: 1, dvol: 0, target: 100, days: 30, vol: 30 };
+(function () {
+  sliders(document.getElementById("ctl6"), [
+    { id: "a6", k: "ds", lbl: "ΔS", name: "Spot move today", min: -4, max: 4, step: 0.25,
+      fmt: v => (v >= 0 ? "+" : "") + v.toFixed(2) + "%" },
+    { id: "b6", k: "dvol", lbl: "Δσ", name: "Vol move today", min: -4, max: 4, step: 0.25,
+      fmt: v => (v >= 0 ? "+" : "") + v.toFixed(2) + " pts" },
+    { id: "c6", k: "target", lbl: "$", name: "Vega per point, $000s", min: 10, max: 500, step: 10,
+      fmt: v => "$" + v.toFixed(0) + "k" },
+    { id: "d6", k: "days", lbl: "T", name: "Days to expiry", min: 5, max: 180, step: 5,
+      fmt: v => v.toFixed(0) + "d" }
+  ], s6, () => draw(), "c6");
+  window.draw6 = draw;
+  window.__fund = (target, days, V) =>
+    fundSize(yardstick(BASE.S, days / 365, V), target, BASE.MULT);
+  window.__decompose = decompose;
+  function draw() {
+    const V = s6.vol / 100, T = s6.days / 365, S = BASE.S;
+    const y = yardstick(S, T, V);
+    const F = fundSize(y, s6.target * 1000, BASE.MULT);
+    const d = decompose(y, S, s6.ds, s6.dvol);
+    const scaled = {};
+    Object.keys(d).forEach(k => { scaled[k] = d[k] * F.lots * BASE.MULT; });
+    const tot = totalOf(scaled);
+    const bars = [["Gamma", scaled.gamma, "--moss"], ["Theta", scaled.theta, "--verm"],
+      ["Vega", scaled.vega, "--blue"], ["Vanna", scaled.vanna, "--ochre"],
+      ["Volga", scaled.volga, "--ochre"], ["Net", tot, "--ink"]];
+    let lim = 0;
+    bars.forEach(b => { if (Math.abs(b[1]) > lim) lim = Math.abs(b[1]); });
+    lim = Math.max(lim * 1.25, 1000);
+    const o = Fig(document.getElementById("cv6"),
+      { h: 340, x0: -lim, x1: lim, y0: -0.7, y1: 5.3, pad: { l: 76, r: 18, t: 12 } });
+    axes(o, x => Math.abs(x) >= 1000 ? (x / 1000).toFixed(0) + "k" : x.toFixed(0), () => "", 5, 0);
+    const g = o.g, bh = o.ph / 7.4;
+    bars.forEach((b, i) => {
+      const yy = 5 - i;
+      g.fillStyle = C(i === 5 ? "--ink" : "--ink2");
+      g.font = (i === 5 ? "600 " : "") + "10px 'IBM Plex Mono', monospace";
+      g.textAlign = "right"; g.textBaseline = "middle";
+      g.fillText(b[0], o.P.l - 7, o.Y(yy));
+      g.save(); g.fillStyle = C(b[2]); g.globalAlpha = i === 5 ? 0.95 : 0.78;
+      const x0 = o.X(0), x1 = o.X(b[1]);
+      g.fillRect(Math.min(x0, x1), o.Y(yy) - bh / 2, Math.abs(x1 - x0), bh);
+      g.restore();
+      g.fillStyle = C("--ink2"); g.font = "9px 'IBM Plex Mono', monospace";
+      g.textAlign = b[1] >= 0 ? "left" : "right"; g.textBaseline = "middle";
+      g.fillText("$" + Math.round(b[1]).toLocaleString(), x1 + (b[1] >= 0 ? 4 : -4), o.Y(yy));
+    });
+    vline(o, 0, C("--ink"), "");
+    document.getElementById("kv6").innerHTML = kvHTML([
+      ["Vega target", "$" + (s6.target * 1000).toLocaleString() + " per point", "blue"],
+      ["Contracts", Math.round(F.lots).toLocaleString()],
+      ["Option notional", "$" + Math.round(F.notional).toLocaleString()],
+      ["Theta per day", "$" + Math.round(F.thetaDay).toLocaleString(), "verm"],
+      ["Gamma on a 1% move", "$" + Math.round(F.lots * BASE.MULT * 0.5 * y.gamma * 1).toLocaleString(), "moss"],
+      ["— on 2%", "$" + Math.round(F.lots * BASE.MULT * 0.5 * y.gamma * 4).toLocaleString()],
+      ["— on 3%", "$" + Math.round(F.lots * BASE.MULT * 0.5 * y.gamma * 9).toLocaleString()],
+      ["Breakeven move", breakeven(y, S).toFixed(4) + "%", "ochre"],
+      ["One vol point buys", ((y.vega / 100) / (-y.theta / 365)).toFixed(2) + " days of theta", "blue"]
+    ]);
+  }
+})();
+
+/* ══════════ 07 — the drill ══════════ */
+(function () {
+  const E = id => document.getElementById(id);
+  let cur = null, sc = 0, asked = 0, streak = 0, best = 0, hard = false;
+  const R = Math.random;
+  const pick = a => a[Math.floor(R() * a.length)];
+  function make() {
+    if (!hard) {
+      const t = Math.floor(R() * 4);
+      if (t === 0) {
+        const v = pick([12, 16, 20, 25, 30, 40, 60]);
+        const a = impliedDaily(v / 100);
+        return { kind: "The delta-hedged breakeven", unit: "%", a: a, tol: 0.005,
+          q: "A <b>" + v + " vol</b> name. What daily move does <em>any</em> delta-hedged " +
+            "structure need to break even, at a flat volatility?",
+          w: "σ/√365 = " + v + "/" + Math.sqrt(365).toFixed(3) + " = <b>" + a.toFixed(4) +
+            "%</b>. The gamma cancels, so the structure does not enter it." };
+      }
+      if (t === 1) {
+        const v = pick([15, 20, 30, 40]), d = pick([7, 14, 30, 60, 90]);
+        const b = bs(100, 100, d / 365, v / 100, 0, 0, true);
+        const a = b.vega / (b.gamma * 100 * 100 * (v / 100) * (d / 365));
+        return { kind: "The vega identity", unit: "", a: a, tol: 0.002,
+          q: "For a single option, what is <b>vega ÷ (Γ·S²·σ·T)</b>?",
+          w: "Exactly <b>1</b>, at every strike and every expiry — which is why vega and " +
+            "gamma cannot be given opposite signs at one expiry." };
+      }
+      if (t === 2) {
+        const d1 = pick([30, 60, 90]), d2 = pick([7, 14, 21]);
+        const a = Math.sqrt(d1 / d2);
+        return { kind: "Gamma against time", unit: "×", a: a, tol: 0.01,
+          q: "An at-the-money option ages from <b>" + d1 + "</b> days to <b>" + d2 +
+            "</b>. By what factor does its gamma multiply?",
+          w: "√(" + d1 + "/" + d2 + ") = <b>" + a.toFixed(3) +
+            "×</b>, while vega multiplies by the reciprocal, " + (1 / a).toFixed(3) + "×." };
+      }
+      const v = pick([15, 20, 25, 30, 40]);
+      const a = v / Math.sqrt(252) ;
+      return { kind: "Trading-day convention", unit: "%", a: a, tol: 0.005,
+        q: "A <b>" + v + " vol</b> name, hedged only on trading days. What is the breakeven " +
+          "daily move using √252 rather than √365?",
+        w: v + "/√252 = <b>" + a.toFixed(4) + "%</b>, against " +
+          impliedDaily(v / 100).toFixed(4) + "% on calendar days. The two get mixed constantly." };
+    }
+    const t = Math.floor(R() * 3);
+    if (t === 0) {
+      const tg = pick([50, 100, 200, 250, 500]), d = pick([30, 60, 90]);
+      const v = pick([20, 30, 40]);
+      const y = yardstick(100, d / 365, v / 100);
+      const a = tg * 1000 / (y.vega / 100 * 100);
+      return { kind: "Contracts for a vega target", unit: "contracts", a: a,
+        tol: Math.max(2, a * 0.01),
+        q: "You want <b>$" + tg + "k</b> of vega per point in <b>" + d + "-day</b> " +
+          "at-the-money straddles on a <b>$100</b> stock at <b>" + v + " vol</b>. How many contracts?",
+        w: "Vega per contract per point = $" + (y.vega / 100 * 100).toFixed(2) + ", so $" +
+          (tg * 1000).toLocaleString() + " ÷ that = <b>" + Math.round(a).toLocaleString() +
+          "</b> contracts." };
+    }
+    if (t === 1) {
+      const tg = pick([50, 100, 200, 250]), d = pick([30, 60, 90]);
+      const v = pick([20, 30, 40]);
+      const y = yardstick(100, d / 365, v / 100);
+      const F = fundSize(y, tg * 1000, 100);
+      const a = F.thetaDay;
+      return { kind: "Daily theta on a vega target", unit: "$", a: a,
+        tol: Math.max(200, a * 0.01),
+        q: "Holding <b>$" + tg + "k</b> of vega per point in <b>" + d +
+          "-day</b> straddles at <b>" + v + " vol</b>. What is the daily theta?",
+        w: "<b>$" + Math.round(a).toLocaleString() + "</b> — and one vol point is worth " +
+          ((y.vega / 100) / (-y.theta / 365)).toFixed(2) + " days of it." };
+    }
+    const d = pick([30, 60, 90, 120]);
+    const v = pick([20, 30, 40]);
+    const y = yardstick(100, d / 365, v / 100);
+    const a = (y.vega / 100) / (-y.theta / 365);
+    return { kind: "Vol points per day of carry", unit: "days", a: a, tol: Math.max(0.02, a * 0.02),
+      q: "A <b>" + d + "-day</b> at-the-money straddle at <b>" + v +
+        " vol</b>. How many days of theta does one volatility point pay for?",
+      w: "vega per point ÷ theta per day = <b>" + a.toFixed(2) +
+        " days</b>. It scales with the expiry, so a 90-day option gives three times a 30-day one." };
+  }
+  function next() {
+    cur = make();
+    E("dKind").textContent = cur.kind; E("dText").innerHTML = cur.q;
+    E("dUnit").textContent = cur.unit; E("dInput").value = "";
+    E("drill").classList.remove("done");
+    focusSoft(E("dInput"), E("drill"));
+  }
+  function submit() {
+    if (!cur || E("drill").classList.contains("done")) return;
+    const raw = parseFloat(String(E("dInput").value).replace(/[$,%\s]/g, ""));
+    asked++;
+    const ok = isFinite(raw) && Math.abs(raw - cur.a) <= cur.tol;
+    if (ok) { sc++; streak++; if (streak > best) best = streak; } else streak = 0;
+    E("dVerdict").textContent = ok ? "CORRECT"
+      : ("NOT QUITE — the answer is " +
+        (Math.abs(cur.a) >= 1000 ? Math.round(cur.a).toLocaleString() : cur.a.toFixed(4)));
+    E("dVerdict").className = "vd " + (ok ? "ok" : "no");
+    E("dWork").innerHTML = cur.w;
+    E("dScore").textContent = sc + " / " + asked;
+    E("dStreak").textContent = String(streak); E("dBest").textContent = String(best);
+    E("drill").classList.add("done");
+  }
+  E("dSubmit").addEventListener("click", submit);
+  E("dInput").addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+  E("dNext").addEventListener("click", next);
+  E("dSkip").addEventListener("click", () => { streak = 0; E("dStreak").textContent = "0"; next(); });
+  E("dEasy").addEventListener("click", () => {
+    hard = false; E("dEasy").setAttribute("aria-pressed", "true");
+    E("dHard").setAttribute("aria-pressed", "false"); next();
+  });
+  E("dHard").addEventListener("click", () => {
+    hard = true; E("dHard").setAttribute("aria-pressed", "true");
+    E("dEasy").setAttribute("aria-pressed", "false"); next();
+  });
+  window.drawDrill = next;
+  window.__drill = () => {
+    const o = [];
+    [false, true].forEach(h => { hard = h; for (let j = 0; j < 400; j++) o.push(make()); });
+    hard = false; return o;
+  };
+})();
+
+function drawAll() {
+  drawHero(); draw1(); draw2(); draw3(); draw4(); draw5(); draw6(); drawDrill();
+}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

@@ -603,6 +603,186 @@ PAGES["rulers"] = () => {
     Q.every(q => Math.abs((q.a + Math.max(q.tol * 10, 1)) - q.a) > q.tol));
 };
 
+
+PAGES["atlas"] = () => {
+  const M = load("atlas.html", ["BASE", "STRUCTS", "AXES", "greeksOf", "flatVol",
+    "skewVol", "yardstick", "normalized", "thetaRatio", "vegaRatio", "breakeven",
+    "impliedDaily", "decompose", "totalOf", "fundSize", "CALL", "PUT", "STOCK",
+    "__atlas", "__profile", "__crossings", "__atTime", "__breakeven", "__fund",
+    "__decompose", "__drill", "bs"]);
+  const S = 100, T = 30 / 365, T2 = 90 / 365, V = 0.30;
+  const byName = n => M.STRUCTS.find(x => x.n === n);
+  const gOf = (n, s, t, vol) => M.greeksOf(byName(n).legs, s === undefined ? S : s,
+    t === undefined ? T : t, T2, M.flatVol(vol === undefined ? V : vol));
+
+  console.log("    chapter 01 - the two identities");
+  console.log("      theta = -1/2 * gamma * S^2 * sigma^2   (no T)");
+  console.log("      vega  =      gamma * S^2 * sigma * T   (T)");
+  [80, 90, 95, 100, 105, 110, 125].forEach(k => {
+    const b = M.bs(S, k, T, V, 0, 0, true);
+    yes("  strike " + k + ": theta/(-.5*g*S^2*v^2) is exactly 1",
+      Math.abs(M.thetaRatio(b, S, V) - 1) < 1e-9);
+    yes("  strike " + k + ": vega/(g*S^2*v*T) is exactly 1",
+      Math.abs(M.vegaRatio(b, S, V, T) - 1) < 1e-9);
+  });
+  yes("theta tracks gamma across MIXED expiries too",
+    [["Long straddle", T], ["Butterfly", T], ["Calendar", T], ["Diagonal", T]]
+      .every(([n, t]) => Math.abs(M.thetaRatio(gOf(n, S, t), S, V) - 1) < 1e-9));
+  yes("  but vega does NOT, once expiries are mixed",
+    Math.abs(M.vegaRatio(gOf("Calendar"), S, V, T) - 1) > 0.5);
+  const cal = gOf("Calendar");
+  eq("a 30/90 calendar: gamma is -0.0196", cal.gamma, -0.019636, 5e-6);
+  eq("  while its vega is +8.33", cal.vega, 8.3284, 5e-4);
+  yes("  so the signs differ, which no single expiry can do", cal.gamma * cal.vega < 0);
+  yes("every SINGLE-expiry structure has gamma and vega of one sign",
+    ["Long straddle", "Long strangle", "Call spread", "Put spread", "Risk reversal",
+     "Butterfly", "Iron condor", "Call ratio 1\u00d72", "Put backspread", "Collar",
+     "Covered call", "Short put"].every(n => {
+      const g = gOf(n);
+      return g.gamma * g.vega >= -1e-12;
+    }));
+
+  console.log("    chapter 02 - the atlas");
+  eq("sixteen structures", M.STRUCTS.length, 16, 0);
+  const y = M.yardstick(S, T, V);
+  eq("the yardstick straddle's gamma", y.gamma, 0.092684, 5e-6);
+  eq("  vega", y.vega, 22.8535, 5e-4);
+  eq("  theta", y.theta, -41.7076, 5e-4);
+  const nz = n => M.normalized(byName(n), S, T, T2, V);
+  eq("the straddle normalizes to 1.00 on gamma", nz("Long straddle").gamma, 1.0, 1e-12);
+  eq("straddle vanna is near zero", nz("Long straddle").vanna, 0.0050, 5e-4);
+  eq("  and its volga is near zero", nz("Long straddle").volga, -0.0062, 5e-4);
+  eq("strangle volga is +0.95", nz("Long strangle").volga, 0.9463, 5e-4);
+  yes("  so a strangle is a straddle plus a bet on the SIZE of the vol move",
+    Math.abs(nz("Long strangle").volga) > 100 * Math.abs(nz("Long straddle").volga));
+  eq("risk reversal vanna is +0.057", nz("Risk reversal").vanna, 0.0572, 5e-4);
+  eq("  and its volga is only -0.016", nz("Risk reversal").volga, -0.0159, 5e-4);
+  yes("  so a risk reversal is skew where a strangle is vol convexity",
+    Math.abs(nz("Risk reversal").vanna) > Math.abs(nz("Risk reversal").volga));
+
+  console.log("    chapter 02 - a covered call IS a short put");
+  const cc = gOf("Covered call"), sp = gOf("Short put");
+  ["delta", "gamma", "vega", "theta", "vanna", "volga"].forEach(k => {
+    yes("  " + k.padEnd(6) + " matches to 12 decimals", Math.abs(cc[k] - sp[k]) < 1e-12);
+  });
+  eq("both have delta 0.4828", cc.delta, 0.482849, 5e-6);
+  eq("  gamma -0.0463", cc.gamma, -0.046342, 5e-6);
+  eq("  vega -11.43", cc.vega, -11.4267, 5e-4);
+  eq("  theta +20.85", cc.theta, 20.8538, 5e-4);
+  const ccn = nz("Covered call");
+  eq("normalized, both sit at -0.500 on gamma", ccn.gamma, -0.500, 5e-4);
+  eq("  and -0.500 on vega", ccn.vega, -0.500, 5e-4);
+  eq("  vanna -0.0025", ccn.vanna, -0.0025, 5e-4);
+  eq("  volga +0.0031", ccn.volga, 0.0031, 5e-4);
+  console.log("    chapter 02 - and a covered put IS a short call");
+  const cp = gOf("Covered put"), sc = gOf("Short call");
+  ["delta", "gamma", "vega", "theta", "vanna", "volga"].forEach(k => {
+    yes("  " + k.padEnd(6) + " matches to 12 decimals", Math.abs(cp[k] - sc[k]) < 1e-12);
+  });
+  eq("both have delta -0.5172", cp.delta, -0.517151, 5e-6);
+  console.log("    chapter 02 - stock touches delta and nothing else");
+  ["gamma", "vega", "theta", "vanna", "volga"].forEach(k => {
+    yes("  covered call and NAKED short call agree on " + k,
+      Math.abs(cc[k] - sc[k]) < 1e-12);
+  });
+  yes("  while their deltas differ by exactly one",
+    Math.abs((cc.delta - sc.delta) - 1) < 1e-12);
+
+  console.log("    chapter 03 - a profile is not a number");
+  eq("butterfly gamma at spot 100", M.__profile("Butterfly", "gamma", 100, T, V), -0.1559, 5e-4);
+  eq("  at spot 92", M.__profile("Butterfly", "gamma", 92, T, V), -0.0148, 5e-4);
+  yes("  and it is POSITIVE below the wing",
+    M.__profile("Butterfly", "gamma", 88, T, V) > 0);
+  const cross = M.__crossings("Butterfly", "gamma", T, V);
+  yes("the butterfly's gamma changes sign twice across spot", cross.length === 2);
+  eq("  the lower crossing is at 91.45", cross[0], 91.45, 0.06);
+  yes("  and the upper one is above spot", cross[1] > 100);
+  yes("the straddle's gamma never changes sign",
+    M.__crossings("Long straddle", "gamma", T, V).length === 0);
+  yes("the iron condor's gamma changes sign too",
+    M.__crossings("Iron condor", "gamma", T, V).length >= 2);
+
+  console.log("    chapter 04 - what time does");
+  eq("straddle gamma at 90 days", M.yardstick(S, 90 / 365, V).gamma, 0.053414, 5e-6);
+  eq("  at 30 days", M.yardstick(S, 30 / 365, V).gamma, 0.092684, 5e-6);
+  eq("  at 1 day", M.yardstick(S, 1 / 365, V).gamma, 0.508104, 5e-5);
+  const g30 = M.yardstick(S, 30 / 365, V), g7 = M.yardstick(S, 7 / 365, V);
+  eq("gamma multiplies by 2.072 going 30d to 7d", g7.gamma / g30.gamma, 2.0724, 5e-3);
+  eq("  against the theoretical sqrt(30/7)", Math.sqrt(30 / 7), 2.0702, 5e-4);
+  yes("  the two agree to within a fifth of a percent",
+    Math.abs(g7.gamma / g30.gamma - Math.sqrt(30 / 7)) / Math.sqrt(30 / 7) < 0.002);
+  eq("vega multiplies by 0.483 over the same move", g7.vega / g30.vega, 0.4834, 5e-3);
+  eq("  against sqrt(7/30)", Math.sqrt(7 / 30), 0.4830, 5e-4);
+  yes("so a vega position becomes a gamma position on its own",
+    g7.gamma > g30.gamma && g7.vega < g30.vega);
+
+  console.log("    chapter 05 - the same breakeven, until skew");
+  const imp = M.impliedDaily(V);
+  eq("the implied daily move is 1.5703%", imp, 1.5703, 5e-4);
+  const flatNames = ["Long straddle", "Long strangle", "Call spread", "Put spread",
+    "Risk reversal", "Butterfly", "Iron condor", "Call ratio \u00d72", "Covered call",
+    "Calendar", "Diagonal"];
+  ["Long straddle", "Long strangle", "Call spread", "Put spread", "Risk reversal",
+   "Butterfly", "Iron condor", "Call ratio 1\u00d72", "Put backspread", "Collar",
+   "Covered call", "Short put", "Calendar", "Diagonal"].forEach(n => {
+    eq("  " + n.padEnd(15) + " breaks even at 1.5703%",
+      M.breakeven(gOf(n), S), 1.5703, 5e-4);
+  });
+  yes("EVERY structure, single or mixed expiry, gives the identical breakeven",
+    ["Long straddle", "Butterfly", "Iron condor", "Calendar", "Diagonal", "Covered call"]
+      .every(n => Math.abs(M.breakeven(gOf(n), S) - imp) < 5e-4));
+  console.log("    chapter 05 - and what breaks it");
+  const skewG = n => M.greeksOf(byName(n).legs, S, T, T2, M.skewVol(V, 0.004));
+  eq("with 40bp of skew a straddle still needs 1.5703%",
+    M.breakeven(skewG("Long straddle"), S), 1.5703, 1e-3);
+  eq("  a put spread needs only 1.1185%",
+    M.breakeven(skewG("Put spread"), S), 1.1185, 5e-3);
+  eq("  a risk reversal 1.3277%",
+    M.breakeven(skewG("Risk reversal"), S), 1.3277, 5e-3);
+  eq("  and a butterfly 1.5957%, slightly MORE",
+    M.breakeven(skewG("Butterfly"), S), 1.5957, 5e-3);
+  yes("so skew separates them, and it is the only thing that does",
+    Math.abs(M.breakeven(skewG("Put spread"), S) - imp) > 0.4);
+  yes("  the butterfly is the worse carry on an equity surface, not the better",
+    M.breakeven(skewG("Butterfly"), S) > imp);
+  eq("the trading-day convention gives 1.890% instead",
+    V / Math.sqrt(252) * 100, 1.8898, 5e-4);
+
+  console.log("    chapter 06 - in fund units");
+  eq("vega per contract per point is $22.85", y.vega / 100 * 100, 22.8535, 5e-4);
+  eq("theta per contract per day is $11.43", -y.theta / 365 * 100, 11.4267, 5e-4);
+  const F = M.fundSize(y, 100000, 100);
+  eq("$100k of vega per point takes 4,376 contracts", F.lots, 4376, 1.0);
+  eq("  which is $43.8m of option notional", F.notional, 43756978, 12000);
+  eq("  and bleeds $50,000 a day", F.thetaDay, 50000, 30);
+  eq("a 1% move earns $20,278 of gamma",
+    F.lots * 100 * 0.5 * y.gamma * 1, 20278, 12);
+  eq("  a 2% move, $81,111", F.lots * 100 * 0.5 * y.gamma * 4, 81111, 45);
+  eq("  a 3% move, $182,500", F.lots * 100 * 0.5 * y.gamma * 9, 182500, 100);
+  yes("gamma grows with the SQUARE of the move",
+    Math.abs((F.lots * 100 * 0.5 * y.gamma * 4) / (F.lots * 100 * 0.5 * y.gamma * 1) - 4) < 1e-9);
+  eq("one vol point is worth exactly 2 days of theta",
+    (y.vega / 100) / (-y.theta / 365), 2.0, 5e-3);
+  yes("  and a 90-day option gives three times that",
+    Math.abs((M.yardstick(S, 90 / 365, V).vega / 100) /
+      (-M.yardstick(S, 90 / 365, V).theta / 365) - 6.0) < 0.02);
+  const d = M.decompose(y, S, 0, 1);
+  eq("a one-point vol move alone earns 0.2285 per share", d.vega, 0.228535, 5e-5);
+  yes("  which is roughly twice the daily theta", Math.abs(d.vega / -d.theta - 2) < 0.01);
+
+  console.log("    chapter 07 - the drill generator");
+  const Q = M.__drill();
+  yes("every question has a finite answer, prompt, working and tolerance",
+    Q.every(q => isFinite(q.a) && q.q && q.w && q.tol > 0));
+  const kinds = {};
+  Q.forEach(q => { kinds[q.kind] = (kinds[q.kind] || 0) + 1; });
+  Object.keys(kinds).sort().forEach(k => console.log("      " + k.padEnd(34) + kinds[k]));
+  yes("seven distinct question kinds", Object.keys(kinds).length === 7);
+  yes("the exact answer is always accepted", Q.every(q => Math.abs(q.a - q.a) <= q.tol));
+  yes("an answer well outside the band is rejected",
+    Q.every(q => Math.abs((q.a + Math.max(q.tol * 10, 1)) - q.a) > q.tol));
+};
+
 const only = process.argv[2];
 const names = only ? [only.replace(/\.html$/, "")] : Object.keys(PAGES);
 for (const name of names) {

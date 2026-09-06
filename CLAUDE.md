@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. All eighteen pages live.
+no dependencies. All nineteen pages live.
 
 ## Before you change anything
 
@@ -139,7 +139,7 @@ Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proo
 
 ## Offline, and installing to a phone
 
-The series is a PWA. `sw.js` precaches all eighteen pages plus the engine on
+The series is a PWA. `sw.js` precaches all nineteen pages plus the engine on
 install — about 2MB — and serves everything from that cache afterwards, so the
 whole thing works with no network. Three strategies, and the split is deliberate:
 
@@ -178,7 +178,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all eighteen pages are live. Pages 12-15 were added after mapping
+Nothing unbuilt — all nineteen pages are live. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
@@ -204,6 +204,27 @@ page here and it was the most requested thing missing.
 Still uncovered from that mapping, if more is ever wanted: hedging with options from
 a corporate or portfolio seat (his ch 17), and expiration P&L taught from scratch
 (ch 4), which this series assumes.
+
+## Page 19 and the yardstick trap
+
+The atlas normalizes every structure against a one-lot ATM straddle. The
+first version rebuilt that yardstick at whatever spot and expiry it was
+called with, which is wrong in two different ways and only one of them is
+obvious. Across spot it divides a profile by a moving denominator and quietly
+reshapes it; across expiry it is worse, because the straddle then reads 1.00
+at *every* expiry and chapter 04's entire subject — gamma exploding as 1/sqrt(T)
+while vega drains — cancels out of the chart. `normalized()` now pins the
+reference to spot 100 and takes an explicit `refT` so chapter 04 can hold it
+at 30 days. verify.js caught this as a butterfly reading -0.021 at spot 92
+where the prose said -0.0148.
+
+Two smaller ones from the same page, both found by pixel-sampling rather than
+by either pre-flight. A hero that only draws from inside its
+requestAnimationFrame loop stays blank when rAF is throttled, because
+`size()` clears the bitmap and nothing repaints it — every hero should paint
+once synchronously before animating. And a zero-crossing reported off a
+0.05 scan grid lands up to a step late, which is how the prose came to say
+91.45 while the panel said 91.50; bisect inside the bracket instead.
 
 ## The `line()` trap
 
