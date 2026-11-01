@@ -24,6 +24,17 @@
 <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
+<style>
+  .fgCard{border-top:1px solid var(--hair);padding:10px 0}
+  .fgCard summary{cursor:pointer;font-size:17px;line-height:1.4}
+  .fgTag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin:0 8px}
+  .fgV{color:var(--grey);font-size:15px}
+  .fgBody{padding:6px 0 4px 2px;font-size:16px;line-height:1.55;max-width:760px}
+  .fgBody p{margin:8px 0}
+  .fgLegs,.fgNums{font-family:var(--mono);font-size:12px;color:var(--grey)}
+  .fgSee a{color:var(--blue)}
+  #fgChips{margin:18px 0 8px}
+</style>
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
@@ -39,6 +50,7 @@
   <a href="#c4"><span>The shelves</span><i></i></a>
   <a href="#c5"><span>Lizards</span><i></i></a>
   <a href="#c6"><span>Flow</span><i></i></a>
+  <a href="#c7"><span>Field guide</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -59,6 +71,7 @@
   <ol>
     <li><b>Every structure appears twice.</b> Once as a shape you could draw for a client, once as a bar chart of what it is actually long and short.</li>
     <li><b>Chapter 03 is the argument.</b> Two trades with different names, different clients and opposite signs turn out to be one instrument.</li>
+    <li><b>Chapter 07 is the field guide.</b> Every common structure with why it is traded, how it loses and what it needs to win — the chapter to come back to.</li>
     <li><b>Chapter 05 is the correction.</b> The lizards are defined by a condition on the premium, not by their legs — and the condition frequently fails.</li>
   </ol>
   <details class="drop">
@@ -451,6 +464,23 @@
     </div>
     <div class="ans"><b>Widening breaks it.</b> Going from 2 wide to 10 wide adds eight points of potential loss and only 1.88 of credit — 3.80 becomes 5.67 — because moving the long call from 104 to 112 saves you the difference between two out-of-the-money calls, which is far less than the eight points of width it adds. The condition credit ≥ width fails and the upside tail reappears, capped at width minus credit. Not unlimited — the long call still caps it — but no longer zero, which is the property you were paying for. The instinct that wider is safer is exactly backwards here.</div>
   </div>
+  <div class="prose">
+    <p>The same test applies to the whole family, each with its own width. A <b>big lizard</b> — short the 100 straddle, long the 105 call — collects <b>5.97</b> against a width of 5, so it holds by 97 cents. A <b>twisted sister</b> — short the 105 call, short the 95 put, long the 92 put — collects <b>3.21</b> against a width of 3 on the downside, and holds by only 21 cents. One shrug of implied vol and it does not.</p>
+    <p>Notice where the risk went. A jade lizard that holds has no upside risk, but it has not become safe; it has moved all of its risk to the other side. It is a short put with a call spread sold on top, so a fall to 85 at expiry costs 98 − 85 − 3.80 = <b>9.20</b>. The name describes the side that was made safe and stays quiet about the side that was not.</p>
+    <p>And the flat surface on this page understates how often the condition holds. On a real equity skew the short put is priced off a higher implied vol than the calls, which raises the credit. With a skew of −0.8 vol per unit of log-moneyness, the 98/102/104 lizard collects <b>4.21</b> instead of 3.80, and the 92/105/110 version collects <b>3.21</b> instead of 2.36 — closer, but still short of its width of 5. Skew helps lizards; it does not rescue a spread that is too wide.</p>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — where the condition comes from, and what it does not protect</summary>
+    <div class="body">
+      <p>Take a jade lizard: short a put at K₁, short a call at K₂, long a call at K₃ above it, for a total credit c. Above K₃ every leg's payoff is fixed: the put is worthless and the call spread owes its full width.</p>
+      <div class="mline">P&amp;L above K₃ = c − (K₃ − K₂)</div>
+      <p class="mread">Reads as: <b>keep the credit, pay the full width of the call spread.</b> That is the worst the upside can ever do, because nothing above K₃ changes.</p>
+      <p>Between K₂ and K₃ the loss on the call spread is smaller than the width, so the P&amp;L is higher than at K₃. The worst upside outcome is therefore the one above K₃, and it is non-negative exactly when c ≥ K₃ − K₂. The big lizard and twisted sister are the same argument with the width measured from the straddle strike and on the put side.</p>
+      <p><b>Where it breaks.</b> The condition is a statement about expiry. Before then the short call can be assigned early — into a dividend, say, from page 08 — which removes one leg and leaves the others. A settlement right at a short strike brings page 08's pin risk. Margin is charged on the position, not on the inequality, so a lizard that has no upside risk on paper can still tie up capital against it. And the condition says nothing at all about the downside, which is where the position's real risk lives.</p>
+    </div>
+  </details>
+
 </section>
 
 <!-- ══════════ 06 ══════════ -->
@@ -501,12 +531,76 @@
     </div>
   </div>
 
+  <div class="prose">
+    <p>The figure puts numbers on the mechanism, with the caveat that the mapping from flow to vol is an assumption on a slider. With both flows at their default size and an impact of 0.35, the 90 strike trades at <b>31.39%</b> and the 110 at <b>24.52%</b>: a 90–110 skew of <b>6.87</b> points on a surface that started flat at 28. Switch overwriting off and the skew falls to <b>3.40</b>; switch put buying off instead and it falls to <b>3.47</b>. Each flow supplies about half the slope, from opposite ends — the put buyers lift the left wing and the overwriters press down the right.</p>
+    <p>That split matters for trading, because the two flows move on different calendars. Overwriting runs monthly and steadily; put buying spikes when portfolio managers get nervous. A surface whose slope comes mostly from overwriting is held down at the upside and tends to stay there; one whose slope comes from put demand can steepen sharply and relax just as fast. Same skew number, different behavior.</p>
+  </div>
+
+  <div class="mline">σ(K) ≈ σ₀ + κ · [ demand(K) − supply(K) ]</div>
+  <p class="mread">Reads as: <b>each strike's implied vol is the no-flow level, pushed up by persistent demand and down by persistent supply, in proportion to how much the market charges to absorb an imbalance.</b> κ is that charge, and it is the one number here nobody can measure directly.</p>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A large wave of new overwriting programmes launches and keeps selling calls every month. All else equal, which part of the surface moves?</p>
+    <div class="opts">
+      <button>The downside, because more call selling means more put buying elsewhere</button>
+      <button data-ok="1">The upside. Persistent call supply has to be absorbed, so upside implied vols fall and the 90–110 skew steepens from the right-hand end</button>
+      <button>Nothing — overwriters have no view on volatility, so their selling carries no information</button>
+      <button>The at-the-money level only</button>
+    </div>
+    <div class="ans"><b>The upside wing comes down.</b> The third answer is right that overwriters have no view and wrong about the consequence: flow with no information still has to be warehoused by somebody who charges for it, and the charge is the price. That is the whole point of this chapter — and the reason "the market is telling us upside vol is cheap" is often only telling you that a mandate is running.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — why an imbalance with no information still becomes a price</summary>
+    <div class="body">
+      <p>A dealer who absorbs a one-way flow ends up holding inventory it did not choose. Page 05's market-making chapter shows what it does about that: it skews its quotes away from the side it already owns.</p>
+      <div class="mline">quote mid = fair value − k · inventory</div>
+      <p class="mread">Reads as: <b>the price shown is the dealer's estimate of value, shifted by how much it already holds.</b> Long calls from overwriters, it marks calls down to discourage more selling and encourage buying.</p>
+      <p>When the flow is persistent the inventory never clears, so the shift never goes away. Across many strikes and many dealers, that permanent shift is the slope of the surface — the overwriting term at the upside, the put-buying term at the downside.</p>
+      <p><b>Where it breaks.</b> Flow is not the only generator of skew. Page 02 showed jumps and correlated stochastic volatility each produce one from pure modeling assumptions, and index skew persisted through very different flow regimes. Positioning is inferred rather than observed, so the size of κ in any real market is a matter of estimation and argument. Read the figure as which way each flow pushes, not as a decomposition of any real surface.</p>
+    </div>
+  </details>
+
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>The field guide: every common structure, and what it takes to win with it</h2>
+    <p class="dek">Why each one is traded, who trades it, how it loses, and the conditions under which it actually makes money. No structure has an edge on its own.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Every structure below is a way of buying or selling some mix of direction, movement, the price of movement, skew and time. None of them is good or bad. A structure makes money when the market has mispriced the thing it is long or short, and loses when it has not — so the question is never "is this a good strategy" but "what is this structure betting on, and is that thing mispriced right now?"</p>
+    <p>There are only five honest sources of edge in options, and every "how to win" below is one of them. <b>Price</b>: implied volatility is wrong relative to what will be realized — the variance risk premium, measured with the vol cone in the <a href="tools.html" style="color:var(--blue)">toolkit</a>. <b>Shape</b>: one part of the surface is rich or cheap relative to another — skew and term structure, <a href="surface.html" style="color:var(--blue)">page 02</a>. <b>Events</b>: a catalyst is priced wrong, <a href="catalyst.html" style="color:var(--blue)">page 03</a>. <b>Flow</b>: you are paid for warehousing someone else's mandated trade, chapter 06. <b>Execution and sizing</b>: you pay less to trade and you size so a bad outcome does not end the game, <a href="execution.html" style="color:var(--blue)">page 06</a> and the toolkit's Kelly tool. A structure is the vehicle; the edge has to come from one of those five.</p>
+    <p>The live numbers on each card use chapter 01's market — change spot, vol or expiry there and every card reprices. Filter by what you are trying to do.</p>
+  </div>
+
+  <div class="mline">expected P&amp;L = Σ probability(state) × payoff(state) − price paid</div>
+  <p class="mread">Reads as: <b>a structure only makes money if your distribution of outcomes is better than the one the market charged you for.</b> Win rate, credit received and "defined risk" all leave this equation unchanged; they describe the shape of the bet, not its value.</p>
+
+  <div class="chips" role="group" aria-label="Filter structures" id="fgChips"></div>
+  <div id="fgCards"></div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">An iron condor seller wins 85% of the time. What does that tell you about the strategy's edge?</p>
+    <div class="opts">
+      <button>It has a large edge — 85% is far above a coin flip</button>
+      <button data-ok="1">Nothing by itself. A short-wing structure has a high win rate by construction; the edge depends on whether the premium exceeds the expected cost of the 15% of losses, which are several times larger</button>
+      <button>It has a small edge, because the wins are small</button>
+      <button>It has no edge, because short options lose in the long run</button>
+    </div>
+    <div class="ans"><b>Nothing by itself.</b> Win rate is a property of the payoff shape, not of the price. <a href="rulers.html" style="color:var(--blue)">Page 18</a> shows a seller's hit rate rising as tails fatten — exactly when the strategy is most dangerous. The fourth answer over-corrects: short options earn the variance risk premium on average, which is why so many institutions run them, but the premium comes with a tail you must size for.</div>
+  </div>
 </section>
 
 <!-- ══════════ quiz ══════════ -->
 <section class="chapter" id="cq">
   <div class="chead">
-    <div class="cnum">07</div>
+    <div class="cnum">08</div>
     <h2>Check yourself</h2>
     <p class="dek">Six questions across the page.</p>
   </div>
@@ -721,7 +815,7 @@ function fingerprint(legs){
     {id:"S1",k:"S",lbl:"S",name:"Spot",min:20,max:300,step:5,fmt:v=>"$"+v.toFixed(0)},
     {id:"v1",k:"vol",lbl:"σ",name:"Implied vol",min:.08,max:1.2,step:.01,fmt:pct},
     {id:"d1",k:"days",lbl:"T",name:"Days to expiry",min:3,max:365,step:1,fmt:v=>v.toFixed(0)+"d"}
-  ],MKT,()=>draw(),"c1");
+  ],MKT,()=>{draw();if(window.draw7)draw7();},"c1");
   sliders(document.getElementById("ctl2"),[
     {id:"L2",k:"lots",lbl:"N",name:"Contracts",min:1,max:200,step:1,fmt:v=>v.toFixed(0)}
   ],MKT,()=>draw(),"c2");
@@ -962,6 +1056,159 @@ const s6={overwrite:1.0,putbuy:1.0,impact:.35};
   }
 })();
 
+/* ══════════════════════════════════════════════
+   07 — the field guide
+   ══════════════════════════════════════════════
+   legs: [type, strike as a fraction of spot, quantity, expiry multiple]
+   type c call, p put, s stock. Greeks come from the same engine and the
+   same market as chapter 01, so every card reprices when that one does. */
+const FG=[
+ {n:"Long call",c:"dir",l:[["c",1.05,1]],v:"Up, with room to be wrong for the price of the premium.",
+  why:"The simplest way to own upside with a known worst case. Retail favors it for leverage; funds use it to add upside without selling stock, or as a cheap way to stay invested after taking profits.",
+  win:"You need the move to arrive before theta takes the premium, and you want to have bought volatility that was cheap — a call is long vega, so buying it at an implied vol above what the stock then realizes is a loss even if you are right about direction.",
+  pit:"Paying for volatility at the wrong time, especially into earnings where implied collapses after the print; far out-of-the-money calls in hot names, where call skew makes the lottery tickets expensive; holding through the last weeks where theta is steepest.",
+  how:"Check implied against the vol cone before buying. Pick the strike from the expected move, not from how cheap it looks. When implied is high, buy a call spread instead and give back the upside you were unlikely to get. Size as a premium you can lose entirely.",pg:["black-scholes.html","Page 01"]},
+ {n:"Long put",c:"hedge",l:[["p",0.95,1]],v:"Down, or insurance against it.",
+  why:"Portfolio insurance and bearish speculation with a capped loss. Pensions and insurers buy index puts as mandated hedges; that demand is one reason downside implied vols sit above realized.",
+  win:"Puts carry the skew premium, so on average they lose money relative to their payoff — they win when the drop is larger or faster than the price assumed. They are worth most when bought while the market is calm and skew is flat.",
+  pit:"The bleed: a permanent put programme can cost more than the drawdowns it prevents. Buying after a sell-off, when implied and skew are already high. Choosing a strike so far out that it pays only in a crash you will not get.",
+  how:"Finance with a put spread or a collar if you only need protection over a range. Roll on a schedule rather than on fear. Measure the programme by the drawdown it caps per dollar spent, not by whether this month's put paid.",pg:["surface.html","Page 02"]},
+ {n:"Short put (cash-secured)",c:"income",l:[["p",0.95,-1]],v:"Flat to up; happy to own the stock lower.",
+  why:"Paid to place a limit order to buy. It harvests both the variance risk premium and the put-skew premium, which is why systematic put-writing indices have historically earned equity-like returns with lower volatility — until the drawdowns.",
+  win:"Implied must exceed what is realized often enough to pay for the occasional gap. The edge is real on average and concentrated in calm periods following a spike, when implied is still elevated and realized has come down.",
+  pit:"It is short a crash and correlated with everything else you own. Selling in a calm market at low implied gives the least premium for the same tail. Margin calls arrive at the worst moment, so leverage turns a drawdown into a forced exit.",
+  how:"Size so a 30% gap is survivable without selling. Sell more after vol spikes and less in calm. Spread expiries so a single month cannot sink the book. Sell only on names or indices you would actually hold.",pg:["variance.html","Page 09"]},
+ {n:"Covered call",c:"income",l:[["s",1,1],["c",1.05,-1]],v:"Hold the stock, collect income, accept a cap.",
+  why:"The most common option strategy in the world. Overwriting programmes at pensions, funds and in buy-write ETFs sell calls monthly against holdings — the structural supply of upside volatility from chapter 06.",
+  win:"A covered call is identical to a short put (page 19), so it earns when the call's implied vol exceeds the vol the stock then delivers. It underperforms the stock in strong rallies by construction.",
+  pit:"Capping the upside in exactly the months that make a year's return. Selling the cheapest part of an equity surface — upside calls usually carry the lowest implieds. Early assignment before an ex-dividend date (page 08). Treating the premium as yield rather than as the price of volatility sold.",
+  how:"Overwrite when call implied is rich against the cone, not on a calendar. Put the strike above the expected move. Know that you are short volatility and size the stock position accordingly.",pg:["atlas.html","Page 19"]},
+ {n:"Protective put",c:"hedge",l:[["s",1,1],["p",0.95,1]],v:"Own the stock with a floor.",
+  why:"Insurance for a concentrated or long-held position. Common for executives with restricted stock, family offices and funds protecting a gain through an event.",
+  win:"Wins when the stock falls below the strike by more than the premium — and, as insurance, is worth it when the loss it prevents would be ruinous rather than merely painful.",
+  pit:"Continuous cost; the same skew premium as a long put. Rolling every month at the money is one of the most expensive habits in options.",
+  how:"Protect for the window that matters, not forever. Use a put spread when the disaster case below a level is acceptable, or a collar when upside can be given away.",pg:["early-exercise.html","Page 08"]},
+ {n:"Collar",c:"hedge",l:[["s",1,1],["p",0.90,1],["c",1.10,-1]],v:"Floor and cap, often for zero premium.",
+  why:"Corporate treasurers and concentrated holders protecting a position on a budget. Banks offer it as a product, and the flow is persistent and one-sided.",
+  win:"The collar holder is buying skew: on a steep surface the zero-cost call strike comes in closer to the money (chapter 03). It wins as insurance; economically the holder pays the skew premium to the dealer.",
+  pit:"Zero premium is not zero cost. A steep skew means giving up more upside for the same floor. Tax and accounting treatment can dominate the economics.",
+  how:"Compare zero-cost strikes across expiries and on a put-spread collar before choosing. Collar when skew is flat, not after a sell-off.",pg:["structures.html","Chapter 03"]},
+ {n:"Bull call spread",c:"dir",l:[["c",1.00,1],["c",1.10,-1]],v:"Up, to a target.",
+  why:"A directional bet with much less vega and theta than an outright call. The workhorse of directional option trading at funds and desks.",
+  win:"Needs the stock to reach the short strike by expiry. Its edge comes from strike selection: the short leg should sit where you think the move stops, so you sell the upside you did not expect to keep.",
+  pit:"Capping the upside on a big move. Two bid–offers to cross. Early assignment on the short leg in American options.",
+  how:"Put the short strike at your target or the expected move. Prefer it to an outright when implied is high.",pg:["spreading.html","Page 14"]},
+ {n:"Bear put spread",c:"dir",l:[["p",1.00,1],["p",0.90,-1]],v:"Down, to a target.",
+  why:"The bearish mirror, and on equities a structurally attractive one: the lower put you sell sits higher on the skew, so it recovers more of the cost than the symmetric call spread would.",
+  win:"Needs the decline to reach the lower strike. Skew helps — you are selling the richer leg.",
+  pit:"A crash through the lower strike pays only the width. Pin risk near either strike at expiry.",
+  how:"Use when you are bearish but do not need crash protection. Check how much the short leg's skew is paying you.",pg:["spreading.html","Page 14"]},
+ {n:"Credit spread (bull put)",c:"income",l:[["p",0.95,-1],["p",0.90,1]],v:"Flat to up, collected up front.",
+  why:"Sold heavily by retail and systematic income products because the cash arrives first and the win rate is high.",
+  win:"It is the same trade as the bull call spread on the same strikes, differing only by interest on the width (page 14). It wins exactly when that debit spread would.",
+  pit:"The credit illusion — a large maximum loss against a small maximum gain feels like income until it is not. Early assignment on the short put after a drop. Ignoring that the identical debit spread exists.",
+  how:"Choose between credit and debit versions on margin and assignment, never on 'collecting premium'. Sell where skew makes the short leg rich.",pg:["spreading.html","Page 14"]},
+ {n:"Risk reversal",c:"dir",l:[["c",1.10,1],["p",0.90,-1]],v:"Direction plus a view that skew is too steep.",
+  why:"How FX desks quote skew and how equity funds get bullish exposure cheaply: sell the expensive downside put to buy the cheap upside call.",
+  win:"Wins on a rally, and wins on the skew if downside vol falls relative to upside. It is the fund's side of the corporate's collar.",
+  pit:"Short a put: a crash costs like owning the stock, without having paid for it. Margin on the short leg. Selling skew just before it steepens.",
+  how:"Trade it when skew is historically steep and you are already willing to own the stock lower. Size as if you own the shares.",pg:["structures.html","Chapter 03"]},
+ {n:"Long straddle",c:"vol",l:[["c",1.00,1],["p",1.00,1]],v:"A large move either way; or realized vol above implied.",
+  why:"The purest long-volatility position. Vol funds buy it delta-hedged to own realized volatility; event traders buy it into catalysts.",
+  win:"Delta-hedged, it earns the gap between realized and implied variance, weighted by when the movement happens (page 16, chapter 07). Into an event it wins if the move beats the straddle-implied move by more than the vol crush costs.",
+  pit:"Theta every day. Losing two thirds of fairly priced event trades and abandoning the strategy (page 03). Buying after a spike when implied is already high.",
+  how:"Buy when implied sits low in its cone and you have a reason to expect realized to rise. Hedge on a rule (page 06). Judge the strategy over many trades, never by its hit rate.",pg:["catalyst.html","Page 03"]},
+ {n:"Long strangle",c:"vol",l:[["c",1.10,1],["p",0.90,1]],v:"A big move, cheaper than a straddle.",
+  why:"Cheaper long vol with long vol-of-vol: the wings gain vega as volatility explodes, which is why strangles outperform in genuine regime changes.",
+  win:"Needs a move past either strike plus the premium, or a rise in implied — especially of the wings.",
+  pit:"Low win rate; theta on two legs; the wings are often the most expensive part of the surface.",
+  how:"Use when you expect a regime change rather than ordinary movement. Compare against a straddle on the same vega.",pg:["atlas.html","Page 19"]},
+ {n:"Short straddle / strangle",c:"vol",l:[["c",1.10,-1],["p",0.90,-1]],v:"The stock stays in a range; implied is too high.",
+  why:"The direct way to harvest the variance risk premium. Vol funds, market makers and systematic short-vol products run it, usually delta-hedged.",
+  win:"Implied has historically exceeded subsequent realized vol on most indices most of the time; the seller collects that gap. The premium is largest just after a spike.",
+  pit:"Unlimited loss on a gap; correlation spikes in crashes; margin forces you out at the bottom. Short-vol products have been wiped out in single sessions when volatility doubled overnight.",
+  how:"Sell only when implied exceeds your realized forecast by a margin. Delta-hedge or buy far wings to cap the tail. Size to the worst week, not the average month.",pg:["real-world.html","Page 15"]},
+ {n:"Iron condor",c:"vol",l:[["p",0.85,1],["p",0.95,-1],["c",1.05,-1],["c",1.15,1]],v:"A range, with defined risk.",
+  why:"The most popular income structure among retail traders because of its high win rate and capped loss.",
+  win:"A short strangle with tail insurance bought back: it wins when the premium collected exceeds the expected loss, including the cost of the wings.",
+  pit:"The win-rate illusion (chapter check above). Short gamma between the short strikes, where the stock usually is. Adjusting repeatedly, paying spreads on four legs every time.",
+  how:"Price the wings as insurance you are buying, not as decoration. Compare to the short strangle plus separate tail protection. Take profits early rather than holding into gamma.",pg:["atlas.html","Page 19"]},
+ {n:"Butterfly",c:"vol",l:[["c",0.95,1],["c",1.00,-2],["c",1.05,1]],v:"The stock pins near one price.",
+  why:"Cheap, defined-risk bets on a precise outcome — an expected pin at expiry, or a takeout price in a cash deal.",
+  win:"Wins when the stock finishes near the body. Its edge comes from knowing where the stock is likely to end, which in deal situations (page 20) is sometimes knowable.",
+  pit:"Low probability; three strikes and wide spreads; short gamma at the body as expiry approaches.",
+  how:"Center it on a level with a reason to attract the price — open interest, a deal price. Use broken-wing versions to shift the risk to the side you are comfortable with.",pg:["merger.html","Page 20"]},
+ {n:"Iron butterfly",c:"vol",l:[["p",0.90,1],["p",1.00,-1],["c",1.00,-1],["c",1.10,1]],v:"A short straddle with wings.",
+  why:"Captures most of a short straddle's premium with a capped loss; popular for selling event vol with defined risk.",
+  win:"Wins if the stock stays near the strike and implied is rich.",
+  pit:"The same gamma risk as a short straddle near the strike, and the wings cost more on a skewed surface.",
+  how:"Sell where the straddle is rich and the wings are cheap; check both against the surface.",pg:["catalyst.html","Page 03"]},
+ {n:"Calendar spread",c:"vol",l:[["c",1.00,-1,1],["c",1.00,1,3]],v:"Front-month quiet, back-month vol holds or rises.",
+  why:"The way to trade term structure: short the front, long the back. It isolates an event or a front-month dislocation from the overall vol level.",
+  win:"Long vega, short gamma, collects front theta. Wins when the front decays faster than the back and implied holds — or when an event priced into the front comes in quieter than priced.",
+  pit:"A big move early (short front gamma). The back month's implied falling. An event you did not know was inside the front expiry.",
+  how:"Strip events out of the term structure first (page 03). Trade it when forward vol between the expiries looks wrong, not merely when the curve is inverted.",pg:["catalyst.html","Page 03"]},
+ {n:"Diagonal",c:"dir",l:[["c",1.05,-1,1],["c",0.95,1,3]],v:"A calendar with a directional lean.",
+  why:"Includes the 'poor man's covered call' — a long-dated in-the-money call standing in for stock, with short-dated calls sold against it.",
+  win:"Two trades in one: the directional exposure of the long leg and the term-structure carry of selling the front.",
+  pit:"Assuming it behaves like a covered call: the long leg is an option with its own vega and theta. A sharp rally through the short strike.",
+  how:"Analyze the long leg and the short leg separately, then together.",pg:["atlas.html","Page 19"]},
+ {n:"Ratio spread (1×2)",c:"vol",l:[["c",1.05,1],["c",1.15,-2]],v:"A moderate rise, financed by selling the wing.",
+  why:"Sells expensive wing volatility to finance a directional view; dealers and funds use it when the wing is rich.",
+  win:"Wins most at the short strike. Its edge is the wing's richness.",
+  pit:"Unlimited loss above the upper breakeven — the more right you are, the worse it gets (page 14).",
+  how:"Only where the wing is genuinely rich, and with a plan for the tail: a long further-out call, or a stop.",pg:["spreading.html","Page 14"]},
+ {n:"Backspread",c:"vol",l:[["c",1.05,-1],["c",1.15,2]],v:"A big move in one direction.",
+  why:"Buys tail convexity cheaply by selling a nearer option; a favorite before regime changes.",
+  win:"Wins on a large move; loses in the middle.",
+  pit:"The worst outcome is a moderate move to the long strike at expiry.",
+  how:"Use when you expect a jump rather than drift, and the far wing is cheap.",pg:["spreading.html","Page 14"]},
+ {n:"Jade lizard",c:"income",l:[["p",0.98,-1],["c",1.02,-1],["c",1.04,1]],v:"Flat to up with no upside risk — if the condition holds.",
+  why:"A retail income structure designed to remove upside risk from a short strangle.",
+  win:"Only when the credit covers the call spread's width (chapter 05); then it is a short put plus a free call spread.",
+  pit:"The condition failing on wide spreads; all the risk moved to the downside.",
+  how:"Check credit ≥ width before every trade, and size for the downside like a short put.",pg:["structures.html","Chapter 05"]},
+ {n:"Conversion / reversal",c:"arb",l:[["s",1,1],["p",1.00,1],["c",1.00,-1]],v:"No market view — a financing trade.",
+  why:"Run by financing desks and market makers to lend or borrow through the options market at the implied rate.",
+  win:"Wins when the implied rate beats your funding (conversion) or undercuts it (reversal).",
+  pit:"Borrow recalls on the reversal side, early assignment and unexpected dividends (page 07).",
+  how:"Compare against the correct side's funding rate, and monitor borrow as closely as rate.",pg:["parity.html","Page 07"]},
+ {n:"Box spread",c:"arb",l:[["c",0.95,1],["c",1.05,-1],["p",1.05,1],["p",0.95,-1]],v:"No market view — a synthetic loan.",
+  why:"A bull call spread plus a bear put spread on the same strikes pays the width at expiry no matter what: a zero-coupon bond. Institutions use European index boxes to borrow or lend.",
+  win:"Its price implies an interest rate; it wins only if that rate beats your alternative.",
+  pit:"On American-style single-stock options the short legs can be assigned early, turning a riskless box into a large unhedged position — the classic way this 'riskless' trade blows up.",
+  how:"Use European-style, cash-settled index options, and compare the implied rate with your funding.",pg:["parity.html","Page 07"]}
+];
+const FGCAT={all:"All",dir:"Directional",income:"Income",vol:"Volatility",hedge:"Hedging",arb:"Financing"};
+let FGSEL="all";
+window.fgGreeks=function(legs){
+  const T=MKT.days/365,o={price:0,delta:0,gamma:0,vega:0,theta:0};
+  legs.forEach(([t,k,q,m])=>{
+    if(t==="s"){o.price+=q*MKT.S;o.delta+=q;return;}
+    const g=bs(MKT.S,MKT.S*k,T*(m||1),MKT.vol,MKT.r,MKT.q,t==="c");
+    for(const x in o)o[x]+=q*g[x];});
+  return o;
+};
+(function(){
+  const chips=document.getElementById("fgChips"),cards=document.getElementById("fgCards");
+  chips.innerHTML=Object.entries(FGCAT).map(([k,v])=>`<button data-fg="${k}" aria-pressed="${k===FGSEL}">${v}</button>`).join("");
+  chips.querySelectorAll("[data-fg]").forEach(b=>b.addEventListener("click",()=>{
+    FGSEL=b.dataset.fg;chips.querySelectorAll("[data-fg]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.fg===FGSEL));draw();}));
+  window.draw7=draw;
+  function draw(){
+    cards.innerHTML=FG.filter(x=>FGSEL==="all"||x.c===FGSEL).map(x=>{
+      const g=fgGreeks(x.l);
+      const legs=x.l.map(([t,k,q,m])=>(q>0?"+":"")+q+" "+(t==="s"?"stock":(Math.round(MKT.S*k)+(t==="c"?" call":" put")))+(m&&m!==1?" ("+m+"× expiry)":"")).join(", ");
+      return `<details class="fgCard"><summary><b>${x.n}</b> <span class="fgTag">${FGCAT[x.c]}</span><span class="fgV">${x.v}</span></summary>
+        <div class="fgBody"><p class="fgLegs">${legs}</p>
+        <p class="fgNums">cost ${(g.price>=0?"$":"−$")+Math.abs(g.price).toFixed(2)} · Δ ${g.delta.toFixed(2)} · Γ ${g.gamma.toFixed(4)} · vega/pt ${(g.vega/100).toFixed(3)} · θ/day ${(g.theta/365).toFixed(3)}</p>
+        <p><b>Why it is traded.</b> ${x.why}</p><p><b>How it wins.</b> ${x.win}</p>
+        <p><b>Pitfalls.</b> ${x.pit}</p><p><b>How to actually win.</b> ${x.how}</p>
+        <p class="fgSee">Go deeper: <a data-h="${x.pg[0]}">${x.pg[1]}</a></p></div></details>`;}).join("");
+    cards.querySelectorAll("[data-h]").forEach(a=>a.setAttribute("href",a.dataset.h));
+  }
+})();
+
 /* load a volatility-shelf structure into chapter 01's figure */
 document.querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",()=>{
   SEL=b.dataset.load;
@@ -970,7 +1217,7 @@ document.querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",(
   document.getElementById("cvGreeks").scrollIntoView({behavior:"smooth",block:"center"});
 }));
 
-function drawAll(){draw1();draw3();draw5();draw6();}
+function drawAll(){draw1();draw3();draw5();draw6();draw7();}
 LAB.boot(drawAll);
 
 </script>

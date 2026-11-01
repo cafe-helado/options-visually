@@ -855,6 +855,16 @@ PAGES["structures"] = () => {
   eq("call spread skew −0.25", F("Call spread")[3], -0.25, 0.005);
   yes("collar is the exact mirror of the risk reversal",
     F("Collar (options)").every((x, i) => Math.abs(x + F("Risk reversal")[i]) < 1e-12));
+  /* chapter 07: the field guide */
+  const FG = load("structures.html", ["FG", "fgGreeks", "MKT"]);
+  yes("the field guide covers 23 structures, each with all four sections",
+    FG.FG.length === 23 && FG.FG.every(x => x.why && x.win && x.pit && x.how && x.pg));
+  yes("every card's greeks are finite", FG.FG.every(x => Object.values(FG.fgGreeks(x.l)).every(isFinite)));
+  const box = FG.fgGreeks(FG.FG.find(x => x.n === "Box spread").l), cv = FG.fgGreeks(FG.FG.find(x => x.n.startsWith("Conversion")).l);
+  eq("a box has no delta", box.delta, 0, 1e-9);
+  eq("…no gamma", box.gamma, 0, 1e-9);
+  eq("…and costs the width discounted", box.price, 10 * Math.exp(-FG.MKT.r * FG.MKT.days / 365), 1e-6);
+  eq("a conversion has no delta", cv.delta, 0, 1e-9);
 };
 
 PAGES["dispersion"] = () => {
@@ -992,6 +1002,24 @@ PAGES["tools"] = () => {
   /* leveraged ETFs */
   eq("3x at 20 vol drags 12% a year", M.letf(0.08, 0.20, 3).drag, -0.12, 1e-12);
   eq("−1x has (L² − L) = 2", M.letf(0.08, 0.20, -1).drag / (-(0.04) / 2), 2, 1e-12);
+};
+
+PAGES["playbook"] = () => {
+  const M = load("playbook.html", ["simulate", "statsOf", "s1", "PB"]);
+  const s = M.simulate(M.s1), A = M.statsOf(s.idx), B = M.statsOf(s.pw), Cc = M.statsOf(s.th);
+  eq("default history has three crash months", s.idx.filter(r => r < -0.15).length, 3, 0);
+  eq("put-writing wins 93% of months", B.win * 100, 93, 0.5);
+  eq("…with skewness −9.2", B.skew, -9.2, 0.05);
+  eq("…and a worst month of −19%", B.worst * 100, -19, 0.5);
+  eq("index grows 13.0% a year", A.cagr * 100, 13.0, 0.05);
+  eq("…with a 26% worst drawdown", A.dd * 100, -26, 0.5);
+  eq("tail-hedged index grows 13.6%", Cc.cagr * 100, 13.6, 0.05);
+  eq("…with a 19% worst drawdown", Cc.dd * 100, -19, 0.5);
+  const z = M.statsOf(M.simulate(Object.assign({}, M.s1, { vrp: 0 }))[ "pw" ]);
+  yes("with no premium put-writing's return all but disappears", z.cagr < 0.25 * B.cagr + 0.01);
+  yes("fifteen strategies, each with all four sections",
+    M.PB.length === 15 && M.PB.every(x => x.harvest && x.how && x.lose && x.win && x.pg.length));
+  yes("every linked page exists", M.PB.every(x => x.pg.every(([h]) => fs.existsSync(path.join(ROOT, h)))));
 };
 
 const only = process.argv[2];

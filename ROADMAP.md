@@ -614,3 +614,13 @@ leveraged-ETF decay, −(L² − L)σ²/2.
 - A position builder that exports a blotter to CSV and reads one back.
 - Hedging from a corporate seat (Natenberg's hedging chapter) and expiration
   P&L from scratch — the two topics the Natenberg mapping still flags.
+
+## 21 · The Playbook  ✅ live (playbook.html)
+
+Strategies rather than structures: fifteen that people and institutions run,
+each with why it pays, how it is run, how it loses and what it takes to win,
+filterable by who runs it. Chapter 01's seeded 30-year simulation (seed 19,
+VRP +25%, a −25% crash month about once a decade) gives put-writing a 93% win
+rate, skewness −9.2 and a −19% worst month; the index 13.0% a year with a 26%
+drawdown; the index plus rolled 15%-out puts 13.6% with a 19% drawdown. The
+New-history button exists to show how path-dependent the tail-hedge result is.
