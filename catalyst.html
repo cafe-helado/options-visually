@@ -132,7 +132,7 @@
     <p class="q">A name has 25% diffusive vol and an earnings event worth a 6% move. Why is the two-week implied vol so much higher than the two-month?</p>
     <div class="opts">
       <button>The market expects higher volatility in the near term</button>
-      <button data-ok="1">Both windows contain the same event variance J², but the front spreads it over a sixth of the time, so J²/T is six times larger</button>
+      <button data-ok="1">Both windows contain the same event variance J², but the front spreads it over about a quarter of the time — 14 days against 60 — so J²/T is about four times larger</button>
       <button>Short-dated options always trade at a premium because of gamma</button>
       <button>The back month has more diffusive volatility to average against</button>
     </div>
@@ -299,7 +299,7 @@
         <div class="kv" style="margin-top:20px" id="kv4"></div>
       </div>
     </div>
-    <figcaption>The shaded region is where the move exceeds the straddle-implied number. It is more than half the distribution, which surprises people who have been treating that number as a one-sigma band. The ratio between the two markers is always √(2/π) — it does not depend on volatility, spot or tenor.</figcaption>
+    <figcaption>The shaded region is where the move exceeds the straddle-implied number. It is 42% of the distribution — far more than the 32% a one-sigma band would leave outside, which surprises people who have been treating that number as one. The ratio between the two markers is always √(2/π) — it does not depend on volatility, spot or tenor.</figcaption>
   </figure>
 
   <div class="check">
@@ -390,7 +390,7 @@
   <div class="prose">
     <p class="lead">Suppose the strip says the market is charging J = 6% for a print and you think it is worth 4%. Buying or selling the front month expresses that, but it expresses a great deal else besides — you are also taking a position in the diffusive vol, and in the direction, and in the gamma between now and expiry.</p>
     <p>The cleaner expression is a <b>calendar</b>: trade the front month against the back. Because both expiries share the same σ<sub>d</sub> and only the front carries a meaningful J²/T, the spread isolates the event. Sell the front and buy the back and you are short the event and roughly flat the diffusive level.</p>
-    <p>The numbers make the case. On a name with 25% diffusive vol and a 6% event, a two-week option prices at 39.5% and a two-month at 29.1%. If you think J is really 4%, the fair front-month vol is <b>31.3%</b> — an 8-point difference in the front and under 2 points in the back. Nearly all of your edge is in the near expiry, and nearly all of the risk you did not want is in the shared diffusive component that the spread cancels.</p>
+    <p>The numbers make the case. On a name with 25% diffusive vol and a 6% event, a two-week option prices at 39.5% and a two-month at 29.1%. If you think J is really 4%, the fair front-month vol is <b>32.3%</b> — a 7.3-point difference in the front against 2.2 points at two months. Nearly all of your edge is in the near expiry, and nearly all of the risk you did not want is in the shared diffusive component that the spread cancels.</p>
     <p>Two warnings, both from chapter 01's asymmetry. First, a calendar is not a clean event bet: the legs have different gammas and different vegas, so you are still short front gamma when you sell the front, and a large move hurts you regardless of what the vol does. Second, the event has to actually happen inside the front expiry — a confirmed date matters more than the vol level, and a date that moves turns the position into something you did not choose.</p>
   </div>
 

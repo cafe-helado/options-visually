@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Workbook — problems and reading for every page</title>
+<meta name="description" content="A problem set for every page of Options, visually, with computed answers, build-it coding exercises, and the chapters of Natenberg, Sinclair, Hull, Gatheral, Bennett and Taleb that cover the same ground.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Workbook — problems and reading for every page">
+<meta property="og:description" content="A problem set for every page of Options, visually, with computed answers, build-it coding exercises, and the chapters of Natenberg, Sinclair, Hull, Gatheral, Bennett and Taleb that cover the same ground.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<style>
+  .wbBar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 8px}
+  .wbBar .note{font-family:var(--mono);font-size:11px;color:var(--grey);margin-left:auto}
+  .wbToc{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 18px;margin:10px 0 34px;font-family:var(--mono);font-size:12px}
+  .wbToc a{color:var(--ink);text-decoration:none;padding:3px 0;border-bottom:1px solid var(--hair)}
+  .wbToc a b{color:var(--blue);margin-right:6px}
+  .wbSec{border-top:1px solid var(--hair);padding:26px 0 10px}
+  .wbSec h3{font-family:var(--disp);font-size:24px;margin:0 0 14px}
+  .wbSec h3 a{color:var(--ink);text-decoration:none}
+  .wbN{font-family:var(--mono);font-size:13px;color:var(--blue);vertical-align:middle;margin-right:6px}
+  .wbCols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:30px}
+  .wbCols>*{min-width:0}
+  .wbSec h4{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin:0 0 8px}
+  .wbRead{padding-left:18px;margin:0;font-size:15px;line-height:1.5}
+  .wbRead li{margin-bottom:8px}
+  .wbProbs{padding-left:22px;margin:0 0 14px}
+  .wbQ{margin-bottom:12px;font-size:16px;line-height:1.5}
+  .wbQ>p{margin:0 0 4px}
+  .wbAns summary{font-family:var(--mono);font-size:11px;color:var(--blue);cursor:pointer}
+  .wbAns p{margin:6px 0;font-size:15px}
+  .wbA{font-family:var(--mono);font-size:15px;color:var(--moss)}
+  .wbBuild{font-size:15px;line-height:1.5;border-left:3px solid var(--ochre);padding-left:12px}
+  @media (max-width:760px){.wbCols{grid-template-columns:1fr;gap:16px}}
+  @media print{
+    .serieshead,.progress,.wbBar,.wbToc,footer{display:none!important}
+    body{background:#fff}
+    .wbSec{break-inside:avoid-page;padding-top:14px}
+    .wbAns:not([open]){display:none}
+    .wbAns summary{display:none}
+  }
+</style>
+
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">Companion &middot; Workbook</span>
+  </div>
+</header>
+<div class="progress" id="prog"></div>
+
+<main>
+
+<div class="orient">
+  <h2>The workbook</h2>
+  <p class="lede">A problem set for every page in the series, with each page matched to the parts of the standard books that cover the same ground. Read the page, read the book section beside it, then work the problems before opening the answers.</p>
+  <ol>
+    <li><b>Numeric answers are computed, not typed.</b> Each one runs through the same Black–Scholes engine the pages use, and the repo's numeric checker evaluates every answer, so none of them can drift away from the arithmetic.</li>
+    <li><b>Print it.</b> "Print problems" gives you a clean sheet with the answers folded away; "Print with answers" gives you the key.</li>
+    <li><b>The reading names topics, not page numbers.</b> Chapter numbers change between editions, so each entry names the chapter or topic to look for. Natenberg's titles are from the second edition.</li>
+    <li><b>"Build it" boxes are for coding.</b> They turn a page into a short Python exercise on real or simulated data.</li>
+  </ol>
+</div>
+
+<div class="wbBar">
+  <button class="act ghost" id="wbShow">Show all answers</button>
+  <button class="act ghost" id="wbHide">Hide all answers</button>
+  <button class="act ghost" id="wbPrint">Print problems</button>
+  <button class="act ghost" id="wbPrintA">Print with answers</button>
+  <span class="note" id="wbCount"></span>
+</div>
+
+<nav class="wbToc" id="wbToc" aria-label="Pages"></nav>
+
+<div id="wbBody"></div>
+
+</main>
+
+<footer>
+  <p class="n">Reading suggestions point at the standard references for each topic: Natenberg for options trading, Sinclair for volatility trading, Hull for derivatives theory, Gatheral for the volatility surface, Bennett for volatility products, Taleb for hedging in practice, Harris for market microstructure, Kirchner for merger arbitrage, plus a few original papers where the idea started. Check chapter titles against your own edition.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* ═══════════ the workbook ═══════════
+   One entry per page of the series. Numeric answers are FUNCTIONS, computed
+   by the same engine the pages use, so an answer can never drift from the
+   arithmetic the way a typed number can. verify.js evaluates every one.
+   r: reading — [source, what to read]. Chapter numbers differ between
+      editions, so the reading names the topic and, where it is stable, the
+      chapter title.
+   p: problems — {q, f, u, how} numeric, or {q, ans} written.
+   b: a build-it exercise, for readers who want to code the page. */
+const fx=(v,d)=>v.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+const U={
+  "$":(v,d)=>(v<0?"−$":"$")+fx(Math.abs(v),d==null?2:d),
+  "%":(v,d)=>fx(v*100,d==null?2:d)+"%",
+  "x":(v,d)=>fx(v,d==null?2:d)+"×",
+  "":(v,d)=>fx(v,d==null?4:d)
+};
+const NAT="Natenberg, Option Volatility and Pricing (2nd ed.)";
+const SIN="Sinclair, Volatility Trading";
+const HULL="Hull, Options, Futures, and Other Derivatives";
+const GAT="Gatheral, The Volatility Surface";
+const BEN="Bennett, Trading Volatility";
+const TAL="Taleb, Dynamic Hedging";
+
+const WB=[
+ {n:"01",href:"black-scholes.html",t:"The Price of Uncertainty",
+  r:[[NAT,"Theoretical Pricing Models; Volatility; Risk Measurement I"],[HULL,"The Black–Scholes–Merton model; The Greek letters"],[SIN,"the opening chapters on options and the variance risk premium"]],
+  p:[{q:"Price a three-month at-the-money call: S = K = 100, σ = 30%, r = 5%, no dividend.",f:()=>bs(100,100,0.25,0.30,0.05,0,true).price,u:"$",how:"d₁ = (r + σ²/2)T / σ√T; price = S·N(d₁) − K·e⁻ʳᵀ·N(d₂). The page's appendix does it line by line."},
+     {q:"You are short 20 of those calls. How many shares do you buy to be delta neutral?",f:()=>bs(100,100,0.25,0.30,0.05,0,true).delta*100*20,u:"",d:0,how:"delta × 100 shares × 20 contracts."},
+     {q:"A $250 stock trades on 40 implied vol. What daily move does a delta-hedged long option need to break even?",f:()=>250*0.40/Math.sqrt(365),u:"$",how:"ΔS = S·σ/√365 — the gamma cancels out of ½Γ(ΔS)² = θ."},
+     {q:"Why does the stock's expected return not appear anywhere in the formula?",ans:"Because the option can be replicated by a hedging programme whose cost depends on how much the stock moves, not where it goes. Two traders who disagree about the drift pay the same to replicate, so the price cannot contain the drift. Chapter 06 runs the experiment."}],
+  b:"Write bs(S,K,T,σ,r) in Python with scipy.stats.norm, reproduce the appendix table to six decimals, then check every greek against a finite difference."},
+
+ {n:"02",href:"surface.html",t:"The Surface",
+  r:[[NAT,"Volatility Skews"],[GAT,"the opening chapters on the implied volatility surface and its arbitrage bounds"],[BEN,"the chapters on skew and term structure"],["Derman, 'Regimes of Volatility' (1999)","sticky strike, sticky delta and the regimes behind them"]],
+  p:[{q:"One-month ATM vol is 30% and three-month is 26%. What forward vol does the market imply between them?",f:()=>Math.sqrt((0.26*0.26*0.25-0.30*0.30/12)/(0.25-1/12)),u:"%",how:"σ²_fwd = (σ₂²T₂ − σ₁²T₁)/(T₂ − T₁). Subtract variances; never average vols."},
+     {q:"A vendor surface prices the 95/100/105 butterfly at −0.02. What does that mean?",ans:"Negative probability density — by Breeden–Litzenberger the butterfly is the density. If the prices are tradeable, buy it; far more often the surface fit has broken at those strikes."},
+     {q:"On a downward equity skew, is a call's sticky-delta delta above or below its Black–Scholes delta?",ans:"Above. Under sticky delta the smile moves with spot, so when spot rises a fixed strike sits at lower moneyness on the shifted curve, its vol rises, and the call gains value: delta picks up vega × ∂σ/∂S > 0."}],
+  b:"Fit a skew to a real chain: pull one expiry from yfinance, invert implied vols, and recover the density by second differences across strikes."},
+
+ {n:"03",href:"catalyst.html",t:"Catalyst and Noise",
+  r:[[SIN,"the material on event volatility and earnings"],[BEN,"the treatment of event vol and term structure"]],
+  p:[{q:"A 14-day option trades at 39.54% and a 60-day at 29.05%, one earnings event inside both. Recover the diffusive vol.",f:()=>{const a=14/365,b=60/365;return Math.sqrt((0.3954**2*a-0.2905**2*b)/(a-b));},u:"%",how:"σ_d² = (σ₁²T₁ − σ₂²T₂)/(T₁ − T₂); the event term cancels."},
+     {q:"Same two options — what one-day move is the event worth?",f:()=>{const a=14/365,b=60/365,v=(0.3954**2*a-0.2905**2*b)/(a-b);return Math.sqrt(0.3954**2*a-v*a);},u:"%",how:"J = √(σ₁²T₁ − σ_d²T₁)."},
+     {q:"An $80 stock on 50 implied vol, seven days out. What is the straddle-implied move?",f:()=>Math.sqrt(2/Math.PI)*80*0.5*Math.sqrt(7/365),u:"$",how:"0.7979 × S × σ√T. It is a mean absolute move, about 80% of one standard deviation."}],
+  b:"Pull a name's ATM term structure the week before earnings, plot variance against 1/T, and read σ_d² off the intercept and J² off the slope."},
+
+ {n:"04",href:"structures.html",t:"The Structure Zoo",
+  r:[[NAT,"Introduction to Spreading; Volatility Spreads"],["Sinclair, Positional Option Trading","choosing a structure for a view"]],
+  p:[{q:"Short the 98 put, short the 102 call, long the 104 call; 30 vol, 45 days, r = 4%, spot 100. What credit do you collect?",f:()=>{const T=45/365;return bs(100,98,T,0.3,0.04,0,false).price+bs(100,102,T,0.3,0.04,0,true).price-bs(100,104,T,0.3,0.04,0,true).price;},u:"$",how:"Sum the premiums. Against a width of 2 the credit covers the call spread, so this jade lizard has no upside risk."},
+     {q:"A treasurer buys the 90 put (30 vol, 45 days, r = 4%) and wants zero cost on a flat surface. Which call strike, to the nearest half point, funds it?",f:()=>{const T=45/365,put=bs(100,90,T,0.3,0.04,0,false).price;for(let k=100.5;k<200;k+=0.5)if(bs(100,k,T,0.3,0.04,0,true).price<=put)return k;return NaN;},u:"",d:1,how:"Search upward for the first call worth no more than the put. On a steep skew the answer moves toward the money."},
+     {q:"What is a collar plus a risk reversal on the same strikes?",ans:"One share of stock. Every option leg cancels, so delta, gamma, vega, vanna and volga net to exactly zero — they are one instrument with the sign flipped."}]},
+
+ {n:"05",href:"microstructure.html",t:"The Market, Not the Model",
+  r:[["Harris, Trading and Exchanges","the chapters on dealers, bid–ask spreads and informed traders"],[TAL,"the material on market making and the bid–offer"]],
+  p:[{q:"A six-month ATM option: S = 100, σ = 30%, r = 4%. How many vol points is one cent?",f:()=>0.01/(bs(100,100,0.5,0.3,0.04,0,true).vega/100),u:"",d:3,how:"Δσ = Δprice / vega per point."},
+     {q:"A seven-day 112 call on the same stock. How many vol points is one cent now?",f:()=>0.01/(bs(100,112,7/365,0.3,0.04,0,true).vega/100),u:"",d:1,how:"Same division; vega has collapsed, the tick has not."},
+     {q:"You widen your quotes. What happens to the share of your fills that are informed?",ans:"It rises. Uninformed flow is deterred first; informed traders still trade whenever their edge clears your spread. Widening manages the size of adverse selection, never its composition."}]},
+
+ {n:"06",href:"execution.html",t:"Executing the Hedge",
+  r:[["Almgren & Chriss, 'Optimal Execution of Portfolio Transactions' (2000)","the impact-against-risk trade-off"],["Harris, Trading and Exchanges","the chapters on transaction costs and order types"]],
+  p:[{q:"With costs proportional to size, your optimal rehedge count is 128. Costs halve. What is the new optimum?",f:()=>128*2,u:"",d:0,how:"N* = λc₁/c₂k is linear in 1/k."},
+     {q:"Same desk, but the cost is a fixed charge per ticket, so the bill grows like N. The charge halves. New optimum?",f:()=>128*Math.pow(2,2/3),u:"",d:0,how:"With cost ∝ N and risk ∝ 1/√N, N* ∝ (λ/k)^{2/3}."},
+     {q:"A uniform execution buys through a window in which the price drifts up 3.00. Roughly what is the shortfall against arrival?",f:()=>1.5,u:"$",how:"Buying evenly along a straight line pays its midpoint: half the drift."}]},
+
+ {n:"07",href:"parity.html",t:"Parity, Boxes and Rolls",
+  r:[[NAT,"Option Arbitrage"],[HULL,"Properties of stock options"]],
+  p:[{q:"S = 100, K = 100, six months, r = 4%, no dividend. What should C − P be?",f:()=>100-100*Math.exp(-0.04*0.5),u:"$",how:"C − P = S − K·e⁻ʳᵀ."},
+     {q:"A convert is shown at 0.36 to the converter (a payment, so −0.36), K = 25, 17 days, a 0.40 dividend, $0.005 commission. What simple rate is implied?",f:()=>((-0.36+0.40-0.005)/25)*(360/17),u:"%",how:"Interest = (C − P) + Div − Comm; rate = Interest/K × 360/Days."},
+     {q:"Straddle 7.80, combo 5.42. What is the put worth?",f:()=>(7.80-5.42)/2,u:"$",how:"P = (Straddle − Combo)/2."},
+     {q:"Who carries recall risk, the converter or the reverser?",ans:"The reverser — it is short the stock. The converter is long the shares and benefits when borrow spikes, because it can lend them at the new fee."}],
+  b:"Code the revcon pricer both ways (price → rate, rate → price) and reproduce the six presets on the page."},
+
+ {n:"08",href:"early-exercise.html",t:"A Decision Worth Exactly Nothing",
+  r:[[NAT,"Early Exercise of American Options"],[HULL,"the American-option sections on early exercise"]],
+  p:[{q:"Interest floor on a 100 strike, r = 4.5%, four months left.",f:()=>100*(1-Math.exp(-0.045*4/12)),u:"$",how:"K(1 − e⁻ʳᵗ). If the dividend is below this, no call is ever worth exercising."},
+     {q:"Short 50 contracts, 40% of open interest exercises. Standard deviation of shares assigned?",f:()=>100*Math.sqrt(50*0.4*0.6),u:"",d:0,how:"Binomial: √(Np(1−p)) contracts × 100."},
+     {q:"Short 10 calls settling two cents in the money on a 35-vol $100 stock. One-day standard deviation of the position you wake up with?",f:()=>1000*100*0.35/Math.sqrt(252),u:"$",d:0,how:"1,000 shares × S × σ/√252."}]},
+
+ {n:"09",href:"variance.html",t:"Only One of Them Is Tradeable",
+  r:[["Demeterfi, Derman, Kamal & Zou, 'More Than You Ever Wanted to Know About Volatility Swaps' (1999)","the replication argument and the 1/K² strip"],[BEN,"the chapters on variance and volatility swaps"],[GAT,"the material on variance swaps"]],
+  p:[{q:"Long $100,000 vega notional of variance at 25; realized comes in at 30. Payoff?",f:()=>100000*(30*30-25*25)/(2*25),u:"$",d:0,how:"N_vega × (σ_R² − K²)/(2K), in vol points."},
+     {q:"Same trade, realized 18.",f:()=>100000*(18*18-25*25)/(2*25),u:"$",d:0,how:"The square makes the downside smaller per point and the upside larger."},
+     {q:"Where does the 1/K² weighting in the strip come from?",ans:"From the second derivative of the log payoff. Any smooth payoff is a portfolio of options weighted by its own curvature, and the curvature of −ln(S) is 1/S²."}],
+  b:"Price a variance swap from a real chain with the discrete strip, then truncate the wings and watch it fall."},
+
+ {n:"10",href:"dispersion.html",t:"Correlation, Whether You Meant To or Not",
+  r:[[BEN,"the chapters on dispersion and correlation trading"]],
+  p:[{q:"Twenty equally weighted names at 40% vol; the index trades 25%. Implied correlation?",f:()=>((0.25*0.25/0.16)-1/20)/(1-1/20),u:"",d:3,how:"σ_I² = σ²[ρ + (1 − ρ)/n], solved for ρ."},
+     {q:"Same names, zero correlation. Index vol?",f:()=>0.40/Math.sqrt(20),u:"%",how:"Only the diagonal survives: σ/√n."},
+     {q:"Why does a dispersion book lose in a crash even though it is long twenty variance swaps?",ans:"It is short correlation, and crashes are correlation events. Sized to be flat the volatility level, its P&L is (ρ_implied − ρ_realized) times the off-diagonal sum at realized vols — so a spike in both correlation and vols multiplies the loss."}]},
+
+ {n:"11",href:"book.html",t:"The Sum of the Parts",
+  r:[[NAT,"Position Analysis and the risk-measurement chapters"],[TAL,"the material on scenario analysis and the limits of greeks"]],
+  p:[{q:"30 contracts, delta 0.42, stock at $150. Dollar delta?",f:()=>0.42*100*30*150,u:"$",d:0,how:"delta × 100 × contracts × S."},
+     {q:"Same position, gamma 0.03. Gamma cash per 1%?",f:()=>0.03*100*30*150*150*0.01,u:"$",d:0,how:"Γ × 100 × contracts × S² × 1%."},
+     {q:"A desk reports net vega of zero. What have you learned?",ans:"Almost nothing. It could be long a thousand in the front and short a thousand in the back. Ask for the buckets."}]},
+
+ {n:"12",href:"binomial.html",t:"The Price That Ignores the Odds",
+  r:[["Cox, Ross & Rubinstein, 'Option Pricing: A Simplified Approach' (1979)","the original lattice"],[HULL,"Binomial trees"],[NAT,"the binomial pricing chapter"]],
+  p:[{q:"One step: 100 goes to 120 or 80, zero rates. Price of the 100 call?",f:()=>{const D=(20-0)/(120-80),B=80*D;return D*100-B;},u:"$",how:"Δ = (C_u − C_d)/(S_u − S_d) = 0.5; borrow 40; cost 50 − 40."},
+     {q:"u = 1.10, d = 0.90, r·dt = 1%. Risk-neutral up probability?",f:()=>(Math.exp(0.01)-0.9)/(1.1-0.9),u:"",d:4,how:"p = (e^{r·dt} − d)/(u − d)."},
+     {q:"σ = 10%, r = 8%. Longest step for which a CRR tree is arbitrage-free?",f:()=>Math.pow(0.10/0.08,2),u:"",d:4,how:"dt < (σ/r)², in years."}],
+  b:"Build a CRR tree for an American put, average N and N+1, and compare with the page's 20.2680."},
+
+ {n:"13",href:"forwards.html",t:"The Forward Is the Real Underlying",
+  r:[[NAT,"Forward Pricing; Contract Settlement and Cash Flow"],[HULL,"Determination of forward and futures prices; Options on futures"]],
+  p:[{q:"S = 100, r = 5%, dividend yield 2%, six months. Forward?",f:()=>100*Math.exp(0.03*0.5),u:"$",how:"F = S·e^{(r − q)T}."},
+     {q:"Spot-model delta 0.60, r = 6%, six months. How many futures hedge a hundred-lot?",f:()=>60*Math.exp(-0.03),u:"",d:1,how:"Futures delta = spot delta × e⁻ʳᵀ."},
+     {q:"Ten index calls struck at 5,200 settle at 5,283.47, multiplier 100. Cash owed by the short?",f:()=>10*(5283.47-5200)*100,u:"$",d:0,how:"Contracts × points × multiplier."}]},
+
+ {n:"14",href:"spreading.html",t:"Nobody Trades One Option",
+  r:[[NAT,"Bull and Bear Spreads; Risk Considerations"],["Sinclair, Positional Option Trading","trade structure against the view you actually hold"]],
+  p:[{q:"A 100/110 call spread costs 3.6607, r = 4.5%, 90 days. What does the 100/110 put spread pay?",f:()=>10*Math.exp(-0.045*90/365)-3.6607,u:"$",how:"Debit + credit = width × e⁻ʳᵀ."},
+     {q:"A 1×2 105/115 call ratio costs 1.0961. Upper breakeven?",f:()=>115+(10-1.0961),u:"",d:3,how:"Peak at the short strike is the width minus the debit; past it you are net short one call."},
+     {q:"Is a bull put spread a different trade from the bull call spread on the same strikes?",ans:"No. Same payoff, maximum profit, maximum loss and breakeven; they differ by the interest on the width. The real differences are margin and early-assignment exposure."}]},
+
+ {n:"15",href:"real-world.html",t:"Every Assumption, and What It Costs",
+  r:[[NAT,"Models and the Real World"],[TAL,"the chapters on jumps, fat tails and why hedging fails"]],
+  p:[{q:"Under pure diffusion, how much does 32× the rebalancing cut hedging error?",f:()=>Math.sqrt(32),u:"x",how:"Error ∝ 1/√N."},
+     {q:"85% of the time vol is 18, 15% of the time 42. Single vol with the same variance?",f:()=>Math.sqrt(0.85*0.18*0.18+0.15*0.42*0.42),u:"%",how:"Mix variances, then take the root."},
+     {q:"Why does more frequent hedging stop helping when the stock can jump?",ans:"A jump's size does not shrink as the rebalancing interval does, so its (ΔS)² is O(1) rather than O(dt). The error approaches a floor no share hedge can reach — only other options hedge it."}]},
+
+ {n:"16",href:"questions.html",t:"The Questions They Ask You",
+  r:[["Crack, Heard on the Street","the options and probability sections"],[NAT,"the whole book, as a source of questions to drill"]],
+  p:[{q:"A 10-wide call spread, one year, r = 5%, stock at 1,000. Value?",f:()=>10*Math.exp(-0.05),u:"$",how:"Both legs are certain: a zero-coupon bond on the width."},
+     {q:"Rolling weekly options for a year costs how many times the one-year option?",f:()=>Math.sqrt(52),u:"x",how:"n × price(T/n) = √n × price(T)."},
+     {q:"Two 30-strike puts against three 20-strike puts at $6 and $4: what does the package cost, and can it lose?",ans:"It costs 2×6 − 3×4 = 0 and its payoff is never negative — positive anywhere below 30. That is the convexity arbitrage."}]},
+
+ {n:"17",href:"screen.html",t:"Reading the Screen",
+  r:[[NAT,"Volatility; the chapters on reading option prices"],[SIN,"the material on implied volatility as a price"]],
+  p:[{q:"A $40 stock at 45 vol, seven days out. One-sigma move?",f:()=>40*0.45*Math.sqrt(7/365),u:"$",how:"S·σ·√T."},
+     {q:"A $100 stock at 30 vol, 30 days, 5-point strikes. Strikes per sigma?",f:()=>100*0.30*Math.sqrt(30/365)/5,u:"",d:2,how:"One sigma ÷ strike spacing."},
+     {q:"Two names show 32.4% ATM vol, one a penny wide and one twenty cents wide. What do you know about the second?",ans:"Little. Twenty cents on an ATM option is roughly a two-point vol band; the printed implied is one number from inside it."}]},
+
+ {n:"18",href:"rulers.html",t:"Two Rulers",
+  r:[[SIN,"the realized-volatility estimators and their efficiency"]],
+  p:[{q:"A straddle implies a 5% move. One-sigma move, on a normal?",f:()=>0.05/Math.sqrt(2/Math.PI),u:"%",how:"Divide by √(2/π) = 0.7979."},
+     {q:"How often does a normal move exceed the straddle-implied move?",f:()=>2*(1-ncdf(Math.sqrt(2/Math.PI))),u:"%",how:"The breakeven sits at 0.7979σ, so P = 2(1 − N(0.7979))."},
+     {q:"Same 5% implied move on a t with four degrees of freedom. Sigma?",f:()=>0.05*Math.SQRT2,u:"%",how:"MAD/σ = 1/√2 for t₄."}],
+  b:"Compute close-to-close, Parkinson and Yang–Zhang vol on a year of daily data and compare the root-mean-square estimator with the 1.2533 × mean-absolute one."},
+
+ {n:"19",href:"atlas.html",t:"The Greek Atlas",
+  r:[[NAT,"Risk Measurement II"],[TAL,"the greek-by-greek chapters"]],
+  p:[{q:"A delta-hedged position on a 30-vol name, flat surface. Daily breakeven move?",f:()=>0.30/Math.sqrt(365),u:"%",how:"σ/√365, whatever the structure."},
+     {q:"ATM gamma from 30 days to 7 days multiplies by about?",f:()=>Math.sqrt(30/7),u:"x",how:"Γ ∝ 1/√T."},
+     {q:"Why is a covered call the same position as a short put?",ans:"Put–call parity: long stock + short call = short put + bond. Every greek matches; stock touches delta and nothing else."}]},
+
+ {n:"20",href:"merger.html",t:"A Deal Is a Price on Two Futures",
+  r:[["Kirchner, Merger Arbitrage","spreads, odds, deal structures and the regulatory process"],[NAT,"Early Exercise, for what a cash deal does to options"]],
+  p:[{q:"Target $4, cash deal $5, standalone $2, one year, 10% funding. Implied odds?",f:()=>(4*1.1-2)/(5-2),u:"%",d:1,how:"p·D + (1 − p)·SV = S(1 + rT)."},
+     {q:"Same deal at zero rates, then a $0.30 special dividend paid either way. New price?",f:()=>(2/3)*(5+0.30)+(1/3)*2,u:"$",how:"Only the close state gains the dividend: S + p·q."},
+     {q:"Stock deal: long the target at $4, short $5 of acquirer. The acquirer rallies 30% and the deal breaks. Loss?",f:()=>(2-4)-5*0.30,u:"$",how:"Target to standalone, plus the open short."},
+     {q:"A second request knocks a cash target from $10.79 to $10.47. Name the two components.",ans:"Lower odds of closing — the quick-clearance branch is gone — and a longer wait, which adds carry on the takeout. On the page's tree, about 23 cents and 9 cents."}]}
+];
+
+/* ══════════════ render ══════════════ */
+(function(){
+  const toc=document.getElementById("wbToc"), body=document.getElementById("wbBody");
+  toc.innerHTML=WB.map(e=>`<a href="#wb${e.n}"><b>${e.n}</b> ${e.t}</a>`).join("");
+  let k=0;
+  body.innerHTML=WB.map(e=>{
+    const read=e.r.map(([s,w])=>`<li><b>${s}</b> — ${w}</li>`).join("");
+    const probs=e.p.map((p,i)=>{k++;
+      const ans=p.f?`<p class="wbA">${U[p.u||""](p.f(),p.d)}</p><p>${p.how}</p>`:`<p>${p.ans}</p>`;
+      return `<li class="wbQ"><p>${p.q}</p><details class="wbAns"><summary>Answer</summary>${ans}</details></li>`;}).join("");
+    return `<section class="wbSec" id="wb${e.n}">
+      <h3><span class="wbN">${e.n}</span> <a data-h="${e.href}">${e.t}</a></h3>
+      <div class="wbCols"><div><h4>Read alongside</h4><ul class="wbRead">${read}</ul></div>
+      <div><h4>Problems</h4><ol class="wbProbs">${probs}</ol>
+      ${e.b?`<h4>Build it</h4><p class="wbBuild">${e.b}</p>`:""}</div></div></section>`;}).join("");
+  /* links are set after rendering so the static link checker reads real filenames, not a template */
+  body.querySelectorAll("[data-h]").forEach(a=>a.setAttribute("href",a.dataset.h));
+  document.getElementById("wbCount").textContent=k+" problems across "+WB.length+" pages";
+  const all=open=>document.querySelectorAll(".wbAns").forEach(d=>d.open=open);
+  document.getElementById("wbShow").addEventListener("click",()=>all(true));
+  document.getElementById("wbHide").addEventListener("click",()=>all(false));
+  document.getElementById("wbPrint").addEventListener("click",()=>{all(false);window.print();});
+  document.getElementById("wbPrintA").addEventListener("click",()=>{all(true);window.print();});
+})();
+window.__wb=WB;window.__U=U;
+
+function drawAll(){}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

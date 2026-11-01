@@ -90,7 +90,7 @@
     <p class="lead">Ask what a stock will be worth in six months and you get an opinion. Ask what price you can <em>agree today</em> to trade it at in six months and you get a number that follows from arithmetic, because the trade can be assembled out of things you can already do.</p>
     <p>Here is the package. Borrow 100 at 5%. Buy the share. Hold it for six months, collecting dividends at 2%. Simultaneously agree to sell it forward at F. At delivery you hand over the share, receive F, and repay the loan. If F is anything other than <b>100 · e<sup>(0.05−0.02)·0.5</sup> = 101.5113</b>, that package makes or loses money with no risk, and somebody will do it until it doesn't.</p>
     <p>The figure runs the ledger across every terminal spot price from 60 to 160. The locked P&amp;L is <b>0.0000000000</b> in every column. Not small, not approximately zero — the position has no exposure to the outcome at all, which is exactly why the forward price is determined rather than debated.</p>
-    <p>That has a consequence people find hard to accept. A forward is <b>not a forecast</b>. Change your expected return on the stock to −20% a year and the expected spot in a year drops to 80.25; change it to +25% and it rises to 125.86. The forward stays at <b>103.0455</b> through all of it, because no step in the construction used an expected return. This is the same argument as <a href="binomial.html#c1" style="color:var(--blue)">page 12's replication</a>, applied one instrument earlier.</p>
+    <p>That has a consequence people find hard to accept. A forward is <b>not a forecast</b>. Change your expected return on the stock to −20% a year and the expected spot in a year drops to 80.25; change it to +25% and it rises to 125.86. The one-year forward stays at <b>103.0455</b> through all of it, because no step in the construction used an expected return. This is the same argument as <a href="binomial.html#c1" style="color:var(--blue)">page 12's replication</a>, applied one instrument earlier.</p>
     <p>So when a futures curve is upward sloping, the market is not predicting a rise. It is telling you what it costs to carry the thing — and reading contango as bullishness is one of the most durable misreadings in finance.</p>
   </div>
 
@@ -221,7 +221,7 @@
       <button>Nothing — dividends are already in the spot price</button>
       <button>It falls by the present value of the cut</button>
     </div>
-    <div class="ans"><b>It rises.</b> This catches people because the instinctive reaction to a dividend cut is bearish, and the forward's response is mechanically the opposite. Spot may well fall on the news; the <em>forward relative to spot</em> widens, because the dividend was the thing making the carry cheap. Someone long a forward and short the stock is long the dividend forecast, whether they thought about it or not.</div>
+    <div class="ans"><b>It rises.</b> This catches people because the instinctive reaction to a dividend cut is bearish, and the forward's response is mechanically the opposite. Spot may well fall on the news; the <em>forward relative to spot</em> widens, because the dividend was the thing making the carry cheap. Someone long a forward and short the stock is <em>short</em> the dividend forecast, whether they thought about it or not: they owe the dividends on the short shares, so a cut is a gain to them.</div>
   </div>
 </section>
 

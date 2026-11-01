@@ -205,7 +205,7 @@
     <p><b>Jumps.</b> Let the stock occasionally gap by a random amount, as it does through an earnings release or a headline. Merton's model adds exactly that — a Poisson arrival of lognormal jumps — and it has a closed form, so no simulation is needed. Give the jumps a negative mean and the resulting density has a fat left tail, which the surface reports as skew.</p>
     <p><b>Stochastic volatility.</b> Let the volatility itself be random. If vol moves independently of spot, the terminal distribution becomes a mixture of lognormals with different widths, which is fat-tailed on <em>both</em> sides. The surface reports that as a symmetric smile with no skew. To get skew you need vol to move <em>against</em> spot — the leverage effect — which is why real stochastic-vol models carry a correlation parameter and why it is always negative for equities.</p>
     <p>Here is the problem: at one expiry, calibrated to the same data, both produce curves you cannot tell apart by eye. The panels below start with settings that look nearly identical at three months.</p>
-    <p><b>The test is the term structure.</b> A jump is a fixed-size shock. Over a short window it dominates the diffusion and bends the surface violently; over a long window the diffusion accumulates while the jump does not, so the skew washes out. Stochastic volatility has no such decay — the vol-of-vol keeps working at every horizon. The numbers are stark: jump-driven skew falls from <b>8.46 vol points at one month to 0.40 at three years</b>, while the mixture's stays essentially flat at 0.3 to 0.6 throughout.</p>
+    <p><b>The test is the term structure.</b> Jumps arrive at a rate, so their variance accumulates with time just as the diffusion's does — what does not accumulate is their <em>asymmetry</em>. Over a short window one or two lopsided shocks dominate and bend the surface violently; over a long window many jumps add up and, by the central limit theorem, the sum looks increasingly normal: skewness falls like 1/√T, and the skew washes out. Stochastic volatility has no such decay — the vol-of-vol keeps working at every horizon. The numbers are stark: jump-driven skew falls from <b>8.46 vol points at one month to 0.40 at three years</b>, while the mixture's stays essentially flat at 0.3 to 0.6 throughout.</p>
     <p>So when you see a surface whose skew collapses as you go out in time, that is a market pricing event risk. When the skew persists into the long end, that is a market pricing a regime.</p>
   </div>
 
@@ -251,7 +251,7 @@
       <button>Persistent stochastic volatility with negative correlation</button>
       <button>Nothing — all surfaces do this</button>
     </div>
-    <div class="ans"><b>Event risk.</b> Fixed-size jump risk contributes a constant amount of variance regardless of horizon, while diffusion accumulates with time — so the jump's share of total variance, and therefore its effect on the shape, shrinks as maturity grows. Persistent skew into the long end points at a regime property instead. This distinction has a direct trade behind it, which is <a href="index.html" style="color:var(--blue)">page 03's</a> subject: if the front-month skew is event-driven you can strip out the event and price what is left.</div>
+    <div class="ans"><b>Event risk.</b> A jump's lopsidedness does not survive aggregation: over a long horizon many jumps sum toward a normal, so the skewness they add falls like 1/√T and their effect on the shape fades with maturity. (A single scheduled event is the stronger version — its variance is fixed outright, which is page 03.) Persistent skew into the long end points at a regime property instead. This distinction has a direct trade behind it, which is <a href="index.html" style="color:var(--blue)">page 03's</a> subject: if the front-month skew is event-driven you can strip out the event and price what is left.</div>
   </div>
 </section>
 
@@ -525,7 +525,7 @@
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
-    <span class="lab">Question 5 · chapter 06</span>
+    <span class="lab">Question 5 · chapter 05</span>
     <p class="q">What does vanna do in a skewed market?</p>
     <div class="opts">
       <button>Nothing; it only matters for exotics</button>
@@ -537,7 +537,7 @@
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
-    <span class="lab">Question 6 · chapter 07</span>
+    <span class="lab">Question 6 · chapter 06</span>
     <p class="q">A quoted butterfly across three strikes has a negative price. What does that mean?</p>
     <div class="opts">
       <button>The market expects a large move</button>

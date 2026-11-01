@@ -6,10 +6,10 @@
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#EDF0EC">
 <title>Junior Trader Questions — Options, visually</title>
-<meta name="description" content="Twenty-two options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
+<meta name="description" content="Thirty-seven options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Junior Trader Questions — Options, visually">
-<meta property="og:description" content="Twenty-two options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
+<meta property="og:description" content="Thirty-seven options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +48,7 @@
   <div class="heroInner">
     <div class="eyebrow">An interactive derivation · No. 16</div>
     <h1>The questions they <em>ask</em> you</h1>
-    <p class="sub">Twenty-two questions on a ladder, from ones with a single right answer to ones with no formula at all — and six of them worked at full length. Each is a trap built around a plausible wrong answer, and each resolves in a figure you can move.</p>
+    <p class="sub">Thirty-seven questions on a ladder, from ones with a single right answer to ones with no formula at all — and six of them worked at full length. Each is a trap built around a plausible wrong answer, and each resolves in a figure you can move.</p>
   </div>
   <div class="scrollcue">Scroll ↓</div>
 </div>
@@ -84,7 +84,7 @@
   <div class="chead">
     <div class="cnum">01</div>
     <h2>Start with the ones that have a single right answer</h2>
-    <p class="dek">Twenty-two questions on three rungs. Read, decide, then press — and watch the figure settle it.</p>
+    <p class="dek">Thirty-seven questions on three rungs. Read, decide, then press — and watch the figure settle it.</p>
   </div>
 
   <div class="prose">
@@ -379,7 +379,7 @@
 
   <div class="prose">
     <p class="lead">The stock is 100. The six-month 100 call is 5.00 and the 100 put is 3.50. Rates are 4%. Parity says call minus put should equal S − K·e<sup>−rT</sup> = <b>1.98</b>, and the screen says <b>1.50</b>. Forty-eight cents of free money. Do you take it?</p>
-    <p>The trade would be: buy the call, sell the put, sell the stock — a package that is short the forward at a good price. To hold it you must borrow shares. Which is the answer: the forty-eight cents is not an arbitrage, it is the market quoting you a <span class="term" data-t="Borrow rate" data-def="What it costs to borrow shares in order to sell them short. It behaves exactly like a dividend in every option formula, and it is the usual explanation for a put-call parity violation that will not close.">borrow rate</span>. Solve parity for the dividend-or-borrow term instead of assuming it is zero and the gap becomes <b>0.96%</b> a year, which on a hundred shares over six months is $48.13 — precisely the forty-eight cents you thought you were being handed.</p>
+    <p>The trade would be: buy the call, sell the put, sell the stock — a package that is long the synthetic forward at a good price, against the stock sold short. To hold it you must borrow shares. Which is the answer: the forty-eight cents is not an arbitrage, it is the market quoting you a <span class="term" data-t="Borrow rate" data-def="What it costs to borrow shares in order to sell them short. It behaves exactly like a dividend in every option formula, and it is the usual explanation for a put-call parity violation that will not close.">borrow rate</span>. Solve parity for the dividend-or-borrow term instead of assuming it is zero and the gap becomes <b>0.96%</b> a year, which on a hundred shares over six months is $48.13 — precisely the forty-eight cents you thought you were being handed.</p>
   </div>
 
   <figure class="bleed">
@@ -967,7 +967,139 @@
             return Math.exp(-r*T)*ncdf(d2);},
         S=>(P(S,95,0.25,V,0.03,0,true)-P(S,105,0.25,V,0.03,0,true))/10,
         S=>(P(S,99,0.25,V,0.03,0,true)-P(S,101,0.25,V,0.03,0,true))/2],
-     col:["--blue","--grey","--ochre"],dash:[null,[5,5],[2,3]],marks:[[100,"--verm","K"]]}}
+     col:["--blue","--grey","--ochre"],dash:[null,[5,5],[2,3]],marks:[[100,"--verm","K"]]}},
+  /* ── added from a desk interview sheet: tier 1 ───────────────────── */
+  {t:1,q:"Which position is long gamma and short vega?",
+   o:["A long straddle","A short straddle","Long a front-month option against short a back-month one","Long a back-month option against short a front-month one"],ok:2,
+   why:"Gamma per unit of vega scales like 1/T, so a one-month option carries twelve times the gamma per unit of vega that a one-year does. Buy the front, sell enough of the back to cancel the vega, and what is left is gamma. Any single-expiry structure has gamma and vega of the same sign; it takes two expiries to split them.",
+   fig:{title:"Gamma and vega of an at-the-money option, against expiry",cap:"Gamma lives at the front and vega at the back. A reverse calendar buys the left end of the blue curve and sells the right end of the gold one.",
+     x0:0.03,x1:1,xf:v=>(v*12).toFixed(0)+"m",yf:v=>v.toFixed(2),
+     leg:[["Gamma × 10","--blue"],["Vega per point","--ochre"]],
+     f:[T=>10*bs(S0,100,T,V,R,0,true).gamma,T=>bs(S0,100,T,V,R,0,true).vega/100],
+     col:["--blue","--ochre"]}},
+
+  {t:1,q:"Can a European option ever cost more than its American twin?",
+   o:["Yes, a deep in-the-money European put","No. The American option has every right the European one has, plus one, so it can never be worth less","Yes, before a large dividend","Only for calls on futures"],ok:1,
+   why:"An extra right cannot have negative value: you can always choose not to use it. The reverse gap, American well above European, does happen — a deep put at high rates (the European one can sit below intrinsic, 35.36 against 40 at spot 60 here), a deep call before a large dividend, puts on hard-to-borrow names. Page 08 prices all three.",
+   fig:{title:"A deep European put against its intrinsic value",cap:"The European put dips under intrinsic. The American one cannot, because it can always be exercised for intrinsic — which is exactly why it is worth more.",
+     x0:40,x1:110,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
+     leg:[["European put","--blue"],["Intrinsic","--grey"],["American floor","--moss"]],
+     f:[S=>P(S,100,1,V,0.05,0,false),S=>Math.max(100-S,0),S=>Math.max(P(S,100,1,V,0.05,0,false),100-S)],
+     col:["--blue","--grey","--moss"],dash:[null,null,[4,3]],marks:[[60,"--ochre","60"]]}},
+
+  {t:1,q:"Earnings are in a week. The at-the-money straddle is 20 bid, 25 offer in vol. Tomorrow, with no news, where do you expect the vol quote?",
+   o:["Lower — a day of decay has passed","Higher. The event's variance is fixed, and it is now spread over one day fewer","The same, since nothing happened","Lower, because the event is a day closer"],ok:1,
+   why:"Quoted vol is the square root of total variance over time. The diffusive part shrinks with the days, the event part does not, so dividing the fixed lump by a smaller T raises the number. With 18% diffusive and a 3% event, a week out quotes 28.2% and a day later 29.5% — the option is cheaper in dollars and dearer in vol. Page 03 is this arithmetic.",
+   fig:{title:"Quoted vol into an event, against days left",cap:"The quote climbs as the event approaches even though nothing has changed. The day after the print it falls back to the diffusive line.",
+     x0:1,x1:14,xf:v=>v.toFixed(0)+"d",yf:v=>(v*100).toFixed(0)+"%",
+     leg:[["Quoted vol","--blue"],["Diffusive vol","--grey"]],
+     f:[d=>Math.sqrt(0.0324+0.0009/(d/365)),()=>0.18],
+     col:["--blue","--grey"],dash:[null,[5,5]],marks:[[7,"--ochre","today"],[6,"--moss","tomorrow"]]}},
+
+  {t:1,q:"When should you exercise an American call early?",
+   o:["Whenever it is deep in the money","Just before an ex-dividend date, when the dividend exceeds the call's time value — the put plus the interest on the strike","Never; calls are never exercised early","When implied volatility falls"],ok:1,
+   why:"Exercising throws away time value, which is exactly the put plus K(1 − e⁻ʳᵗ). Only a dividend can pay for that, and only on the last day before the ex-date. Puts run the other way: exercise when the interest you earn on receiving the strike early beats the call and dividends you give up — deep in the money, high rates. Page 08 is the whole of it.",
+   fig:{title:"A call's time value against spot, with a $1.50 dividend",cap:"The blue hurdle falls toward the interest floor as the call goes deeper. Where it drops below the dividend, exercising into the ex-date wins.",
+     x0:90,x1:150,xf:v=>v.toFixed(0),yf:v=>v.toFixed(2),
+     leg:[["Time value: put + interest","--blue"],["Dividend","--verm"],["Interest floor","--grey"]],
+     f:[S=>P(S,100,0.25,V,0.045,0,false)+100*(1-Math.exp(-0.045*0.25)),()=>1.5,()=>100*(1-Math.exp(-0.045*0.25))],
+     col:["--blue","--verm","--grey"],dash:[null,[5,5],[2,3]]}},
+
+  /* ── tier 2 ──────────────────────────────────────────────────────── */
+  {t:2,q:"Stock at 60. You buy the 50 put for 5 and hedge it on a 30 delta with stock, frictionless, zero rates. Where are your breakevens at expiry?",
+   o:["45 and 76.67","38.57 and 76.67","45 only","38.57 and 60"],ok:1,
+   why:"Hedging a 30-delta put means buying 0.3 shares at 60. Above 50 the put is worthless: −5 + 0.3(S − 60) = 0 at 76.67. Below 50: (50 − S) − 5 + 0.3(S − 60) = 27 − 0.7S = 0 at 38.57. The worst case is −8 at 50, where the put has expired worthless and the stock has fallen.",
+   fig:{title:"Hedged long put: P&L at expiry",cap:"A valley with its floor at the strike. The hedge turns an outright put into a bet that the stock goes a long way in either direction.",
+     x0:25,x1:95,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
+     leg:[["P&L","--blue"],["Zero","--grey"]],
+     f:[S=>Math.max(50-S,0)-5+0.3*(S-60),()=>0],
+     col:["--blue","--grey"],dash:[null,[3,3]],marks:[[38.57,"--moss","38.57"],[76.67,"--moss","76.67"]]}},
+
+  {t:2,q:"Now buy the 50/40 put spread for 4 instead, hedged on a 20 delta at 60. Where are the breakevens?",
+   o:["42.5 and 80","30, 42.5 and 80","46 and 80","30 and 80"],ok:1,
+   why:"You buy 0.2 shares at 60. Above 50: −4 + 0.2(S − 60) = 0 at 80. Between 40 and 50: (50 − S) − 4 + 0.2(S − 60) = 34 − 0.8S = 0 at 42.5. Below 40 the spread is capped at 10 and the long stock keeps losing: 0.2S − 6 = 0 at 30. Three breakevens, because capping the put leaves the hedge naked on a crash.",
+   fig:{title:"Hedged put spread: P&L at expiry",cap:"Profit only in a band between 30 and 42.5. Below 40 the spread stops paying and the stock hedge, bought for a put that no longer exists, drags the line back down.",
+     x0:15,x1:95,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
+     leg:[["P&L","--blue"],["Zero","--grey"]],
+     f:[S=>Math.min(Math.max(50-S,0),10)-4+0.2*(S-60),()=>0],
+     col:["--blue","--grey"],dash:[null,[3,3]],marks:[[30,"--moss","30"],[42.5,"--moss","42.5"],[80,"--moss","80"]]}},
+
+  {t:2,q:"Ten trading days to expiry. Earnings in two days, with an implied earnings move of 4% (one standard deviation). Non-event vol is 30%, 252 days a year. What is the at-the-money implied vol?",
+   o:["30.0% — the event is already in the non-event vol","33.4% — a time-weighted average of 30% and the event's annualized vol","36.1%","63.5% — the event annualized"],ok:2,
+   why:"Add variances, not vols. Total variance = 0.30² × 10/252 + 0.04² = 0.00517, and annualizing over 10/252 gives 36.1%. The 33.4% answer averages volatilities, the most common error on a vol desk. If your convention lets the event day replace an ordinary day, use 9 days of diffusion and you get 34.8% — say which convention you mean.",
+   fig:{title:"Implied vol against days to expiry, with one 4% event inside",cap:"The shorter the option, the larger the share of its variance the event supplies. At ten days it adds about six points.",
+     x0:3,x1:60,xf:v=>v.toFixed(0)+"d",yf:v=>(v*100).toFixed(0)+"%",
+     leg:[["Implied vol","--blue"],["Non-event vol","--grey"]],
+     f:[d=>Math.sqrt((0.09*d/252+0.0016)*252/d),()=>0.30],
+     col:["--blue","--grey"],dash:[null,[5,5]],marks:[[10,"--ochre","10d"]]}},
+
+  {t:2,q:"The 30 put is $6 and the 20 put is $4, same underlying, same expiry. Is there an arbitrage?",
+   o:["No — the put spread costs 2 and pays at most 10","Yes. Buy two 30 puts and sell three 20 puts for zero cost; the payoff is never negative and is positive anywhere below 30","Yes: sell the 30 put and buy the 20 put","No, puts on the same name cannot be arbitraged against each other"],ok:1,
+   why:"A put is worth zero at a zero strike and is convex in strike, so P(20) can be at most two-thirds of P(30) — here exactly 4.00, on the boundary. Two 30 puts against three 20 puts cost 12 − 12 = 0 and pay 2(30 − S) between 20 and 30 and S below 20: never negative, sometimes positive. Any probability of finishing below 30 makes it a free option.",
+   fig:{title:"Payoff of +2 × 30 put − 3 × 20 put, entered for zero",cap:"A tent that never dips below zero. A position that costs nothing and cannot lose is the definition of an arbitrage.",
+     x0:0,x1:40,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
+     leg:[["Payoff","--blue"],["Zero","--grey"]],
+     f:[S=>2*Math.max(30-S,0)-3*Math.max(20-S,0),()=>0],
+     col:["--blue","--grey"],dash:[null,[3,3]],marks:[[20,"--ochre","20"],[30,"--ochre","30"]]}},
+
+  {t:2,q:"The stock is $30 and you are short the January 50 calls, delta-hedged with long stock. What is the best headline you could wake up to?",
+   o:["The company files for bankruptcy","An all-cash takeover at $40","A stock-for-stock merger at a 30% premium","An earnings beat"],ok:1,
+   why:"A cash deal below your strike does everything you want at once: the stock jumps, so your long-stock hedge makes money; the deliverable becomes fixed cash, so the calls lose their volatility and can never reach 50. Bankruptcy also kills the calls but wrecks the hedge. A stock deal leaves the deliverable volatile. Page 20 prices what is left — the chance of a topping bid.",
+   fig:{title:"The 50 call at spot 40, as the stock's volatility collapses",cap:"A cash deal is a volatility crash to near zero. At 45 vol this call is worth 3.39; as vol goes to zero it goes to nothing, because 40 can never become 50.",
+     x0:0.02,x1:0.6,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(2),
+     leg:[["50 call at spot 40","--blue"]],
+     f:[v=>P(40,50,0.75,v,R,0,true)],col:["--blue"],marks:[[0.45,"--ochre","before"]]}},
+
+  /* ── tier 3 ──────────────────────────────────────────────────────── */
+  {t:3,q:"Roll a fair die repeatedly. Which comes first more often: a 6 followed by a 6, or a 5 followed by a 6?",
+   o:["Equally likely — each pair has probability 1/36","6-6, because a 6 can start it again","5-6, about 7 times in 12","It depends on the first roll"],ok:2,
+   why:"A failed 6-6 attempt (a 6 then a 5) leaves you holding a 5 — half of a 5-6. A failed 5-6 attempt (a 5 then a 5) still leaves a 5, but a 6-6 attempt that fails on anything else resets you. Solve the three-state chain and 5-6 comes first with probability 7/12. Run separately, 5-6 also takes 36 rolls on average against 6-6's 42. Equal pair probabilities do not mean equal waiting times; overlap matters.",
+   fig:{title:"P(5-then-6 before 6-then-6), against the probability of each face",cap:"At a fair die's 1/6 it is 7/12. The edge comes from overlap, not from the pairs being more or less likely.",
+     x0:0.05,x1:0.45,xf:v=>v.toFixed(2),yf:v=>(v*100).toFixed(0)+"%",
+     leg:[["P(5-6 first)","--blue"],["Even","--grey"]],
+     f:[s=>1-s/((1+2*s)-(1+s)*(1-2*s)/(1-s)),()=>0.5],
+     col:["--blue","--grey"],dash:[null,[5,5]],marks:[[1/6,"--ochre","fair die"]]}},
+
+  {t:3,q:"Broker A offers a one-day at-the-money straddle on a $100 stock at $5. Broker B offers an even-money bet that the stock moves more than 5%. Which do you trade?",
+   o:["B — the bet's line sits at the straddle's breakeven, so it is the same price","A. A straddle at 5 is an expected absolute move of 5%; the stock beats its own mean absolute move only about 42% of the time, so an even-money bet on it loses","Either; they are the same bet","B, because fat tails make big moves more likely"],ok:1,
+   why:"The straddle price pins the mean absolute move at 5%, which on a normal is a standard deviation of 6.27%. The chance of exceeding the mean absolute move is 42.5%, not 50%, so taking the over at even money is a losing bet. Fat tails make it worse, not better: on a Laplace it is 36.8%. Page 18 is this exact gap between the two rulers.",
+   fig:{title:"Chance the move exceeds a threshold, given a $5 straddle",cap:"At 5% the curve reads 42.5%, below the even-money line. The bet only becomes fair at a threshold of about 4.2%.",
+     x0:0,x1:15,xf:v=>v.toFixed(0)+"%",yf:v=>(v*100).toFixed(0)+"%",
+     leg:[["P(|move| > x)","--blue"],["Even money","--grey"]],
+     f:[x=>2*(1-ncdf(x/(5/Math.sqrt(2/Math.PI)))),()=>0.5],
+     col:["--blue","--grey"],dash:[null,[5,5]],marks:[[5,"--ochre","5%"]]}},
+
+  {t:3,q:"A counterparty buys calls from you in names that go up the next day 90% of the time. Should you keep trading with them?",
+   o:["Yes — they are simply bullish, and you are paid the spread","Not at the same price. Flow that is right that often is informed: measure your markouts against them and widen, size down, or stop","Yes, as long as you delta-hedge","It does not matter; adverse selection averages out"],ok:1,
+   why:"A 90% next-day hit rate is information, and every fill they give you is a fill you did not want. Delta-hedging does not help — you hedge after the price has moved. The tool is markout analysis: what your P&L on their trades looks like a minute, an hour and a day later. Page 05's quoting simulation is this from the market maker's side.",
+   fig:{title:"Expected markout per trade, against the counterparty's hit rate",cap:"At a coin flip the flow costs you nothing; at 90% you lose eight-tenths of a typical move on every trade before the spread.",
+     x0:0.5,x1:1,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(1),
+     leg:[["Loss in typical moves","--verm"]],
+     f:[h=>2*h-1],col:["--verm"],marks:[[0.9,"--ochre","90%"]]}},
+
+  {t:3,q:"IBM is at $75. What is a security worth that pays $1 the first time IBM touches $100? Zero rates, no dividends.",
+   o:["$0.75. Buy a hundredth of a share for $0.75 and sell it the moment IBM touches 100","$1, since it will touch eventually","About $0.50, the chance of touching","$0.25"],ok:0,
+   why:"Holding 1/100 of a share is worth exactly $1 at the touch, so it at least replicates the payoff and the security can cost no more than $0.75. Under Black–Scholes with zero rates a path that never touches drifts toward zero, so the bound is attained: the perpetual one-touch is S/H. The construction is the answer — it needs no probability and no volatility.",
+   fig:{title:"Value of a $1 perpetual one-touch at 100, against spot",cap:"A straight line from zero to one. The hedge is a fixed number of shares, which is why the price is linear.",
+     x0:0,x1:100,xf:v=>v.toFixed(0),yf:v=>v.toFixed(2),
+     leg:[["S / 100","--blue"]],
+     f:[S=>S/100],col:["--blue"],marks:[[75,"--ochre","75"]]}},
+
+  {t:3,q:"Rates are expected to fall a point over the next year. Should a January revcon imply a higher or lower rate than an April one?",
+   o:["Higher — longer financing always costs more","Lower. Each revcon's implied rate tracks the average funding rate to its own expiry, and a falling path pulls the longer average down","The same; both are struck off today's rate","It cannot be inferred from rates"],ok:1,
+   why:"A revcon is a loan to its expiry, so it prices off the term rate for that tenor. If short rates fall a point over the year, the average to April is about 5.1% and to January about 4.8%. Two forces push back: a term premium for tying up balance sheet longer, and dividend forecasts that are softer further out. Check the jelly roll between them — page 07.",
+   fig:{title:"Average expected funding rate to each expiry, on a falling path",cap:"The further out the revcon, the more of the expected cuts it averages in.",
+     x0:0.05,x1:1,xf:v=>(v*12).toFixed(0)+"m",yf:v=>(v*100).toFixed(2)+"%",
+     leg:[["Term rate to expiry","--blue"]],
+     f:[T=>0.0525-0.01*T/2],col:["--blue"],marks:[[0.25,"--moss","April"],[0.9,"--ochre","January"]]}},
+
+  {t:3,q:"Why might an options desk find itself converting far more names than it reverses?",
+   o:["Conversions are always more profitable","A conversion holds the stock and lends cash, needing no borrow; a reversal is short stock, pays a borrow fee and carries recall risk — expensive exactly on event and deal names","Regulation forbids reversals","Because puts are cheaper than calls"],ok:1,
+   why:"The two trades are mirror images in the identity and not in the plumbing. The reverser must borrow shares, and on names with deal or event risk the borrow is expensive, volatile and recallable. A desk long the stock already, as merger arbitrage often is, also finds conversions natural: they add puts under shares it holds. Page 07 chapter 09 is where the risk sits.",
+   fig:{title:"A reverser's all-in cost against the borrow fee",cap:"The converter's return is the implied rate; the reverser pays the implied rate plus the borrow. On hard-to-borrow names the gap is the whole trade.",
+     x0:0,x1:0.10,xf:v=>(v*100).toFixed(0)+"%",yf:v=>(v*100).toFixed(1)+"%",
+     leg:[["Reverser's cost","--verm"],["Converter's rate","--moss"]],
+     f:[b=>0.045+b,()=>0.045],col:["--verm","--moss"],dash:[null,[5,5]]}}
   ];
 
   let tier=1,idx=0,answered=false;

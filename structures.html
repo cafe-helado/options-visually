@@ -121,6 +121,49 @@
     </div>
     <figcaption>Notice how often two structures with visibly different payoff shapes have nearly identical greek profiles, and vice versa. The butterfly and the iron condor look like different animals on the left and are close cousins on the right — both short gamma, short vega, long theta, with the difference being where the risk sits rather than what kind of risk it is.</figcaption>
   </figure>
+  <div class="prose">
+    <p>Read the two panels against each other and one rule does most of the work: <b>a peak in the payoff is short gamma, a valley is long gamma.</b> Curvature is gamma, and a peak curves down. The butterfly's tent at 100 reads <b>−0.0080</b> of gamma at the money even though it is a long position bought for a debit — you paid for the wings, but the body you sold is closer and dominates. The straddle's valley reads <b>+0.0754</b>. Who paid whom does not tell you the sign; the shape does.</p>
+    <p>The second rule is that time changes the volatility view far more than the payoff view. The grey payoff line never moves when you drag the expiry, because it is the payoff <em>at</em> expiry. The greek panel moves completely: shorten a butterfly to three days and its short gamma concentrates into a spike around the body; push it out to a year and it all but vanishes. Same ticket, very different risk, depending only on the calendar.</p>
+  </div>
+
+  <div class="mline">greek(structure) = Σ qᵢ · greek(legᵢ)</div>
+  <p class="mread">Reads as: <b>every greek of a structure is the quantity-weighted sum of its legs' greeks.</b> Price is linear in the legs, and the derivative of a sum is the sum of the derivatives — which is why the fingerprint in the next chapter is just the legs' fingerprints added up.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Pick the <b>Butterfly</b> in the chips above, then <b>predict</b> what its gamma panel looks like with three days left — and with a year.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"days":3}' data-focus="cvGreeks">Three days left</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"days":365}' data-focus="cvGreeks">A year left</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"days":45,"vol":0.30}' data-focus="cvGreeks">Back to 45 days</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You buy a 95/100/105 call butterfly for a debit. At the money, what sign is its gamma?</p>
+    <div class="opts">
+      <button>Positive — you bought it, and long option positions are long gamma</button>
+      <button data-ok="1">Negative. The payoff has a peak at 100, and a peak curves down; the two short body options outweigh the wings near the money</button>
+      <button>Zero, because the legs cancel</button>
+      <button>It depends on whether it was bought for a debit or a credit</button>
+    </div>
+    <div class="ans"><b>Negative, about −0.008 here.</b> Paying a debit tells you about cash, not curvature. The butterfly is short gamma in the body and long it in the wings — <a href="atlas.html" style="color:var(--blue)">page 19</a> finds the spot where it changes sign — which is why it behaves like a short straddle with insurance bolted on.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — why greeks add across legs, and when the sum misleads</summary>
+    <div class="body">
+      <p>A structure's value is the sum of its legs' values, each scaled by its quantity.</p>
+      <div class="mline">V = Σ qᵢ · Vᵢ(S, σ, t)</div>
+      <p class="mread">Reads as: <b>the package is worth what its pieces are worth.</b> No interaction terms, because each option pays independently of the others.</p>
+      <p>Differentiate with respect to anything and the sum passes straight through.</p>
+      <div class="mline">∂V/∂x = Σ qᵢ · ∂Vᵢ/∂x</div>
+      <p class="mread">Reads as: <b>the sensitivity of the whole is the sum of the sensitivities of the parts.</b></p>
+      <p><b>Where it breaks.</b> The algebra never breaks; the interpretation does. Summing vega across legs assumes every leg's volatility moves by the same amount, and on a skewed surface or across expiries they do not — <a href="book.html" style="color:var(--blue)">page 11</a> shows a book whose net vega of 417 produces anything from $743 to $1,238 on moves that all look like two points.</p>
+    </div>
+  </details>
+
 </section>
 
 <!-- ══════════ 02 ══════════ -->
@@ -157,6 +200,37 @@
     </div>
     <figcaption>The fingerprint is deliberately blind to the payoff. Two structures can produce completely different diagrams for a client and identical fingerprints for a trader — which is the subject of the next chapter, and the reason a vol desk does not much care what a structure is called.</figcaption>
   </figure>
+  <div class="prose">
+    <p>Look at two of the bars and they always agree. <b>Realized and Vol level read the same number for every structure on this page</b> — the straddle +1.00 on both, the iron condor −0.53 on both, the butterfly −0.11 on both. That is not a coincidence of the examples. At a single expiry vega is gamma times S²σT, the same constant for every leg, so once both are divided by the straddle's they cannot differ. A single-expiry structure can never be long movement and short its price; <a href="atlas.html" style="color:var(--blue)">page 19</a> proves it and shows the calendar that breaks the tie.</p>
+    <p>So the honest count is four axes, not five, and the interesting differences live in the last two. A strangle carries 0.64 of a straddle's gamma and vega plus a convexity bar of <b>+0.47</b> that the straddle does not have at all. A risk reversal reads <b>+0.35</b> direction and <b>+0.46</b> skew with almost nothing elsewhere: a skew position with a tilt. A call spread reads +0.33 direction like the risk reversal, but <b>−0.25</b> skew — the same directional bet with the opposite exposure to the smile.</p>
+    <p>One caveat about scale. Direction, Realized and Vol level are measured against the straddle directly. Skew and Vol convexity are vanna and volga against a straddle-sized yardstick scaled for display, so read their signs and their sizes relative to each other, not as numbers to put in a risk limit.</p>
+  </div>
+
+  <div class="mline">bar = greek(structure) / |greek(one-lot ATM straddle)|</div>
+  <p class="mread">Reads as: <b>each axis is how much of that exposure you hold, measured in straddles.</b> A −0.53 on Realized means the structure is short about half a straddle's worth of gamma.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>With the <b>Butterfly</b> selected, <b>predict</b> its Realized bar at three days and at a year. At 45 days it reads −0.11.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"days":3}' data-focus="fingerBars">Three days</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"days":365}' data-focus="fingerBars">A year</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"days":45}' data-focus="fingerBars">Back to 45 days</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A fingerprint reads Direction +0.35, Realized +0.09, Vol level +0.09, Skew +0.46, Vol convexity −0.03. What is it most likely to be?</p>
+    <div class="opts">
+      <button>A call spread — it is bullish</button>
+      <button data-ok="1">A risk reversal. Mostly direction and skew, almost no gamma or vega; a call spread has similar direction but the opposite sign on skew</button>
+      <button>A strangle, since it is long vol</button>
+      <button>A short put, since it is bullish and short the downside</button>
+    </div>
+    <div class="ans"><b>A risk reversal.</b> The call spread is the tempting answer because its direction bar matches (+0.33), but its skew bar is −0.25. A short put would read heavily short on Realized and Vol level. The axes nobody looks at are where structures that look alike come apart.</div>
+  </div>
+
 </section>
 
 <!-- ══════════ 03 ══════════ -->
@@ -171,7 +245,7 @@
     <p class="lead">A concentrated shareholder wants downside protection and cannot pay for it, so they buy a put and sell a call to fund it. On the pitch it is a <b>collar</b>: a floor, a cap, zero premium, and a worst case the board can approve.</p>
     <p>A volatility fund sees the other side and calls it a <b><span class="term" data-t="Risk reversal" data-def="Long an out-of-the-money call and short an out-of-the-money put, or the reverse. A directional position financed by selling the other tail — and the vol fund's name for what a corporate calls a collar.">risk reversal</span></b>: long the call, short the put, which on an equity surface means short the expensive downside and long the cheap upside. They are not thinking about floors. They are thinking that skew is too steep and they want to be paid to own that view.</p>
     <p>Put both through the fingerprint and the numbers are exactly negatives of each other — delta, gamma, vega, theta, vanna and volga all sum to <b>zero to machine precision</b>. There is no sense in which these are two trades. There is one trade, and two descriptions of it that share almost no vocabulary.</p>
-    <p>Why this matters beyond being tidy: it tells you where the <em>price</em> of a collar comes from. The treasurer thinks they are buying insurance and paying for it with an upside cap. What they are actually doing is selling skew, and the level they receive is set by how steep the surface is that day. A collar that is zero-cost in a high-skew environment requires giving up far less upside than the same collar when skew is flat — a fact that is invisible in the payoff diagram and obvious in the fingerprint.</p>
+    <p>Why this matters beyond being tidy: it tells you where the <em>price</em> of a collar comes from. The treasurer thinks they are buying insurance and paying for it with an upside cap. What they are actually doing is <em>buying</em> skew — paying for the expensive downside with the cheap upside — and the exchange rate is set by how steep the surface is that day. A collar that is zero-cost in a high-skew environment requires giving up <em>more</em> upside than the same collar when skew is flat: on a 90 put at 30 vol and 45 days, the zero-cost call strike falls from 113 on a flat surface to 106.5 on a steep one. That is invisible in the payoff diagram and obvious in the fingerprint.</p>
   </div>
 
   <figure class="bleed">
@@ -228,11 +302,11 @@
     <p class="q">A treasurer says their zero-cost collar "cost nothing." What did it actually cost?</p>
     <div class="opts">
       <button>Nothing — the premiums offset exactly, which is the point</button>
-      <button data-ok="1">The upside above the cap, priced by the skew. Steeper skew means the same protection costs less foregone upside</button>
+      <button data-ok="1">The upside above the cap, priced by the skew. Steeper skew means the same protection costs more foregone upside</button>
       <button>Only the bid-offer on two legs</button>
       <button>The dividend on the underlying shares</button>
     </div>
-    <div class="ans"><b>They sold skew, and the price was upside.</b> Zero premium is an accounting statement, not an economic one — the put was paid for with a call, and the exchange rate between them is the skew. In a steep-skew environment the downside put is expensive relative to the upside call, so funding it requires selling a call further out and you keep more upside. The identical structure in a flat-skew name forces the cap much closer. This is exactly why the fund on the other side describes the trade as a skew position: that is the variable being traded, even though nobody in the meeting said the word.</div>
+    <div class="ans"><b>They bought skew, and the price was upside.</b> Zero premium is an accounting statement, not an economic one — the put was paid for with a call, and the exchange rate between them is the skew. In a steep-skew environment the downside put is expensive relative to the upside call, so funding it requires selling a call <em>closer</em> to the money and you keep less upside: the zero-cost call for a 90 put moves from 113 on a flat surface to 106.5 on a steep one. The identical structure in a flat-skew name leaves the cap much further out. This is exactly why the fund on the other side describes the trade as a skew position: that is the variable being traded, even though nobody in the meeting said the word.</div>
   </div>
 </section>
 
@@ -255,7 +329,7 @@
         <tr><th>Structure</th><th>Stated purpose</th><th>What the other side is buying</th></tr>
         <tr><td>Covered call</td><td>Yield on a held position</td><td>Long vol, long gamma, cheap upside</td></tr>
         <tr><td>Protective put</td><td>Floor under a holding</td><td>Short downside vol, short skew</td></tr>
-        <tr><td>Zero-cost collar</td><td>Protection with no premium</td><td>Long skew, long vanna</td></tr>
+        <tr><td>Zero-cost collar</td><td>Protection with no premium</td><td>Short skew, long vanna</td></tr>
         <tr><td>Cash-secured put</td><td>Entry price plus income</td><td>Long downside vol</td></tr>
         <tr><td>Put spread collar</td><td>Cheaper protection, capped</td><td>Skew and wing exposure together</td></tr>
         <tr><td>Overwriting program</td><td>Systematic income</td><td>Persistent supply of upside vol</td></tr>
@@ -267,14 +341,14 @@
     <div class="panel">
       <div class="figtop"><h3>The volatility shelf</h3><span class="note">Traded for a greek exposure</span></div>
       <table class="rot">
-        <tr><th>Structure</th><th>Axis it expresses</th><th>What it costs to hold</th></tr>
-        <tr><td>Straddle</td><td>Realized vs implied, purely</td><td>Maximum theta per unit of gamma</td></tr>
-        <tr><td>Strangle</td><td>Same, cheaper, with wing convexity</td><td>Less theta, needs a bigger move</td></tr>
-        <tr><td>Calendar</td><td>Term structure of vol</td><td>Front gamma against back vega</td></tr>
-        <tr><td>Risk reversal</td><td>Skew, directly</td><td>Delta you must hedge continuously</td></tr>
-        <tr><td>Butterfly</td><td>Local density at one strike</td><td>Pinned to a strike; dies if spot leaves</td></tr>
-        <tr><td>Ratio spread</td><td>Wing pricing, short convexity</td><td>Unbounded tail if the wing is wrong</td></tr>
-        <tr><td>Iron condor</td><td>Short vol with defined wings</td><td>Short gamma between the shorts</td></tr>
+        <tr><th>Structure</th><th>Axis it expresses</th><th>What it costs to hold</th><th></th></tr>
+        <tr><td>Straddle</td><td>Realized vs implied, purely</td><td>Maximum theta per unit of gamma</td><td><button class="act ghost" data-load="Straddle">Load</button></td></tr>
+        <tr><td>Strangle</td><td>Same, cheaper, with wing convexity</td><td>Less theta, needs a bigger move</td><td><button class="act ghost" data-load="Strangle">Load</button></td></tr>
+        <tr><td>Calendar</td><td>Term structure of vol</td><td>Front gamma against back vega</td><td></td></tr>
+        <tr><td>Risk reversal</td><td>Skew, directly</td><td>Delta you must hedge continuously</td><td><button class="act ghost" data-load="Risk reversal">Load</button></td></tr>
+        <tr><td>Butterfly</td><td>Local density at one strike</td><td>Pinned to a strike; dies if spot leaves</td><td><button class="act ghost" data-load="Butterfly">Load</button></td></tr>
+        <tr><td>Ratio spread</td><td>Wing pricing, short convexity</td><td>Unbounded tail if the wing is wrong</td><td><button class="act ghost" data-load="Ratio spread">Load</button></td></tr>
+        <tr><td>Iron condor</td><td>Short vol with defined wings</td><td>Short gamma between the shorts</td><td><button class="act ghost" data-load="Iron condor">Load</button></td></tr>
       </table>
     </div>
   </figure>
@@ -282,6 +356,33 @@
   <div class="prose">
     <p>One structural asymmetry runs down both lists. The institutional shelf is dominated by <b>selling upside and buying downside</b> — <span class="term" data-t="Overwriting" data-def="Selling calls against stock you already own, usually as a standing program rather than a view. One of the two structural flows that shapes the single-name surface.">overwriting</span> programs, collars, protective puts. The volatility shelf is where the other side of that accumulates. That imbalance is not a coincidence and it is chapter 06's subject.</p>
   </div>
+  <div class="prose">
+    <p>The translation column is the useful one, and the fingerprint puts numbers on it. The <b>collar</b> and the <b>risk reversal</b> are the cleanest pair: −0.35 against +0.35 on direction and −0.46 against +0.46 on skew, every axis an exact mirror — chapter 03's identity read off the bars. The <b>iron condor</b> and the <b>butterfly</b> look like relatives on the payoff diagram, but per lot at these strikes the condor carries about five times the butterfly's short gamma and vega, −0.53 against −0.11: its short strikes sit near the money with nothing close by to offset them, while the butterfly's long wings sit right beside its body. The <b>strangle</b> is not a cheap straddle: it is 0.64 of a straddle plus a convexity bet the straddle does not make.</p>
+    <p>Two habits follow. When someone on the institutional shelf describes a trade, translate it into the axes before deciding whether you want the other side. And when two structures look interchangeable on the volatility shelf, compare their skew and convexity bars — that is where they stop being the same trade. The Load buttons send a structure to chapter 01's figure so both readings sit side by side.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Load the <b>iron condor</b>, then the <b>butterfly</b>. <b>Predict</b> which is more short volatility per lot before you look at the greek panel.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-load="Iron condor">Iron condor</button>
+      <button class="act ghost" data-load="Butterfly">Butterfly</button>
+      <button class="act ghost" data-load="Strangle">Strangle</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A pension runs a monthly overwriting programme — selling calls against stock it holds. In greek terms, what is the dealer on the other side buying?</p>
+    <div class="opts">
+      <button>Direction, since the pension is long the stock</button>
+      <button data-ok="1">Upside volatility: long gamma and long vega in the calls, from a seller who sells on a calendar rather than on price</button>
+      <button>Skew, because overwriting is a skew trade</button>
+      <button>Nothing — a covered call is hedged, so there is nothing to buy</button>
+    </div>
+    <div class="ans"><b>Upside volatility, sold on a schedule.</b> Long stock and short calls is exactly a short put (<a href="atlas.html" style="color:var(--blue)">page 19</a>), so what changes hands is gamma and vega. The fourth answer confuses the delta the stock covers with the volatility exposure the stock cannot touch. And because the programme sells regardless of price, it is a persistent supply of upside vol — chapter 06's reason upside strikes are offered.</div>
+  </div>
+
 </section>
 
 <!-- ══════════ 05 ══════════ -->
@@ -297,7 +398,7 @@
     <p>That description omits the entire point. What makes a jade lizard interesting is that it can have <b>no upside risk at all</b>, and it has that property only when:</p>
     <div class="mline">total credit received ≥ width of the call spread</div>
     <p class="mread">Reads as: <b>you must be paid at least as much as the most the call spread can ever lose.</b> If so, the worst upside outcome is a wash and everything above the short call is flat.</p>
-    <p>Whether that holds depends entirely on strikes and volatility, and it is easy to get wrong. A short 92 put against a 105/110 call spread collects <b>2.68</b> against a width of <b>5</b> — that is not a jade lizard, it is just a short strangle with a capped call side and real upside risk. Tighten to a 98 put against a 102/104 spread and the credit is <b>3.80</b> against a width of <b>2</b>, and the property holds at every volatility level from 25 to 70.</p>
+    <p>Whether that holds depends entirely on strikes and volatility, and it is easy to get wrong. A short 92 put against a 105/110 call spread collects <b>2.36</b> against a width of <b>5</b> — that is not a jade lizard, it is just a short strangle with a capped call side and real upside risk. Tighten to a 98 put against a 102/104 spread and the credit is <b>3.80</b> against a width of <b>2</b>, and the property holds at every volatility level from 25 to 70.</p>
     <p>The general pattern: <b>narrow spreads and higher volatility make the condition hold; wide spreads break it.</b> Which is worth internalizing because it runs against instinct — the wider call spread feels safer, and it is precisely the version that reintroduces the risk the structure exists to remove.</p>
     <p>The figure checks the condition live. Move the strikes and the verdict flips, and the payoff's right-hand tail lifts off the flat line the moment the inequality fails.</p>
   </div>
@@ -348,7 +449,7 @@
       <button>Nothing changes; the short put dominates the risk</button>
       <button>It becomes unlimited</button>
     </div>
-    <div class="ans"><b>Widening breaks it.</b> Going from 2 wide to 10 wide adds eight points of potential loss and only a fraction of a point of credit, because the extra long call you are no longer buying was far out of the money and nearly worthless. The condition credit ≥ width fails and the upside tail reappears, capped at width minus credit. Not unlimited — the long call still caps it — but no longer zero, which is the property you were paying for. The instinct that wider is safer is exactly backwards here.</div>
+    <div class="ans"><b>Widening breaks it.</b> Going from 2 wide to 10 wide adds eight points of potential loss and only 1.88 of credit — 3.80 becomes 5.67 — because moving the long call from 104 to 112 saves you the difference between two out-of-the-money calls, which is far less than the eight points of width it adds. The condition credit ≥ width fails and the upside tail reappears, capped at width minus credit. Not unlimited — the long call still caps it — but no longer zero, which is the property you were paying for. The instinct that wider is safer is exactly backwards here.</div>
   </div>
 </section>
 
@@ -860,6 +961,14 @@ const s6={overwrite:1.0,putbuy:1.0,impact:.35};
     ]);
   }
 })();
+
+/* load a volatility-shelf structure into chapter 01's figure */
+document.querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",()=>{
+  SEL=b.dataset.load;
+  document.querySelectorAll("#szChips [data-sz]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.sz===SEL));
+  draw1();
+  document.getElementById("cvGreeks").scrollIntoView({behavior:"smooth",block:"center"});
+}));
 
 function drawAll(){draw1();draw3();draw5();draw6();}
 LAB.boot(drawAll);

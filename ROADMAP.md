@@ -578,3 +578,39 @@ Estimators: relative efficiency of the absolute estimator is 87.6% under a
 clean normal, needing 14.2% more data. With 6% of days at 4x vol the true
 sigma is 1.3784; RMS reads it correctly with a spread of 0.155 while the
 absolute estimator reads 85.6% of it with a spread of 0.080.
+
+## 20 · A Deal Is a Price on Two Futures  ✅ live (merger.html)
+
+Merger arbitrage, built from a desk primer and interview sheet. Spreads as a
+rate (gross, annualized, net of funding); implied odds with the carry charged
+in both outcomes — 80.0% where the primer's shortcut gives 76.9%; stock deals,
+costless capital and basis risk (a full short is over-hedged by 1 − p); what a
+100bp cut does to a 75/25 cash/stock book (+0.72% now, −0.81%/yr after);
+the VZIO antitrust tree reproduced to the cent ($10.79 / $10.47 / $8.63 at 5%
+with 6.3 and 5.6 month stages), with the second-request drop split into
+23 cents of odds and 9 of time; special dividends worth p × q ($4.20, not
+$4.30; VZIO +$0.16); and options on a binary outcome (10/5 put spread $0.19
+on the market's failure price against $1.78 on a $5 view). Every number is
+in verify.js.
+
+## Companion · The Workbook  ✅ live (workbook.html)
+
+Sixty-plus problems, three to four per page, with numeric answers computed by
+the engine rather than typed, a reading list per page (topic or chapter title,
+not chapter numbers, which change between editions), and build-it Python
+exercises on the data-heavy pages. Printable with or without answers.
+
+## Companion · The Toolkit  ✅ live (tools.html)
+
+Five calculators: vol to moves with a printable cheat sheet; a realized-vol
+cone from pasted closes; expected P&L of a delta-hedged option,
+vega·(σr² − σi²)/2σi; Kelly sizing for option bets; volatility drag and
+leveraged-ETF decay, −(L² − L)σ²/2.
+
+## Candidates
+
+- An event calendar tool: paste earnings dates, get the weighted-day term
+  structure from page 03.
+- A position builder that exports a blotter to CSV and reads one back.
+- Hedging from a corporate seat (Natenberg's hedging chapter) and expiration
+  P&L from scratch — the two topics the Natenberg mapping still flags.

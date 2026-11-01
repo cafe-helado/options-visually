@@ -127,8 +127,8 @@
       <div class="mline">expected cost ≈ c<sub>2</sub> · k · √N</div>
       <p class="mread">Reads as: <b>the money you spend grows like the square root of how often you trade.</b> Halving the interval does not double the bill, it multiplies it by about 1.41.</p>
       <p>Add them with a risk aversion λ and differentiate. One term falls like N<sup>−1/2</sup> and the other rises like N<sup>1/2</sup>, so the sum has an interior minimum wherever their derivatives cancel.</p>
-      <div class="mline">N* ∝ (c<sub>1</sub>λ / c<sub>2</sub>k)<sup>2/3</sup></div>
-      <p class="mread">Reads as: <b>hedge more often when risk aversion is high and less often when trading is expensive, with both effects entering to the two-thirds power.</b> The exponent is why halving costs does not double the optimal frequency — it raises it by about 59%.</p>
+      <div class="mline">N* = c<sub>1</sub>λ / c<sub>2</sub>k</div>
+      <p class="mread">Reads as: <b>hedge more often when risk aversion is high and less often when trading is expensive, and both effects enter one-for-one.</b> Setting the derivatives equal, c<sub>2</sub>k/2√N = λc<sub>1</sub>/2N<sup>3/2</sup>, and the powers of N collapse to a single N — so halving costs doubles the optimal frequency. The two-thirds power people sometimes quote belongs to a different cost model: a fixed ticket charge per rebalance makes cost grow like N rather than √N, and then halving the charge raises the optimum by only 59%. Which cost model your desk faces is a question about its fee schedule, not about options.</p>
       <p><b>Where it breaks.</b> The √N cost scaling is asymptotic and the figure's own numbers say so: between N = 128 and N = 512 the observed ratio is 1.76 against a predicted 2.0, because at low rebalance counts the initial hedge and the final unwind dominate turnover and neither depends on N at all. The formula also assumes cost is proportional to size, which is the first thing that fails once your order is large relative to volume — at that point cost becomes convex in size and the optimum moves further left than this expression suggests.</p>
     </div>
   </details>
@@ -459,11 +459,11 @@
     <p class="q">Your desk halves its commissions. What happens to the optimal rehedge frequency?</p>
     <div class="opts">
       <button>It falls, since cheaper trading means fewer hedges are needed</button>
-      <button data-ok="1">It rises, but by less than double — the optimum moves with the two-thirds power, so halving costs raises it by about 59%</button>
-      <button>It exactly doubles</button>
+      <button>It rises by about 59% — the optimum moves with the two-thirds power of cost</button>
+      <button data-ok="1">It roughly doubles. With costs proportional to size, turnover grows like √N and risk falls like 1/√N, so the optimum is linear in λ/k</button>
       <button>It is unchanged; frequency depends only on gamma</button>
     </div>
-    <div class="ans"><b>It rises by about 59%.</b> The optimum sits where marginal cost equals marginal risk reduction, and both terms scale with fractional powers of N — which is why the answer is neither "unchanged" nor "double".</div>
+    <div class="ans"><b>It roughly doubles.</b> The optimum sits where marginal cost equals marginal risk reduction; with a √N bill and a 1/√N risk, those balance at N* = λc<sub>1</sub>/c<sub>2</sub>k, linear in cost. The 59% answer is right for a different desk — one paying a fixed charge per ticket, where the bill grows like N. And "roughly" is honest: the figure's turnover is only asymptotically √N, so the simulated optimum moves a little less than the formula says.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">

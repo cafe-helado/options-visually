@@ -603,7 +603,7 @@
     <p class="lead">Corporate actions adjust option contracts, and the adjustments fall into two categories that behave completely differently. The first kind changes the <em>ratio</em>: how many shares one contract delivers and at what strike. The second changes the <em>composition</em>: what the deliverable is made of. The first is invisible to your risk. The second annihilates it.</p>
     <p>Take a two-for-one split. The strike halves, the deliverable stays at 100 shares, and you hold twice as many contracts. Every per-share number changes and every position-level number does not. A 100-strike call on a $120 stock worth <b>25.2795</b> becomes two 50-strike calls on a $60 stock worth <b>12.6398</b> each. Position value, dollar delta, gamma cash and vega all come through with a residual of exactly zero. Share delta doubles, which is correct — twice as many shares at half the price.</p>
     <p>Odd ratios work identically, they just look worse. A three-for-two split leaves you one contract with a <b>150-share</b> deliverable struck at <b>66.667</b>, and the position value comes through with a residual of <b>−9 × 10<sup>−13</sup></b>. The identity table below computes both sides live; drag anything and the residual column stays at the floor. The reason is that Black–Scholes is homogeneous of degree one in spot and strike — scale both by the same factor and the price scales with them — so a ratio adjustment is a change of units and nothing more.</p>
-    <p>Now the other kind. A cash merger at $85 replaces the deliverable with $8,500 in cash. The contract survives, the expiry survives, and the option becomes a claim on a fixed amount of money. Volatility no longer enters, because there is nothing left to be volatile.</p>
+    <p>Now the other kind. A cash merger at $85 replaces the deliverable with $8,500 in cash. The contract survives, the expiry survives, and the option becomes a claim on a fixed amount of money. Volatility no longer enters, because there is nothing left to be volatile. That is the limit <em>once the deal is certain</em>. Until it closes, the deliverable is still the stock, and the deal can break or be topped by a higher bid — so calls above the deal price keep exactly the value of those two outcomes. The table below is the certain-deal limit; <a href="merger.html" style="color:var(--blue)">page 20</a> prices the uncertainty.</p>
     <p>The consequence is a table people find hard to believe. Announce an all-cash deal at $85 on a stock trading $84 with six months and a 40 volatility, and the stock goes <em>up</em> — while every call on it goes down. The 90-strike call, worth <b>7.80</b>, becomes worthless: the deliverable will never exceed $85, so the strike will never be reached, regardless of the five and a half months remaining. The at-the-money 85 call goes from <b>9.85</b> to zero on the same logic. Even the deep 70-strike falls from <b>18.48</b> to <b>14.67</b>, because its price contained time value and time value requires uncertainty. Vega is zero on every line.</p>
     <p>Nothing was mispriced and nothing was adjusted incorrectly. The contracts do exactly what their terms say. The lesson is that greeks describe a deliverable, not a contract, and when the deliverable stops being a random variable the greeks stop existing — which is a different and much more abrupt failure than the ones the rest of this series deals in.</p>
   </div>
@@ -649,11 +649,11 @@
     <p class="q">Your name announces an all-cash acquisition at a large premium. You are short the far out-of-the-money calls. What happened to your risk?</p>
     <div class="opts">
       <button>It got much worse — the stock gapped up through your strikes</button>
-      <button data-ok="1">It went to zero, if the strikes are above the deal price. The deliverable is now fixed cash and those calls can never pay</button>
+      <button data-ok="1">It collapsed toward zero, if the strikes are above the deal price — what is left is the chance of a topping bid or a break, and it goes to exactly zero when the deal closes</button>
       <button>It is unchanged; the contracts were adjusted to preserve value</button>
       <button>It depends on the implied volatility after the announcement</button>
     </div>
-    <div class="ans"><b>It went to zero — assuming the deal is all cash and your strikes sit above the deal price.</b> This is the one situation in the whole series where a short option position becomes riskless rather than merely cheap. The trap in the first answer is real, though: it is the right answer for a <em>stock-for-stock</em> deal, where the deliverable becomes shares of the acquirer and remains perfectly volatile. "Cash or stock" is the question to ask before anything else, and in an election deal you may not know for weeks.</div>
+    <div class="ans"><b>It went to zero — assuming the deal is all cash and your strikes sit above the deal price.</b> Once the deal closes this is the one situation in the whole series where a short option position becomes riskless rather than merely cheap; until then you are short a small, sharp claim on a competing bid, which is the risk merger-arbitrage desks actually price. The trap in the first answer is real, though: it is the right answer for a <em>stock-for-stock</em> deal, where the deliverable becomes shares of the acquirer and remains perfectly volatile. "Cash or stock" is the question to ask before anything else, and in an election deal you may not know for weeks.</div>
   </div>
 
   <details class="derive">
@@ -882,7 +882,7 @@
     <p class="q">An all-cash acquisition at $85 is announced on a stock trading $84. What happens to the six-month 90-strike calls?</p>
     <div class="opts">
       <button>They rally, since the stock gapped toward the strike</button>
-      <button data-ok="1">They go to zero. The deliverable becomes fixed cash, so the strike can never be reached and volatility no longer enters</button>
+      <button data-ok="1">They go to zero as the deal becomes certain. The deliverable becomes fixed cash, so the strike can never be reached and volatility no longer enters</button>
       <button>They are adjusted so that their value is preserved</button>
       <button>They hold their value until the deal actually closes</button>
     </div>

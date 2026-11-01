@@ -230,8 +230,8 @@
 
   <div class="prose">
     <p class="lead">Dispersion is the trade that expresses chapter 01 directly. Sell variance on the index, buy variance on each of its members in matched size, and hold both to expiry. If the names move around a lot but independently, the components pay and the index does not, and you win. If everything moves together, the index pays more than the components and you lose.</p>
-    <p>The reason it is traded in <b>variance</b> rather than volatility is chapter 01's identity, which is exactly linear in variance and a mess in volatility. Match variance notionals and the position's P&amp;L reduces to the difference between implied and realized correlation, multiplied by the size of the off-diagonal sum. That is a clean exposure. Try the same thing with volatility swaps or straddles and the relationship is approximate and drifts with spot.</p>
-    <p>The figure runs it. With implied correlation at <b>0.35</b> — an index implied of <b>24.25%</b> against those components — the P&amp;L line crosses zero at realized correlation of exactly 0.35 and is a straight line either side. Realized correlation of <b>0.15</b> and the short index leg wins comfortably; realized <b>0.60</b> and it loses about two and a half times what it made in the good case, because the line keeps going.</p>
+    <p>The reason it is traded in <b>variance</b> rather than volatility is chapter 01's identity, which is exactly linear in variance and a mess in volatility. Buy each component's variance in proportion to its index weight, scaled so the long leg's total variance equals the index's at the correlation you sold, and the position's P&amp;L reduces to the difference between implied and realized correlation, multiplied by the size of the off-diagonal sum. That is a clean exposure. Try the same thing with volatility swaps or straddles and the relationship is approximate and drifts with spot.</p>
+    <p>The figure runs it. With implied correlation at <b>0.35</b> — an index implied of <b>24.25%</b> against those components — the P&amp;L line crosses zero at realized correlation of exactly 0.35 and is a straight line either side. Realized correlation of <b>0.15</b> and the short index leg wins comfortably; realized <b>0.60</b> and it loses a quarter more than it made in the good case — 0.25 of correlation against 0.20, on a straight line — and the line keeps going.</p>
     <p>Three practical things the figure cannot show. Trading twenty single-name variance swaps means twenty bid–offers against one, so the entry cost is asymmetric and the trade needs a decent gap between implied and expected realized just to break even. Weights drift, so a matched basket stops being matched. And the components have their own wing problems from <a href="variance.html#c4" style="color:var(--blue)">page 09 chapter 04</a> — single-name variance is exactly the product whose replication is most fragile, and you are long twenty of them.</p>
   </div>
 
@@ -259,7 +259,7 @@
         <div class="kv" style="margin-top:20px" id="kv3"></div>
       </div>
     </div>
-    <figcaption>The lower panel is the control experiment and it is the point of the chapter. Multiply every single-name volatility by any factor you like, leaving correlation alone, and the net line barely moves — both legs scale together. The position is genuinely insensitive to the thing everybody talks about and completely exposed to the thing nobody quotes.</figcaption>
+    <figcaption>The lower panel is the control experiment and it is the point of the chapter. Multiply every single-name volatility by any factor you like with realized correlation at the level you sold, and the net line sits on zero at every multiplier — both legs scale together. Move realized correlation away and the multiplier scales the correlation P&amp;L by its square, which is why the same correlation miss costs far more in a violent market. The position is genuinely insensitive to the thing everybody talks about and completely exposed to the thing nobody quotes.</figcaption>
   </figure>
 
   <div class="try">
@@ -348,7 +348,7 @@
   <div class="prose">
     <p class="lead">Every risk on this page collapses into a single sentence. A dispersion position is short correlation; correlation has a hard ceiling at one; and markets travel toward that ceiling in exactly the episodes where everything else is going wrong too. The trade's worst case is not a tail of a smooth distribution — it is a regime change, and it arrives with the rest of the portfolio's worst case.</p>
     <p>Put numbers on it with our basket. In a calm market at <b>ρ = 0.25</b>, index volatility is <b>21.06%</b>. Move correlation alone to <b>0.90</b>, touching no single-name volatility at all, and index volatility goes to <b>37.20%</b> — a rise of <b>16.14 points</b> produced entirely by co-movement. Now do what actually happens and let single-name volatilities rise as well, say by <b>1.8×</b>: index volatility reaches <b>66.97%</b>, up <b>45.91 points</b> from calm.</p>
-    <p>Watch what that does to the two legs. The short index variance leg loses on a move of <b>4,041</b> variance units. The long component leg, which is supposed to be the hedge, gains only <b>3,425</b>. The trade is not volatility-neutral in a crash because it was never a volatility trade — the legs only cancel while correlation is where you left it.</p>
+    <p>Watch what that does to the two legs. Measured from the 0.35 correlation the trade was sold at, the short index variance leg loses <b>3,896</b> variance units. The long component leg, sized to be variance-neutral at inception and supposed to be the hedge, gains only <b>1,318</b>. Net, the book is down <b>2,579</b> — and every unit of that is the correlation move, magnified by the square of the volatility multiplier. The trade is not volatility-neutral in a crash because it was never a volatility trade — the legs only cancel while correlation is where you left it.</p>
     <p>Two more failure modes worth naming, both of which turn a bad outcome into an unmanageable one.</p>
     <p><b>The average is not the matrix.</b> A single ρ cannot distinguish a market that has become uniformly more correlated from one that has split into two blocks. Books hedged on average correlation carry the difference as an unhedged residual, and it is largest in stress, when the correlation structure is changing shape rather than just level.</p>
     <p><b>Liquidity leaves both legs at once.</b> Single-name variance is the product from <a href="variance.html#c7" style="color:var(--blue)">page 09 chapter 07</a> whose replication depends on a put wing that gaps and widens in a crash. Twenty of those, against one index position, is a lot of fragility concentrated in one direction.</p>
@@ -516,6 +516,12 @@ const idxVol=(vols,rho)=>Math.sqrt(Math.max(0,idxVar(vols,rho)));
 const impCorr=(vols,sigI)=>(sigI*sigI-diagSum(vols))/offSum(vols);
 const scale=(vols,m)=>vols.map(v=>v*m);
 const wAvg=vols=>vols.reduce((a,v,i)=>a+W[i]*v,0);
+/* component variance notional: each name bought in proportion to its index weight, scaled so the
+   long leg's total variance equals the index variance at the correlation sold. Sizing on the
+   diagonal alone (w_i squared) left the book short the volatility level — at 1.8x vols it lost
+   1,134 units with correlation unchanged, which is not a dispersion trade. */
+const wVar=vols=>vols.reduce((a,v,i)=>a+W[i]*v*v,0);
+const kMatch=rho=>idxVar(VOLS,rho)/wVar(VOLS);
 
 function bars3(o,xs,ys,col,wfrac){
   const g=o.g,w=(o.pw/Math.max(1,xs.length))*(wfrac||0.7);
@@ -700,7 +706,7 @@ const s3={rhoImp:0.35,rhoReal:0.35,volMult:1};
   function legs(rhoR,mult){
     const vi=scale(VOLS,mult);
     const shortIdx = idxVar(VOLS,s3.rhoImp) - idxVar(vi,rhoR);       // sold at implied
-    const longComp = diagSum(vi) - diagSum(VOLS);                    // bought at implied
+    const longComp = kMatch(s3.rhoImp)*(wVar(vi) - wVar(VOLS));      // bought at implied, variance-matched
     return {shortIdx, longComp, net:shortIdx+longComp};
   }
   function draw(){
@@ -836,7 +842,7 @@ const s5={rho:0.25,volMult:1,rhoImp:0.35};
       const rho=0.25+(0.95-0.25)*t, m=1+(s5.volMult-1)*t;
       const vi=scale(VOLS,m);
       const sIdx=(idxVar(VOLS,s5.rhoImp)-idxVar(vi,rho))*1e4;
-      const lComp=(diagSum(vi)-diagSum(VOLS))*1e4;
+      const lComp=kMatch(s5.rhoImp)*(wVar(vi)-wVar(VOLS))*1e4;
       xs.push(t*100);si.push(sIdx);lc.push(lComp);net.push(sIdx+lComp);
     }
     let lo=Infinity,hi=-Infinity;
@@ -852,7 +858,7 @@ const s5={rho:0.25,volMult:1,rhoImp:0.35};
 
     const vi=scale(VOLS,s5.volMult);
     const sIdx=(idxVar(VOLS,s5.rhoImp)-idxVar(vi,s5.rho))*1e4;
-    const lComp=(diagSum(vi)-diagSum(VOLS))*1e4;
+    const lComp=kMatch(s5.rhoImp)*(wVar(vi)-wVar(VOLS))*1e4;
     document.getElementById("kv5").innerHTML=kvHTML([
       ["Calm index (ρ=0.25)",pct2(idxVol(VOLS,0.25))],
       ["Correlation only (0.90)",pct2(idxVol(VOLS,0.90))],

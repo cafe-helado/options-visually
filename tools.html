@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Toolkit — vol to moves, vol cones, hedged P&amp;L, Kelly sizing, vol drag</title>
+<meta name="description" content="Five calculators to keep beside a screen: annual vol to daily, weekly and expiry moves with a cheat sheet; a realized-vol cone from pasted closes; expected P&amp;L of a delta-hedged option; Kelly sizing for option bets; and volatility drag in leveraged ETFs.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Toolkit — vol to moves, vol cones, hedged P&amp;L, Kelly sizing, vol drag">
+<meta property="og:description" content="Five calculators to keep beside a screen: annual vol to daily, weekly and expiry moves with a cheat sheet; a realized-vol cone from pasted closes; expected P&amp;L of a delta-hedged option; Kelly sizing for option bets; and volatility drag in leveraged ETFs.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<style>
+  .px2{width:100%;height:150px;font-family:var(--mono);font-size:11px;border:1px solid var(--hair);background:var(--card);color:var(--ink);padding:8px;box-sizing:border-box;resize:vertical}
+  .sheet{font-family:var(--mono);font-size:12px;border-collapse:collapse;width:100%}
+  .sheet th,.sheet td{padding:4px 8px;border-bottom:1px solid var(--hair);text-align:right}
+  .sheet th:first-child,.sheet td:first-child{text-align:left}
+  .sheet th{color:var(--grey);font-weight:500}
+</style>
+
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">Companion &middot; Toolkit</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Tools">
+  <a href="#c1"><span>Vol to moves</span><i></i></a>
+  <a href="#c2"><span>Vol cone</span><i></i></a>
+  <a href="#c3"><span>Hedged P&amp;L</span><i></i></a>
+  <a href="#c4"><span>Bet sizing</span><i></i></a>
+  <a href="#c5"><span>Vol drag</span><i></i></a>
+</nav>
+
+<main>
+
+<div class="orient">
+  <h2>The toolkit</h2>
+  <p class="lede">Five calculators to keep open beside a screen. Each one is a page of the series turned into something you can type your own numbers into, with the page it comes from linked so the reasoning is one click away.</p>
+  <ol>
+    <li><b>Vol to moves</b> — the conversion you do fifty times a day, with a printable cheat sheet.</li>
+    <li><b>Vol cone</b> — paste a column of closing prices and see where today's realized vol sits against its own history, and against the implied you are being quoted.</li>
+    <li><b>Hedged P&amp;L</b> — what a delta-hedged option is expected to earn if your realized-vol view is right.</li>
+    <li><b>Bet sizing</b> — the Kelly fraction for an option structure, given what it costs, what it pays, and the probability you believe.</li>
+    <li><b>Vol drag</b> — why volatility costs a compounding investor money, and what daily rebalancing does to a leveraged ETF.</li>
+  </ol>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Turn a vol into a move before anyone finishes the sentence</h2>
+    <p class="dek">Annual vol over sixteen is a daily move. Everything else is the same square root.</p>
+  </div>
+  <div class="prose">
+    <p class="lead">A volatility quote is a standard deviation per year. To use it you need it per day, per week, per expiry, and in dollars. The square root of time does all of it, and √252 ≈ 16 is close enough that a 32-vol stock moves about 2% a day and a 16-vol index about 1%. <a href="black-scholes.html" style="color:var(--blue)">Page 01</a> derives the √T; <a href="rulers.html" style="color:var(--blue)">page 18</a> explains why the straddle's move is only 80% of a standard deviation.</p>
+  </div>
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>One-sigma move against horizon</h3>
+          <span class="legend" style="margin:0"><span><i class="swl" style="background:var(--blue)"></i>1σ</span><span><i class="swl" style="background:var(--ochre)"></i>Straddle</span><span><i class="swl" style="background:var(--grey)"></i>If it grew linearly</span></span></div>
+        <canvas id="cv1" height="270"></canvas>
+        <div class="figtop" style="margin:18px 0 6px"><h3>Your stock, by horizon</h3></div>
+        <table class="sheet wtab" id="tab1"></table>
+      </div>
+      <div class="rail panel">
+        <h4>The quote</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Notice how far the blue curve sits above the grey line at the short end. Uncertainty arrives front-loaded: a quarter of the year carries half of the year's standard deviation.</figcaption>
+  </figure>
+  <div class="mline">daily move ≈ σ / 16   ·   move over T ≈ S · σ · √T</div>
+  <p class="mread">Reads as: <b>divide the annual vol by sixteen for a day, and scale by the square root of the time for anything else.</b></p>
+  <figure>
+    <div class="panel">
+      <div class="figtop"><h3>Cheat sheet — one-sigma move as a percent of spot</h3><span class="note">Print it and tape it to the monitor.</span></div>
+      <table class="sheet wtab" id="sheet1"></table>
+    </div>
+  </figure>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>Is this vol high? Only against its own history</h2>
+    <p class="dek">A vol cone puts today's realized vol at every lookback inside the range it has lived in. Implied gets judged against that, not against a feeling.</p>
+  </div>
+  <div class="prose">
+    <p class="lead">"Thirty vol is expensive" means nothing until you know what thirty vol is for this name. A <span class="term" data-t="Vol cone" data-def="The minimum, quartiles, median and maximum of rolling realized volatility at several lookback windows. Short windows swing widely and long ones narrowly, so the bands form a cone.">vol cone</span> answers it. Take a history of closes, compute rolling realized vol over 10, 21, 42, 63, 126 and 252 days, and for each window record the range it has spanned. Short windows swing wildly and long ones barely move, so the bands narrow into a cone.</p>
+    <p>Then lay two things over it: where each window's realized vol sits today, and the implied vol you are being quoted. Implied near the top of the cone at the matching tenor is rich against history; near the bottom, cheap. Sinclair's work on volatility trading popularized the tool, and it is still the fastest honest answer to "is this high". Paste any column of closes below — a CSV with dates works, because the last number on each line is read as the close.</p>
+  </div>
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Realized-vol cone</h3>
+          <span class="legend" style="margin:0"><span><i class="swl" style="background:var(--blue)"></i>Now</span><span><i class="swl" style="background:var(--ink)"></i>Median</span><span><i class="swl" style="background:var(--grey)"></i>Quartiles</span><span><i class="swl" style="background:var(--verm)"></i>Max / min</span><span><i class="swl" style="background:var(--ochre)"></i>Implied</span></span></div>
+        <canvas id="cv2" height="290"></canvas>
+        <textarea class="px2" id="px2" aria-label="Closing prices, one per line" spellcheck="false"></textarea>
+      </div>
+      <div class="rail panel">
+        <h4>Compare</h4>
+        <div id="ctl2"></div>
+        <div class="btnrow"><button class="act ghost" id="demo2">Reload the demo series</button></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The demo series has a calm stretch, a stressed one and a recovery, which is why its cone is wide at the short end. Notice where the blue line sits: realized vol at short lookbacks is noisy enough that a single reading proves little, which is why the median and quartiles are the reference, not the latest print.</figcaption>
+  </figure>
+  <div class="mline">σ_realized(w) = √( 252 · Var[ ln(Sₜ / Sₜ₋₁) ] over the last w days )</div>
+  <p class="mread">Reads as: <b>the standard deviation of daily log returns over the window, annualized by √252.</b> <a href="rulers.html" style="color:var(--blue)">Page 18</a> covers what changes if you use absolute returns instead.</p>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>What a hedged option earns if your vol view is right</h2>
+    <p class="dek">Buy at implied, hedge daily, and the expected P&amp;L is the gap between realized and implied <em>variance</em>, scaled by vega.</p>
+  </div>
+  <div class="prose">
+    <p class="lead">A delta-hedged long option earns ½Γ(ΔS)² on each move and pays theta for it. Theta is set by the implied vol you paid; the gamma income is set by the vol that actually happens. Average it out and the expected P&amp;L is vega × (σ_r² − σ_i²)/(2σ_i) — close to vega times the vol difference for small gaps, and convex for large ones because the payoff is in variance.</p>
+    <p>Two caveats to carry. This is an <em>expectation</em>: <a href="questions.html" style="color:var(--blue)">page 16 chapter 07</a> shows the same realized vol paying anywhere from −2.61 to +6.12 depending on when it arrives relative to your gamma. And it assumes the option stays near the money; far from the strike, gamma fades and so does the income.</p>
+  </div>
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Expected P&amp;L of a long, delta-hedged ATM option, against realized vol</h3>
+          <span class="legend" style="margin:0"><span><i class="swl" style="background:var(--blue)"></i>Variance-based</span><span><i class="swl" style="background:var(--grey)"></i>Vega × vol gap</span></span></div>
+        <canvas id="cv3" height="280"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The trade</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>Notice the blue curve bends above the grey line on both sides. The long option gains more for each extra point of realized vol than it loses for each point short — the variance convexity of <a href="variance.html" style="color:var(--blue)">page 09</a> showing up in an ordinary option.</figcaption>
+  </figure>
+  <div class="mline">E[P&amp;L] ≈ vega · (σ_r² − σ_i²) / (2σ_i)</div>
+  <p class="mread">Reads as: <b>you are paid the difference in variances, converted into vol points through vega.</b> Short the option and the sign flips.</p>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>Having an edge is half of it; sizing is the other half</h2>
+    <p class="dek">An option bet with a positive expectation can still ruin you if it is too large. The Kelly fraction is the size that maximizes long-run growth.</p>
+  </div>
+  <div class="prose">
+    <p class="lead">Price a structure as a bet: it costs c and pays W if you are right. The market's implied probability is c/W. If you believe a higher probability p, you have an edge — and the question every trader underweights is how much of the bankroll to put on it.</p>
+    <p>The <span class="term" data-t="Kelly criterion" data-def="The bet size that maximizes the expected logarithm of wealth, and so the long-run growth rate. Betting more than Kelly lowers growth while raising risk; most practitioners bet a fraction of it.">Kelly criterion</span> answers: bet f* = p − (1 − p)/b, where b = (W − c)/c is the payout odds. Growth rises to a peak at f* and falls away on both sides. For a small, even-odds edge, twice Kelly gives back all of the growth and half Kelly keeps three-quarters of it; for a long-shot payoff the curve is lopsided — on this trade half Kelly keeps 86% — but the penalty for oversizing always arrives. Because your p is an estimate, most practitioners bet a fraction of Kelly. The default here is <a href="merger.html" style="color:var(--blue)">page 20</a>'s biotech trade: a 10/5 put spread at $0.19 that pays $5 if the failure price is as bad as your team thinks.</p>
+  </div>
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Long-run growth rate against the fraction bet</h3>
+          <span class="legend" style="margin:0"><span><i class="swl" style="background:var(--blue)"></i>Expected log growth per bet</span></span></div>
+        <canvas id="cv4" height="270"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The bet</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Notice the curve is flat at the top and steep on the right. Undersizing costs little; oversizing costs a lot, and far enough past Kelly a winning bet loses money over time.</figcaption>
+  </figure>
+  <div class="mline">f* = p − (1 − p) / b   ·   g(f) = p·ln(1 + f·b) + (1 − p)·ln(1 − f)</div>
+  <p class="mread">Reads as: <b>bet your edge divided by the odds; growth is the probability-weighted log of what happens to your bankroll.</b></p>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Volatility is a cost to anyone who compounds</h2>
+    <p class="dek">The median investor earns the average return minus half the variance. Lever it daily and the drag grows with the square of the leverage.</p>
+  </div>
+  <div class="prose">
+    <p class="lead">Up 50% then down 50% leaves you at 75%. Volatility pulls compounded growth below the arithmetic average by about σ²/2 a year — the same −σ²/2 that sits in <a href="black-scholes.html" style="color:var(--blue)">page 01</a>'s lognormal. It is why the median outcome lags the mean, and why reducing volatility at the same average return raises wealth.</p>
+    <p>A leveraged ETF resets to its multiple every day, so its compounded growth is Lμ − L²σ²/2. Compare that with L times the index's growth and the difference is −(L² − L)σ²/2: a drag that grows with the square of the leverage and the square of the vol. At 20 vol, a 3× fund loses about 12% a year to it — more than many years' worth of the index's excess return. Inverse funds pay it too, and more: a −1× fund has L² − L = 2.</p>
+  </div>
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Median wealth over time</h3>
+          <span class="legend" style="margin:0"><span><i class="swl" style="background:var(--grey)"></i>The index</span><span><i class="swl" style="background:var(--ochre)"></i>L × the index's growth</span><span><i class="swl" style="background:var(--blue)"></i>Daily-reset L× fund</span></span></div>
+        <canvas id="cv5" height="270"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The fund</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Notice the blue line separates from the gold one even when the index goes nowhere in particular. Raise the vol and the leveraged fund's median can fall while the index's rises: the fund is short the variance it rebalances against.</figcaption>
+  </figure>
+  <div class="mline">growth ≈ μ − σ²/2   ·   L× daily reset: Lμ − L²σ²/2</div>
+  <p class="mread">Reads as: <b>volatility costs half its square in growth, and leverage multiplies the return by L but the cost by L².</b> Continuous rebalancing and lognormal returns are assumed; fees and financing make it worse.</p>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">These tools are calculators, not forecasts. The hedged-P&amp;L tool gives an expectation that real paths scatter widely around; the vol cone describes history, not the future; Kelly sizing is only as good as the probability you feed it, and over-confident inputs are the usual way it goes wrong; the leveraged-ETF figures assume continuous daily rebalancing and ignore fees, financing and borrow. Inspired by the habit, common among practitioners who write about volatility, of turning every concept into a number you can compute in your head.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* ═══════════ the toolkit ═══════════
+   Five calculators a trader actually keeps open. Each figure is one block,
+   the same shape as every page in the series. */
+const pc=(v,d)=>(v*100).toFixed(d==null?2:d)+"%";
+const usd=(v,d)=>(v<0?"−$":"$")+Math.abs(v).toFixed(d==null?2:d);
+function curve(o,x0,x1,f,col,w,dash){const xs=[],ys=[];
+  for(let i=0;i<=160;i++){const x=x0+(x1-x0)*i/160;xs.push(x);ys.push(f(x));}
+  line(o,xs,ys,col,w,dash);}
+
+/* ══════════════════════════════════════════════
+   01 — vol to moves
+   ══════════════════════════════════════════════ */
+const s1={S:100,v:0.30,days:30};
+window.moveTable=(v,S)=>[["1 day",1/252],["1 week",5/252],["1 month",21/252],["1 quarter",63/252],["1 year",1]]
+  .map(([n,T])=>({n,T,sd:S*v*Math.sqrt(T),st:Math.sqrt(2/Math.PI)*S*v*Math.sqrt(T)}));
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"S1",k:"S",lbl:"S",name:"Spot",min:5,max:1000,step:5,fmt:v=>"$"+v.toFixed(0)},
+    {id:"v1",k:"v",lbl:"σ",name:"Implied vol",min:0.05,max:1.5,step:0.01,fmt:pct},
+    {id:"d1",k:"days",lbl:"T",name:"Trading days",min:1,max:252,step:1,fmt:v=>v.toFixed(0)+"d"}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function draw(){
+    const sd=d=>s1.S*s1.v*Math.sqrt(d/252);
+    const o=Fig(document.getElementById("cv1"),{h:270,x0:1,x1:252,y0:0,y1:sd(252)*1.05,pad:{l:58}});
+    axes(o,v=>v.toFixed(0)+"d",v=>"$"+v.toFixed(0),5,4);
+    clip(o,()=>{curve(o,1,252,sd,C("--blue"),2.4);
+      curve(o,1,252,d=>sd(d)*Math.sqrt(2/Math.PI),C("--ochre"),2,[5,4]);
+      curve(o,1,252,d=>s1.S*s1.v*d/252,C("--grey"),1.4,[2,3]);});
+    vline(o,s1.days,C("--verm"),"your tenor",[2,4]);
+    const T=s1.days/252,one=s1.S*s1.v*Math.sqrt(T);
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Daily move, σ/√252",pc(s1.v/Math.sqrt(252))],
+      ["Rule of 16",pc(s1.v/16)],
+      ["1σ over your tenor",usd(one)+"  ("+pc(one/s1.S,1)+")"],
+      ["Straddle ≈ 0.8σ",usd(one*Math.sqrt(2/Math.PI))],
+      ["68% range",usd(s1.S-one,0)+" – "+usd(s1.S+one,0)],
+      ["Beats the straddle move","42.5% of the time"]
+    ]);
+    document.getElementById("tab1").innerHTML="<tr><th>Horizon</th><th>1σ move</th><th>Straddle</th><th>% of spot</th></tr>"+
+      moveTable(s1.v,s1.S).map(r=>`<tr><td>${r.n}</td><td>${usd(r.sd)}</td><td>${usd(r.st)}</td><td>${pc(r.sd/s1.S,1)}</td></tr>`).join("");
+  }
+  /* the cheat sheet: annual vol against horizons, in percent of spot */
+  const vols=[0.10,0.15,0.20,0.25,0.30,0.40,0.50,0.60,0.80,1.00];
+  document.getElementById("sheet1").innerHTML="<tr><th>Vol</th><th>Day</th><th>Week</th><th>Month</th><th>Quarter</th></tr>"+
+    vols.map(v=>`<tr><td>${(v*100).toFixed(0)}</td>`+[1,5,21,63].map(d=>`<td>${(v*Math.sqrt(d/252)*100).toFixed(1)}%</td>`).join("")+"</tr>").join("");
+})();
+
+/* ══════════════════════════════════════════════
+   02 — realized vol cone from pasted closes
+   ══════════════════════════════════════════════ */
+const s2={iv:0.30};
+window.parseCloses=txt=>String(txt).split(/\r?\n/).map(l=>{const m=l.match(/-?\d+(?:\.\d+)?/g);return m?parseFloat(m[m.length-1]):NaN;})
+  .filter(v=>isFinite(v)&&v>0);
+window.coneOf=(px,wins)=>{
+  const r=[];for(let i=1;i<px.length;i++)r.push(Math.log(px[i]/px[i-1]));
+  return wins.filter(w=>w<r.length).map(w=>{
+    const vs=[];let s=0,q=0;
+    for(let i=0;i<r.length;i++){s+=r[i];q+=r[i]*r[i];
+      if(i>=w){s-=r[i-w];q-=r[i-w]*r[i-w];}
+      if(i>=w-1){const m=s/w;vs.push(Math.sqrt(Math.max(0,(q-w*m*m)/(w-1))*252));}}
+    const sorted=[...vs].sort((a,b)=>a-b),qt=p=>sorted[Math.min(sorted.length-1,Math.floor(p*(sorted.length-1)))];
+    return {w,min:sorted[0],q25:qt(0.25),med:qt(0.5),q75:qt(0.75),max:sorted[sorted.length-1],now:vs[vs.length-1]};
+  });
+};
+(function(){
+  /* a demo series with a calm year, a stressed stretch and a recovery, so the cone has shape */
+  function demo(){let p=100,out=[p],seed=7;
+    const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+    const g=()=>{let u=0;while(!u)u=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*rnd());};
+    for(let i=0;i<504;i++){const v=i>300&&i<360?0.55:i>360&&i<420?0.32:0.20;p*=Math.exp(-0.5*v*v/252+v/Math.sqrt(252)*g());out.push(+p.toFixed(2));}
+    return out.join("\n");}
+  const ta=document.getElementById("px2"),RAW=demo();ta.value=RAW;
+  sliders(document.getElementById("ctl2"),[
+    {id:"iv2",k:"iv",lbl:"IV",name:"Implied vol to compare",min:0.05,max:1.2,step:0.01,fmt:pct}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  ta.addEventListener("input",()=>draw());
+  document.getElementById("demo2").addEventListener("click",()=>{ta.value=demo();draw();});
+  function draw(){
+    const src=typeof ta.value==="string"&&ta.value.trim().length?ta.value:RAW;
+    const px=parseCloses(src),cone=coneOf(px,[10,21,42,63,126,252]);
+    const kv=document.getElementById("kv2");
+    if(cone.length<2){kv.innerHTML=kvHTML([["Prices read",String(px.length)],["Need","at least 45 closes"]]);return;}
+    const xs=cone.map(c=>c.w),top=Math.max(s2.iv,...cone.map(c=>c.max))*1.1;
+    const o=Fig(document.getElementById("cv2"),{h:290,x0:xs[0],x1:xs[xs.length-1],y0:0,y1:top,pad:{l:52}});
+    axes(o,v=>v.toFixed(0)+"d",v=>(v*100).toFixed(0)+"%",5,4);
+    clip(o,()=>{
+      line(o,xs,cone.map(c=>c.max),C("--verm"),1.4,[3,3]);
+      line(o,xs,cone.map(c=>c.q75),C("--grey"),1.4);
+      line(o,xs,cone.map(c=>c.med),C("--ink"),2);
+      line(o,xs,cone.map(c=>c.q25),C("--grey"),1.4);
+      line(o,xs,cone.map(c=>c.min),C("--moss"),1.4,[3,3]);
+      line(o,xs,cone.map(c=>c.now),C("--blue"),2.6);
+      line(o,[xs[0],xs[xs.length-1]],[s2.iv,s2.iv],C("--ochre"),2,[6,4]);
+    });
+    const m=cone.find(c=>c.w===21)||cone[0];
+    const rank=(m.now-m.min)/Math.max(1e-9,m.max-m.min);
+    kv.innerHTML=kvHTML([
+      ["Prices read",String(px.length)],
+      ["21d realized now",pc(m.now,1)],
+      ["21d median",pc(m.med,1)],
+      ["21d range",pc(m.min,1)+" – "+pc(m.max,1)],
+      ["Where now sits in range",(rank*100).toFixed(0)+"%"],
+      ["Implied − 21d median",((s2.iv-m.med)*100).toFixed(1)+" pts"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   03 — what a delta-hedged option earns
+   ══════════════════════════════════════════════ */
+const s3={S:100,iv:0.30,rv:0.35,days:30,n:10};
+window.hedgedPnL=(S,iv,rv,T)=>{const g=bs(S,S,T,iv,0,0,true);return g.vega*(rv*rv-iv*iv)/(2*iv);};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"S3",k:"S",lbl:"S",name:"Spot",min:10,max:500,step:5,fmt:v=>"$"+v.toFixed(0)},
+    {id:"iv3",k:"iv",lbl:"σi",name:"Implied vol you trade at",min:0.05,max:1,step:0.01,fmt:pct},
+    {id:"rv3",k:"rv",lbl:"σr",name:"Realized vol you expect",min:0.05,max:1,step:0.01,fmt:pct},
+    {id:"d3",k:"days",lbl:"T",name:"Days to expiry",min:5,max:365,step:1,fmt:v=>v.toFixed(0)+"d"},
+    {id:"n3",k:"n",lbl:"N",name:"Contracts",min:1,max:200,step:1,fmt:v=>v.toFixed(0)}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  function draw(){
+    const T=s3.days/365,M=100*s3.n;
+    const o=Fig(document.getElementById("cv3"),{h:280,x0:0.05,x1:Math.max(1,s3.iv*2.2),y0:-hedgedPnL(s3.S,s3.iv,0.05,T)*M*1.1,y1:hedgedPnL(s3.S,s3.iv,Math.max(1,s3.iv*2.2),T)*M*1.05,pad:{l:66}});
+    axes(o,v=>(v*100).toFixed(0)+"%",v=>usd(v,0),5,4);
+    clip(o,()=>{line(o,[0.05,Math.max(1,s3.iv*2.2)],[0,0],C("--grey"),1,[3,3]);
+      curve(o,0.05,Math.max(1,s3.iv*2.2),rv=>hedgedPnL(s3.S,s3.iv,rv,T)*M,C("--blue"),2.4);
+      curve(o,0.05,Math.max(1,s3.iv*2.2),rv=>bs(s3.S,s3.S,T,s3.iv,0,0,true).vega*(rv-s3.iv)*M,C("--grey"),1.6,[5,4]);});
+    vline(o,s3.iv,C("--ochre"),"implied",[2,4]);vline(o,s3.rv,C("--verm"),"your view",[2,4]);
+    const g=bs(s3.S,s3.S,T,s3.iv,0,0,true);
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Long, expected P&L",usd(hedgedPnL(s3.S,s3.iv,s3.rv,T)*M,0)],
+      ["Short, expected P&L",usd(-hedgedPnL(s3.S,s3.iv,s3.rv,T)*M,0)],
+      ["Breakeven daily move",usd(s3.S*s3.iv/Math.sqrt(365))+" ("+pc(s3.iv/Math.sqrt(365))+")"],
+      ["Your view's daily move",pc(s3.rv/Math.sqrt(365))],
+      ["Theta / day",usd(g.theta/365*M,0)],
+      ["Vega / point",usd(g.vega/100*M,0)],
+      ["Caveat","path-weighted; see page 16 ch. 07"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   04 — sizing a bet: Kelly
+   ══════════════════════════════════════════════ */
+const s4={cost:0.19,pay:5,p:0.20,bank:100000};
+window.kelly=(cost,pay,p)=>{const b=(pay-cost)/cost;return {b,f:p-(1-p)/b,imp:cost/pay,
+  g:f=>p*Math.log(1+f*b)+(1-p)*Math.log(Math.max(1e-12,1-f))};};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"c4",k:"cost",lbl:"c",name:"Cost of the structure",min:0.05,max:5,step:0.01,fmt:v=>"$"+v.toFixed(2)},
+    {id:"w4",k:"pay",lbl:"W",name:"What it pays if right",min:0.5,max:20,step:0.1,fmt:v=>"$"+v.toFixed(1)},
+    {id:"p4",k:"p",lbl:"p",name:"Your probability it pays",min:0.01,max:0.95,step:0.005,fmt:v=>pc(v,1)},
+    {id:"bk4",k:"bank",lbl:"$",name:"Bankroll",min:1000,max:1000000,step:1000,fmt:v=>"$"+v.toLocaleString()}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  function draw(){
+    const K=kelly(s4.cost,s4.pay,s4.p),fmax=Math.min(0.99,Math.max(0.05,K.f*2.6));
+    let lo=0,hi=0;for(let i=0;i<=100;i++){const v=K.g(fmax*i/100);lo=Math.min(lo,v);hi=Math.max(hi,v);}
+    const o=Fig(document.getElementById("cv4"),{h:270,x0:0,x1:fmax,y0:Math.max(lo,-hi*2-0.01),y1:hi*1.2+1e-4,pad:{l:58}});
+    axes(o,v=>(v*100).toFixed(0)+"%",v=>(v*100).toFixed(1)+"%",5,4);
+    clip(o,()=>{line(o,[0,fmax],[0,0],C("--grey"),1,[3,3]);curve(o,0,fmax,K.g,C("--blue"),2.4);});
+    if(K.f>0){vline(o,K.f,C("--moss"),"Kelly",[2,4]);vline(o,K.f/2,C("--ochre"),"half",[2,4]);}
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Payout odds b",K.b.toFixed(2)+" : 1"],
+      ["Market-implied odds",pc(K.imp,1)],
+      ["Your edge",((s4.p-K.imp)*100).toFixed(1)+" pts"],
+      ["Kelly fraction",K.f>0?pc(K.f,1):"no bet"],
+      ["Half Kelly, in dollars",K.f>0?usd(K.f/2*s4.bank,0):"—"],
+      ["Growth at half / full",K.f>0?pc(K.g(K.f/2),2)+" / "+pc(K.g(K.f),2):"—"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   05 — volatility drag and leveraged ETFs
+   ══════════════════════════════════════════════ */
+const s5={mu:0.08,v:0.20,L:3,yrs:10};
+window.letf=(mu,v,L)=>({one:mu-v*v/2,lev:L*mu-L*L*v*v/2,naive:L*(mu-v*v/2),drag:-(L*L-L)*v*v/2});
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"m5",k:"mu",lbl:"μ",name:"Index arithmetic return",min:-0.1,max:0.25,step:0.005,fmt:pct},
+    {id:"v5",k:"v",lbl:"σ",name:"Index volatility",min:0.05,max:0.8,step:0.01,fmt:pct},
+    {id:"L5",k:"L",lbl:"L",name:"Leverage",min:-3,max:4,step:0.5,fmt:v=>v.toFixed(1)+"×"},
+    {id:"y5",k:"yrs",lbl:"T",name:"Years",min:1,max:30,step:1,fmt:v=>v.toFixed(0)+"y"}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  function draw(){
+    const R=letf(s5.mu,s5.v,s5.L),w=g=>t=>Math.exp(g*t);
+    const top=Math.max(w(R.one)(s5.yrs),w(R.lev)(s5.yrs),w(R.naive)(s5.yrs))*1.08;
+    const o=Fig(document.getElementById("cv5"),{h:270,x0:0,x1:s5.yrs,y0:0,y1:top,pad:{l:52}});
+    axes(o,v=>v.toFixed(0)+"y",v=>v.toFixed(1)+"×",5,4);
+    clip(o,()=>{curve(o,0,s5.yrs,w(R.one),C("--grey"),2);
+      curve(o,0,s5.yrs,w(R.naive),C("--ochre"),2,[5,4]);
+      curve(o,0,s5.yrs,w(R.lev),C("--blue"),2.6);});
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Index median growth",pc(R.one)+" / yr"],
+      [s5.L.toFixed(1)+"× daily-reset growth",pc(R.lev)+" / yr"],
+      [s5.L.toFixed(1)+"× the index's growth",pc(R.naive)+" / yr"],
+      ["Decay from rebalancing",pc(R.drag)+" / yr"],
+      ["Vol at which the fund stops growing",s5.L>0&&s5.mu>0?pc(Math.sqrt(2*s5.mu/s5.L),1):"—"],
+      ["Median after "+s5.yrs+"y",w(R.lev)(s5.yrs).toFixed(2)+"× vs "+w(R.one)(s5.yrs).toFixed(2)+"×"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

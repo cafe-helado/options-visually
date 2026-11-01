@@ -229,10 +229,10 @@
   </div>
 
   <div class="prose">
-    <p class="lead">Here is the comparison the textbooks describe and rarely draw. You are bullish on a 100 stock over ninety days. Five structures express that, and to compare them honestly each is sized so they all start with exactly <b>100 share-deltas</b> — identical directional exposure, so the only differences are structural.</p>
+    <p class="lead">Here is the comparison the textbooks describe and rarely draw. You are bullish on a 100 stock over ninety days. Five option structures express that — with the stock itself drawn as a baseline — and to compare them honestly each is sized so they all start with exactly <b>100 share-deltas</b> — identical directional exposure, so the only differences are structural.</p>
     <p>The sizes are already revealing. A hundred deltas costs <b>$10,000</b> as stock, <b>$936</b> as long 105 calls, <b>$1,122</b> as a 105/115 call spread, and <b>−$954</b> as short 95 puts — you are paid to take the position. The 1×2 call ratio needs a size of <b>35.6</b> spreads to reach a hundred deltas, because each one starts with almost none.</p>
     <p>Then the outcomes, and this is the point of the page.</p>
-    <p>If the stock falls to <b>80</b>, the long call is the best of the five, losing <b>$936</b> — its whole cost — while the short put loses <b>$4,011</b>. At <b>95 to 105</b>, where nothing much happens, the short put is best at <b>+$954</b> and the long call is the worst, losing its entire premium. At <b>110 to 120</b> the <span class="term" data-t="Ratio spread" data-def="More options sold than bought. The payoff peaks and then turns over, so the worst case arrives precisely when your directional view was most right.">ratio spread</span> dominates everything, making <b>$31,734</b> at 115. And at <b>130</b> the ratio has collapsed to a <b>$21,727 loss</b> while the plain long call — worst-in-class over most of the range — is the best of the five at <b>+$5,014</b>.</p>
+    <p>If the stock falls to <b>80</b>, the long call is the best of the lot, losing <b>$936</b> — its whole cost — while the short put loses <b>$4,011</b>. At <b>95 to 105</b>, where nothing much happens, the short put is best at <b>+$954</b> and the long call is the worst, losing its entire premium. Just below that, at <b>90</b>, the <b>risk reversal</b> — long the 115 call, short the 90 put, put on for a small credit — is the only line in profit at all, by <b>$14</b>. At <b>110 to 120</b> the <span class="term" data-t="Ratio spread" data-def="More options sold than bought. The payoff peaks and then turns over, so the worst case arrives precisely when your directional view was most right.">ratio spread</span> dominates everything, making <b>$31,734</b> at 115. And at <b>130</b> the ratio has collapsed to a <b>$21,727 loss</b> while the plain long call — worst-in-class over most of the range — is the best of them all at <b>+$5,014</b>.</p>
     <p>Five structures, one view, identical initial delta, and the lead changes hands four times across five distinct regions. The long call is simultaneously the best trade if you are wrong, the worst trade if you are slightly right, and the best trade again if you are extremely right.</p>
     <p>Which means "what is the best bullish structure" is not a question with an answer. The question with an answer is <b>how right do you expect to be, and how wrong can you afford to be</b> — and each of these five encodes a different reply.</p>
   </div>
@@ -247,6 +247,7 @@
             <span><i class="swl" style="background:var(--blue)"></i>Long call</span>
             <span><i class="swl" style="background:var(--moss)"></i>Call spread</span>
             <span><i class="swl" style="background:var(--verm)"></i>Short put</span>
+            <span><i class="swl" style="background:var(--ink)"></i>Risk reversal</span>
             <span><i class="swl" style="background:var(--ochre)"></i>Ratio</span>
           </span>
         </div>
@@ -299,7 +300,7 @@
     <p>The <b>long 105 call</b> runs gamma-cash of <b>+669</b>, vega of <b>+46.20</b> and theta of <b>−8.30</b> a day. You are long movement, long volatility, and paying rent for both.</p>
     <p>The <b>short 95 put</b> runs gamma-cash of <b>−830</b>, vega of <b>−57.33</b> and theta of <b>+7.57</b>. Same direction, opposite everything else: you are short movement, short volatility, and collecting rent.</p>
     <p>The <b>105/115 call spread</b> is the moderate version — <b>+367</b> of gamma, <b>+25.33</b> of vega, <b>−5.04</b> of theta — roughly half the long call's second-order exposure for the same first-order exposure, which is chapter 01's argument in numbers.</p>
-    <p>The <b>1×2 call ratio</b> is in a different category: <b>−4,160</b> of gamma-cash and <b>−287</b> of vega on a position that is nominally just "bullish". That is six times the short put's gamma and five times its vega. The ratio is a short-volatility trade wearing a directional label, which is why chapter 03 showed it making $31,734 in one place and losing $21,727 in another.</p>
+    <p>The <b>1×2 call ratio</b> is in a different category: <b>−4,160</b> of gamma-cash and <b>−287</b> of vega on a position that is nominally just "bullish". That is five times the short put's gamma and five times its vega. The ratio is a short-volatility trade wearing a directional label, which is why chapter 03 showed it making $31,734 in one place and losing $21,727 in another.</p>
     <p>So the greek table is where the disguise comes off. Two structures with the same delta and opposite gamma are not two versions of the same view — they are a directional view bundled with a volatility view, and the second one is frequently larger.</p>
     <p>The practical habit that follows: before putting on any spread, look at its gamma, vega and theta per unit of delta. If those numbers are large relative to the delta you wanted, the trade is mostly not about direction, whatever you called it when you decided to do it.</p>
   </div>
@@ -606,7 +607,7 @@
     <p class="q">A 1×2 call ratio sized to 100 deltas carries −4,160 of gamma cash. What is it really?</p>
     <div class="opts">
       <button>A leveraged bullish position</button>
-      <button data-ok="1">A short-volatility position with a directional tilt. Its gamma is six times the short put's and its vega is −287 against the long call's +46</button>
+      <button data-ok="1">A short-volatility position with a directional tilt. Its gamma is five times the short put's and its vega is −287 against the long call's +46</button>
       <button>A delta-neutral volatility trade</button>
       <button>A hedged version of the call spread</button>
     </div>

@@ -147,7 +147,7 @@
       <p>Two functions appear constantly and are easy to confuse because they describe the same distribution.</p>
       <p><b>n(x)</b> is the <span class="term" data-t="Probability density" data-def="The height of the bell curve at x. Not a probability by itself — you need an interval. The total area under it is 1.">density</span>: the height of the bell curve at x. It is not a probability. The probability of landing in an interval is the <em>area</em> under the curve over that interval, which is why the total area is exactly 1.</p>
       <p><b>N(x)</b> is the <span class="term" data-t="Cumulative distribution" data-def="N(x) is the probability a standard normal draw comes in at or below x. It is the running area under the density from the far left up to x.">cumulative</span> version: the probability of landing at or below x, which is the running total of that area. It climbs from 0 to 1 and passes through exactly 0.5 at x = 0.</p>
-      <p>So when you see <code>N(d₂)</code> in the pricing formula, read it as: <b>the shaded area to the left of nothing in particular — it is the probability that a standard normal draw exceeds the exercise threshold.</b> The two graphs below are the same information; drag the slider and watch the shaded area on top become the height on the bottom.</p>
+      <p>So when you see <code>N(d₂)</code> in the pricing formula, read it as: <b>the shaded area to the left of d₂ — which is the same thing as the probability that a standard normal draw lands above −d₂, the exercise threshold.</b> The two graphs below are the same information; drag the slider and watch the shaded area on top become the height on the bottom.</p>
     </div>
     <figure class="bleed">
       <div class="split wide">
@@ -236,9 +236,9 @@
     <div class="prose">
       <p>Here is the deepest idea on this page, and it takes one sentence: <b>for a curved function, the average of the outcomes is not the outcome of the average.</b> Formally, E[f(X)] ≠ f(E[X]) — <span class="term" data-t="Jensen's inequality" data-def="For a convex (upward-curving) function, the expected value of the function exceeds the function of the expected value. The gap grows with the spread of the input.">Jensen's inequality</span>.</p>
       <p>An option payoff is convex: it bends upward at the strike. So if you average the payoff across all the places the stock might finish, you get <em>more</em> than the payoff at the stock's average finishing place. The excess is pure convexity value, and it is the reason options have any time value at all.</p>
-      <p>The clean demonstration: take an at-the-money call with no drift. The stock's expected finishing price is exactly the strike, so the payoff at the average outcome is exactly <b>zero</b>. Yet the average payoff is not zero — it's the option's whole premium. At 20% vol over a year, on a $100 stock, the average payoff is about <b>7.95</b> while the payoff-at-the-average is <b>0.00</b>. Every cent of that option's value is Jensen's inequality.</p>
+      <p>The clean demonstration: take an at-the-money call with no drift. The stock's expected finishing price is exactly the strike, so the payoff at the average outcome is exactly <b>zero</b>. Yet the average payoff is not zero — it's the option's whole premium. At 20% vol over a year, on a $100 stock, the average payoff is about <b>7.97</b> while the payoff-at-the-average is <b>0.00</b>. Every cent of that option's value is Jensen's inequality.</p>
       <p>Widen the distribution and the gap widens with it. That is vega. Bend the payoff more sharply and the gap widens too. That is gamma. <b>Convexity and volatility are the two ingredients of option value, and this figure is where they meet.</b></p>
-      <p>The same effect running the other direction explains the <code>−σ²/2</code> in chapter one. The logarithm is <em>concave</em>, bending the opposite way, so averaging works against you: volatility drags the median of a stock price below its mean by exactly σ²T/2.</p>
+      <p>The same effect running the other direction explains the <code>−σ²/2</code> in chapter one. The logarithm is <em>concave</em>, bending the opposite way, so averaging works against you: volatility drags the median of a stock price below its mean by exactly σ²T/2 in log terms — a factor of e<sup>−σ²T/2</sup> in price.</p>
     </div>
     <figure class="bleed">
       <div class="split wide">
@@ -299,7 +299,7 @@
       <button data-ok="1">The payoff is curved, so the average payoff exceeds the payoff at the average — the whole premium is that gap</button>
       <button>It ignores that the stock could go bankrupt</button>
     </div>
-    <div class="ans"><b>Jensen's inequality.</b> The payoff at the average outcome is genuinely zero. But you don't receive the payoff at the average — you receive the average of the payoffs, and because max(S−K,0) floors losses at zero while leaving gains unbounded, that average is strictly positive. At 20 vol over a year it's about 7.95 on a $100 stock. Interest rates matter too, but even at r = 0 the option is worth 7.95, so rates are a second-order correction to an effect that is entirely about curvature.</div>
+    <div class="ans"><b>Jensen's inequality.</b> The payoff at the average outcome is genuinely zero. But you don't receive the payoff at the average — you receive the average of the payoffs, and because max(S−K,0) floors losses at zero while leaving gains unbounded, that average is strictly positive. At 20 vol over a year it's about 7.97 on a $100 stock. Interest rates matter too, but even at r = 0 the option is worth 7.97, so rates are a second-order correction to an effect that is entirely about curvature.</div>
   </div>
 </section>
 
@@ -1286,7 +1286,7 @@
       <div class="panel">
         <table class="rot">
           <tr><th>Quantity</th><th>Approximation</th><th>Typical error</th></tr>
-          <tr><td>ATM price</td><td>0.4 × S × σ × √T</td><td>−3% to −7%</td></tr>
+          <tr><td>ATM price</td><td>0.4 × S × σ × √T</td><td>Within 2% at the forward; at spot, −1% to −11% at 4% rates</td></tr>
           <tr><td>ATM vega, per point</td><td>0.4 × S × √T ÷ 100</td><td>under 3%</td></tr>
           <tr><td>ATM gamma</td><td>0.4 ÷ (S × σ × √T)</td><td>under 3%</td></tr>
           <tr><td>ATM theta, per day</td><td>−0.2 × S × σ ÷ √T ÷ 365</td><td>−5% to −13%</td></tr>
@@ -1521,11 +1521,11 @@
         <tr><td>Call</td><td>Leg 1 − Leg 2</td><td>6.583084</td></tr>
       </table>
     </div>
-    <figcaption>The matching put is 5.340864, and you can verify it without repeating the work: put-call parity says C − P = S − Ke<sup>−rT</sup>, so P = 6.583084 − 100 + 98.757800 = 5.340884, agreeing to five decimals. Note d₂ is barely above zero, so this at-the-money call has almost exactly a 50% risk-neutral chance of finishing in the money — a useful mental anchor.</figcaption>
+    <figcaption>The matching put is 5.340864, and you can verify it without repeating the work: put-call parity says C − P = S − Ke<sup>−rT</sup>, so P = 6.583084 − 100 + 98.757780 = 5.340864, agreeing to every decimal shown. Note d₂ is barely above zero, so this at-the-money call has almost exactly a 50% risk-neutral chance of finishing in the money — a useful mental anchor.</figcaption>
   </figure>
 
   <div class="prose">
-    <p>A last observation on that example, because it's the kind of thing that makes the formula feel less alien. The call costs 6.58 on a 100 stock for three months. As a rule of thumb an at-the-money option costs roughly <code>0.4 × S × σ × √T</code>, which here gives 0.4 × 100 × 0.30 × 0.5 = 6.00. Close, and it stays close across a wide range of inputs. If you ever need to sanity-check a quoted premium without a screen, that's the number to have in your head.</p>
+    <p>A last observation on that example, because it's the kind of thing that makes the formula feel less alien. The call costs 6.58 on a 100 stock for three months. As a rule of thumb an at-the-money option costs roughly <code>0.4 × S × σ × √T</code>, which here gives 0.4 × 100 × 0.30 × 0.5 = 6.00 — low by 8.9%, because the rule is exact at the <em>forward</em> and this option is struck at spot with 5% rates. Strike it at the forward of 101.26 and the rule is within 2%. If you ever need to sanity-check a quoted premium without a screen, that's the number to have in your head.</p>
   </div>
 
   <figure>

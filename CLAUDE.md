@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. All nineteen pages live.
+no dependencies. Twenty pages live, plus two companions: the workbook and the toolkit.
 
 ## Before you change anything
 
@@ -139,7 +139,7 @@ Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proo
 
 ## Offline, and installing to a phone
 
-The series is a PWA. `sw.js` precaches all nineteen pages plus the engine on
+The series is a PWA. `sw.js` precaches all twenty pages, both companions and the engine on
 install — about 2MB — and serves everything from that cache afterwards, so the
 whole thing works with no network. Three strategies, and the split is deliberate:
 
@@ -178,7 +178,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all nineteen pages are live. Pages 12-15 were added after mapping
+Nothing unbuilt — all twenty pages are live, plus the workbook and toolkit. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
@@ -189,8 +189,8 @@ It teaches nothing new — it re-asks the other fifteen subjects in the shape a 
 comes in, on a difficulty ladder, because recognizing gamma and *answering* "you are
 long a 25-delta call and the stock rallies five percent, are you longer?" are
 different skills. Its unit is the card: a question, four options where three are real
-misconceptions, a reason, and a figure spec the shared renderer draws. Twenty-two of
-them now, in tiers of 8 / 8 / 6. Adding a card is a ~12-line object in the `CARDS`
+misconceptions, a reason, and a figure spec the shared renderer draws. Thirty-seven of
+them now, in tiers of 12 / 13 / 12. Adding a card is a ~12-line object in the `CARDS`
 array; the renderer takes `{x0,x1,f:[...],col,
 dash,marks,extra}` and works out its own y-range. Keep the tiers honest — a warm-up
 card must have exactly one right answer, and a hard card must have an answer that is
@@ -253,3 +253,31 @@ a sideways scroll but silent *clipping*: ~60px of the control rail became unreac
 on a 390px screen, on five of the seven pages, for months. `lab.css` now sets
 `.split>*{min-width:0}`. When adding a figure, check `documentElement.scrollWidth`
 against `clientWidth` at 360px before shipping.
+
+## The November 2026 logic audit
+
+Every page's prose was read against its own code and an independent
+recomputation. Thirty-four errors were fixed; verify.js now carries a claim for
+each corrected number, so a regression reintroduces a known mistake. The
+pattern worth remembering is that the errors were rarely arithmetic — they were
+*direction* errors that read fluently: steep skew making a collar cheaper
+(it makes it dearer), recall risk on the conversion (it is the reversal's),
+p > 1 described as the down move beating cash (it is cash beating the up move),
+long-forward-short-stock described as long dividends (short), a dispersion long
+leg sized on the diagonal so the "volatility-neutral" book was short vol, an
+execution optimum quoted at a 2/3 power when the page's own cost model gives 1.
+When writing a sentence with a sign in it, check the sign in node, not only
+the magnitude.
+
+Three traps found on the way:
+
+- **The service worker serves stale pages in a browser that has visited the
+  site before.** Testing a new page in the preview pane showed the previous
+  build until the worker was unregistered. Unregister it (DevTools, or
+  `navigator.serviceWorker.getRegistrations()`) before visually checking a
+  change, and remember the CACHE bump.
+- **`check.js` reads `href` out of template literals**, so a renderer that
+  writes `href="${x}"` is reported as a broken link. The workbook sets links
+  after rendering from a `data-h` attribute instead.
+- **Detaching `o.X` from a Fig breaks it** — `X()` uses `this`. Wrap it:
+  `const X = v => o.X(v)`.

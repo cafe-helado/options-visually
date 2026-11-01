@@ -177,6 +177,17 @@ PAGES["catalyst"] = () => {
   eq("at half implied you win 5%", run(0.5).win, 5.2, 0.8);
 };
 
+PAGES["catalyst-calendar"] = () => {
+  /* chapter 06: the prose said 31.3%, an 8-point edge and under 2 points at
+     the back; the page's own totalVol gives 32.3, 7.3 and 2.2 */
+  const M = load("catalyst.html", ["totalVol"]);
+  const at = d => (M.totalVol(0.25, 0.06, d, true) - M.totalVol(0.25, 0.04, d, true)) * 100;
+  eq("fair front at J = 4%, 14d: 32.3%", M.totalVol(0.25, 0.04, 14, true) * 100, 32.28, 0.02);
+  eq("edge at 14d: 7.3 points", at(14), 7.26, 0.02);
+  eq("edge at 60d: 2.2 points", at(60), 2.17, 0.02);
+  eq("front spreads J over ~a quarter of the back's time", 60 / 14, 4.29, 0.01);
+};
+
 PAGES["execution"] = () => {
   /* Chapter 04 draws a fresh random path on every load. The prose used to
      quote 1.47 against arrival as though it were fixed; across loads it runs
@@ -256,7 +267,8 @@ PAGES["variance"] = () => {
 PAGES["questions"] = () => {
   const M = load("questions.html", ["bs", "ncdf", "npdf", "__deck", "__run7", "__drill"]);
   const B = M.bs, D = M.__deck;
-  eq("the deck holds twenty-two cards", D.length, 22, 0);
+  eq("the deck holds thirty-seven cards", D.length, 37, 0);
+  eq("tiers run 12 / 13 / 12", [1, 2, 3].map(t => D.filter(c => c.t === t).length).join("/") === "12/13/12" ? 1 : 0, 1, 0);
   yes("every card has four options and exactly one right answer",
     D.every(c => c.o.length === 4 && c.ok >= 0 && c.ok < 4));
   yes("every card carries a reason and a figure spec",
@@ -781,6 +793,205 @@ PAGES["atlas"] = () => {
   yes("the exact answer is always accepted", Q.every(q => Math.abs(q.a - q.a) <= q.tol));
   yes("an answer well outside the band is rejected",
     Q.every(q => Math.abs((q.a + Math.max(q.tol * 10, 1)) - q.a) > q.tol));
+};
+
+/* ── claims added by the November 2026 logic audit. Each one guards a
+   sentence that was wrong before the audit, so a regression reintroduces
+   a known error rather than a hypothetical one. ─────────────────────── */
+
+PAGES["black-scholes"] = () => {
+  /* the prose said 7.95; a rounded discount factor also made the appendix
+     parity check "agree to five decimals" when it agrees exactly */
+  const M = load("black-scholes.html", ["bs"]);
+  eq("ATM call, 20 vol, 1y, r = 0 averages 7.97", M.bs(100, 100, 1, 0.20, 0, 0, true).price, 7.9656, 5e-4);
+  const c = M.bs(100, 100, 0.25, 0.30, 0.05, 0, true).price, p = M.bs(100, 100, 0.25, 0.30, 0.05, 0, false).price;
+  eq("appendix call = 6.583084", c, 6.583084, 2e-6);
+  eq("appendix put = 5.340864", p, 5.340864, 2e-6);
+  eq("parity with Ke^-rT = 98.757780 reproduces the put", c - 100 + 98.757780, p, 2e-6);
+  eq("the 0.4·Sσ√T rule is 8.9% low on the appendix option", 6 / c - 1, -0.0886, 1e-3);
+  /* the band in the 8·3 table: within 2% at the forward, −1% to −11% at spot */
+  let lo = 1, hi = -1, flo = 1, fhi = -1;
+  for (const v of [0.2, 0.3, 0.45, 0.6]) for (const d of [7, 14, 30, 60, 90]) {
+    const T = d / 365, x = 0.4 * 100 * v * Math.sqrt(T);
+    const e = x / M.bs(100, 100, T, v, 0.04, 0, true).price - 1;
+    const f = x / M.bs(100, 100 * Math.exp(0.04 * T), T, v, 0.04, 0, true).price - 1;
+    lo = Math.min(lo, e); hi = Math.max(hi, e); flo = Math.min(flo, f); fhi = Math.max(fhi, f);
+  }
+  yes("at the forward the ATM rule is within 2%", flo > -0.02 && fhi < 0.02);
+  eq("at spot, 4% rates, 7–90d: worst error about −11%", lo * 100, -10.8, 0.5);
+  eq("at spot, 4% rates, 7–90d: best error about −1%", hi * 100, -0.8, 0.5);
+};
+
+PAGES["structures"] = () => {
+  const M = load("structures.html", ["bs", "MKT"]);
+  const T = 45 / 365, r = 0.04;
+  const cr = (p, c, l, v) => M.bs(100, p, T, v, r, 0, false).price + M.bs(100, c, T, v, r, 0, true).price - M.bs(100, l, T, v, r, 0, true).price;
+  eq("92/105/110 jade lizard collects 2.36 (not 2.68)", cr(92, 105, 110, 0.30), 2.3565, 1e-3);
+  eq("98/102/104 collects 3.80", cr(98, 102, 104, 0.30), 3.7958, 1e-3);
+  eq("widening to 102/112 adds 1.88 of credit", cr(98, 102, 112, 0.30) - cr(98, 102, 104, 0.30), 1.878, 5e-3);
+  /* steep skew makes a zero-cost collar keep LESS upside, not more */
+  const zc = slope => {
+    const v = K => Math.max(0.05, 0.30 + slope * Math.log(K / 100));
+    const put = M.bs(100, 90, T, v(90), r, 0, false).price;
+    for (let k = 100.5; k < 200; k += 0.5) if (M.bs(100, k, T, v(k), r, 0, true).price <= put) return k;
+    return NaN;
+  };
+  eq("zero-cost call for a 90 put, flat surface: 113", zc(0), 113, 0);
+  eq("zero-cost call for a 90 put, steep skew: 106.5", zc(-0.8), 106.5, 0);
+  /* chapters 01, 02 and 04 as expanded: gamma signs and fingerprint bars */
+  const S = load("structures.html", ["ALL", "MKT", "legGreeks", "fingerprint"]);
+  const G = n => S.legGreeks(S.ALL[n](S.MKT)), F = n => S.fingerprint(S.ALL[n](S.MKT)).map(x => x[1]);
+  eq("butterfly gamma at the money −0.0080", G("Butterfly").gamma, -0.00803, 5e-5);
+  eq("straddle gamma +0.0754", G("Straddle").gamma, 0.07537, 5e-5);
+  yes("Realized equals Vol level for every single-expiry structure",
+    Object.keys(S.ALL).every(n => Math.abs(F(n)[1] - F(n)[2]) < 1e-9));
+  eq("iron condor reads −0.53", F("Iron condor")[1], -0.53, 0.005);
+  eq("butterfly reads −0.11", F("Butterfly")[1], -0.11, 0.005);
+  eq("strangle gamma 0.64 of a straddle", F("Strangle")[1], 0.64, 0.005);
+  eq("strangle convexity +0.47", F("Strangle")[4], 0.47, 0.005);
+  eq("risk reversal direction +0.35", F("Risk reversal")[0], 0.35, 0.005);
+  eq("risk reversal skew +0.46", F("Risk reversal")[3], 0.46, 0.005);
+  eq("call spread direction +0.33", F("Call spread")[0], 0.33, 0.005);
+  eq("call spread skew −0.25", F("Call spread")[3], -0.25, 0.005);
+  yes("collar is the exact mirror of the risk reversal",
+    F("Collar (options)").every((x, i) => Math.abs(x + F("Risk reversal")[i]) < 1e-12));
+};
+
+PAGES["dispersion"] = () => {
+  /* the long leg used to be sized on the diagonal only, which left the book
+     short the volatility level: −1,134 at 1.8x vols with correlation flat */
+  const M = load("dispersion.html", ["idxVar", "VOLS", "scale", "kMatch", "wVar"]);
+  const net = (rr, m, ri) => {
+    const v = M.scale(M.VOLS, m);
+    return ((M.idxVar(M.VOLS, ri) - M.idxVar(v, rr)) + M.kMatch(ri) * (M.wVar(v) - M.wVar(M.VOLS))) * 1e4;
+  };
+  eq("realized = implied: flat at 0.6x vols", net(0.35, 0.6, 0.35), 0, 1e-9);
+  eq("realized = implied: flat at 1.8x vols", net(0.35, 1.8, 0.35), 0, 1e-9);
+  eq("realized 0.60 loses 1.25x what 0.15 makes", -net(0.60, 1, 0.35) / net(0.15, 1, 0.35), 1.25, 1e-9);
+  const v = M.scale(M.VOLS, 1.8);
+  eq("crash: short index leg loses 3,896", (M.idxVar(M.VOLS, 0.35) - M.idxVar(v, 0.90)) * 1e4, -3896, 1);
+  eq("crash: long component leg gains 1,318", M.kMatch(0.35) * (M.wVar(v) - M.wVar(M.VOLS)) * 1e4, 1318, 1);
+  eq("crash: net −2,579", net(0.90, 1.8, 0.35), -2579, 1);
+};
+
+PAGES["spreading"] = () => {
+  const M = load("spreading.html", ["sizedFive", "structPnl", "S0", "T0", "R0", "s3"]);
+  const S = M.sizedFive();
+  const at = ST => S.map(s => M.structPnl(s.legs, ST, M.S0, M.T0, M.s3.v, M.R0) * s.mult);
+  const lead = ST => { const v = at(ST); return v.indexOf(Math.max(...v)); };
+  yes("long call leads at 80", lead(80) === 1);
+  yes("the risk reversal leads at 90", lead(90) === 4);
+  eq("…by $14", at(90)[4], 14, 1);
+  yes("short put leads 95 to 105", [95, 100, 105].every(x => lead(x) === 3));
+  yes("ratio leads 110 to 120", [110, 115, 120].every(x => lead(x) === 5));
+  eq("ratio makes $31,734 at 115", at(115)[5], 31734, 1);
+  yes("long call leads again at 130", lead(130) === 1);
+  eq("long call +$5,014 at 130", at(130)[1], 5014, 1);
+};
+
+PAGES["merger"] = () => {
+  const M = load("merger.html", ["oddsShortcut", "oddsExact", "bookMove", "treeNodes", "divPrice", "divNaive", "mixPut", "mixSpot", "s5", "s7"]);
+  /* chapter 01: a fund record read as funding plus a premium */
+  eq("fund forecast 5.25% + 4% premium, net of 5.75% loan = 3.5%", 0.0525 + 0.04 - 0.0575, 0.035, 1e-12);
+  eq("ten years compounded on both sides: $673,169", 1e6 * (Math.pow(1.0925, 10) - Math.pow(1.0575, 10)), 673169, 1);
+  /* chapter 02: the shortcut charges carry in one state only */
+  eq("no-carry odds 66.7%", M.oddsExact(4, 5, 2, 0, 1), 2 / 3, 1e-12);
+  eq("one year at 10%: no-arbitrage odds 80.0%", M.oddsExact(4, 5, 2, 0.10, 1), 0.80, 1e-12);
+  eq("…the shortcut says 76.9%", M.oddsShortcut(4, 5, 2, 0.10, 1), 0.7692, 1e-4);
+  /* chapter 04 */
+  const b = M.bookMove(-0.01, 0.75, 0.0525);
+  eq("each cash deal marks up 0.96%", (1.0525 / 1.0425 - 1) * 100, 0.959, 1e-3);
+  eq("book marks up 0.72%", b.mark * 100, 0.72, 0.005);
+  eq("yearly return falls 0.81%", b.fwd * 100, -0.8125, 1e-9);
+  eq("year one nets about −0.09%", b.year1 * 100, -0.093, 0.005);
+  /* chapter 05: the tree reproduces the desk's node prices */
+  const t = M.treeNodes(M.s5);
+  eq("today $10.79", t.top, 10.79, 0.005);
+  eq("after a 2nd request $10.47", t.sec, 10.47, 0.005);
+  eq("after a lawsuit $8.63", t.law, 8.63, 0.005);
+  eq("tree's odds of closing 88.1%", t.close * 100, 88.07, 0.01);
+  eq("…82.4% once in the 2nd-request branch", t.close2 * 100, 82.41, 0.01);
+  eq("drop from lower odds about 23 cents", t.oddsPart, -0.226, 0.003);
+  eq("drop from more time about 9 cents", t.timePart, -0.094, 0.003);
+  /* chapter 06 */
+  eq("GoPro after a $0.30 special: $4.20", M.divPrice(5, 2, 0.30, 2 / 3), 4.20, 1e-9);
+  eq("…not $4.30", M.divNaive(5, 2, 0.30, 2 / 3), 4.30, 1e-9);
+  eq("VZIO after a $0.20 special: $10.95", M.divPrice(11.5, 7.95, 0.20, 0.80), 10.95, 1e-9);
+  /* chapter 07: the biotech readout */
+  const st = M.s7;
+  eq("spot $20 implies 62.5% odds", M.mixSpot(st), 20, 1e-9);
+  eq("10/5 put spread on the market's view $0.19", M.mixPut(10, st, 10) - M.mixPut(5, st, 10), 0.193, 0.002);
+  eq("…on yours $1.78", M.mixPut(10, st, 5) - M.mixPut(5, st, 5), 1.779, 0.002);
+  eq("7.5 put about a fifth of a cent on the market's view", M.mixPut(7.5, st, 10), 0.0019, 0.0003);
+  eq("…about 94 cents on yours", M.mixPut(7.5, st, 5), 0.938, 0.003);
+};
+
+PAGES["workbook"] = () => {
+  /* every numeric answer is a function; evaluate them all, and pin a sample
+     to values that are independently checked elsewhere in this file */
+  const M = load("workbook.html", ["__wb"]);
+  const W = M.__wb, all = [];
+  W.forEach(e => e.p.forEach((p, i) => all.push([e.n + "." + (i + 1), p])));
+  yes("twenty pages, every one with a reading list and at least three problems",
+    W.length === 20 && W.every(e => e.r.length >= 1 && e.p.length >= 3));
+  yes("every page link points at a file that exists",
+    W.every(e => fs.existsSync(path.join(ROOT, e.href))));
+  yes("every numeric answer is finite", all.every(([, p]) => !p.f || isFinite(p.f())));
+  yes("every written answer carries a real explanation", all.every(([, p]) => p.f || (p.ans && p.ans.length > 60)));
+  const A = id => all.find(x => x[0] === id)[1].f();
+  eq("01.1 appendix call 6.5831", A("01.1"), 6.583084, 1e-5);
+  eq("03.1 strip recovers 25.0%", A("03.1"), 0.25, 2e-4);
+  eq("03.2 …and a 6.0% event", A("03.2"), 0.06, 2e-4);
+  eq("04.2 zero-cost call strike 113", A("04.2"), 113, 0);
+  eq("06.1 halving proportional costs doubles N*", A("06.1"), 256, 0);
+  eq("06.2 fixed-ticket model: +59%", A("06.2") / 128, 1.5874, 1e-4);
+  eq("07.2 revcon example implies 2.965%", A("07.2") * 100, 2.9647, 1e-3);
+  eq("08.1 interest floor 1.4888", A("08.1"), 1.4888, 1e-4);
+  eq("08.2 assignment sd 346 shares", A("08.2"), 346.4, 0.1);
+  eq("09.1 var swap at 30: +$550,000", A("09.1"), 550000, 0);
+  eq("10.1 implied correlation 0.359", A("10.1"), 0.3586, 1e-4);
+  eq("12.1 one-step call is 10", A("12.1"), 10, 1e-12);
+  eq("14.1 put spread pays 6.229", A("14.1"), 6.2290, 1e-3);
+  eq("14.2 ratio breakeven 123.904", A("14.2"), 123.904, 1e-3);
+  eq("18.2 breach rate 42.5%", A("18.2") * 100, 42.49, 0.01);
+  eq("19.1 breakeven 1.5703%", A("19.1") * 100, 1.5703, 1e-4);
+  eq("20.1 odds with carry 80%", A("20.1"), 0.80, 1e-12);
+  eq("20.2 special dividend: $4.20", A("20.2"), 4.20, 1e-12);
+};
+
+PAGES["tools"] = () => {
+  const M = load("tools.html", ["moveTable", "parseCloses", "coneOf", "hedgedPnL", "kelly", "letf", "bs", "gauss"]);
+  eq("rule of 16 is within 1% of √252", Math.sqrt(252) / 16, 0.992, 1e-3);
+  const mt = M.moveTable(0.30, 100);
+  eq("a quarter carries half the year's sigma", mt[3].sd / mt[4].sd, 0.5, 1e-12);
+  eq("straddle is 0.7979 of sigma", mt[2].st / mt[2].sd, 0.79788, 1e-5);
+  /* the cone must recover a known vol from a constant-vol series */
+  let p = 100; const px = [p];
+  for (let i = 0; i < 2520; i++) { p *= Math.exp(-0.5 * 0.09 / 252 + 0.30 / Math.sqrt(252) * M.gauss()); px.push(p); }
+  const c = M.coneOf(px, [21, 252]);
+  eq("cone median at 21d recovers 30% vol", c[0].med, 0.30, 0.015);
+  eq("cone median at 252d recovers 30% vol", c[1].med, 0.30, 0.015);
+  yes("short windows swing wider than long ones", c[0].max - c[0].min > c[1].max - c[1].min);
+  yes("CSV with dates: the last number on each line is the close",
+    M.parseCloses("date,close\n2026-01-02,101.5\n2026-01-05,99.25").join(",") === "101.5,99.25");
+  yes("…and parses to two closes", M.parseCloses("date,close\n2026-01-02,101.5\n2026-01-05,99.25").length === 2);
+  /* hedged P&L: variance-based, equals vega × gap to first order */
+  const T = 30 / 365, v = M.bs(100, 100, T, 0.30, 0, 0, true).vega;
+  eq("small gap: vega × vol difference", M.hedgedPnL(100, 0.30, 0.301, T) / (v * 0.001), 1, 2e-3);
+  yes("convex: +5 pts earns more than −5 pts loses", M.hedgedPnL(100, 0.30, 0.35, T) > -M.hedgedPnL(100, 0.30, 0.25, T));
+  /* Kelly on the biotech put spread */
+  const K = M.kelly(0.19, 5, 0.20);
+  eq("market-implied odds 3.8%", K.imp, 0.038, 1e-12);
+  eq("Kelly fraction 16.8%", K.f, 0.2 - 0.8 / ((5 - 0.19) / 0.19), 1e-12);
+  eq("on this long shot half Kelly keeps 86% of the growth", K.g(K.f / 2) / K.g(K.f), 0.855, 0.005);
+  const E = M.kelly(1, 2, 0.55);
+  eq("small even-odds edge: half Kelly keeps three-quarters", E.g(E.f / 2) / E.g(E.f), 0.75, 0.01);
+  eq("…and twice Kelly gives it all back", E.g(2 * E.f) / E.g(E.f), 0, 0.03);
+  let neg = false; for (let f = K.f; f < 0.99; f += 0.005) if (K.g(f) < 0) { neg = true; break; }
+  yes("far enough past Kelly even the long shot loses money", neg);
+  /* leveraged ETFs */
+  eq("3x at 20 vol drags 12% a year", M.letf(0.08, 0.20, 3).drag, -0.12, 1e-12);
+  eq("−1x has (L² − L) = 2", M.letf(0.08, 0.20, -1).drag / (-(0.04) / 2), 2, 1e-12);
 };
 
 const only = process.argv[2];

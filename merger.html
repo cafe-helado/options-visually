@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>A Deal Is a Price on Two Futures — merger arbitrage and its options</title>
+<meta name="description" content="Gross and net spreads, implied odds with carry done properly, stock deals and basis risk, what rates do to an arb book, the antitrust tree priced node by node, special dividends, and options on a binary outcome.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A Deal Is a Price on Two Futures — merger arbitrage and its options">
+<meta property="og:description" content="Gross and net spreads, implied odds with carry done properly, stock deals and basis risk, what rates do to an arb book, the antitrust tree priced node by node, special dividends, and options on a binary outcome.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">No. 20 &middot; Merger Arbitrage</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>The spread</span><i></i></a>
+  <a href="#c2"><span>Odds</span><i></i></a>
+  <a href="#c3"><span>Stock deals</span><i></i></a>
+  <a href="#c4"><span>Rates</span><i></i></a>
+  <a href="#c5"><span>The tree</span><i></i></a>
+  <a href="#c6"><span>Dividends</span><i></i></a>
+  <a href="#c7"><span>Options</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation · No. 20</div>
+    <h1>A deal is a price on <em>two</em> futures</h1>
+    <p class="sub">A target stock after an announcement is not a company any more. It is a claim on the deal price if the deal closes and on the standalone value if it breaks, financed until somebody decides which.</p>
+  </div>
+  <div class="scrollcue">Scroll &darr;</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">This page needs <a href="parity.html" style="color:var(--blue)">page 07</a> for carry and conversions, <a href="early-exercise.html" style="color:var(--blue)">page 08</a> for what a cash deal does to the options, and <a href="catalyst.html" style="color:var(--blue)">page 03</a> for event volatility. Everything else is built here.</p>
+  <ol>
+    <li><b>Chapters 01 and 02 are the whole idea.</b> A spread is a probability and a financing rate wearing one number, and separating them is the job.</li>
+    <li><b>Chapter 02 corrects a shortcut.</b> The odds formula most primers teach charges interest in only one of the two outcomes, and the error is several points of probability.</li>
+    <li><b>Chapter 05 is the regulatory tree.</b> A second request moves a stock for two reasons, and the tree says how much of each.</li>
+    <li><b>Chapter 07 is where the options come in.</b> A binary outcome makes a distribution with two humps, and the cheapest options on the screen are the ones that bet on the shape of the second hump.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation &mdash; every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>S</td><td>The target's price today, after the announcement.</td></tr>
+      <tr><td>D</td><td>The deal consideration per target share — cash, or the current value of the acquirer shares offered.</td></tr>
+      <tr><td>SV</td><td>Standalone value: where the target trades if the deal disappears. Usually anchored on the pre-announcement price.</td></tr>
+      <tr><td>p</td><td>The probability the deal closes. Implied by prices, never observed.</td></tr>
+      <tr><td>r, T</td><td>Your funding rate and the time until the deal resolves, in years. Simple interest, which is how spreads are quoted.</td></tr>
+      <tr><td>Gross spread</td><td>D − S. What you collect if the deal closes, before financing.</td></tr>
+      <tr><td>Net spread</td><td>The annualized gross spread minus your cost of capital. The actual risk premium.</td></tr>
+      <tr><td>HSR, 2nd request</td><td>The US antitrust filing and the regulator's in-depth follow-up. Chapter 05.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>The spread is a rate, not a profit</h2>
+    <p class="dek">A dollar of spread on a four-dollar stock is a return only after you say how long it takes and what the money costs.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Suppose an acquirer agrees to buy a company for $5 a share in cash. The target was $2 yesterday; it opens at $4. The <span class="term" data-t="Gross spread" data-def="The deal price minus the target's price. What a merger arbitrageur collects if the deal closes, before paying for the money tied up while waiting.">gross spread</span> is $1 — a 25% return if the deal closes.</p>
+    <p>Twenty-five percent over what? That is the whole first lesson. If the deal closes in three months the annualized return is about 100%; in a year it is 25%; in two years 12.5%. The same dollar is a completely different trade depending on the calendar, which is why arbitrageurs quote spreads annualized and why the legal timeline is as important as the legal outcome.</p>
+    <p>And the money is not free. You fund the position at some rate — fed funds plus a spread for most institutions. The <span class="term" data-t="Net spread" data-def="The annualized spread minus the arbitrageur's cost of capital. The genuine premium for bearing the risk that the deal breaks.">net spread</span> is what is left after paying it, and it is the real risk premium: the compensation for the chance that the deal breaks and the stock falls back toward $2.</p>
+    <p>That framing answers a question that sounds like a riddle. A fund that has returned 8% a year for decades, while fed funds averaged 4%, has not earned 8% of skill. It has earned the funding rate plus about 4% of premium. If you borrow at fed funds plus 50 basis points when fed funds is 5.25%, the honest forecast for that fund is 5.25% plus the same 4% premium — about 9.25% — and your carry after paying 5.75% on the loan is about <b>3.5% a year</b>, or roughly <b>$350,000</b> on a million over ten years without compounding. Compound both sides and it is <b>$673,169</b>. The 8% headline was never the number; the premium over funding was.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Annualized return on the spread, against how long the deal takes</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Annualized gross spread</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Your funding</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The deal</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>Notice the curve falls like one over the time to close and meets the funding line at a definite month. Past that point the deal is a loss even if it closes, which is why a regulator adding six months can hurt a position without changing the odds at all.</figcaption>
+  </figure>
+
+  <div class="mline">net spread = (D − S)/S × 12/months − (r + funding spread)</div>
+  <p class="mread">Reads as: <b>the spread you collect, stretched to a year, minus what the year's money costs you.</b> Positive means you are being paid to take the break risk; negative means you are paying for it.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>The deal is unchanged but the regulator signals a long review. <b>Predict</b> the month at which the spread stops covering a 5.75% cost of money, then stretch the timeline.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"months":3}' data-focus="cv1">Closes in three months</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"months":24}' data-focus="cv1">Two-year review</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"S":4.8,"months":12}' data-focus="cv1">A tight spread</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A merger-arb fund returned 8% a year for fifty years while fed funds averaged 4%. Fed funds is now 5.25%. What should you expect it to return?</p>
+    <div class="opts">
+      <button>8% — that is its track record</button>
+      <button data-ok="1">About 9.25%. Arb returns are funding plus a premium for break risk, and the premium, about 4%, is what the history measured</button>
+      <button>About 4%, since that was its excess return</button>
+      <button>Less than 8%, because higher rates make deals harder to finance</button>
+    </div>
+    <div class="ans"><b>Funding plus the premium.</b> Spreads are set so that arbitrageurs earn their cost of capital plus compensation for risk, so when the cost of capital rises spreads widen with it. The last answer names a real second-order effect — expensive financing can deter leveraged buyers — but it is not what sets the arbitrageur's return on deals already announced.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The price is a probability, once you pay for the wait</h2>
+    <p class="dek">Two outcomes, one price, and the odds fall out. The common shortcut charges interest in only one of the outcomes.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">If the deal closes the stock is worth $5. If it breaks, it is worth roughly what it was before anyone heard of the deal — $2, on the assumption that the holders who were happy at $2 would buy it there again. Today it is $4. With no time and no interest, the price is a weighted average of the two outcomes and the weight is the probability:</p>
+  </div>
+  <div class="mline">S = p · D + (1 − p) · SV  ⟹  p = (S − SV)/(D − SV) = (4 − 2)/(5 − 2) = 66.7%</div>
+  <p class="mread">Reads as: <b>the downside you are risking, as a share of the whole range between break and close.</b> The market is paying as though there is a two-in-three chance the deal goes through.</p>
+
+  <div class="prose">
+    <p>Now put the wait back in. The deal will resolve in exactly a year and you fund at 10%. You pay $4 today, but what you must earn is $4.40 at resolution, because the money cost you 40 cents either way — whether the deal closes <em>or</em> breaks. Price that honestly and the odds are <b>80.0%</b>: p·5 + (1 − p)·2 = 4.40.</p>
+    <p>The shortcut most primers teach, downside ÷ (upside − interest + downside), gives <b>76.9%</b>. It subtracts the interest from the upside only — as though you paid for your money in the world where the deal closes and got it free in the world where it breaks. You do not. The gap is three points of probability here and it grows with the rate and the time.</p>
+    <p>Notice the direction: carry raises the implied odds. A stock trading at the same price under higher rates is telling you the deal is <em>more</em> likely, because the market is accepting a lower return for the same risk only if there is less risk.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Implied odds against the funding rate</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>No-arbitrage</span>
+            <span><i class="swl" style="background:var(--verm)"></i>The shortcut</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The prices</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Notice the two lines agree at a zero rate and peel apart as carry grows. Set the months to zero and they agree everywhere — the shortcut is only wrong about money that takes time to arrive.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>The question as it is usually asked: one year, 10% funding, $4 stock, $2 standalone. <b>Predict</b> both odds before pressing, then take the rate to zero.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"r":0.10,"months":12,"S":4,"SV":2}' data-focus="cv2">One year at 10%</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"r":0,"months":12}' data-focus="cv2">Rates at zero</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"SV":1}' data-focus="cv2">A lower standalone</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A target trades at $4 against a $5 cash deal and a $2 standalone. Rates go from zero to 10% with the price unchanged. What happened to the implied odds?</p>
+    <div class="opts">
+      <button>They fell — higher rates make the deal less attractive</button>
+      <button data-ok="1">They rose, from 66.7% to 80%. At the same price, a buyer earning a higher funding rate is accepting the same spread only because the deal is safer</button>
+      <button>Nothing — the odds depend only on the three prices</button>
+      <button>They rose to 76.9%, using downside over upside minus interest plus downside</button>
+    </div>
+    <div class="ans"><b>They rose, to 80%.</b> The fourth answer is the shortcut, and it is the tempting one because it is printed in primers: it charges the 40 cents of interest against the upside only. Your money costs the same in the break state, so the right equation grows the whole $4, not just the part you hope to collect.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — the odds formula, done once properly</summary>
+    <div class="body">
+      <p>Fund the purchase at r for time T. At resolution you must have S(1 + rT) to break even, and the position is worth D with probability p and SV otherwise.</p>
+      <div class="mline">p · D + (1 − p) · SV = S · (1 + rT)</div>
+      <p class="mread">Reads as: <b>the expected payout equals what the purchase cost, grown at your funding rate.</b> That is what "fairly priced to a financed buyer" means.</p>
+      <p>Solve for p.</p>
+      <div class="mline">p = ( S(1 + rT) − SV ) / ( D − SV )</div>
+      <p class="mread">Reads as: <b>the downside, grown by the carry, as a share of the range.</b> With r = 0 it is the simple ratio from the start of the chapter.</p>
+      <p>The shortcut instead writes p(D − S − SrT) = (1 − p)(S − SV), which is the same equation with the carry deleted from the break side. Expanding both shows the gap is (1 − p)·SrT in the numerator — interest on the break state, exactly the thing the shortcut forgot.</p>
+      <p><b>Where it breaks.</b> Standalone value is not a constant. The market moves while the deal is pending, the target's business changes, and a broken deal often leaves the target worth less than before (it may have stopped investing) or more (somebody else now knows it is for sale). The odds you back out are only as good as the SV you assumed, and the SV is a view.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>A stock deal borrows nothing and hedges imperfectly</h2>
+    <p class="dek">Pay in shares instead of cash and the financing almost disappears. What replaces it is basis risk, and a short that does not close itself if the deal breaks.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Change one term: the acquirer pays $5 <em>of its own stock</em> per share instead of $5 cash. To lock in the spread you buy the target at $4 and short $5 of the acquirer. If the deal closes, your target shares turn into exactly the acquirer shares you are short, and the position closes itself for a $1 profit regardless of where the acquirer trades.</p>
+    <p>Notice what happened to the financing. You are long $4 and short $5, so you are net <em>short</em> a dollar and earn a rebate on the proceeds. The capital cost that dominated chapter 02 is gone, which is why stock deals are sometimes called costless capital — and why the timeline matters much less. If the deal takes longer, you keep earning the rebate and keep waiting.</p>
+    <p>Ignoring the rebate, the odds are the plain ratio: 2 / 3 = <b>66.7%</b>. The maximum loss is the interesting number. If the deal breaks with the acquirer unchanged, the target falls to $2 and you lose $2. But the short does not close itself in that world. If the acquirer rallied 30% before the break you lose another $1.50 on the short — <b>$3.50</b> in total — and in principle the loss on the short leg is unbounded.</p>
+    <p>And before anything is decided there is <span class="term" data-t="Basis risk" data-def="The risk that two things you have hedged against each other do not move together. In a stock deal: the target tracks the acquirer only in proportion to the odds of closing.">basis risk</span>. The target only tracks the acquirer in proportion to the odds of closing — with a two-in-three chance, a 10% acquirer rally lifts the target by about two-thirds of that on the deal leg. Short the full $5 and you are over-hedged by a third: a rally hurts you even while the deal is on track.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Long target, short acquirer — P&amp;L against what the acquirer does</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--moss)"></i>If it closes</span>
+            <span><i class="swl" style="background:var(--verm)"></i>If it breaks</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Marked today</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The position</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The green line is flat because closing converts one leg into the other. The red line slopes because a broken deal leaves you naked short. The dashed blue line is the one you live with day to day: an over-hedge that loses on acquirer rallies by one minus the odds.</figcaption>
+  </figure>
+
+  <div class="mline">mark-to-market ≈ (p − 1) · $5 · (acquirer move)</div>
+  <p class="mread">Reads as: <b>the target moves with the acquirer only by the probability of closing, so a full short leaves you short the remainder.</b> Hedging p of the consideration rather than all of it removes the drift.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Rally the acquirer 30% and <b>predict</b> the loss if the deal then breaks. Then raise the odds to 95% and watch the daily basis shrink.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"x":0.30}' data-focus="cv3">Acquirer up 30%</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"p":0.95,"x":0.20}' data-focus="cv3">A deal everyone believes</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"p":0.667,"x":0}' data-focus="cv3">Back to the start</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long the target and short the full stock consideration. The acquirer rallies 10% with no deal news. What happened?</p>
+    <div class="opts">
+      <button>Nothing — the position is hedged</button>
+      <button data-ok="1">You lost money. The target moves with the acquirer only in proportion to the odds of closing, so a full short is an over-hedge by one minus the odds</button>
+      <button>You made money, since the consideration is now worth more</button>
+      <button>You lost the full 10% of the short</button>
+    </div>
+    <div class="ans"><b>You lost a little.</b> At two-in-three odds the target picks up about two-thirds of the acquirer's move on its deal leg, and the short loses all of it. The third answer is half right: the consideration is worth more, but only in the world where the deal closes, and the price weights that world by p.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>Rates move an arb book twice, in opposite directions</h2>
+    <p class="dek">A rate cut marks cash deals up today and lowers what they earn from then on. Stock deals barely notice.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 01 said arb returns are funding plus a premium. Chapter 02 said the price of a cash target is its expected payout discounted at the funding rate. Put them together and a rate change does two things at once.</p>
+    <p>Take a book that is 75% cash deals and 25% stock deals, every deal a year from closing, funded at 5.25%. Rates fall 100 basis points and stay there. Each cash target is priced off its payout divided by 1 + r, so the cut marks them up immediately: by about 0.96% each, or <b>+0.72%</b> on the book. Standalone values are assumed not to move.</p>
+    <p>From then on the book earns less. Cash deals now return a point less a year. Stock deals lose only the rebate on their net short — a quarter of their capital — so they give up a quarter point. Together the book's yearly return falls by <b>0.81%</b>. Over the first year the mark-up and the lower carry nearly cancel, leaving <b>−0.09%</b>; every year after, the book simply earns about 0.8% less.</p>
+    <p>That is the relationship people get backwards. Lower rates <em>feel</em> good for arbitrage because the first thing you see is a mark-up. But merger arbitrage is a spread over funding, and spreads compress when funding gets cheaper. In the long run arb returns move with short rates, one-for-one on the cash part of the book.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>What a rate change does to the book</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--moss)"></i>Mark-up today</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Change in yearly return</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Year one, net</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The book</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>Notice the green and red lines are nearly mirror images: what the cut gives you today it takes back over the next year. Slide the book to all stock deals and both lines lie down — stock deals were never paying for their money.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Make the book all cash and cut rates 300 basis points. <b>Predict</b> whether year one is up, down or flat.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"cash":1,"dr":-0.03}' data-focus="cv4">All cash, deep cut</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"cash":0,"dr":-0.01}' data-focus="cv4">All stock deals</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"cash":0.75,"dr":-0.01,"r0":0.0525}' data-focus="cv4">The 75/25 book</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Rates fall 100 basis points and are expected to stay there. What happens to the expected return of a cash-heavy merger-arb portfolio?</p>
+    <div class="opts">
+      <button>It rises, since every position marked up</button>
+      <button data-ok="1">It falls by roughly the cut on the cash share — after a one-time mark-up that roughly pays for the first year</button>
+      <button>Nothing, since rates do not affect deal odds</button>
+      <button>It falls by the full 100 basis points across the whole book</button>
+    </div>
+    <div class="ans"><b>Lower going forward, after a one-off gain.</b> The mark-up is the market re-pricing the spreads to the new, lower required return; what you collect afterwards is that lower return. The fourth answer forgets that stock deals are funded by their own short and barely care.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>A second request costs odds and time, and the tree says how much of each</h2>
+    <p class="dek">The antitrust process is a sequence of decision points. Price each one as a node and the stock's reaction to news becomes arithmetic.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A US merger review runs through a few predictable gates. The companies file under <span class="term" data-t="HSR" data-def="The Hart–Scott–Rodino filing that starts a US antitrust review. The regulator has thirty days to clear the deal or open an in-depth investigation.">HSR</span>, and within thirty days the FTC or DoJ either lets the deal proceed or issues a <span class="term" data-t="Second request" data-def="The regulator's demand for detailed documents after an HSR filing. It means an in-depth review that usually takes months, and it is the first big branch in a deal's tree.">second request</span>. A second request means months of document production. At the end the regulator either clears the deal or sues to block it, and a judge decides the lawsuit.</p>
+    <p>A desk turns that into a tree. Each gate is a node; each branch has a probability; each node's value is the probability-weighted value of its children, discounted for the time that stage adds. The tree below is the one from a desk's own model of a real cash deal: a $11.50 takeout, a $7.51 break price, a 32.2% chance of clearing at HSR, 73.7% of clearing after a second request, and a 33.1% chance of winning a lawsuit. Multiply the branches through and the tree's own odds of closing are <b>88.1%</b>.</p>
+    <p>With a 5% funding rate and the second request and lawsuit each adding about six months, the tree reproduces the desk's node prices to the cent: <b>$10.79</b> today, <b>$10.47</b> after a second request, <b>$8.63</b> after a lawsuit.</p>
+    <p>Now the question desks actually ask: why does a second request knock 32 cents off the stock? Two separate reasons. The <b>odds fall</b> — once you are in the second-request branch, the chance of closing drops from 88.1% to 82.4%, because the quick-clearance path is gone and the lawsuit path is now live. And the <b>wait lengthens</b> — six more months of carry on an $11.50 claim. The tree splits the drop: about <b>23 cents</b> from the odds and <b>9 cents</b> from the time.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The regulatory tree, priced node by node</h3>
+          <span class="note">Edge labels are branch probabilities; each box is the node's value and its odds of closing.</span>
+        </div>
+        <canvas id="cv5" height="330"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The review</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>Notice the second-request box sits below today's box even though most of the tree beneath it still ends at the deal price. Drag the months a second request adds toward zero and the drop shrinks but does not vanish — that remainder is pure probability.</figcaption>
+  </figure>
+
+  <div class="mline">V(node) = [ p · V(close) + (1 − p) · V(next node) ] / (1 + r · t)</div>
+  <p class="mread">Reads as: <b>each node is worth the average of where it can go next, discounted for how long getting there takes.</b> Work backwards from the leaves and the whole tree prices itself.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Make the second request instant — zero added months — and <b>predict</b> how much of the 32-cent drop survives. Then make the lawsuit a coin flip.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"t2":0,"t3":0}' data-focus="cv5">No added time</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"p3":0.5}' data-focus="cv5">Lawsuit is a coin flip</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"p1":0.322,"p2":0.737,"p3":0.331,"t2":6.3,"t3":5.6,"r":0.05}' data-focus="cv5">The desk's tree</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A cash deal gets a second request and the target falls from $10.79 to $10.47. Name the two components.</p>
+    <div class="opts">
+      <button>Lower odds and a wider bid–offer</button>
+      <button data-ok="1">Lower odds of closing — the quick-clearance branch is gone — and a longer wait, which adds carry on the takeout. Here roughly 23 cents and 9 cents</button>
+      <button>Lower odds only; time does not matter for a cash deal</button>
+      <button>A lower standalone value, because the market now doubts the company</button>
+    </div>
+    <div class="ans"><b>Probability and time.</b> The third answer is the trap, and chapter 01 is why: time is the denominator of every spread. The fourth answer can be true of a real deal, but it is a change in a leaf of the tree, not in the second request itself.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation — splitting the drop into odds and time</summary>
+    <div class="body">
+      <p>Price the tree twice: once with the real stage lengths and once with every stage instantaneous. The instantaneous tree has no carry at all, so the change in its value when you move from today's node to the second-request node is the probability effect alone.</p>
+      <div class="mline">odds effect = V₀(2nd request) − V₀(today)   ·   time effect = total drop − odds effect</div>
+      <p class="mread">Reads as: <b>remove time, measure what is left, and call the remainder time.</b> It is the same split as a variance attribution, done on a tree.</p>
+      <p><b>Where it breaks.</b> The branch probabilities are the desk's opinion, and a tree whose odds multiply to 88% while the market trades the stock at an implied 80% is a disagreement, not a fact — that gap is either the desk's edge or the desk's blind spot. Timelines are worse than probabilities: courts and regulators do not publish schedules, and the length of a lawsuit is one of the least predictable numbers in the whole calculation. Foreign regulators — the CMA, SAMR, the European Commission — add their own trees, and the deal closes only if every one of them ends at the green box.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
+    <h2>A special dividend is worth the odds times the dividend</h2>
+    <p class="dek">The cash leaves the company whether or not the deal closes, so it only adds value in the world where somebody pays the full price for what is left.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A week after the GoPro announcement — $5 cash, $4 stock, $2 standalone, zero rates — the target declares a 30-cent special dividend, to be paid before the deal resolves. The acquirer says the $5 still stands. Where does the stock trade?</p>
+    <p>The tempting answer is $4.30: the old price plus the dividend. It double-counts. If the deal breaks, the company is worth $2 in total, but $0.30 of that has just been paid out — so the shares fall to $1.70 and you hold 30 cents of cash. Still $2.00. The dividend only adds value in the close state, where the acquirer pays $5 for a company that has already handed you 30 cents. So the stock moves by the odds times the dividend: 2/3 × 0.30 = 20 cents, to <b>$4.20</b>.</p>
+    <p>The same arithmetic on the VZIO deal: an $11.50 takeout trading at $10.79 on 80% implied odds announces a 20-cent special, and the takeout is unchanged. The stock should trade at about <b>$10.95</b>, up 16 cents — not 20.</p>
+    <p>Once the dividend goes ex, the stock drops by the full dividend, because now everybody's claim is lower by exactly that cash. Before the ex-date, the dividend is a bet on the deal like everything else on this page.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Price against the odds, with and without the dividend</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Before the dividend</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Correct</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Adding the whole dividend</span>
+          </span>
+        </div>
+        <canvas id="cv6" height="280"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The deal</h4>
+        <div id="ctl6"></div>
+        <div class="btnrow"><button class="act ghost" id="gp6">GoPro</button><button class="act ghost" id="vz6">VZIO</button></div>
+        <div class="kv" style="margin-top:20px" id="kv6"></div>
+      </div>
+    </div>
+    <figcaption>Notice the blue line starts on the grey one at zero odds and ends on the red one at certainty. The dividend's value scales with the probability that someone pays the takeout on top of it, which is the whole answer in one picture.</figcaption>
+  </figure>
+
+  <div class="mline">S′ = p · (D + q) + (1 − p) · SV   ⟹   S′ − S = p · q</div>
+  <p class="mread">Reads as: <b>in the close state you get the deal price and the dividend; in the break state the dividend came out of the standalone value, so nothing changes.</b> The price moves by the odds times the dividend.</p>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">GoPro trades at $4 on a $5 cash deal and a $2 standalone, at zero rates. It declares a $0.30 special paid regardless of the outcome, and the deal price is unchanged. Where should it trade?</p>
+    <div class="opts">
+      <button>$4.30 — the price plus the dividend</button>
+      <button data-ok="1">$4.20. The cash leaves the company either way, so a broken deal is still worth $2 in total; only the close state gains 30 cents, and it is weighted two-thirds</button>
+      <button>$4.00 — dividends are already in the price</button>
+      <button>$3.70 — the stock drops by the dividend</button>
+    </div>
+    <div class="ans"><b>$4.20.</b> The fourth answer is what happens on the ex-date, not on the announcement. The first answer is the common one, and the error is treating the standalone value as if it did not pay for the dividend.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
+    <h2>Options on a binary outcome price the shape of the bad hump</h2>
+    <p class="dek">A deal or a drug trial turns one distribution into two. The cheapest options on the chain are a claim on where the second hump sits.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Before a binary event resolves, the stock's distribution is a mixture: a hump around the success price and another around the failure price, weighted by the odds. Every option on the chain is the probability-weighted average of its two conditional prices, and nothing in Black–Scholes' single bell curve can describe that.</p>
+    <p>Here is the case that makes it tradeable. A biotech at $20 has a trial readout coming. The market thinks failure takes it to $10; assume success takes it to $26, which together with the $20 price implies 62.5% odds. Your research team thinks a failure is far worse — $5, not $10. You do not need to disagree with the odds to have a trade. You need an option that only pays in the failure hump, below where the market thinks that hump sits.</p>
+    <p>The <b>10/5 put spread</b> is that option. On the market's distribution it is worth <b>$0.19</b>; on yours, <b>$1.78</b> — about nine times as much. The 7.5 put is the extreme version: about a fifth of a cent on the market's view and about 94 cents on yours. Strikes below the market's failure price are cheap precisely because the market puts almost no probability there, which is what makes them the right instrument when you disagree about the floor rather than about the odds.</p>
+    <p>The same shape governs options on deal stocks. A target in a <b>cash</b> deal is pinned near the takeout and its day-to-day volatility collapses — chapter 08 of page 08 shows the certain-deal limit, where the calls above the deal price are worth nothing. In a <b>stock</b> deal the target inherits the acquirer's volatility, scaled by the exchange ratio, so its non-catalyst vol stays high. A <b>collar</b> deal sits between: inside the collar band the consideration is fixed in value and the target behaves like a cash deal, outside it the target moves like stock. So the ranking of non-catalyst volatility is stock, then collar, then cash.</p>
+    <p>And it answers a question that sounds like a riddle: you are short the January 50 calls on a $30 stock — what is the best headline you could wake up to? Not a crash, if you are hedged long the shares. The best headline is <b>an all-cash takeover below $50</b>: the stock jumps, your long-delta hedge makes money, and the calls you are short lose their volatility and can never reach the strike, so they decay toward the value of a topping bid. Every option you are short gets cheaper and every share you hold gets dearer.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Two humps: the market's distribution and yours</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Market's failure price</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Your failure price</span>
+          </span>
+        </div>
+        <canvas id="cv7" height="270"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The event</h4>
+        <div id="ctl7"></div>
+        <div class="btnrow"><button class="act ghost" id="bio7">Biotech readout</button><button class="act ghost" id="gp7">GoPro deal</button></div>
+        <div class="kv" style="margin-top:20px" id="kv7"></div>
+      </div>
+    </div>
+    <figcaption>Notice the two curves share the right hump exactly and differ only on the left. Every option that matters for this view lives under the left hump, and those are the options the market prices as close to worthless.</figcaption>
+  </figure>
+
+  <div class="mline">option = p · BS(success price) + (1 − p) · BS(failure price)</div>
+  <p class="mread">Reads as: <b>price the option in each world and weight by the odds.</b> The smile you would see on such a chain is not a statement about volatility at all; it is the two humps, flattened into one number per strike.</p>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">The market prices a failed trial at $10 from $20. You believe $5. What trade expresses that view most efficiently?</p>
+    <div class="opts">
+      <button>Buy the at-the-money put, since you are bearish</button>
+      <button>Sell the stock short</button>
+      <button data-ok="1">Buy puts struck below $10 — the 10/5 put spread or the 7.5 puts. They pay only in the failure hump, below where the market thinks it sits, and the market prices them as nearly worthless</button>
+      <button>Buy a straddle, since the event is binary</button>
+    </div>
+    <div class="ans"><b>Puts below the market's floor.</b> You have no view on the odds, only on the failure price, so you want an instrument that is insensitive to the odds and sensitive to the floor. The at-the-money put pays mostly on whether the trial fails, which is the market's question, not yours. The straddle bets on movement the market has already priced. The short sale makes money on any failure and loses on success, which is a bet on the odds.</div>
+  </div>
+</section>
+
+<!-- ══════════ quiz ══════════ -->
+<section class="chapter" id="cq">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Check yourself</h2>
+    <p class="dek">Six questions across the page.</p>
+  </div>
+
+  <div class="prose" style="margin-bottom:26px"><p>Answer without scrolling back. Each explanation names the chapter to revisit.</p></div>
+
+  <div class="score" id="scoreBox">
+    <span class="big" id="scoreNum">0 / 6</span>
+    <span class="txt" id="scoreTxt">Answered nothing yet. Questions are scored as you go.</span>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 1 · chapter 02</span>
+    <p class="q">GoPro is at $2 when a $5 all-cash take-private is announced. Rates are zero and the stock goes to $4. What odds is the market pricing?</p>
+    <div class="opts">
+      <button>80%, since the stock is 80% of the deal price</button>
+      <button data-ok="1">Two-thirds: the $2 of downside is two-thirds of the $3 range between break and close</button>
+      <button>50%, since nobody knows</button>
+      <button>100%, since the stock jumped</button>
+    </div>
+    <div class="ans"><b>Two-thirds.</b> S = pD + (1 − p)SV gives p = (4 − 2)/(5 − 2). The first answer divides by the wrong range: it treats a broken deal as worthless rather than as a return to $2.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 2 · chapter 02</span>
+    <p class="q">Same deal, resolving in a year, funded at 10%. What are the odds?</p>
+    <div class="opts">
+      <button>66.7% — rates do not change probabilities</button>
+      <button>76.9%, from downside ÷ (upside − interest + downside)</button>
+      <button data-ok="1">80%. The $4 must grow to $4.40 whether the deal closes or breaks, and p·5 + (1 − p)·2 = 4.40</button>
+      <button>90%</button>
+    </div>
+    <div class="ans"><b>80%.</b> The shortcut charges interest only in the close state; your money costs the same if the deal breaks. Chapter 02 has the derivation.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 3 · chapter 03</span>
+    <p class="q">Instead of cash, the acquirer pays $5 in its own stock. Ignoring the rebate, what are the odds, and what is the most you can lose?</p>
+    <div class="opts">
+      <button>66.7%, and $2</button>
+      <button data-ok="1">66.7% — and $2 only if the acquirer is unchanged at the break. The short does not close itself if the deal fails, so the loss on that leg is unbounded in principle</button>
+      <button>80%, and $4</button>
+      <button>66.7%, and nothing, since the position is hedged</button>
+    </div>
+    <div class="ans"><b>Two-thirds, and more than $2.</b> The first answer is what most people say and it is the number that holds only if the acquirer does not move. Chapter 03's red line is the rest of it.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 4 · chapter 04</span>
+    <p class="q">Rates fall 100 basis points for a decade. Your arb book is 75% cash deals closing in a year. What do you expect?</p>
+    <div class="opts">
+      <button>Higher returns — every cash target just marked up</button>
+      <button data-ok="1">A one-time mark-up of about 0.7%, then a yearly return about 0.8% lower. Arb returns track short rates</button>
+      <button>No change; rates do not affect deals</button>
+      <button>A loss of 1% immediately</button>
+    </div>
+    <div class="ans"><b>Up today, lower forever.</b> The mark-up is the spread compressing to the new required return; what remains to be earned is smaller by about the cut on the cash share. Chapter 04.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 5 · chapter 06</span>
+    <p class="q">VZIO trades at $10.79 on an $11.50 cash takeout, implying 80% odds. It announces a $0.20 special; the takeout is unchanged and the odds do not move. Where does it trade?</p>
+    <div class="opts">
+      <button>$10.99</button>
+      <button data-ok="1">About $10.95 — up 80% of 20 cents, because the dividend only adds value in the close state</button>
+      <button>$10.79</button>
+      <button>$10.59</button>
+    </div>
+    <div class="ans"><b>Up 16 cents.</b> If the deal breaks the company is worth the same in total after paying the cash out. Chapter 06.</div>
+  </div>
+
+  <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
+    <span class="lab">Question 6 · chapter 07</span>
+    <p class="q">Which target has the highest non-catalyst volatility: one in a cash deal, a stock deal, or a collar deal?</p>
+    <div class="opts">
+      <button>Cash, because cash deals are riskier</button>
+      <button data-ok="1">The stock deal. Its consideration is acquirer shares, so it inherits the acquirer's volatility; a collar behaves like cash inside its band and like stock outside it; a cash deal pins the target near the takeout</button>
+      <button>The collar, because it has two regimes</button>
+      <button>They are the same; only the event risk differs</button>
+    </div>
+    <div class="ans"><b>Stock, then collar, then cash.</b> Non-catalyst volatility is what the target does while nothing happens to the deal, and that is set by what the consideration is made of.</div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p class="n">Every number on this page uses simple interest, a single funding rate and a fixed standalone value, which is how spreads are quoted rather than how they behave. Real standalone values move with the market and with what the target did while it waited; real timelines slip; real deals have financing conditions, material-adverse-change clauses, competing bids and votes that are not drawn as branches here. The VZIO tree's branch probabilities and timings are a desk's model, reproduced to show the mechanics, and the biotech success price is an assumption. Antitrust doctrine and regulatory practice change with administrations — the Chicago school's focus on consumer prices and the newer emphasis on market power produce different trees for the same deal — and nothing here is a forecast of how any regulator will act.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* ═══════════ merger arbitrage — shared arithmetic ═══════════
+   Every chapter prices a target as a probability-weighted claim on two
+   outcomes, close (the deal consideration) and break (the standalone
+   value), financed at a simple-interest rate over the time to resolution.
+   Simple interest is deliberate: it is the convention arb desks quote
+   spreads in, and it keeps the odds formula readable. */
+const money=(x,d)=>(x<0?"−$":"$")+Math.abs(x).toFixed(d==null?2:d);
+const pctS=(x,d)=>(x*100).toFixed(d==null?1:d)+"%";
+/* the shortcut on the primer: downside / (upside − carry + downside) */
+const oddsShortcut=(S,D,SV,r,T)=>{const up=D-S,dn=S-SV,I=S*r*T;return dn/(up-I+dn);};
+/* no-arbitrage: p·D + (1−p)·SV must equal S grown at the funding rate */
+const oddsExact=(S,D,SV,r,T)=>(S*(1+r*T)-SV)/(D-SV);
+/* a curve helper — line() takes arrays, never a function */
+function curve(o,x0,x1,f,col,w,dash){const xs=[],ys=[];
+  for(let i=0;i<=160;i++){const x=x0+(x1-x0)*i/160;xs.push(x);ys.push(f(x));}
+  line(o,xs,ys,col,w,dash);}
+
+/* ══════════════════════════════════════════════
+   HERO — spreads that close or break
+   ══════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById("heroCv");
+  let w,h,g,raf,t0=0,paths=[];
+  function mk(){paths=[];
+    for(let i=0;i<26;i++){const close=Math.random()<0.8, tb=0.35+Math.random()*0.55, pts=[];
+      let y=0.55+(Math.random()-0.5)*0.04;
+      for(let j=0;j<=120;j++){const t=j/120;
+        if(t<tb){y+=(0.62-y)*0.02+(Math.random()-0.5)*0.012;}
+        else y=close? y+(0.30-y)*0.25 : y+(0.86-y)*0.18+(Math.random()-0.5)*0.02;
+        pts.push(y);}
+      paths.push({pts,close});}}
+  function size(){const dpr=window.devicePixelRatio||1;
+    w=cv.clientWidth;h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+    g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);}
+  function paint(k){
+    g.fillStyle=C("--chalk");g.fillRect(0,0,w,h);
+    paths.forEach(p=>{g.strokeStyle=p.close?C("--blue"):C("--verm");
+      g.globalAlpha=p.close?0.16:0.24;g.lineWidth=p.close?1.1:1.5;g.beginPath();
+      const n=Math.min(120,k);
+      for(let j=0;j<=n;j++){const x=(j/120)*w,y=p.pts[j]*h;j?g.lineTo(x,y):g.moveTo(x,y);}
+      g.stroke();});
+    g.globalAlpha=1;}
+  function frame(ts){if(!t0)t0=ts;const k=Math.floor((ts-t0)/28);
+    paint(k);if(k>150){t0=ts;mk();}raf=requestAnimationFrame(frame);}
+  mk();size();paint(120);           // paint once synchronously, then animate
+  if(!RM)raf=requestAnimationFrame(frame);
+  let t;window.addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(()=>{
+    cancelAnimationFrame(raf);size();paint(120);t0=0;if(!RM)raf=requestAnimationFrame(frame);},170);});
+})();
+
+/* ══════════════════════════════════════════════
+   01 — the spread, gross and net
+   ══════════════════════════════════════════════ */
+const s1={S:4,D:5,months:12,r:0.0525,fs:0.005};
+(function(){
+  sliders(document.getElementById("ctl1"),[
+    {id:"S1",k:"S",lbl:"S",name:"Target price",min:3,max:4.95,step:0.05,fmt:v=>"$"+v.toFixed(2)},
+    {id:"D1",k:"D",lbl:"D",name:"Deal price",min:4,max:6,step:0.05,fmt:v=>"$"+v.toFixed(2)},
+    {id:"m1",k:"months",lbl:"T",name:"Months to close",min:1,max:24,step:1,fmt:v=>v.toFixed(0)+"m"},
+    {id:"r1",k:"r",lbl:"r",name:"Fed funds",min:0,max:0.10,step:0.0025,fmt:v=>pct2(v)},
+    {id:"f1",k:"fs",lbl:"+",name:"Your funding spread",min:0,max:0.02,step:0.0025,fmt:v=>(v*1e4).toFixed(0)+"bp"}
+  ],s1,()=>draw(),"c1");
+  window.draw1=draw;
+  function draw(){
+    const gross=s1.D-s1.S, fund=s1.r+s1.fs;
+    const ann=m=>(gross/s1.S)*12/m;
+    const o=Fig(document.getElementById("cv1"),{h:290,x0:1,x1:24,y0:0,y1:Math.max(0.25,Math.min(1.2,ann(3)*1.1)),pad:{l:56}});
+    axes(o,v=>v.toFixed(0)+"m",v=>(v*100).toFixed(0)+"%",5,4);
+    clip(o,()=>{curve(o,1,24,ann,C("--blue"),2.4);
+      line(o,[1,24],[fund,fund],C("--verm"),1.8,[5,4]);});
+    vline(o,s1.months,C("--ochre"),"your deal",[2,4]);
+    const a=ann(s1.months);
+    document.getElementById("kv1").innerHTML=kvHTML([
+      ["Gross spread",money(gross)],
+      ["As % of price",pctS(gross/s1.S,2)],
+      ["Annualized",pctS(a,2)],
+      ["Your funding",pctS(fund,2)],
+      ["Net spread, annualized",pctS(a-fund,2)],
+      ["Breakeven months",a>0&&fund>0?((gross/s1.S)*12/fund).toFixed(1):"—"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   02 — odds from prices, with and without carry
+   ══════════════════════════════════════════════ */
+const s2={S:4,D:5,SV:2,r:0.10,months:12};
+(function(){
+  sliders(document.getElementById("ctl2"),[
+    {id:"S2",k:"S",lbl:"S",name:"Target price",min:2.2,max:4.9,step:0.05,fmt:v=>"$"+v.toFixed(2)},
+    {id:"SV2",k:"SV",lbl:"SV",name:"Standalone value",min:0.5,max:3.5,step:0.05,fmt:v=>"$"+v.toFixed(2)},
+    {id:"r2",k:"r",lbl:"r",name:"Funding rate",min:0,max:0.15,step:0.0025,fmt:v=>pct2(v)},
+    {id:"m2",k:"months",lbl:"T",name:"Months to resolution",min:0,max:24,step:1,fmt:v=>v.toFixed(0)+"m"}
+  ],s2,()=>draw(),"c2");
+  window.draw2=draw;
+  function draw(){
+    const T=s2.months/12;
+    const o=Fig(document.getElementById("cv2"),{h:290,x0:0,x1:0.15,y0:0.4,y1:1.05,pad:{l:56}});
+    axes(o,v=>(v*100).toFixed(0)+"%",v=>(v*100).toFixed(0)+"%",5,4);
+    clip(o,()=>{
+      curve(o,0,0.15,r=>oddsExact(s2.S,s2.D,s2.SV,r,T),C("--blue"),2.4);
+      curve(o,0,0.15,r=>oddsShortcut(s2.S,s2.D,s2.SV,r,T),C("--verm"),2,[5,4]);
+    });
+    vline(o,s2.r,C("--ochre"),"your rate",[2,4]);
+    const e=oddsExact(s2.S,s2.D,s2.SV,s2.r,T), sc=oddsShortcut(s2.S,s2.D,s2.SV,s2.r,T);
+    document.getElementById("kv2").innerHTML=kvHTML([
+      ["Upside",money(s2.D-s2.S)],
+      ["Downside",money(s2.S-s2.SV)],
+      ["Carry to resolution",money(s2.S*s2.r*T)],
+      ["Odds, no carry",pctS(oddsExact(s2.S,s2.D,s2.SV,0,T),1)],
+      ["Odds, shortcut",pctS(sc,1)],
+      ["Odds, no-arbitrage",pctS(e,1)],
+      ["Gap",((e-sc)*100).toFixed(1)+" pts"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   03 — the stock deal and its basis
+   ══════════════════════════════════════════════ */
+const s3={p:2/3,x:0};
+(function(){
+  sliders(document.getElementById("ctl3"),[
+    {id:"p3",k:"p",lbl:"p",name:"Odds of closing",min:0.05,max:0.99,step:0.01,fmt:v=>pctS(v,0)},
+    {id:"x3",k:"x",lbl:"Δ",name:"Acquirer move before resolution",min:-0.5,max:0.5,step:0.01,fmt:v=>(v>=0?"+":"")+(v*100).toFixed(0)+"%"}
+  ],s3,()=>draw(),"c3");
+  window.draw3=draw;
+  /* long one target at $4, short $5 of acquirer per target share */
+  const closePL=x=>1;                       // you deliver the target into the acquirer shares you are short
+  const breakPL=x=>(2-4)-5*x;               // target falls to standalone, the short stays open
+  const markPL=(x,p)=>p*5*x-5*x;            // before resolution: target tracks p of the acquirer move
+  function draw(){
+    const o=Fig(document.getElementById("cv3"),{h:290,x0:-0.5,x1:0.5,y0:-5,y1:3,pad:{l:56}});
+    axes(o,v=>(v>=0?"+":"")+(v*100).toFixed(0)+"%",v=>money(v,0),5,4);
+    clip(o,()=>{
+      line(o,[-0.5,0.5],[0,0],C("--grey"),1,[3,3]);
+      curve(o,-0.5,0.5,closePL,C("--moss"),2.4);
+      curve(o,-0.5,0.5,breakPL,C("--verm"),2.4);
+      curve(o,-0.5,0.5,x=>markPL(x,s3.p),C("--blue"),2,[5,4]);
+    });
+    vline(o,s3.x,C("--ochre"),null,[2,4]);
+    const ev=s3.p*closePL(s3.x)+(1-s3.p)*breakPL(s3.x);
+    document.getElementById("kv3").innerHTML=kvHTML([
+      ["Implied odds, no carry",pctS((4-2)/(5-2),1)],
+      ["If it closes",money(closePL(s3.x))],
+      ["If it breaks",money(breakPL(s3.x))],
+      ["Mark-to-market now",money(markPL(s3.x,s3.p))],
+      ["Expected at resolution",money(ev)],
+      ["Hedge that removes basis",(s3.p*100).toFixed(0)+"% of $5"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   04 — rates and the arb book
+   ══════════════════════════════════════════════ */
+const s4={dr:-0.01,cash:0.75,r0:0.0525,short:0.25};
+(function(){
+  sliders(document.getElementById("ctl4"),[
+    {id:"dr4",k:"dr",lbl:"Δr",name:"Change in rates",min:-0.03,max:0.03,step:0.0025,fmt:v=>(v>=0?"+":"")+(v*1e4).toFixed(0)+"bp"},
+    {id:"c4",k:"cash",lbl:"cash",name:"Share in cash deals",min:0,max:1,step:0.05,fmt:v=>pctS(v,0)},
+    {id:"r04",k:"r0",lbl:"r₀",name:"Rate before the change",min:0.01,max:0.08,step:0.0025,fmt:v=>pct2(v)}
+  ],s4,()=>draw(),"c4");
+  window.draw4=draw;
+  /* one-year cash deals are priced off E/(1 + r): a rate cut marks them up
+     once and lowers what they earn from then on. Stock deals carry a net
+     short of a quarter of capital, earning the rebate rate on it. */
+  window.bookMove=function(dr,cash,r0){
+    const mark=cash*((1+r0)/(1+r0+dr)-1);
+    const fwd=cash*dr+(1-cash)*s4.short*dr;
+    return {mark,fwd,year1:mark+fwd};
+  };
+  function draw(){
+    const o=Fig(document.getElementById("cv4"),{h:290,x0:-0.03,x1:0.03,y0:-0.035,y1:0.035,pad:{l:58}});
+    axes(o,v=>(v>=0?"+":"")+(v*1e4).toFixed(0),v=>(v*100).toFixed(1)+"%",5,4);
+    clip(o,()=>{
+      line(o,[-0.03,0.03],[0,0],C("--grey"),1,[3,3]);
+      curve(o,-0.03,0.03,d=>bookMove(d,s4.cash,s4.r0).mark,C("--moss"),2.2);
+      curve(o,-0.03,0.03,d=>bookMove(d,s4.cash,s4.r0).fwd,C("--verm"),2.2);
+      curve(o,-0.03,0.03,d=>bookMove(d,s4.cash,s4.r0).year1,C("--blue"),2.6,[5,4]);
+    });
+    vline(o,s4.dr,C("--ochre"),null,[2,4]);
+    const b=bookMove(s4.dr,s4.cash,s4.r0);
+    document.getElementById("kv4").innerHTML=kvHTML([
+      ["Mark-up today",pctS(b.mark,2)],
+      ["Change in yearly return",pctS(b.fwd,2)],
+      ["Year one, net",pctS(b.year1,2)],
+      ["Every year after",pctS(b.fwd,2)],
+      ["Cash-deal sensitivity",pctS(s4.cash,0)+" of the rate"]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   05 — the regulatory tree, priced
+   ══════════════════════════════════════════════ */
+const s5={p1:0.322,p2:0.737,p3:0.331,D:11.5,B:7.51,r:0.05,t1:0.25,t2:6.3,t3:5.6};
+(function(){
+  sliders(document.getElementById("ctl5"),[
+    {id:"p15",k:"p1",lbl:"p₁",name:"Clears at HSR",min:0,max:1,step:0.001,fmt:v=>pctS(v,1)},
+    {id:"p25",k:"p2",lbl:"p₂",name:"Clears after 2nd request",min:0,max:1,step:0.001,fmt:v=>pctS(v,1)},
+    {id:"p35",k:"p3",lbl:"p₃",name:"Wins the lawsuit",min:0,max:1,step:0.001,fmt:v=>pctS(v,1)},
+    {id:"t25",k:"t2",lbl:"t₂",name:"Months a 2nd request adds",min:0,max:12,step:0.1,fmt:v=>v.toFixed(1)+"m"},
+    {id:"t35",k:"t3",lbl:"t₃",name:"Months a lawsuit adds",min:0,max:12,step:0.1,fmt:v=>v.toFixed(1)+"m"},
+    {id:"r5",k:"r",lbl:"r",name:"Funding rate",min:0,max:0.10,step:0.0025,fmt:v=>pct2(v)}
+  ],s5,()=>draw(),"c5");
+  window.draw5=draw;
+  /* each node is the discounted expectation of its children; the discount
+     is the carry over the time that stage adds */
+  window.treeNodes=function(st){
+    const d=m=>1/(1+st.r*m/12);
+    const law=d(st.t3)*(st.p3*st.D+(1-st.p3)*st.B);
+    const sec=d(st.t2)*(st.p2*st.D+(1-st.p2)*law);
+    const top=d(st.t1)*(st.p1*st.D+(1-st.p1)*sec);
+    const close=st.p1+(1-st.p1)*(st.p2+(1-st.p2)*st.p3);
+    const close2=st.p2+(1-st.p2)*st.p3;
+    /* split the drop on a 2nd request into odds and time: the same subtree
+       priced with no extra carry isolates the probability effect */
+    const secNoTime=st.p2*st.D+(1-st.p2)*(st.p3*st.D+(1-st.p3)*st.B);
+    const topNoTime=st.p1*st.D+(1-st.p1)*secNoTime;
+    return {law,sec,top,close,close2,oddsPart:secNoTime-topNoTime,
+            timePart:(sec-top)-(secNoTime-topNoTime)};
+  };
+  let BOUNDS=[0,1e9];
+  function box(g,x,y,txt,sub,col){
+    g.font=(NARROW()?9.5:11)+"px 'IBM Plex Mono', monospace";
+    const mw=t=>{const m=g.measureText(t);return m&&m.width?m.width:t.length*6.6;};
+    const wB=Math.max(mw(txt),mw(sub))+(NARROW()?10:16);
+    x=Math.min(Math.max(x,BOUNDS[0]+wB/2+1),BOUNDS[1]-wB/2-1);   // never clip at the canvas edge
+    g.fillStyle=C("--chalk");g.strokeStyle=col;g.lineWidth=1.4;
+    g.fillRect(x-wB/2,y-17,wB,34);g.strokeRect(x-wB/2,y-17,wB,34);
+    g.fillStyle=col;g.textAlign="center";g.textBaseline="middle";
+    g.fillText(txt,x,y-6);g.fillStyle=C("--grey");g.fillText(sub,x,y+8);
+  }
+  function edge(g,x0,y0,x1,y1,lab){
+    g.strokeStyle=C("--hair");g.lineWidth=1;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();
+    g.fillStyle=C("--ink");g.font="10px 'IBM Plex Mono', monospace";g.textAlign="center";
+    g.fillText(lab,(x0+x1)/2+(NARROW()?0:10),(y0+y1)/2-4);
+  }
+  function draw(){
+    const cv=document.getElementById("cv5");
+    const o=Fig(cv,{h:330,x0:0,x1:1,y0:0,y1:1,pad:{l:8,r:8,t:8,b:8}});
+    const g=o.g,X=v=>o.X(v),Y=v=>o.Y(v),n=treeNodes(s5),p=v=>(v*100).toFixed(1);
+    BOUNDS=[o.P.l,o.P.l+o.pw];
+    const P=NARROW()
+      ? {top:[0.17,0.62],c1:[0.47,0.90],sec:[0.40,0.40],c2:[0.64,0.64],law:[0.62,0.20],c3:[0.83,0.42],br:[0.83,0.07]}
+      : {top:[0.10,0.62],c1:[0.40,0.88],sec:[0.40,0.40],c2:[0.70,0.62],law:[0.70,0.16],c3:[0.92,0.36],br:[0.92,0.04]};
+    const at=k=>[X(P[k][0]),Y(P[k][1])];
+    edge(g,...at("top"),...at("c1"),p(s5.p1)+"%");
+    edge(g,...at("top"),...at("sec"),p(1-s5.p1)+"%");
+    edge(g,...at("sec"),...at("c2"),p(s5.p2)+"%");
+    edge(g,...at("sec"),...at("law"),p(1-s5.p2)+"%");
+    edge(g,...at("law"),...at("c3"),p(s5.p3)+"%");
+    edge(g,...at("law"),...at("br"),p(1-s5.p3)+"%");
+    box(g,...at("top"),"Today $"+n.top.toFixed(2),"close "+p(n.close)+"%",C("--blue"));
+    box(g,...at("sec"),"2nd req $"+n.sec.toFixed(2),"close "+p(n.close2)+"%",C("--ochre"));
+    box(g,...at("law"),"Lawsuit $"+n.law.toFixed(2),"close "+p(s5.p3)+"%",C("--verm"));
+    ["c1","c2","c3"].forEach(k=>box(g,...at(k),"Close $"+s5.D.toFixed(2),"",C("--moss")));
+    box(g,...at("br"),"Break $"+s5.B.toFixed(2),"",C("--verm"));
+    document.getElementById("kv5").innerHTML=kvHTML([
+      ["Today",money(n.top)],
+      ["After a 2nd request",money(n.sec)],
+      ["After a lawsuit",money(n.law)],
+      ["Drop on a 2nd request",money(n.sec-n.top)],
+      ["  from lower odds",money(n.oddsPart)],
+      ["  from more time",money(n.timePart)],
+      ["Tree's odds of closing",pctS(n.close,1)]
+    ]);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   06 — special dividends
+   ══════════════════════════════════════════════ */
+const s6={D:5,SV:2,div:0.30,p:2/3};
+(function(){
+  sliders(document.getElementById("ctl6"),[
+    {id:"D6",k:"D",lbl:"D",name:"Deal price",min:2,max:15,step:0.05,fmt:v=>"$"+v.toFixed(2)},
+    {id:"SV6",k:"SV",lbl:"SV",name:"Standalone value, before the dividend",min:0.5,max:12,step:0.01,fmt:v=>"$"+v.toFixed(2)},
+    {id:"q6",k:"div",lbl:"q",name:"Special dividend",min:0,max:1,step:0.01,fmt:v=>"$"+v.toFixed(2)},
+    {id:"p6",k:"p",lbl:"p",name:"Odds of closing",min:0,max:1,step:0.01,fmt:v=>pctS(v,0)}
+  ],s6,()=>draw(),"c6");
+  window.draw6=draw;
+  /* the cash leaves the company either way, so a broken deal is worth SV in
+     total (SV − q of stock plus q of cash); only the close state gains q */
+  window.divPrice=(D,SV,q,p)=>p*(D+q)+(1-p)*SV;
+  window.divNaive=(D,SV,q,p)=>p*D+(1-p)*SV+q;
+  function draw(){
+    const o=Fig(document.getElementById("cv6"),{h:280,x0:0,x1:1,y0:Math.min(s6.SV,s6.D)*0.95,y1:(Math.max(s6.SV,s6.D)+s6.div)*1.03,pad:{l:58}});
+    axes(o,v=>(v*100).toFixed(0)+"%",v=>"$"+v.toFixed(2),5,4);
+    clip(o,()=>{
+      curve(o,0,1,p=>s6.D*p+s6.SV*(1-p),C("--grey"),1.6,[3,3]);
+      curve(o,0,1,p=>divNaive(s6.D,s6.SV,s6.div,p),C("--verm"),2,[5,4]);
+      curve(o,0,1,p=>divPrice(s6.D,s6.SV,s6.div,p),C("--blue"),2.4);
+    });
+    vline(o,s6.p,C("--ochre"),null,[2,4]);
+    const before=s6.p*s6.D+(1-s6.p)*s6.SV;
+    document.getElementById("kv6").innerHTML=kvHTML([
+      ["Before the announcement",money(before)],
+      ["After, correctly",money(divPrice(s6.D,s6.SV,s6.div,s6.p))],
+      ["After, if you add the whole dividend",money(divNaive(s6.D,s6.SV,s6.div,s6.p))],
+      ["Price move",money(divPrice(s6.D,s6.SV,s6.div,s6.p)-before)],
+      ["= odds × dividend",money(s6.p*s6.div)]
+    ]);
+  }
+  document.getElementById("vz6").addEventListener("click",()=>{
+    Object.assign(s6,{D:11.5,SV:7.95,div:0.20,p:0.80});SYNC["c6"].sync();draw();});
+  document.getElementById("gp6").addEventListener("click",()=>{
+    Object.assign(s6,{D:5,SV:2,div:0.30,p:2/3});SYNC["c6"].sync();draw();});
+})();
+
+/* ══════════════════════════════════════════════
+   07 — options on a binary outcome
+   ══════════════════════════════════════════════ */
+const s7={up:26,dn:10,p:0.625,sUp:0.25,sDn:0.45,days:30,view:5};
+(function(){
+  sliders(document.getElementById("ctl7"),[
+    {id:"u7",k:"up",lbl:"U",name:"Price on success / close",min:12,max:40,step:0.5,fmt:v=>"$"+v.toFixed(1)},
+    {id:"d7",k:"dn",lbl:"F",name:"Market's failure price",min:2,max:18,step:0.5,fmt:v=>"$"+v.toFixed(1)},
+    {id:"v7",k:"view",lbl:"F′",name:"Your failure price",min:1,max:18,step:0.5,fmt:v=>"$"+v.toFixed(1)},
+    {id:"p7",k:"p",lbl:"p",name:"Odds of success",min:0.05,max:0.95,step:0.005,fmt:v=>pctS(v,1)},
+    {id:"sd7",k:"sDn",lbl:"σF",name:"Vol after a failure",min:0.1,max:1,step:0.05,fmt:pct}
+  ],s7,()=>draw(),"c7");
+  window.draw7=draw;
+  /* after the event the stock trades as a lognormal around whichever price
+     the outcome sets; an option is the p-weighted average of the two
+     conditional Black–Scholes prices (zero rates, short horizon) */
+  window.mixPut=(K,st,dn)=>{const T=st.days/365;
+    return st.p*bs(st.up,K,T,st.sUp,0,0,false).price+(1-st.p)*bs(dn,K,T,st.sDn,0,0,false).price;};
+  window.mixSpot=st=>st.p*st.up+(1-st.p)*st.dn;
+  function dens(x,c,s,T){const sd=s*Math.sqrt(T),m=Math.log(c)-0.5*sd*sd;
+    return x>0?npdf((Math.log(x)-m)/sd)/(x*sd):0;}
+  function draw(){
+    const T=s7.days/365,hi=Math.max(s7.up*1.35,20);
+    const fm=x=>s7.p*dens(x,s7.up,s7.sUp,T)+(1-s7.p)*dens(x,s7.dn,s7.sDn,T);
+    const fv=x=>s7.p*dens(x,s7.up,s7.sUp,T)+(1-s7.p)*dens(x,s7.view,s7.sDn,T);
+    let top=0;for(let i=1;i<=200;i++){const x=hi*i/200;top=Math.max(top,fm(x),fv(x));}
+    const o=Fig(document.getElementById("cv7"),{h:270,x0:0,x1:hi,y0:0,y1:top*1.1,pad:{l:44}});
+    axes(o,v=>"$"+v.toFixed(0),()=>"",5,1);
+    clip(o,()=>{curve(o,0.01,hi,fm,C("--blue"),2.2);curve(o,0.01,hi,fv,C("--verm"),2,[5,4]);});
+    vline(o,mixSpot(s7),C("--ochre"),"spot",[2,4]);
+    const Ks=[s7.dn,(s7.dn+s7.view)/2,s7.view].map(k=>Math.round(k*2)/2);
+    const rows=[["Spot today",money(mixSpot(s7))]];
+    Ks.forEach(K=>{const m=mixPut(K,s7,s7.dn),v=mixPut(K,s7,s7.view);
+      rows.push([K.toFixed(1)+" put, market",money(m,3)],["  on your view",money(v,3)+(m>1e-4?"  ("+(v/m).toFixed(1)+"×)":"")]);});
+    const ps=mixPut(Ks[0],s7,s7.dn)-mixPut(Ks[2],s7,s7.dn), pv=mixPut(Ks[0],s7,s7.view)-mixPut(Ks[2],s7,s7.view);
+    rows.push([Ks[0].toFixed(1)+"/"+Ks[2].toFixed(1)+" put spread",money(ps,3)+" → "+money(pv,3)]);
+    document.getElementById("kv7").innerHTML=kvHTML(rows);
+  }
+  document.getElementById("bio7").addEventListener("click",()=>{
+    Object.assign(s7,{up:26,dn:10,p:0.625,sUp:0.25,sDn:0.45,days:30,view:5});SYNC["c7"].sync();draw();});
+  document.getElementById("gp7").addEventListener("click",()=>{
+    Object.assign(s7,{up:5,dn:2,p:2/3,sUp:0.10,sDn:0.45,days:30,view:1.5});SYNC["c7"].sync();draw();});
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();}
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
