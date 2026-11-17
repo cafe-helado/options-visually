@@ -607,6 +607,22 @@ cone from pasted closes; expected P&L of a delta-hedged option,
 vega·(σr² − σi²)/2σi; Kelly sizing for option bets; volatility drag and
 leveraged-ETF decay, −(L² − L)σ²/2.
 
+## Companion · The Program  ✅ live (program.html)
+
+The series run as a trainee class, on the shape trading firms publish for
+their own: theory first, then timed practice, then a desk. Seven stations
+(payoff, parity, vol as a price, hedged P&L, the surface, edge after costs,
+sizing), each naming pages to watch, drills to clear twice running, and one
+real-screen task. Twenty-three drills with computed keys; seven of them are
+"spot the mispricing" screens (one strike off parity, a hard-to-borrow chain
+that is not an arbitrage, a gap inside the bid-offer, a box against funding,
+a negative butterfly, falling total variance, and a mock-pit pile of fills
+that collapses to a butterfly), some of which have nothing on them. Grading
+is A/B first try, C second try after the steps, F otherwise. A Leitner
+ledger in localStorage (gaps of 1, 2, 4, 8, 16 days), a printable readiness
+report, the edge map (nine families: signal, structure, other side, what
+kills it) and a printable trade memo. Every key is re-derived in verify.js.
+
 ## Candidates
 
 - An event calendar tool: paste earnings dates, get the weighted-day term

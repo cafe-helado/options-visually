@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. Twenty-one pages live, plus two companions: the workbook and the toolkit.
+no dependencies. Twenty-one pages live, plus three companions: the program, the workbook and the toolkit.
 
 ## Before you change anything
 
@@ -139,7 +139,7 @@ Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proo
 
 ## Offline, and installing to a phone
 
-The series is a PWA. `sw.js` precaches all twenty-one pages, both companions and the engine on
+The series is a PWA. `sw.js` precaches all twenty-one pages, the three companions and the engine on
 install — about 2MB — and serves everything from that cache afterwards, so the
 whole thing works with no network. Three strategies, and the split is deliberate:
 

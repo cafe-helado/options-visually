@@ -1004,6 +1004,69 @@ PAGES["tools"] = () => {
   eq("−1x has (L² − L) = 2", M.letf(0.08, 0.20, -1).drag / (-(0.04) / 2), 2, 1e-12);
 };
 
+PAGES["program"] = () => {
+  /* The program's drills carry computed keys. Each is re-derived here a
+     different way from the one the page uses, over a few hundred deals. */
+  const M = load("program.html", ["seed", "deal", "DRILLS", "SPOT", "STN", "gradeOf", "isRight", "boxOf", "dueList",
+    "gateOK", "stationState", "summary", "loopLines", "GAP", "DAY", "FEE"]);
+  const N = 400, each = (type, f) => { let bad = 0; for (let i = 1; i <= N; i++) { M.seed(i * 7919); if (!f(M.deal(type))) bad++; } return bad; };
+  eq("seven stations", M.STN.length, 7, 0);
+  yes("every gate names a real drill", M.STN.every(s => s.gate.every(g => g.every(t => M.DRILLS[t]))));
+  eq("hedged break-even at 30 vol on trading days is 1.89%", 0.30 / Math.sqrt(252) * 100, 1.89, 0.005);
+
+  eq("parity: the planted strike is the one found, right side, right size", each("parity", d => d.planted === 0 ? d.ans.nothing
+    : !d.ans.nothing && d.ans.k === d.plantedAt && d.ans.c === (d.planted > 0 ? 0 : 1) && Math.abs(d.ans.n - (Math.abs(d.planted) - M.FEE) * 100) <= 2.5), 0, 0);
+  eq("hard-to-borrow chain is never a trade", each("htb", d => d.ans.nothing && d.ans.c === 2), 0, 0);
+  eq("…its gap is the same at every strike, to rounding", each("htb", d => Math.max(...d.gaps) - Math.min(...d.gaps) <= 0.035 && Math.max(...d.gaps) < 0), 0, 0);
+  eq("…and the implied borrow recovers the true one", each("htb", d => Math.abs(d.impliedBorrow - d.borrow) <= 0.02), 0, 0);
+  eq("quote: a conversion is only called when it clears the spread", each("inside", d => (d.ans.c === 0) === (d.conv > 0) && d.rev < 0), 0, 0);
+  eq("box: the implied rate reprices the box", each("box", d => Math.abs(d.W * Math.exp(-d.imp * d.T) - d.px) < 1e-9), 0, 0);
+  eq("forward vol: near variance plus forward variance is far variance", each("fwdvar", d => { const q = d.q, f = d.ans.n / 100;
+    return Math.abs(q.v1 * q.v1 * q.t1 + f * f * (q.t2 - q.t1) - q.v2 * q.v2 * q.t2) < 1e-9; }), 0, 0);
+  eq("event move: base plus event reprices both expiries", each("event", d => { const q = d.q, J = d.ans.n / 100, b = d.base;
+    return Math.abs(b * b * q.d1 / 365 + J * J - q.v1 * q.v1 * q.d1 / 365) < 1e-9 && Math.abs(b * b * q.d2 / 365 + J * J - q.v2 * q.v2 * q.d2 / 365) < 1e-9; }), 0, 0);
+  eq("clean vol: the answer recovers the base the print was built from", each("clean", d => Math.abs(d.ans.n / 100 - d.q.b) < 0.003), 0, 0);
+  eq("box: side follows implied against funding", each("box", d => d.ans.c === (d.imp - d.fund > 0.0025 ? 0 : d.imp - d.fund < -0.0025 ? 1 : 2)), 0, 0);
+  eq("call prices: a planted strike makes its butterfly negative", each("fly", d => d.planted < 0 ? d.ans.nothing
+    : d.ans.k === d.planted - 1 && d.ans.n < 0 && Math.abs(d.ans.n - (d.C[d.planted - 1] - 2 * d.C[d.planted] + d.C[d.planted + 1])) < 1e-9), 0, 0);
+  eq("term structure: nothing to do exactly when total variance never falls", each("calendar", d =>
+    d.ans.nothing === d.w.every((x, i) => i === 0 || x >= d.w[i - 1])), 0, 0);
+  eq("mock pit: net price equals cash paid plus the strike gap", each("dissect", d => { const f = d.fills;
+    return Math.abs(d.cost - (f.strad - f.c1 - 2 * f.c2 + 2 * f.c3 - f.p3 + (f.K3 - f.K1))) < 0.006 && (d.ans.c === 0) === (d.cost < 0); }), 0, 0);
+  eq("straddle to vol: the head estimate is inside tolerance of the true vol", each("strad2iv", d => Math.abs(d.ans.n - d.trueVol * 100) < d.ans.tol), 0, 0);
+  eq("conversion rate: tolerance admits the simple-interest answer", each("revcon", d => d.ans.tol >= 0.12 && (d.ans.c === 0) === (d.imp > d.fund)), 0, 0);
+  eq("fair vol: buy below fair, sell above, nothing inside a point", each("fairiv", d => d.ans.c === (Math.abs(d.pts) < 1 ? 2 : d.pts > 0 ? 1 : 0)), 0, 0);
+  eq("half Kelly is half of full, and zero when the edge is negative", each("kelly", d => Math.abs(d.ans.n - Math.max(0, d.full * 50)) < 1e-9), 0, 0);
+  yes("every drill deals without error and carries a key and steps", Object.keys(M.DRILLS).every(t => { for (let i = 1; i <= 60; i++) { M.seed(i * 31 + 5);
+    const d = M.deal(t); if (!d.key || !d.template || !(d.sec > 0) || /NaN|undefined/.test(d.key + d.html)) return false; } return true; }));
+
+  /* grading */
+  const num = { ans: { c: null, k: null, n: 250, tol: 1 }, tag: "CARRY", sec: 60 };
+  yes("right first time inside the clock is an A", M.gradeOf(num, { n: 250.4 }, 1, 40).g === "A");
+  yes("right first time over the clock is a B", M.gradeOf(num, { n: 250 }, 1, 61).g === "B");
+  yes("right on the second try is a C", M.gradeOf(num, { n: 250 }, 2, 10).g === "C");
+  yes("wrong is an F with the drill's tag", (r => r.g === "F" && r.tag === "CARRY")(M.gradeOf(num, { n: 300 }, 2, 10)));
+  yes("a flipped sign is tagged SIGN", M.gradeOf(num, { n: -250 }, 2, 10).tag === "SIGN");
+  yes("an answer a hundred times too big is tagged UNITS", M.gradeOf(num, { n: 25000 }, 2, 10).tag === "UNITS");
+  const spot = { ans: { c: 2, k: null, n: null, tol: 2.5, nothing: true }, tag: "CARRY", sec: 60 };
+  yes("'nothing to do' is right with no strike and no number", M.isRight(spot, { c: 2, k: null, n: null }));
+  yes("trading a screen that has nothing on it is wrong", !M.isRight(spot, { c: 0, k: 1, n: 12 }));
+
+  /* the ledger */
+  const t0 = 1e12, rep = (type, g, d) => ({ t: t0 + d * M.DAY, type, g, tag: "OK", sec: 5 });
+  eq("two good reps put a drill in box 2", M.boxOf([rep("kelly", "A", 0), rep("kelly", "B", 1)], "kelly").b, 2, 0);
+  eq("a miss sends it back to box 1", M.boxOf([rep("kelly", "A", 0), rep("kelly", "A", 1), rep("kelly", "F", 2)], "kelly").b, 1, 0);
+  yes("the gaps are 1, 2, 4, 8 and 16 days", M.GAP.slice(1).join() === "1,2,4,8,16");
+  yes("box 2 is not due after one day", M.dueList([rep("kelly", "A", 0), rep("kelly", "A", 1)], t0 + 2 * M.DAY).length === 0);
+  yes("…and is due after two", M.dueList([rep("kelly", "A", 0), rep("kelly", "A", 1)], t0 + 3 * M.DAY)[0].t === "kelly");
+  yes("a gate needs two in a row", !M.gateOK([rep("payoff", "A", 0)], ["payoff"]) && M.gateOK([rep("payoff", "A", 0), rep("payoff", "B", 1)], ["payoff"])
+    && !M.gateOK([rep("payoff", "A", 0), rep("payoff", "A", 1), rep("payoff", "C", 2)], ["payoff"]));
+  const s1 = M.stationState([rep("payoff", "A", 0), rep("payoff", "A", 1)], {}, M.STN[0]);
+  yes("drills alone do not pass a station; the real-screen task must be ticked", s1.drills && !s1.passed
+    && M.stationState([rep("payoff", "A", 0), rep("payoff", "A", 1)], { 1: 1 }, M.STN[0]).passed);
+  yes("spot drills are logged with the spot- prefix", /\| spot-fly \| OK \| A$/.test(M.loopLines([rep("fly", "A", 0)])));
+};
+
 PAGES["playbook"] = () => {
   const M = load("playbook.html", ["simulate", "statsOf", "s1", "PB"]);
   const s = M.simulate(M.s1), A = M.statsOf(s.idx), B = M.statsOf(s.pw), Cc = M.statsOf(s.th);
