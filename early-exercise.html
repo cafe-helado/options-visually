@@ -42,7 +42,8 @@
   <a href="#c7"><span>Pin risk</span><i></i></a>
   <a href="#c8"><span>Corporate actions</span><i></i></a>
   <a href="#c9"><span>Tenders</span><i></i></a>
-  <a href="#c10"><span>Drills</span><i></i></a>
+  <a href="#c10"><span>Both sides, with borrow</span><i></i></a>
+  <a href="#c11"><span>Drills</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -745,6 +746,78 @@
 <section class="chapter" id="c10">
   <div class="chead">
     <div class="cnum">10</div>
+    <h2>Calls and puts on one ledger, with borrow in it</h2>
+    <p class="dek">Chapters 01 to 04 took the call and the put separately and assumed the stock was free to borrow. Put them side by side, add the borrow fee, and one rule covers both.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Two options on a $100 strike with 45 days left, each 15% in the money: a call with the stock at $115 and a put with the stock at $85. A $1.10 dividend goes ex tomorrow. For each option the figure sets what exercising today collects against what it throws away. The longer bar wins.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Exercise today, or hold: both options, per share</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--moss)"></i>What exercising collects</span>
+            <span><i class="swl" style="background:var(--verm)"></i>What exercising gives up</span>
+          </span>
+        </div>
+        <canvas id="cvEx" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The situation</h4>
+        <div id="ctlEx"></div>
+        <div class="kv" style="margin-top:20px" id="kvEx"></div>
+      </div>
+    </div>
+    <figcaption>The same four ingredients appear on both sides of the page with their roles swapped. What pays the call holder to exercise is what tells the put holder to wait.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p><b>The call.</b> Exercising collects the $1.10 dividend, and saves 7 cents of borrow on the short stock a hedged holder is carrying against it. It gives up 55 cents of interest, because the $100 strike is paid today instead of in 45 days, and the put, worth 41 cents, which was the protection against the stock falling back through the strike. $1.17 against $0.96: <b>exercise</b>, and be 21 cents a share better off than holding.</p>
+    <p><b>The put.</b> Exercising collects the same 55 cents of interest, now on $100 received early. It gives up the $1.10 dividend that the stock held against the put is about to pay, 5 cents of lending fee, and the call, worth 15 cents. $0.55 against $1.30: <b>hold</b>, at least until the stock has gone ex.</p>
+  </div>
+
+  <div class="mline">call: exercise when &nbsp; dividend + borrow &ge; interest on K + put &nbsp;&nbsp;&nbsp; put: exercise when &nbsp; interest on K &ge; dividend + borrow + call</div>
+  <p class="mread">Reads as: <b>a call is exercised to get the stock, so the things that make stock worth having — a dividend, a lending fee — argue for it, and the things that make cash worth keeping argue against. A put is exercised to get the cash, so the list flips.</b> In both cases the option at the same strike on the other side is the insurance you surrender.</p>
+
+  <div class="prose">
+    <p>Take the dividend away and the answers swap. The call has almost nothing to collect and should be held; the put collects 55 cents against 26 and should be exercised. That is chapters 01 and 04 in one picture: calls run on dividends, puts run on interest.</p>
+    <p>Borrow is the part the earlier chapters left out, and on a hard-to-borrow stock it dominates. At a 25% fee and no dividend at all, the call should be exercised: a market maker long that call is short the stock against it, exercising closes the short, and 45 days of borrow on $115 is $3.49 a share against $1.18 given up. The put should be held however deep it is, because the stock held against it earns that fee. A stock that pays nothing can therefore see its calls exercised early, and the tell is the same as in chapter 05: deep calls trading at or under parity.</p>
+    <p>Three practical points. For calls the decision is made once, on the last day before the ex-date, because exercising any earlier pays interest for nothing. For puts it is made every day, and the day after an ex-date is when many of them tip. And if you are short, read the same ledger from the other side: whenever the holder should exercise and does not, you keep what they left behind, which is the subject of chapter 06.</p>
+    <p>The ledger uses European values for the option given up, so it is a screen and not a pricer. When the two bars are close, the true boundary is a few cents away from where this puts it and the tree in chapter 04 is the tool. When they are not close, which is most nights, the subtraction is enough.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Remove the dividend and make the stock cost 25% to borrow. <b>Predict</b> each verdict before you press.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cEx" data-patch='{"D":0,"b":0.25}' data-focus="cvEx">No dividend, 25% borrow</button>
+      <button class="act ghost" data-preset="cEx" data-patch='{"D":0,"b":0.005}' data-focus="cvEx">No dividend, easy borrow</button>
+      <button class="act ghost" data-preset="cEx" data-patch='{"D":0,"b":0.005,"r":0}' data-focus="cvEx">Zero rates too</button>
+      <button class="act ghost" data-preset="cEx" data-patch='{"m":15,"days":45,"r":0.045,"v":0.28,"D":1.1,"b":0.005}' data-focus="cvEx">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long deep in-the-money puts, hedged with long stock, on a name that pays no dividend and has just become very expensive to borrow. Rates are 4.5%. Do you exercise?</p>
+    <div class="opts">
+      <button>Yes; deep puts with positive rates should always be exercised</button>
+      <button data-ok="1">No; the stock you hold against them can be lent for more than the interest you would earn on the strike</button>
+      <button>Yes; a hard-to-borrow stock is likely to fall</button>
+      <button>It makes no difference, since the position is hedged</button>
+    </div>
+    <div class="ans"><b>Hold.</b> Exercising hands over the stock and collects the strike. The strike earns 4.5%; the stock was earning the lending fee, which is higher. The first answer is the rule from chapter 04 applied to a stock that is no longer free to borrow. The third is a view on direction, which a hedged position does not have.</div>
+  </div>
+</section>
+
+<!-- ══════════ 11 ══════════ -->
+<section class="chapter" id="c11">
+  <div class="chead">
+    <div class="cnum">11</div>
     <h2>Drill it, then check yourself</h2>
     <p class="dek">The arithmetic on this page is only useful at speed, on a Tuesday afternoon, with twenty names to clear.</p>
   </div>
@@ -1704,8 +1777,58 @@ const s9 = { pror: 1, v: 0.09, tender: 100, S: 98.2, days: 120 };
   window.drawDrill = next;
 })();
 
+/* ══════════ 10 — calls and puts on one ledger ══════════
+   What exercising today collects against what it gives up, for a call and
+   a put the same distance in the money. The option given up is valued as
+   European on the ex-dividend stock with the borrow fee as a yield, so the
+   two sides net exactly to the option's time value by parity. */
+function exSide(p, call){ const K = 100, S = call ? K * (1 + p.m / 100) : K * (1 - p.m / 100), tau = p.days / 365, Sx = S - p.D;
+  const c = bs(Sx, K, tau, p.v, p.r, p.b, true).price, pt = bs(Sx, K, tau, p.v, p.r, p.b, false).price;
+  const interest = K * (1 - Math.exp(-p.r * tau)), borrow = Sx * (1 - Math.exp(-p.b * tau)), intrinsic = call ? S - K : K - S;
+  const gain = call ? [["Dividend", p.D], ["Borrow saved", borrow]] : [["Interest on the strike", interest]];
+  const lose = call ? [["Interest on the strike", interest], ["The put given up", pt]] : [["Dividend", p.D], ["Lending fee", borrow], ["The call given up", c]];
+  const sum = a => a.reduce((x, y) => x + y[1], 0);
+  return { S, intrinsic, alive: call ? c : pt, tv: (call ? c : pt) - intrinsic, gain, lose, g: sum(gain), l: sum(lose), net: sum(gain) - sum(lose) }; }
+const sEx = { m: 15, days: 45, r: 0.045, v: 0.28, D: 1.10, b: 0.005 };
+(function(){
+  const dl = v => (v < -.005 ? "−$" : "$") + Math.abs(v).toFixed(2);
+  sliders(document.getElementById("ctlEx"), [
+    { id: "mE", k: "m", lbl: "m", name: "How far in the money", min: 2, max: 40, step: 1, fmt: v => v.toFixed(0) + "%" },
+    { id: "dE", k: "days", lbl: "T", name: "Days to expiry", min: 2, max: 180, step: 1, fmt: v => v.toFixed(0) + "d" },
+    { id: "DE", k: "D", lbl: "D", name: "Dividend going ex tomorrow", min: 0, max: 3, step: 0.05, fmt: v => "$" + v.toFixed(2) },
+    { id: "bE", k: "b", lbl: "b", name: "Borrow fee", min: 0, max: 0.6, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" },
+    { id: "rE", k: "r", lbl: "r", name: "Interest rate", min: 0, max: 0.10, step: 0.0025, fmt: v => (v * 100).toFixed(2) + "%" },
+    { id: "vE", k: "v", lbl: "σ", name: "Volatility", min: 0.1, max: 0.9, step: 0.01, fmt: v => (v * 100).toFixed(0) + "%" }
+  ], sEx, () => draw(),"cEx");
+  window.drawEx = draw;
+  function draw(){
+    const c = exSide(sEx, true), p = exSide(sEx, false), top = Math.max(1.2, c.g, c.l, p.g, p.l) * 1.15;
+    const o = Fig(document.getElementById("cvEx"), { h: 300, x0: 0, x1: 5, y0: 0, y1: top, pad: { l: 54, r: 14, t: 14, b: 34 } });
+    axes(o, () => "", v => "$" + v.toFixed(2), 1, 5);
+    const g = o.g; g.save(); g.font = "9.5px 'IBM Plex Mono', monospace"; g.textAlign = "center";
+    const stack = (x, parts, col, label) => { let y = 0; parts.forEach(([n, v], i) => { if (v <= 0) return; const x0 = o.X(x - .32), x1 = o.X(x + .32), t = o.Y(y + v), b = o.Y(y);
+        g.globalAlpha = .9 - .22 * i; g.fillStyle = col; g.fillRect(x0, t, x1 - x0, Math.max(1, b - t - 1));
+        g.globalAlpha = 1; if (b - t > 13 && !NARROW()) { g.fillStyle = C("--chalk"); g.fillText(n.replace("Interest on the strike", "Interest").replace("The put given up", "Put given up").replace("The call given up", "Call given up"), (x0 + x1) / 2, (t + b) / 2 + 3); } y += v; });
+      g.fillStyle = C("--grey"); g.fillText(label, o.X(x), o.P.t + o.ph + 16); };
+    stack(0.8, c.gain, C("--moss"), "Call: collects"); stack(1.7, c.lose, C("--verm"), "Call: gives up");
+    stack(3.3, p.gain, C("--moss"), "Put: collects"); stack(4.2, p.lose, C("--verm"), "Put: gives up"); g.restore();
+    vline(o, 2.5, C("--hair"), null, [2, 4]);
+    const verdict = x => x.net > 0.005 ? "exercise, +" + dl(x.net) : x.net < -0.005 ? "hold, exercising costs " + dl(-x.net) : "indifferent";
+    document.getElementById("kvEx").innerHTML = kvHTML([
+      ["Call: stock at", "$" + c.S.toFixed(2)],
+      ["  collects / gives up", dl(c.g) + " / " + dl(c.l)],
+      ["  verdict", verdict(c)],
+      ["Put: stock at", "$" + p.S.toFixed(2)],
+      ["  collects / gives up", dl(p.g) + " / " + dl(p.l)],
+      ["  verdict", verdict(p)],
+      ["Interest on the strike", dl(c.gain.length ? c.lose[0][1] : 0)],
+      ["Borrow over the period, call / put", dl(c.gain[1][1]) + " / " + dl(p.lose[1][1])]
+    ]);
+  }
+})();
+
 function drawAll() {
-  draw1(); draw2(); draw3(); draw4(); draw5(); draw6(); draw7(); draw8(); draw9(); drawDrill();
+  draw1(); draw2(); draw3(); draw4(); draw5(); draw6(); draw7(); draw8(); draw9(); drawEx(); drawDrill();
 }
 LAB.boot(drawAll);
 

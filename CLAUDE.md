@@ -284,6 +284,11 @@ and the derivation box lists what it ignores. Prose there quotes dollars to
 the dime; round to what the figure's readout shows or the claim fails by
 four cents, as two did.
 
+`early-exercise.html` chapter 10 (`exSide`) puts the call and put exercise
+decisions on one ledger and adds the borrow fee, which chapters 01-04 never
+mention. The ledger nets exactly to minus the option's time value by
+parity; verify.js checks that identity.
+
 `book.html` chapter 09 (`fields`) is a decoder for report columns such as
 DollarGammaPct; every field carries a bump-and-reprice twin in `f.bump`.
 Its default stock is $250 on purpose: at $100 the per-dollar and

@@ -238,6 +238,29 @@ PAGES["early-exercise"] = () => {
   let w = 0; for (let k = 19; k <= 21; k++) w += b(50, k, 0.4);
   eq("fifty short: P(within one contract) = 33.5%", 100 * w, 33.45, 0.2);
   yes("so the overnight hedge is wrong about two times in three", 1 - w > 0.6 && 1 - w < 0.7);
+  console.log("    ch10 · calls and puts on one ledger");
+  { const M = load("early-exercise.html", ["exSide", "sEx", "bs"]), d = M.sEx, c = M.exSide(d, true), p = M.exSide(d, false);
+    yes("defaults", d.m === 15 && d.days === 45 && d.r === 0.045 && d.v === 0.28 && d.D === 1.10 && d.b === 0.005);
+    eq("call collects $1.17", c.g, 1.17, 0.006); eq("  borrow saved 7 cents", c.gain[1][1], 0.07, 0.006);
+    eq("call gives up $0.96", c.l, 0.96, 0.006); eq("  interest 55 cents", c.lose[0][1], 0.55, 0.006); eq("  put 41 cents", c.lose[1][1], 0.41, 0.006);
+    eq("call: exercise, 21 cents better", c.net, 0.21, 0.006);
+    eq("put collects $0.55", p.g, 0.55, 0.006);
+    eq("put gives up $1.30", p.l, 1.30, 0.006); eq("  lending fee 5 cents", p.lose[1][1], 0.05, 0.006); eq("  call 15 cents", p.lose[2][1], 0.15, 0.006);
+    yes("put: hold", p.net < 0);
+    /* the ledger is parity: collects minus gives-up is exactly minus the time value */
+    eq("call ledger nets to minus its time value", c.net, -c.tv, 1e-9);
+    eq("put ledger nets to minus its time value", p.net, -p.tv, 1e-9);
+    const n = Object.assign({}, d, { D: 0 }), cn = M.exSide(n, true), pn = M.exSide(n, false);
+    yes("no dividend: call held", cn.net < 0); yes("no dividend: put exercised", pn.net > 0);
+    eq("  put collects 55 against 26", pn.l, 0.26, 0.006);
+    const h = Object.assign({}, d, { D: 0, b: 0.25 }), ch = M.exSide(h, true), ph = M.exSide(h, false);
+    eq("25% borrow: call saves $3.49", ch.gain[1][1], 3.49, 0.006);
+    eq("  against $1.18 given up", ch.l, 1.18, 0.006);
+    yes("  so the call is exercised with no dividend", ch.net > 0);
+    yes("25% borrow: put held", ph.net < 0);
+    yes("  however deep", M.exSide(Object.assign({}, h, { m: 40 }), false).net < 0);
+    const z = Object.assign({}, d, { D: 0, r: 0 });
+    yes("zero rates, no dividend, easy borrow: neither is exercised", M.exSide(z, true).net < 0 && M.exSide(z, false).net < 0); }
 };
 
 PAGES["variance"] = () => {
