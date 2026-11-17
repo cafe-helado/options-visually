@@ -177,6 +177,16 @@ PAGES["catalyst"] = () => {
   eq("at half implied you win 5%", run(0.5).win, 5.2, 0.8);
 };
 
+PAGES["variance-short-convexity"] = () => {
+  /* Question 5's explanation said convexity "helps" the short on the downside.
+     It does not: the short's gains are concave and its losses convex. */
+  const nvar = 100000 / (2 * 25), pay = rv => nvar * (25 * 25 - rv * rv);
+  eq("short $100k vega at 25, realized 10: +$1.05m", pay(10), 1050000, 1);
+  eq("…against $1.5m at the linear rate", 100000 * 15, 1500000, 0);
+  eq("realized 40: −$1.95m, worse than the linear −$1.5m", pay(40), -1950000, 1);
+  yes("the short does worse than linear on both sides", pay(10) < 1500000 && pay(40) < -1500000);
+};
+
 PAGES["catalyst-calendar"] = () => {
   /* chapter 06: the prose said 31.3%, an 8-point edge and under 2 points at
      the back; the page's own totalVol gives 32.3, 7.3 and 2.2 */
