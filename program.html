@@ -94,7 +94,7 @@
   <p class="lede">The series, run the way a trading firm runs a trainee class: a short track of ideas in order, a pit where you answer against a clock, and a ledger that decides what you practice next. The pages show you a thing happening. This page finds out whether you can do it.</p>
   <ol>
     <li><b>The track</b> — seven stations. Each one names a page to watch, drills to clear, and one thing to do on a real screen.</li>
-    <li><b>The pit</b> — thirty-eight timed drills with computed answers, and a ten-rep head-math sprint. Some screens have something to trade. Some have nothing, and saying so is the right answer.</li>
+    <li><b>The pit</b> — forty timed drills with computed answers, and a ten-rep head-math sprint. Some screens have something to trade. Some have nothing, and saying so is the right answer.</li>
     <li><b>The ledger</b> — every rep is graded and scheduled to come back. It also prints a one-page readiness report.</li>
     <li><b>The edge map</b> — where option edge comes from, one family at a time, and what kills each.</li>
     <li><b>The trade memo</b> — the blanks to fill before any trade, printable.</li>
@@ -143,7 +143,7 @@
     <p class="lbl">2 · Parity and carry</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="synth">Synthetics</button><button class="act ghost" data-act="go" data-type="headparity">Parity in your head</button><button class="act ghost" data-act="go" data-type="revcon">Conversion rate</button><button class="act ghost" data-act="go" data-type="chain">Chain</button><button class="act ghost" data-act="go" data-type="jelly">Jelly roll</button><button class="act ghost" data-act="go" data-type="borrow">Implied borrow</button><button class="act ghost" data-act="go" data-type="earlyex">Early exercise</button><button class="act ghost" data-act="go" data-type="assign">Assignment</button><button class="act ghost" data-act="go" data-type="pin">Pin risk</button><button class="act ghost" data-act="go" data-type="divplay">Dividend play</button></div>
     <p class="lbl">3 · Vol as a price</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="rule16">Rule of 16</button><button class="act ghost" data-act="go" data-type="strad2iv">Straddle to vol</button><button class="act ghost" data-act="go" data-type="tick">A tick in vol</button></div>
     <p class="lbl">4 · Hedged P&amp;L</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="hedge">Delta hedge</button><button class="act ghost" data-act="go" data-type="gpnl">Hedged P&amp;L</button><button class="act ghost" data-act="go" data-type="sign">Greek signs</button><button class="act ghost" data-act="go" data-type="split">Hedge split</button><button class="act ghost" data-act="go" data-type="bleed">Overnight bleed</button><button class="act ghost" data-act="go" data-type="shadow">Vol moves with spot</button></div>
-    <p class="lbl">5 · The surface</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="fwdvar">Forward vol</button><button class="act ghost" data-act="go" data-type="event">Event move</button><button class="act ghost" data-act="go" data-type="corr">Implied correlation</button><button class="act ghost" data-act="go" data-type="structure">Which structure</button><button class="act ghost" data-act="go" data-type="calendar">Term structure</button><button class="act ghost" data-act="go" data-type="fly">Call prices</button></div>
+    <p class="lbl">5 · The surface</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="lean">Hidden delta</button><button class="act ghost" data-act="go" data-type="wvega">Weighted vega</button><button class="act ghost" data-act="go" data-type="fwdvar">Forward vol</button><button class="act ghost" data-act="go" data-type="event">Event move</button><button class="act ghost" data-act="go" data-type="corr">Implied correlation</button><button class="act ghost" data-act="go" data-type="structure">Which structure</button><button class="act ghost" data-act="go" data-type="calendar">Term structure</button><button class="act ghost" data-act="go" data-type="fly">Call prices</button></div>
     <p class="lbl">6 · Edge after costs</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="clean">Clean vol</button><button class="act ghost" data-act="go" data-type="fairiv">Fair vol and edge</button><button class="act ghost" data-act="go" data-type="inside">Quote</button><button class="act ghost" data-act="go" data-type="box">Box</button><button class="act ghost" data-act="go" data-type="dissect">Mock pit</button><button class="act ghost" data-act="go" data-type="peers">Peer group</button></div>
     <p class="lbl">7 · Sizing</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="kelly">Sizing</button></div>
     <p class="lbl">Trading games · any time</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="dice">Dice market</button><button class="act ghost" data-act="go" data-type="devig">Overround</button><button class="act ghost" data-act="go" data-type="potodds">Pot odds</button><button class="act ghost" data-act="go" data-type="bayes">Backtest odds</button></div>
@@ -707,6 +707,26 @@ function dBleed(){
     tag: "SIGN", sec: 45, key: "Each option's delta went from " + d0.toFixed(3) + " to " + d1.toFixed(3) + ", so the position's delta moved by " + (dd > 0 ? "+" : "−") + Math.abs(dd).toFixed(0) + " shares overnight. " +
       (dd < 0 ? "Buy" : "Sell") + " about " + Math.abs(dd).toFixed(0) + " shares. This drift is the bleed; it is why a book that was flat on Friday is not flat on Monday." };
 }
+function dLean(){
+  const long = rnd() < .5, vg = pick([2000, 5000, 10000, 20000]), sig = pick([16, 20, 25, 40, 50]), beta = pick([.5, .8, 1, 1.2, 1.5]), n = (long ? 1 : -1) * vg * sig * beta;
+  return { html: "<p>Your book is <b>" + (long ? "long" : "short") + " $" + vg.toLocaleString("en-US") + "</b> of vega per point in an index trading at <b>" + sig + "</b> vol, and the sheet shows <b>zero delta</b>. " +
+      "You believe the vol on your strikes falls <b>" + beta + "%</b> of itself for each 1% the index rallies. What stock trade makes you really flat? Dollars, positive to buy, negative to sell.</p>",
+    choices: null, ks: null, numLabel: "Dollars of index to trade", ans: { c: null, k: null, n, tol: Math.abs(n) * .02 }, q: { vega: (long ? 1 : -1) * vg, sig, beta },
+    template: "A 1% rally moves vol by beta percent of its level, in points. Multiply by your vega for the dollars made or lost per 1%. The stock position that makes or loses the opposite is one hundred times that.",
+    tag: "WRONG-GREEK", sec: 60, key: "A 1% rally takes " + (sig * beta / 100).toFixed(2) + " points off vol, which " + (long ? "costs" : "makes") + " you $" + (vg * sig * beta / 100).toLocaleString("en-US", { maximumFractionDigits: 0 }) +
+      ". That is what being " + (long ? "short" : "long") + " $" + Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 }) + " of the index does, so " + (long ? "buy" : "sell") + " that much. Hidden delta = −vega × vol × beta." };
+}
+function dWvega(){
+  let fm, bm, fv, bv, n; do { fm = pick([1, 3]); bm = pick([6, 12, 24]); const s = rnd() < .5 ? 1 : -1; fv = -s * pick([20, 30, 40, 60]); bv = s * pick([30, 50, 70, 90]); n = fv + bv * Math.pow(fm / bm, .5); } while (Math.abs(n) < 2);
+  const f = x => (x < 0 ? "short" : "long") + " $" + Math.abs(x) + "k";
+  return { html: "<p>A book is <b>" + f(fv) + "</b> of vega in the <b>" + fm + "-month</b> and <b>" + f(bv) + "</b> in the <b>" + bm + "-month</b>. The sheet adds them to <b>" + (fv + bv > 0 ? "+" : "−") + "$" + Math.abs(fv + bv) + "k</b> a point. " +
+      "Vol moves scale with one over the square root of time. If " + fm + "-month vol rises <b>one point</b>, what does the book make, in $k? Negative for a loss.</p>",
+    choices: null, ks: null, numLabel: "P&L in $k", ans: { c: null, k: null, n, tol: Math.max(.6, Math.abs(n) * .04) }, q: { fm, bm, fv, bv },
+    template: "The long-dated leg does not move a full point. Scale its vega by the square root of (front tenor ÷ back tenor), then add the front leg.",
+    tag: "WRONG-GREEK", sec: 75, key: "The " + bm + "-month moves √(" + fm + "/" + bm + ") = " + Math.sqrt(fm / bm).toFixed(2) + " of a point, so that leg is worth " + sg(bv * Math.sqrt(fm / bm)) + "k. Add the front leg's " + sg(fv) + "k: " + sg(n) +
+      "k." + ((fv + bv) * n < 0 ? " The sheet's total had the wrong sign." : "") + " Raw vega added across expiries assumes a parallel shift." };
+}
+
 function dShadow(){
   let K, call, up, v0 = .25, S1, dv, a, db, ds, rel; const T = 60 / 365;
   do { K = pick([85, 90, 110, 115]); call = rnd() < .5; up = rnd() < .5; S1 = up ? 105 : 95; dv = up ? -.03 : .04;
@@ -775,7 +795,7 @@ const DRILLS = {
   inside: [dInside, 6, "Quote"], box: [dBox, 6, "Box"], dissect: [dDissect, 6, "Mock pit"],
   rule16: [dRule16, 3, "Rule of 16"], strad2iv: [dStrad2iv, 3, "Straddle to vol"], tick: [dTick, 3, "A tick in vol"],
   hedge: [dHedge, 4, "Delta hedge"], gpnl: [dGpnl, 4, "Hedged P&L"], sign: [dSign, 4, "Greek signs"], split: [dSplit, 4, "Hedge split"],
-  bleed: [dBleed, 4, "Overnight bleed"], shadow: [dShadow, 4, "Vol moves with spot"],
+  bleed: [dBleed, 4, "Overnight bleed"], shadow: [dShadow, 4, "Vol moves with spot"], lean: [dLean, 5, "Hidden delta"], wvega: [dWvega, 5, "Weighted vega"],
   fwdvar: [dFwdvar, 5, "Forward vol"], event: [dEvent, 5, "Event move"], corr: [dCorr, 5, "Implied correlation"], structure: [dStructure, 5, "Which structure"],
   calendar: [dCalendar, 5, "Term structure"], fly: [dFly, 5, "Call prices"],
   clean: [dClean, 6, "Clean vol"], peers: [dPeers, 6, "Peer group"], fairiv: [dFairiv, 6, "Fair vol and edge"], kelly: [dKelly, 7, "Sizing"],
@@ -830,7 +850,7 @@ const STN = [
     see: [["black-scholes.html", "The live hedge"], ["atlas.html", "Greek identities"], ["real-world.html", "Where it breaks"]], gate: [["hedge"], ["gpnl"]],
     real: "The daily scoreboard: for one name, log each day's move against the break-even for ten trading days." },
   { n: 5, t: "The surface prices each piece of the distribution", say: "Skew prices the left tail. Term structure prices time, and events are extra variance on particular days. Variances add; vols do not. Each view has a structure that isolates it.",
-    see: [["surface.html", "Skew and density"], ["catalyst.html", "Events"], ["spreading.html", "Choosing a spread"]], gate: [["fwdvar"], ["event"], ["structure"]],
+    see: [["surface.html", "Skew and density"], ["catalyst.html", "Events"], ["spreading.html", "Choosing a spread"], ["dynamics.html", "When the surface moves"]], gate: [["fwdvar"], ["event"], ["structure"]],
     real: "One name with earnings ahead: split two expiries into a base vol and an event move." },
   { n: 6, t: "Edge is fair minus market minus costs", say: "Fair vol is a clean base plus events plus a premium. It is only edge if it clears costs and hedging error. Ask who is selling this to you and why, and price at the bid and offer, never the mid.",
     see: [["microstructure.html", "Spreads and selection"], ["playbook.html", "What desks run"], ["merger.html", "Event odds"]], gate: [["fairiv"], SPOT],

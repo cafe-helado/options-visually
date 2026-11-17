@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. Twenty-one pages live, plus three companions: the program, the workbook and the toolkit.
+no dependencies. Twenty-two pages live, plus three companions: the program, the workbook and the toolkit.
 
 ## Before you change anything
 
@@ -139,7 +139,7 @@ Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proo
 
 ## Offline, and installing to a phone
 
-The series is a PWA. `sw.js` precaches all twenty-one pages, the three companions and the engine on
+The series is a PWA. `sw.js` precaches all twenty-two pages, the three companions and the engine on
 install — about 2MB — and serves everything from that cache afterwards, so the
 whole thing works with no network. Three strategies, and the split is deliberate:
 
@@ -178,7 +178,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all twenty-one pages are live, plus the program, the workbook and the toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
+Nothing unbuilt — all twenty-two pages are live, plus the program, the workbook and the toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
@@ -247,6 +247,18 @@ requestAnimationFrame loop stays blank when rAF is throttled, because
 once synchronously before animating. And a zero-crossing reported off a
 0.05 scan grid lands up to a step late, which is how the prose came to say
 91.45 while the panel said 91.50; bisect inside the bracket instead.
+
+## Page 22 and the claim that was almost true
+
+`dynamics.html` runs on one dial, R: ATM vol moves R × skew per unit of
+log-spot (0 sticky delta, 1 sticky strike, 2 local-vol-like). `volAt`,
+`effDelta`, `hedgedMove`, `rr` and `breakevenSSR` are the whole model, and
+every figure reprices with `bs()` instead of using a greek approximation.
+The first draft said the skew break-even "stays close to 2 whatever you
+move". verify.js failed it: at 40 realized against 25 implied it is 1.72,
+because theta is fixed while the gamma and spot–vol terms scale with
+movement. The sentence now says so. A claim of invariance needs a claim per
+slider, not one.
 
 ## The `line()` trap
 

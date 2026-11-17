@@ -613,10 +613,10 @@ The series run as a trainee class, on the shape trading firms publish for
 their own: theory first, then timed practice, then a desk. Seven stations
 (payoff, parity, vol as a price, hedged P&L, the surface, edge after costs,
 sizing), each naming pages to watch, drills to clear twice running, and one
-real-screen task. Thirty-eight drills with computed keys (carry and exercise:
+real-screen task. Forty drills with computed keys (carry and exercise:
 jelly roll, implied borrow, early exercise, assignment, pin risk, dividend
 play; hedging behavior: Greek signs, hedge split, overnight bleed, vol moving
-with spot; four trading games), plus a ten-rep head-math sprint. Eight are
+with spot, hidden delta, weighted vega; four trading games), plus a ten-rep head-math sprint. Eight are
 "spot the mispricing" screens (one strike off parity, a hard-to-borrow chain
 that is not an arbitrage, a gap inside the bid-offer, a box against funding,
 a negative butterfly, falling total variance, a mock-pit pile of fills
@@ -643,3 +643,31 @@ VRP +25%, a −25% crash month about once a decade) gives put-writing a 93% win
 rate, skewness −9.2 and a −19% worst month; the index 13.0% a year with a 26%
 drawdown; the index plus rolled 15%-out puts 13.6% with a 19% drawdown. The
 New-history button exists to show how path-dependent the tail-hedge result is.
+
+## 22 · Surface Dynamics  ✅ live (dynamics.html)
+
+What a hedge does when the surface moves. One dial, R (the skew-stickiness
+ratio), runs through the page: ATM vol moves R × b points per 1% of spot.
+
+1. One hedge, three outcomes — a 6m ATM call hedged at BS delta 0.542. A ±3%
+   move makes ~$8 either way at R=1; +$37/−$21 at R=0; −$21/+$38 at R=2. Flat
+   delta is 0.640 / 0.542 / 0.444. Hidden delta = −vega × σ × β ($1,000 vega,
+   40 vol, β=1 → short $40,000).
+2. Shadow gamma — 60d 90 put: sheet delta −16.8, gamma 2.16, predicts −27.5
+   at $95; sticky strike needs −30.0, R=2 needs −35.9. Down-gamma 3.11,
+   up-gamma 2.24.
+3. Weighted vega — short $40k 3m, long $50k 1y: +$10k raw, −$15k root-time,
+   flat at h=0.16. 3m straddle +1pt = $0.398; 1y straddle +0.5pt = $0.394.
+4. Skew carry — vega-neutral 90/110 risk reversal, 3m, 100 lots: −$137/day at
+   sticky strike (theta $68, gamma $68), +$135/day per unit of R, break-even
+   R=2.0 when realized = ATM (1.7 at 40 realized). Vega +$1,250 at $92,
+   −$1,270 at $108.
+5. Sampling — φ=0.15: 16% daily is 18.0% weekly, 18.5% monthly; φ=−0.15
+   weekly 14.2%. 1%/day = 16%, 5%/week = 35.5%, 22%/20 days = 78%.
+
+Sources for the ideas: Taleb's Dynamic Hedging (shadow gamma, weighted vega),
+Bergomi (the stickiness ratio and its break-even of 2), Bennett (skew theta),
+Moontower (spot–vol beta in delta, sampling). All numbers recomputed here.
+Still open from the same gap list: normalized skew and a chain order of
+operations on screen.html, index-equivalent gamma on book.html, judgment
+questions on questions.html.

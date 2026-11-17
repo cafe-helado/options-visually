@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Surface Dynamics — what your hedge does when the surface moves</title>
+<meta name="description" content="The delta your vega is hiding, shadow gamma, weighted vega, the daily cost of owning skew, and why realized volatility depends on how often you look.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Surface Dynamics — what your hedge does when the surface moves">
+<meta property="og:description" content="The delta your vega is hiding, shadow gamma, weighted vega, the daily cost of owning skew, and why realized volatility depends on how often you look.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">No. 22 &middot; Surface dynamics</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>One hedge, three outcomes</span><i></i></a>
+  <a href="#c2"><span>The gamma you were not shown</span><i></i></a>
+  <a href="#c3"><span>Vega is a guess about the curve</span><i></i></a>
+  <a href="#c4"><span>What skew pays</span><i></i></a>
+  <a href="#c5"><span>Which realized vol</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation</div>
+    <h1>What your hedge does when the surface <em>moves</em></h1>
+    <p class="sub">Every greek on a risk sheet holds something still that will not stay still. This page moves it, and shows what the sheet left out.</p>
+  </div>
+  <div class="scrollcue">Scroll &darr;</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">You know what delta, gamma, vega and theta are, and you have seen a skewed surface on page 02. This page is about the gap between those numbers and what a book actually does over a day: the delta that vega is hiding, the gamma that appears only when vol moves with spot, the vega total that changes sign depending on how the term structure shifts, the daily bill for owning skew, and the fact that "realized volatility" is several different numbers.</p>
+  <ol>
+    <li><b>One dial runs through the page.</b> It is called R, and it says how far at-the-money vol slides along the skew when spot moves. Learn it in chapter 01 and the rest follows.</li>
+    <li><b>Predict before you press.</b> Each "try this" asks for a sign. Getting the sign wrong is the common failure here, not the size.</li>
+    <li><b>Treat R, h and &phi; as assumptions.</b> None of them can be read off a screen. They are on sliders for that reason.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation &mdash; every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>b</td><td>Skew: the slope of implied vol in log-strike. At &minus;0.35, a strike 10% below spot carries about 3.7 points more vol than at-the-money.</td></tr>
+      <tr><td>R</td><td>The skew-stickiness ratio. When spot rises 1%, at-the-money vol changes by R &times; b points. R = 0 is sticky delta, R = 1 sticky strike, R = 2 roughly what a local-volatility model produces.</td></tr>
+      <tr><td>&beta;</td><td>Spot&ndash;vol beta: the percentage fall in the vol on your strikes for a 1% rise in spot. With vol at 40, &beta; = 1 means 0.4 points per 1%.</td></tr>
+      <tr><td>h</td><td>How fast a vol shock fades with tenor. A one-point move at three months reaches tenor T as (3m / T)<sup>h</sup> points. h = 0 is a parallel shift, h = 0.5 is the root-time convention.</td></tr>
+      <tr><td>&phi;</td><td>Autocorrelation of daily returns. Positive means trending, negative means mean-reverting, zero is a random walk.</td></tr>
+      <tr><td>vega</td><td>Quoted throughout in dollars per one volatility point.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>One hedge, three outcomes</h2>
+    <p class="dek">Buy a call, hedge it at the delta on the screen, and let spot move. What you make depends on something the screen did not ask you about.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">You own one six-month 100-strike call at 30 vol and you are short 54 shares against it, which is the Black&ndash;Scholes delta. The figure moves spot and reprices. The grey line is what the textbook promises: a small gain whichever way spot goes, because you are long gamma. The blue line is the same position on a surface where at-the-money vol slides down the skew as spot rises.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>A call hedged once, then spot moves</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Every strike keeps its vol</span>
+            <span><i class="swl" style="background:var(--blue)"></i>The surface moves as the dial says</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Surface</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>The grey curve is a smile: long gamma, paid both ways. The blue curve is tilted, and a tilted line through the hedge point is a delta. The position was never flat. Dollars per contract, no time passing.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>At R = 2 the hedged call loses when spot rises. <b>Predict</b> what happens at R = 0, where the smile travels with spot instead: does the tilt vanish or reverse?</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"ssr":0}' data-focus="cv1">R = 0, sticky delta</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"ssr":1}' data-focus="cv1">R = 1, sticky strike</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"ssr":2}' data-focus="cv1">R = 2, local-vol-like</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"b":0}' data-focus="cv1">No skew at all</button>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>It reverses. For a 3% move in spot the hedged contract makes about $8 either way under sticky strike. At R = 0 it makes $37 on the way up and loses $21 on the way down. At R = 2 it is the mirror image: it loses $21 up and makes $38 down. Same option, same hedge, same move.</p>
+    <p>What changed is the vol on your strike. Under sticky strike it does not move, so the Black&ndash;Scholes delta of 0.542 is the whole exposure. At R = 2 a 1% rally takes 0.35 points off the vol on the 100 strike, and the option has about $28 of vega per point, so each 1% up costs roughly $10 that the delta never counted. The hedge that would have been flat is 0.444. At R = 0 the vol on the strike rises instead and the flat hedge is 0.640.</p>
+  </div>
+
+  <div class="mline">&Delta;<sub>flat</sub> = &Delta;<sub>BS</sub> + vega &times; (R &minus; 1) &times; b / S</div>
+  <p class="mread">Reads as: <b>the delta that keeps you flat is the screen's delta plus your vega times how far the vol on your strike moves per dollar of spot.</b> With negative skew and R above 1 the second term is negative for anything long vega.</p>
+
+  <div class="prose">
+    <p>Desks carry this as a single number. Measure how much the vol on your strikes falls, in percent, for a 1% rise in spot, and call it <span class="term" data-t="Spot–vol beta" data-def="The percentage change in the implied vol on your strikes for a 1% move in spot, sign flipped so that the usual equity pattern is positive. It converts a vega position into the delta it is hiding.">&beta;</span>. Then a book's hidden delta, in dollars of stock, is:</p>
+  </div>
+  <div class="mline">hidden delta = &minus; vega &times; &sigma; &times; &beta;</div>
+  <p class="mread">Reads as: <b>dollars of vega per point, times the vol level in points, times beta.</b> Long $1,000 of vega at 40 vol with &beta; = 1 is short $40,000 of stock that no delta column shows. To be flat you buy $40,000.</p>
+
+  <div class="prose">
+    <p>Neither the sign nor the size of &beta; is a law. It is an estimate from how that name's surface has been behaving, and it changes with regime. The point of the chapter is narrower: a delta-neutral long-vega book in an equity index is short the market, and a delta-neutral short-vega book is long it, by an amount you can compute.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are short $5,000 of vega in an index at 20 vol, flat delta on the sheet, and you believe &beta; is 1.2. What are you really carrying?</p>
+    <div class="opts">
+      <button>Nothing; delta-neutral means delta-neutral</button>
+      <button>Short $120,000 of the index</button>
+      <button data-ok="1">Long $120,000 of the index</button>
+      <button>Long $6,000 of the index</button>
+    </div>
+    <div class="ans"><b>Long $120,000.</b> Hidden delta is &minus;vega &times; &sigma; &times; &beta; = &minus;(&minus;5,000) &times; 20 &times; 1.2. A selloff lifts vol and a short-vega book loses, which is what being long looks like. The short answer has the sign of a long-vega book. The $6,000 answer forgot that vega is per point and vol is 20 points.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The gamma you were not shown</h2>
+    <p class="dek">If vol moves with spot, delta changes for two reasons at once. The sheet shows one of them.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Now a put, because this is where it hurts. One 60-day 90-strike put with spot at 100. The dashed line is what the risk sheet tells you to expect: today's delta, changing at today's gamma. The solid lines are the delta the position really has as spot moves, which is the number of shares you must hold against it to be flat.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Delta of one long put, in shares</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--ochre)"></i>Sheet: delta + gamma &times; move</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Sticky strike</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Your dial</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Surface &amp; expiry</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Left of spot the blue line pulls away from the dashed one. That widening is delta you have to trade that the gamma number did not announce.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>The sheet says &minus;16.8 shares of delta per contract and 2.16 of gamma per dollar, so at $95 it expects &minus;27.5. Under sticky strike the flat hedge at $95 is &minus;30.0: gamma is not constant, and it grows as the put comes toward the money. At R = 2 the flat hedge is &minus;35.9, because the selloff also raised the vol on the strike and a higher vol on an out-of-the-money put means more delta. On a hundred contracts that is 3,588 shares where the sheet said 2,753.</p>
+    <p>Divide the change by the move and you have the gamma you actually experienced: 3.11 per dollar on the way down against 2.16 on the sheet, and 2.24 on the way up. Traders call the extra part <span class="term" data-t="Shadow gamma" data-def="The change in delta that comes from implied vol moving with spot, on top of ordinary gamma. It is vanna times the vol move, and it is why up-gamma and down-gamma are quoted separately.">shadow gamma</span>, and it is why a serious risk report has an up-gamma and a down-gamma instead of one number.</p>
+  </div>
+
+  <div class="mline">gamma<sub>felt</sub> &asymp; gamma + 2 &times; vanna &times; d&sigma;/dS</div>
+  <p class="mread">Reads as: <b>the gamma you live through is the sheet's gamma plus the change in delta caused by vol moving, counted once for the delta you hold and once for the delta your vega was hiding.</b> Both extra pieces carry the sign of vanna times the spot&ndash;vol move.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p><b>Predict</b> which makes the down-gamma multiple worse: a steeper skew, or less time to expiry?</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"b":-0.7,"days":60}' data-focus="cv2">Steeper skew</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"b":-0.35,"days":14}' data-focus="cv2">Two weeks left</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"b":-0.35,"days":60,"ssr":2}' data-focus="cv2">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are short out-of-the-money index puts, hedged at the sheet delta, and the market falls 5% with vol rising. Compared with what your gamma number predicted, you are:</p>
+    <div class="opts">
+      <button>About where it predicted; gamma already includes this</button>
+      <button data-ok="1">Longer than predicted, and need to sell more than planned into the fall</button>
+      <button>Shorter than predicted, and can buy some back</button>
+      <button>Unaffected in delta; only vega changes</button>
+    </div>
+    <div class="ans"><b>Longer, selling more into the fall.</b> A short put is long delta. Rising vol makes an out-of-the-money put behave as if it were closer to the money, so its delta grows faster than gamma said, and yours grows with it. This is the mechanism behind short-put books needing to sell the most at the worst moment.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>A vega total is a guess about the term structure</h2>
+    <p class="dek">Adding vega across expiries assumes every expiry moves by the same amount. They do not.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A book is short $40,000 of vega in the three-month and long $50,000 in the one-year. The sheet adds them and says long $10,000 a point. Slide h to choose how much of a three-month vol move reaches the one-year, and watch the total.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>What the book makes when three-month vol rises one point</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Net P&amp;L against the shape of the shock</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="250"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>The shock, by tenor</h3></div>
+        <canvas id="cv3b" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Shock &amp; book</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The book is long vol only on the far left. By h = 0.16 it is flat, and at the root-time convention it is short $15,000 a point. Nothing in the position changed.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Short-dated vol moves more than long-dated vol. A common desk convention is that moves scale with one over the square root of time, which is h = 0.5: a point at three months is half a point at one year. Under it the long leg makes $25,000, the short leg loses $40,000, and the "long $10,000" book loses $15,000 on a vol spike.</p>
+  </div>
+
+  <div class="mline">weighted vega = &Sigma; vega<sub>T</sub> &times; (T<sub>ref</sub> / T)<sup>h</sup></div>
+  <p class="mread">Reads as: <b>before adding, scale each expiry's vega by how much that expiry is expected to move when the reference expiry moves one point.</b> The sum is then in units of "points at the reference tenor".</p>
+
+  <div class="prose">
+    <p>There is a tidy consequence. Vega itself grows with the square root of time, so under root-time shocks the two effects cancel: a three-month at-the-money straddle gains $0.398 a share when its vol rises a point, and a one-year straddle gains $0.394 when its vol rises the matching half point. A one-for-one calendar spread, which the sheet shows as long vega, is close to flat. It is a position in the <em>shape</em> of the curve and should be sized as one.</p>
+    <p>h is an assumption. Estimate it by regressing changes in each tenor's vol on changes in the reference tenor, and expect it to rise in a panic, when the front moves and the back barely does.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Move the long leg out to two years at the root-time setting. <b>Predict</b> whether the book gets more short or less.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"h":0.5,"mo":24}' data-focus="cv3">Two-year back leg</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"h":0,"mo":12}' data-focus="cv3">Parallel shift</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"h":0.5,"mo":12,"front":-40,"back":50}' data-focus="cv3">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You sell one-month straddles and buy six-month straddles until the sheet shows zero vega. Vol spikes at the front. Under root-time shocks you:</p>
+    <div class="opts">
+      <button>Break even, since vega is zero</button>
+      <button>Make money, since you own the longer option</button>
+      <button data-ok="1">Lose, since the leg you are short moves about 2.4 times as far</button>
+      <button>Lose only if the spike exceeds your theta</button>
+    </div>
+    <div class="ans"><b>Lose.</b> Equal raw vega means the six-month leg needs the same point move to offset the one-month leg, and under root-time it gets 1/&radic;6 = 0.41 of it. Zero vega on the sheet is short about 59% of the front leg's vega in weighted terms.</div>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section class="chapter" id="c4">
+  <div class="chead">
+    <div class="cnum">04</div>
+    <h2>What skew pays and what it costs</h2>
+    <p class="dek">Owning the put and selling the call has a daily bill. Whether it is worth paying comes down to the same dial.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Buy a hundred three-month 90 puts at 28.2 vol and sell 110 calls at 22.1 vol against them, sized so the vega nets to zero, then delta-hedge. You own skew: you are long the expensive vol and short the cheap one. The figure shows what that position expects to make per day, when the stock realizes exactly the at-the-money vol, as a function of how the surface moves.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Expected daily P&amp;L of a hedged, vega-neutral risk reversal</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Long 100 puts, short the calls</span>
+          </span>
+        </div>
+        <canvas id="cv4" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Surface &amp; stock</h4>
+        <div id="ctl4"></div>
+        <div class="kv" style="margin-top:20px" id="kv4"></div>
+      </div>
+    </div>
+    <figcaption>The line crosses zero near R = 2. Below it, skew costs more than it pays, and the seller of the put collects the difference.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Under sticky strike the position loses $137 a day and there is nothing on the other side. Half is theta: the put has the higher vol, so it decays faster than the call you sold pays you. The other half is gamma: for the same vega, a higher-vol option has <em>less</em> gamma, so you are net short gamma and realized movement costs you too.</p>
+  </div>
+
+  <div class="mline">skew theta &asymp; vega &times; (&sigma;<sub>put</sub> &minus; &sigma;<sub>call</sub>) / 2T</div>
+  <p class="mread">Reads as: <b>the yearly theta bill for a vega-neutral risk reversal is the vega of one leg times the vol gap between the strikes, divided by twice the time to expiry.</b> Here $142,672 of vega per unit of vol times 0.060, over 0.5, is $17,200 a year, or $68 a trading day.</p>
+
+  <div class="prose">
+    <p>What pays for it is the surface moving. When spot falls, the position becomes long vega (about $1,250 a point at $92) and if vol rises at the same moment you are paid; when spot rises it becomes short vega ($1,270 a point at $108) and you want vol falling. Each unit of R adds about $135 a day, so at R = 1.5 you still lose $69 and you break even at R = 2.0.</p>
+    <p>That number is not an accident of these inputs. Move the skew or the expiry and the break-even stays close to 2, provided the stock realizes about the at-the-money vol. Push realized vol up to 40 and it falls to 1.7, because theta is a fixed bill while the spot&ndash;vol term grows with movement. A skew of slope b is the market charging for at-the-money vol to move 2b points per 1% of spot. If it moves less, skew was overpriced and the put seller wins; if it moves more, the put buyer does. Published estimates for equity indices mostly sit between 1 and 2 in ordinary markets and jump above 2 in a crash, which is the whole story of selling index skew: paid most days, and paid back in a hurry.</p>
+    <p>Notice also what the vega line in the panel says. A position with zero vega at $100 has $1,250 of it eight dollars lower. A greek that reads zero is a statement about one spot price.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Halve the skew. <b>Predict</b> whether the break-even R moves.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c4" data-patch='{"b":-0.15}' data-focus="cv4">Half the skew</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"ssr":2.5,"b":-0.3}' data-focus="cv4">A crash regime, R = 2.5</button>
+      <button class="act ghost" data-preset="c4" data-patch='{"ssr":1,"b":-0.3,"rv":0.25,"mo":3}' data-focus="cv4">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">An index has realized R near 1.3 for a year. A colleague says the skew is steep and therefore puts are expensive. The better statement is:</p>
+    <div class="opts">
+      <button>Correct: steep skew means expensive puts</button>
+      <button>Wrong: steepness says nothing about value</button>
+      <button data-ok="1">Skew of any steepness has been overpriced, because the surface moved less than 2&times; the slope it charges for</button>
+      <button>Puts are cheap, because R above 1 favors the put owner</button>
+    </div>
+    <div class="ans"><b>Overpriced at any steepness, on that history.</b> The test is not how steep the skew is but whether vol has been moving against spot by as much as the skew implies. At R = 1.3 it has not, so skew sellers have been collecting. The catch is that R is not stable, and the year in which it reaches 3 is the year the trade gives everything back.</div>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section class="chapter" id="c5">
+  <div class="chead">
+    <div class="cnum">05</div>
+    <h2>Which realized volatility</h2>
+    <p class="dek">Implied gets compared with "realized". Realized depends on how often you look, and so does what a gamma hedger earns.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Take one long price history and measure its volatility three ways: from daily closes, from weekly closes, from monthly closes. On a random walk they agree. The slider lets yesterday's return lean on today's, and the three numbers come apart.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Annualized vol against the sampling interval</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Exact, from the autocorrelation</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Measured on 200 simulated years</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Daily number</span>
+          </span>
+        </div>
+        <canvas id="cv5" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The path</h4>
+        <div id="ctl5"></div>
+        <div class="kv" style="margin-top:20px" id="kv5"></div>
+      </div>
+    </div>
+    <figcaption>With a mild trend, &phi; = 0.15, a stock that prints 16% on daily closes prints 18.0% on weekly and 18.5% on monthly. Same prices.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>The extreme case makes it concrete. A stock that moves 1% a day is a 16% vol stock. If those moves all point the same way for a week it has moved 5%, and a 5% week annualizes to 35.5%. Keep going for twenty days and the 22% month annualizes to 78%. All three are honest measurements of the same path.</p>
+  </div>
+
+  <div class="mline">&sigma;<sub>k-day</sub> = &sigma;<sub>daily</sub> &times; &radic;( 1 + 2 &Sigma;<sub>j&lt;k</sub> (1 &minus; j/k) &phi;<sup>j</sup> )</div>
+  <p class="mread">Reads as: <b>vol sampled every k days equals daily vol times the square root of one plus twice the weighted sum of the autocorrelations inside the window.</b> Positive autocorrelation pushes it up, negative pushes it down, zero leaves it alone.</p>
+
+  <div class="prose">
+    <p>This matters because a delta hedger earns the volatility sampled at the interval they hedge at. Long gamma in a trending name, hedged every day, sells each uptick and gives away the trend; hedged weekly it keeps more of it. In a name that chops, &phi; negative, the daily hedger harvests reversals the weekly hedger never sees: at &phi; = &minus;0.15 the weekly number is 14.2% against 16% daily. So "implied is 17, realized is 16, sell it" is incomplete until you say which realized, and whether the person on the other side hedges at a different clock.</p>
+    <p>&phi; is the least stable assumption on this page. It is small, it changes sign, and estimates of it from a few months of data are mostly noise. Use the figure to know which way the error runs, not to forecast it.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p><b>Predict</b> whether a mean-reverting stock looks more or less volatile on weekly closes than on daily ones.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c5" data-patch='{"phi":-0.15}' data-focus="cv5">Mean-reverting</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"phi":0}' data-focus="cv5">Random walk</button>
+      <button class="act ghost" data-preset="c5" data-patch='{"phi":0.3}' data-focus="cv5">Strong trend</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long gamma in a stock that has been trending. Daily-close realized is 20 and you paid 22 implied. Which is true?</p>
+    <div class="opts">
+      <button>You overpaid by two points, whatever you do</button>
+      <button data-ok="1">Hedging less often may earn you more than 20, because the vol at longer intervals is higher in a trend</button>
+      <button>Hedging more often earns more, because you capture more moves</button>
+      <button>Hedge frequency affects only the noise, never the expected result</button>
+    </div>
+    <div class="ans"><b>Hedging less often may earn more than 20.</b> Frequency leaves the expectation alone only on a random walk. In a trend, wider sampling sees more variance and so does a wider hedge interval. The cost is a bumpier result, and the trend has to persist, which is the part nobody can promise.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation &mdash; why the break-even in chapter 04 is 2</summary>
+    <div class="body">
+      <p>Write the vol of a strike as a line in log-strike with slope b, and let at-the-money vol move by R &times; b per unit of log-spot. A delta-hedged option's expected daily P&amp;L has three parts: theta, gamma times realized variance, and the cross term between spot and the vol on its strike.</p>
+      <div class="mline">E[P&amp;L] = &theta; dt + &frac12; &Gamma; S&sup2; &sigma;<sub>r</sub>&sup2; dt + vanna &times; S &times; (R &minus; 1) b &times; &sigma;<sub>r</sub>&sup2; dt</div>
+      <p class="mread">Reads as: <b>decay, plus what movement pays through gamma, plus what movement pays through vol shifting on your strike while your vega is changing.</b></p>
+      <p>For a vega-neutral risk reversal the first two parts are each about &minus;vega &times; (&sigma;<sub>put</sub> &minus; &sigma;<sub>call</sub>) / 2T when realized equals at-the-money vol, and the third is the same quantity times (R &minus; 1) with the opposite sign and twice the size. Setting the sum to zero gives R = 2. The figure does not use this approximation; it reprices both legs over a one-day distribution of spot, and lands on 2.01.</p>
+      <p><b>Where it breaks.</b> The surface here is a straight line with no curvature, the skew does not change as spot moves, and vol has no moves of its own. Real surfaces have all three, and each adds a term: curvature is paid for by vol-of-vol, and a skew that steepens in a selloff helps the put owner beyond what R captures.</p>
+    </div>
+  </details>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Assumptions: zero rates and dividends; a smile that is linear in log-strike; a surface whose only motion is the one the dial describes; term-structure shocks that are a power of tenor; daily returns with a single autocorrelation. In the real world the failures are called vol-of-vol, skew dynamics, term-structure twists and regime change. Next: <a href="surface.html">the surface itself</a>, <a href="book.html">running a book</a>, or <a href="program.html">drill it</a>.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* ── the surface, and one dial for how it moves ──────────────────────
+   Vol at a strike is a line in log-moneyness: atm + b·ln(K/S).
+   When spot moves from S0 to S the whole line is re-anchored by the dial:
+     ssr = 0  the smile travels with spot            (sticky delta)
+     ssr = 1  every strike keeps its vol             (sticky strike)
+     ssr = 2  at-the-money vol slides twice the skew (local-vol-like)   */
+const S0 = 100;
+function volAt(K, S, p){ return Math.max(.03, p.atm + p.b * Math.log(K / S) + p.ssr * p.b * Math.log(S / S0)); }
+function px(K, S, T, call, p){ return bs(S, K, T, volAt(K, S, p), 0, 0, call).price; }
+/* total derivative of price in spot, letting the vol on the strike move as the dial says */
+function effDelta(K, S, T, call, p){ const h = .01; return (px(K, S + h, T, call, p) - px(K, S - h, T, call, p)) / (2 * h); }
+function bsDelta(K, S, T, call, p){ return bs(S, K, T, volAt(K, S, p), 0, 0, call).delta; }
+/* a long option hedged ONCE at the Black–Scholes delta, then spot moves by m (a fraction) */
+function hedgedMove(K, T, call, m, p){ const S1 = S0 * (1 + m); return px(K, S1, T, call, p) - px(K, S0, T, call, p) - bsDelta(K, S0, T, call, p) * (S1 - S0); }
+/* the lean: dollars of underlying to hold against vega, when vol on your strikes moves beta% per 1% of spot */
+function lean(vegaPerPt, volPts, beta){ return -vegaPerPt * volPts * beta; }
+/* weighted vega: a shock of one point at the reference tenor reaches tenor T as (Tref/T)^h points */
+function tenorShock(T, Tref, h){ return Math.pow(Tref / T, h); }
+function vegaNet(buckets, Tref, h){ return buckets.reduce((a, x) => a + x.vega * tenorShock(x.T, Tref, h), 0); }
+function flipH(front, back){ return Math.log(-front.vega / back.vega) / Math.log(front.T / back.T); }
+/* a vega-neutral risk reversal: long the put, short n calls, hedged at the delta its own dial implies */
+function rr(p){
+  const T = p.T, Kp = p.Kp, Kc = p.Kc, vp = bs(S0, Kp, T, volAt(Kp, S0, p), 0, 0, false), vc = bs(S0, Kc, T, volAt(Kc, S0, p), 0, 0, true), n = vp.vega / vc.vega;
+  const val = (S, t) => px(Kp, S, t, false, p) - n * px(Kc, S, t, true, p);
+  const d0 = (val(S0 + .01, T) - val(S0 - .01, T)) / .02, dt = 1 / 252, sd = p.rv * Math.sqrt(dt);
+  let e = 0, w = 0; for (let i = -60; i <= 60; i++){ const z = i / 10, q = Math.exp(-.5 * z * z), S1 = S0 * Math.exp(sd * z - .5 * sd * sd);
+    e += q * (val(S1, T - dt) - val(S0, T) - d0 * (S1 - S0)); w += q; }
+  const vegaAt = S => (bs(S, Kp, T, volAt(Kp, S, p), 0, 0, false).vega - n * bs(S, Kc, T, volAt(Kc, S, p), 0, 0, true).vega) / 100;
+  return { n, exp: e / w, theta: (vp.theta - n * vc.theta) / 252, gamma: vp.gamma - n * vc.gamma, vegaLeg: vp.vega / 100, vegaAt,
+    volP: volAt(Kp, S0, p), volC: volAt(Kc, S0, p) };
+}
+function breakevenSSR(p){ let lo = 0, hi = 4; for (let i = 0; i < 50; i++){ const m = (lo + hi) / 2; if (rr(Object.assign({}, p, { ssr: m })).exp < 0) lo = m; else hi = m; } return (lo + hi) / 2; }
+/* realized vol depends on how you sample it: variance ratio of k-day returns when daily returns have autocorrelation phi */
+function varRatio(k, phi){ let s = 1; for (let j = 1; j < k; j++) s += 2 * (1 - j / k) * Math.pow(phi, j); return s; }
+function mulberry(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function arPath(n, dailyVol, phi, seed){ const u = mulberry(seed), z = () => Math.sqrt(-2 * Math.log(u() || 1e-12)) * Math.cos(2 * Math.PI * u());
+  const r = [], s = dailyVol * Math.sqrt(1 - phi * phi); let x = dailyVol * z(); for (let i = 0; i < n; i++){ r.push(x); x = phi * x + s * z(); } return r; }
+function sampledVol(r, k){ let ss = 0, m = 0; for (let i = 0; i + k <= r.length; i += k){ let x = 0; for (let j = 0; j < k; j++) x += r[i + j]; ss += x * x; m++; } return Math.sqrt(ss / m * 252 / k); }
+
+/* sampled-function helper: line() takes arrays, never a function */
+function curve(o, f, col, w, dash, n){ const xs = [], ys = []; n = n || 160;
+  for (let i = 0; i <= n; i++){ const x = o.x0 + (o.x1 - o.x0) * i / n; xs.push(x); ys.push(f(x)); } line(o, xs, ys, col, w, dash); }
+function dotAt(o, x, y, col){ const g = o.g; g.save(); g.fillStyle = col; g.beginPath(); g.arc(o.X(x), o.Y(y), 4, 0, 6.2832); g.fill(); g.restore(); }
+const usd = v => (v < -.5 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const usd1 = v => (v < 0 ? "−$" : "+$") + Math.abs(v).toFixed(1);
+const sgn = (v, d) => (v < 0 ? "−" : "+") + Math.abs(v).toFixed(d);
+const dialName = s => s < .25 ? "sticky delta" : Math.abs(s - 1) < .13 ? "sticky strike" : s > 1.75 && s < 2.25 ? "local-vol-like" : s < 1 ? "between delta and strike" : s < 2 ? "between strike and local vol" : "beyond local vol";
+
+/* ══════════ HERO — a smile sliding under a fixed strike ══════════ */
+(function(){
+  const cv = document.getElementById("heroCv"); let w, h, g, raf, t0 = 0;
+  function size(){ const dpr = window.devicePixelRatio || 1; w = cv.clientWidth; h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr;
+    g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function paint(ph){
+    g.fillStyle = C("--chalk"); g.fillRect(0, 0, w, h);
+    const S = 100 + 13 * Math.sin(ph), X = k => w * (.40 + .57 * (k - 70) / 60), Y = v => h * (.84 - (v - .14) * 2.1);
+    [[0, C("--blue"), .34], [1, C("--grey"), .30], [2, C("--verm"), .34]].forEach(([ssr, col, a]) => {
+      const p = { atm: .30, b: -.42, ssr }; g.strokeStyle = col; g.globalAlpha = a; g.lineWidth = 1.6; g.beginPath();
+      for (let j = 0; j <= 80; j++){ const K = 70 + 60 * j / 80, y = Y(volAt(K, S, p)); j ? g.lineTo(X(K), y) : g.moveTo(X(K), y); } g.stroke();
+      g.globalAlpha = a + .25; g.fillStyle = col; g.beginPath(); g.arc(X(100), Y(volAt(100, S, p)), 4.5, 0, 6.2832); g.fill(); });
+    g.globalAlpha = .35; g.strokeStyle = C("--ochre"); g.setLineDash([3, 5]); g.beginPath(); g.moveTo(X(S), h * .14); g.lineTo(X(S), h * .9); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = C("--grey"); g.globalAlpha = .18; g.beginPath(); g.moveTo(X(100), h * .14); g.lineTo(X(100), h * .9); g.stroke(); g.globalAlpha = 1;
+  }
+  function frame(ts){ if (!t0) t0 = ts; paint((ts - t0) / 2600); raf = requestAnimationFrame(frame); }
+  function start(){ size(); paint(1.2); if (!RM) raf = requestAnimationFrame(frame); }
+  start();
+  window.addEventListener("resize", () => { cancelAnimationFrame(raf); t0 = 0; start(); });
+})();
+
+/* ══════════ 01 — one hedge, three outcomes ══════════ */
+const s1 = { ssr: 2, b: -.35, atm: .30, T: .5 };
+(function(){
+  sliders(document.getElementById("ctl1"), [
+    { id: "r1", k: "ssr", lbl: "R", name: "How the surface moves", min: 0, max: 2.5, step: .05, fmt: v => v.toFixed(2) },
+    { id: "b1", k: "b", lbl: "b", name: "Skew (slope)", min: -.8, max: 0, step: .01, fmt: v => v.toFixed(2) },
+    { id: "a1", k: "atm", lbl: "σ", name: "ATM volatility", min: .1, max: .8, step: .01, fmt: pct },
+    { id: "T1", k: "T", lbl: "T", name: "Expiry", min: .08, max: 2, step: .02, fmt: v => (v * 12).toFixed(1) + "m" }
+  ], s1, () => draw(), "c1");
+  window.draw1 = draw;
+  function draw(){
+    const p = s1, f = m => 100 * hedgedMove(100, p.T, true, m / 100, p), ss = Object.assign({}, p, { ssr: 1 }), f1 = m => 100 * hedgedMove(100, p.T, true, m / 100, ss);
+    let lo = 0, hi = 0; for (let m = -8; m <= 8; m += .5){ const a = f(m), b = f1(m); lo = Math.min(lo, a, b); hi = Math.max(hi, a, b); }
+    const pad = (hi - lo) * .08 + 1, o = Fig(document.getElementById("cv1"), { h: 310, x0: -8, x1: 8, y0: lo - pad, y1: hi + pad, pad: { l: 58 } });
+    axes(o, v => sgn(v, 0) + "%", v => usd(v), 8, 5);
+    clip(o, () => { curve(o, f1, C("--grey"), 2.2); curve(o, f, C("--blue"), 2.6); });
+    vline(o, 0, C("--ochre"), "hedged here", [2, 4]);
+    const dB = bsDelta(100, S0, p.T, true, p), dE = effDelta(100, S0, p.T, true, p), vg = bs(S0, 100, p.T, p.atm, 0, 0, true).vega / 100;
+    const beta = -(p.ssr - 1) * p.b / p.atm;
+    document.getElementById("kv1").innerHTML = kvHTML([
+      ["Regime", dialName(p.ssr)],
+      ["Black–Scholes delta", dB.toFixed(3)],
+      ["Delta that would have been flat", dE.toFixed(3)],
+      ["Shares you are off, per contract", sgn(100 * (dE - dB), 1)],
+      ["Hedged P&L, spot +3%", usd1(f(3))],
+      ["Hedged P&L, spot −3%", usd1(f(-3))],
+      ["Vol on your strike per +1% spot", sgn((p.ssr - 1) * p.b, 2) + " pts"],
+      ["Spot–vol beta β", beta.toFixed(2)],
+      ["Hidden delta per $1,000 of vega", usd(lean(1000, p.atm * 100, beta))]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — the gamma you were not shown ══════════ */
+const s2 = { ssr: 2, b: -.35, atm: .25, days: 60 };
+const K2 = 90;
+function gam2(p){ const T = p.days / 365, e = S => 100 * effDelta(K2, S, T, false, p), d0 = e(100);
+  return { d0, bsd: 100 * bsDelta(K2, S0, T, false, p), sheet: 100 * bs(S0, K2, T, volAt(K2, S0, p), 0, 0, false).gamma, down: (e(95) - d0) / -5, up: (e(105) - d0) / 5, at95: e(95), at105: e(105) }; }
+(function(){
+  sliders(document.getElementById("ctl2"), [
+    { id: "r2", k: "ssr", lbl: "R", name: "How the surface moves", min: 0, max: 2.5, step: .05, fmt: v => v.toFixed(2) },
+    { id: "b2", k: "b", lbl: "b", name: "Skew (slope)", min: -.8, max: 0, step: .01, fmt: v => v.toFixed(2) },
+    { id: "a2", k: "atm", lbl: "σ", name: "ATM volatility", min: .1, max: .8, step: .01, fmt: pct },
+    { id: "d2", k: "days", lbl: "T", name: "Days to expiry", min: 7, max: 180, step: 1, fmt: v => v.toFixed(0) + "d" }
+  ], s2, () => draw(), "c2");
+  window.draw2 = draw;
+  function draw(){
+    const p = s2, T = p.days / 365, G = gam2(p), ss = Object.assign({}, p, { ssr: 1 });
+    const o = Fig(document.getElementById("cv2"), { h: 310, x0: 88, x1: 112, y0: -62, y1: 4, pad: { l: 58 } });
+    axes(o, v => "$" + v.toFixed(0), v => v.toFixed(0), 6, 5);
+    clip(o, () => {
+      curve(o, S => G.bsd + G.sheet * (S - 100), C("--ochre"), 1.6, [5, 4]);
+      curve(o, S => 100 * effDelta(K2, S, T, false, ss), C("--grey"), 2.2);
+      curve(o, S => 100 * effDelta(K2, S, T, false, p), C("--blue"), 2.6);
+    });
+    vline(o, 100, C("--ochre"), "spot", [2, 4]);
+    document.getElementById("kv2").innerHTML = kvHTML([
+      ["Regime", dialName(p.ssr)],
+      ["Sheet delta, shares per contract", G.bsd.toFixed(1)],
+      ["Delta that keeps you flat", G.d0.toFixed(1)],
+      ["Gamma on the sheet, per $1", G.sheet.toFixed(2)],
+      ["Gamma you get, spot down 5%", G.down.toFixed(2)],
+      ["Gamma you get, spot up 5%", G.up.toFixed(2)],
+      ["Down-gamma ÷ sheet gamma", (G.down / G.sheet).toFixed(2) + "×"],
+      ["Flat delta at $95", G.at95.toFixed(1)],
+      ["Sheet predicted at $95", (G.bsd - 5 * G.sheet).toFixed(1)]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — weighted vega ══════════ */
+const s3 = { h: .5, front: -40, back: 50, mo: 12 };
+const book3 = p => [{ T: .25, vega: p.front }, { T: p.mo / 12, vega: p.back }];
+(function(){
+  sliders(document.getElementById("ctl3"), [
+    { id: "h3", k: "h", lbl: "h", name: "How fast shocks fade with tenor", min: 0, max: 1, step: .01, fmt: v => v.toFixed(2) },
+    { id: "f3", k: "front", lbl: "V₃", name: "3-month vega, $k per point", min: -80, max: 0, step: 1, fmt: v => v.toFixed(0) },
+    { id: "k3", k: "back", lbl: "V", name: "Long-dated vega, $k per point", min: 0, max: 100, step: 1, fmt: v => v.toFixed(0) },
+    { id: "m3", k: "mo", lbl: "T", name: "Long-dated tenor", min: 6, max: 36, step: 1, fmt: v => v.toFixed(0) + "m" }
+  ], s3, () => draw(), "c3");
+  window.draw3 = draw;
+  function draw(){
+    const p = s3, B = book3(p), f = h => vegaNet(B, .25, h), raw = f(0), a = Math.max(Math.abs(raw), Math.abs(f(1)), 5) * 1.25;
+    const o = Fig(document.getElementById("cv3"), { h: 250, x0: 0, x1: 1, y0: -a, y1: a, pad: { l: 58 } });
+    axes(o, v => v.toFixed(1), v => (v < 0 ? "−" : "") + "$" + Math.abs(v).toFixed(0) + "k", 5, 4);
+    clip(o, () => { curve(o, f, C("--blue"), 2.6); });
+    vline(o, .5, C("--grey"), Math.abs(p.h - .5) < .09 ? "" : "root-time", [2, 4]); vline(o, p.h, C("--ochre"), "you", [2, 4]); dotAt(o, p.h, f(p.h), C("--verm"));
+    const o2 = Fig(document.getElementById("cv3b"), { h: 190, x0: 1, x1: 36, y0: 0, y1: 1.8, pad: { l: 58 } });
+    axes(o2, v => v.toFixed(0) + "m", v => v.toFixed(1), 6, 4);
+    clip(o2, () => { curve(o2, m => 1, C("--grey"), 1.6, [5, 4]); curve(o2, m => tenorShock(m / 12, .25, p.h), C("--blue"), 2.6); });
+    dotAt(o2, 3, 1, C("--verm")); dotAt(o2, p.mo, tenorShock(p.mo / 12, .25, p.h), C("--verm"));
+    const fl = p.front < 0 && p.back > 0 && -p.front < p.back ? flipH(B[0], B[1]) : NaN, sh = tenorShock(p.mo / 12, .25, p.h);
+    document.getElementById("kv3").innerHTML = kvHTML([
+      ["Vega as the sheet adds it", (raw < 0 ? "−" : "+") + "$" + Math.abs(raw).toFixed(0) + "k"],
+      ["3-month vol moves", "1.00 pt"],
+      [p.mo.toFixed(0) + "-month vol moves", sh.toFixed(2) + " pt"],
+      ["P&L, front", (p.front < 0 ? "−" : "+") + "$" + Math.abs(p.front).toFixed(1) + "k"],
+      ["P&L, back", "+$" + (p.back * sh).toFixed(1) + "k"],
+      ["Net when vol rises", (f(p.h) < 0 ? "−" : "+") + "$" + Math.abs(f(p.h)).toFixed(1) + "k"],
+      ["Book turns short above h =", isFinite(fl) ? fl.toFixed(2) : "never"]
+    ]);
+  }
+})();
+
+/* ══════════ 04 — what skew pays and what it costs ══════════ */
+const s4 = { ssr: 1, b: -.30, rv: .25, mo: 3 };
+const P4 = p => ({ atm: .25, b: p.b, ssr: p.ssr, T: p.mo / 12, Kp: 90, Kc: 110, rv: p.rv });
+function carry4(p){ const q = P4(p), o = rr(q), LOTS = 10000, th = o.theta * LOTS, ga = .5 * o.gamma * S0 * S0 * q.rv * q.rv / 252 * LOTS, tot = o.exp * LOTS;
+  return { n: o.n, th, ga, va: tot - th - ga, tot, be: breakevenSSR(q), volP: o.volP, volC: o.volC, vegaLeg: o.vegaLeg * LOTS, vdn: o.vegaAt(92) * LOTS, vup: o.vegaAt(108) * LOTS }; }
+(function(){
+  sliders(document.getElementById("ctl4"), [
+    { id: "r4", k: "ssr", lbl: "R", name: "How the surface moves", min: 0, max: 3, step: .05, fmt: v => v.toFixed(2) },
+    { id: "b4", k: "b", lbl: "b", name: "Skew (slope)", min: -.7, max: -.05, step: .01, fmt: v => v.toFixed(2) },
+    { id: "v4", k: "rv", lbl: "σᵣ", name: "Realized volatility", min: .1, max: .5, step: .01, fmt: pct },
+    { id: "m4", k: "mo", lbl: "T", name: "Expiry", min: 1, max: 12, step: 1, fmt: v => v.toFixed(0) + "m" }
+  ], s4, () => draw(), "c4");
+  window.draw4 = draw;
+  function draw(){
+    const p = s4, c = carry4(p), f = s => rr(Object.assign(P4(p), { ssr: s })).exp * 10000, a = Math.max(Math.abs(f(0)), Math.abs(f(3)), 20) * 1.15;
+    const o = Fig(document.getElementById("cv4"), { h: 300, x0: 0, x1: 3, y0: -a, y1: a, pad: { l: 58 } });
+    axes(o, v => v.toFixed(1), v => usd(v), 6, 5);
+    clip(o, () => { curve(o, f, C("--blue"), 2.6, null, 60); });
+    vline(o, 1, C("--grey"), Math.abs(p.ssr - 1) < .5 ? "" : "sticky strike", [2, 4]); vline(o, c.be, C("--moss"), Math.abs(p.ssr - c.be) < .4 ? "" : "break-even", [2, 4]); vline(o, p.ssr, C("--ochre"), "you", [2, 4]);
+    dotAt(o, p.ssr, c.tot, C("--verm"));
+    document.getElementById("kv4").innerHTML = kvHTML([
+      ["Put vol / call vol", pct(c.volP) + " / " + pct(c.volC)],
+      ["Calls sold per put", c.n.toFixed(2)],
+      ["Theta per day", usd(c.th)],
+      ["Gamma P&L per day", usd(c.ga)],
+      ["Spot–vol P&L per day", usd(c.va)],
+      ["Expected total per day", usd(c.tot)],
+      ["Break-even R", c.be.toFixed(2)],
+      ["Vega if spot is $92 / $108", usd(c.vdn) + " / " + usd(c.vup)]
+    ]);
+  }
+})();
+
+/* ══════════ 05 — which realized volatility ══════════ */
+const s5 = { phi: .15, vol: .16 };
+const SEED5 = 20261117;
+function samp5(p){ const r = arPath(50400, p.vol / Math.sqrt(252), p.phi, SEED5); return [1, 5, 21].map(k => sampledVol(r, k)); }
+(function(){
+  sliders(document.getElementById("ctl5"), [
+    { id: "p5", k: "phi", lbl: "φ", name: "Does yesterday predict today", min: -.3, max: .4, step: .01, fmt: v => sgn(v, 2) },
+    { id: "v5", k: "vol", lbl: "σ", name: "Daily-sampled volatility", min: .08, max: .6, step: .01, fmt: pct }
+  ], s5, () => draw(), "c5");
+  window.draw5 = draw;
+  function draw(){
+    const p = s5, th = k => 100 * p.vol * Math.sqrt(varRatio(k, p.phi)), sm = samp5(p), top = Math.max(th(21), 100 * p.vol) * 1.35, bot = Math.min(th(21), 100 * p.vol) * .7;
+    const o = Fig(document.getElementById("cv5"), { h: 290, x0: 1, x1: 21, y0: bot, y1: top, pad: { l: 58 } });
+    axes(o, v => v.toFixed(0) + "d", v => v.toFixed(0) + "%", 5, 5);
+    const xs = [], ys = []; for (let k = 1; k <= 21; k++){ xs.push(k); ys.push(th(k)); }
+    clip(o, () => { curve(o, k => 100 * p.vol, C("--grey"), 1.6, [5, 4]); line(o, xs, ys, C("--blue"), 2.6); [1, 5, 21].forEach((k, i) => dotAt(o, k, 100 * sm[i], C("--verm"))); });
+    document.getElementById("kv5").innerHTML = kvHTML([
+      ["Sampled daily", pct(p.vol)],
+      ["Sampled weekly", th(5).toFixed(1) + "%"],
+      ["Sampled monthly", th(21).toFixed(1) + "%"],
+      ["Weekly ÷ daily", Math.sqrt(varRatio(5, p.phi)).toFixed(2) + "×"],
+      ["200 simulated years, weekly", pct(sm[1])],
+      ["Who is paid more", p.phi > .005 ? "long gamma, hedging less often" : p.phi < -.005 ? "long gamma, hedging more often" : "nobody — it is a random walk"]
+    ]);
+  }
+})();
+
+function drawAll(){ window.draw1(); window.draw2(); window.draw3(); window.draw4(); window.draw5(); }
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

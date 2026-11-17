@@ -1020,6 +1020,93 @@ PAGES["tools"] = () => {
   eq("−1x has (L² − L) = 2", M.letf(0.08, 0.20, -1).drag / (-(0.04) / 2), 2, 1e-12);
 };
 
+PAGES["dynamics"] = () => {
+  /* Page 22. Every number in the prose, re-derived from the shipped functions,
+     and the three identities the page leans on checked by a second route. */
+  const M = load("dynamics.html", ["bs", "volAt", "px", "effDelta", "bsDelta", "hedgedMove", "lean",
+    "vegaNet", "flipH", "tenorShock", "rr", "breakevenSSR", "varRatio", "arPath", "sampledVol",
+    "gam2", "s2", "carry4", "s4", "samp5", "s5", "s1", "s3", "book3"]);
+  const p = r => ({ atm: .30, b: -.35, ssr: r, T: .5 });
+  /* 01 */
+  eq("01 BS delta of the 6m ATM call", M.bsDelta(100, 100, .5, true, p(1)), 0.542, 0.0006);
+  eq("01 flat delta at R=2", M.effDelta(100, 100, .5, true, p(2)), 0.444, 0.0006);
+  eq("01 flat delta at R=0", M.effDelta(100, 100, .5, true, p(0)), 0.640, 0.0006);
+  eq("01 sticky strike: flat delta is the BS delta", M.effDelta(100, 100, .5, true, p(1)), M.bsDelta(100, 100, .5, true, p(1)), 1e-6);
+  const v1 = M.bs(100, 100, .5, .30, 0, 0, true).vega;
+  eq("01 vega per point per contract ~ $28", v1, 28, 0.5);
+  /* the formula, by a route that never reprices: BS delta + vega (R-1) b / S */
+  eq("01 flat-delta formula at R=2", M.bsDelta(100, 100, .5, true, p(2)) + v1 * (2 - 1) * -.35 / 100, M.effDelta(100, 100, .5, true, p(2)), 0.0005);
+  eq("01 hedged +3%, sticky strike ~ $8", 100 * M.hedgedMove(100, .5, true, .03, p(1)), 8.3, 0.3);
+  eq("01 hedged -3%, sticky strike ~ $8", 100 * M.hedgedMove(100, .5, true, -.03, p(1)), 8.5, 0.3);
+  eq("01 hedged +3% at R=0 is +$37", 100 * M.hedgedMove(100, .5, true, .03, p(0)), 37, 0.6);
+  eq("01 hedged -3% at R=0 is -$21", 100 * M.hedgedMove(100, .5, true, -.03, p(0)), -21, 0.6);
+  eq("01 hedged +3% at R=2 is -$21", 100 * M.hedgedMove(100, .5, true, .03, p(2)), -21, 0.6);
+  eq("01 hedged -3% at R=2 is +$38", 100 * M.hedgedMove(100, .5, true, -.03, p(2)), 38, 0.6);
+  eq("01 $1,000 vega, 40 vol, beta 1 hides -$40,000", M.lean(1000, 40, 1), -40000, 0);
+  eq("01 check: short $5,000 vega, 20 vol, beta 1.2 is long $120,000", M.lean(-5000, 20, 1.2), 120000, 1e-6);
+  yes("01 default dial is R=2", M.s1.ssr === 2 && M.s1.b === -.35 && M.s1.atm === .30 && M.s1.T === .5);
+  /* 02 */
+  const G = M.gam2(M.s2), G1 = M.gam2(Object.assign({}, M.s2, { ssr: 1 }));
+  eq("02 sheet delta -16.8", G.bsd, -16.8, 0.06);
+  eq("02 sheet gamma 2.16", G.sheet, 2.16, 0.006);
+  eq("02 sheet predicts -27.5 at $95", G.bsd - 5 * G.sheet, -27.5, 0.06);
+  eq("02 sticky strike flat hedge at $95 is -30.0", G1.at95, -30.0, 0.06);
+  eq("02 R=2 flat hedge at $95 is -35.9", G.at95, -35.9, 0.06);
+  eq("02 3,588 shares on a hundred contracts", -100 * G.at95, 3588, 1);
+  eq("02 2,753 by the sheet", -100 * (G.bsd - 5 * G.sheet), 2753, 1);
+  eq("02 down-gamma 3.11", G.down, 3.11, 0.006);
+  eq("02 up-gamma 2.24", G.up, 2.24, 0.006);
+  yes("02 short put is longer than the sheet predicted after a fall", -G.at95 > -(G.bsd - 5 * G.sheet));
+  /* 03 */
+  const B = M.book3(M.s3);
+  eq("03 raw vega +$10k", M.vegaNet(B, .25, 0), 10, 1e-9);
+  eq("03 root-time: -$15k", M.vegaNet(B, .25, .5), -15, 1e-9);
+  eq("03 a point at 3m is half a point at 1y", M.tenorShock(1, .25, .5), 0.5, 1e-12);
+  eq("03 flat at h = 0.16", M.flipH(B[0], B[1]), 0.16, 0.002);
+  eq("03 and the book is flat there", M.vegaNet(B, .25, M.flipH(B[0], B[1])), 0, 1e-9);
+  const strad = (T, v) => 2 * M.bs(100, 100, T, v, 0, 0, true).price;
+  eq("03 3m straddle, +1 point: $0.398", strad(.25, .31) - strad(.25, .30), 0.398, 0.0006);
+  eq("03 1y straddle, +0.5 point: $0.394", strad(1, .305) - strad(1, .30), 0.394, 0.0006);
+  eq("03 check: 1m vs 6m, 1/sqrt(6) = 0.41", M.tenorShock(.5, 1 / 12, .5), 0.41, 0.002);
+  eq("03 check: weighted short is 59% of the front leg", M.vegaNet([{ T: 1 / 12, vega: -1 }, { T: .5, vega: 1 }], 1 / 12, .5), -0.59, 0.002);
+  yes("03 try: a two-year back leg makes it more short", M.vegaNet([{ T: .25, vega: -40 }, { T: 2, vega: 50 }], .25, .5) < -15);
+  /* 04 */
+  const c = M.carry4(M.s4), c15 = M.carry4(Object.assign({}, M.s4, { ssr: 1.5 })), c2 = M.carry4(Object.assign({}, M.s4, { ssr: 2 }));
+  eq("04 put vol 28.2", 100 * c.volP, 28.2, 0.05);
+  eq("04 call vol 22.1", 100 * c.volC, 22.1, 0.05);
+  eq("04 sticky strike loses $137 a day", c.tot, -137, 0.6);
+  eq("04 theta $68 a day", c.th, -68, 0.5);
+  eq("04 gamma is the other half", c.ga, -68, 0.5);
+  eq("04 no spot-vol P&L at sticky strike", c.va, 0, 0.3);
+  /* skew theta by the closed form, not the engine's theta */
+  eq("04 skew theta formula, per year", c.vegaLeg * 100 * (c.volP - c.volC) / (2 * .25), 17200, 60);
+  eq("04 skew theta formula, per day", c.vegaLeg * 100 * (c.volP - c.volC) / (2 * .25) / 252, -c.th, 0.2);
+  eq("04 vega of one leg per unit vol", c.vegaLeg * 100, 142672, 2);
+  eq("04 R=1.5 still loses $69", c15.tot, -69, 0.6);
+  eq("04 each unit of R adds about $135", c2.tot - c.tot, 135, 1);
+  eq("04 break-even R = 2.0", c.be, 2.0, 0.03);
+  eq("04 break-even with half the skew", M.carry4(Object.assign({}, M.s4, { b: -.15 })).be, 2.0, 0.04);
+  eq("04 break-even at 6 months", M.carry4(Object.assign({}, M.s4, { mo: 6 })).be, 2.0, 0.06);
+  /* the first draft said the break-even holds at any realized vol. It does not:
+     theta is fixed while the gamma and spot-vol terms both scale with movement. */
+  eq("04 break-even falls to 1.7 at 40 realized", M.carry4(Object.assign({}, M.s4, { rv: .40 })).be, 1.72, 0.02);
+  eq("04 vega at $92 about +$1,250", c.vdn, 1250, 2);
+  eq("04 vega at $108 about -$1,270", c.vup, -1270, 2);
+  /* 05 */
+  eq("05 phi .15 weekly 18.0", 16 * Math.sqrt(M.varRatio(5, .15)), 18.0, 0.05);
+  eq("05 phi .15 monthly 18.5", 16 * Math.sqrt(M.varRatio(21, .15)), 18.5, 0.05);
+  eq("05 phi -.15 weekly 14.2", 16 * Math.sqrt(M.varRatio(5, -.15)), 14.2, 0.05);
+  eq("05 random walk: no effect", M.varRatio(21, 0), 1, 1e-12);
+  eq("05 1% a day is 16%", Math.sqrt(252), 16, 0.2);
+  eq("05 a 5% week is 35.5%", 5 * Math.sqrt(252 / 5), 35.5, 0.05);
+  eq("05 a 22% month is 78%", 22 * Math.sqrt(252 / 20), 78, 0.2);
+  /* the seeded simulation agrees with the closed form (fixed seed, so not flaky) */
+  const sm = M.samp5(M.s5);
+  eq("05 simulated daily", 100 * sm[0], 16, 0.25);
+  eq("05 simulated weekly vs exact", 100 * sm[1], 16 * Math.sqrt(M.varRatio(5, .15)), 0.35);
+  eq("05 simulated monthly vs exact", 100 * sm[2], 16 * Math.sqrt(M.varRatio(21, .15)), 0.6);
+};
+
 PAGES["program"] = () => {
   /* The program's drills carry computed keys. Each is re-derived here a
      different way from the one the page uses, over a few hundred deals. */
@@ -1057,7 +1144,7 @@ PAGES["program"] = () => {
     const d = M.deal(t); if (!d.key || !d.template || !(d.sec > 0) || /NaN|undefined/.test(d.key + d.html)) return false; } return true; }));
 
   /* the second batch: carry, exercise, assignment, hedging behavior, games */
-  eq("thirty-eight drills", Object.keys(M.DRILLS).length, 38, 0);
+  eq("forty drills", Object.keys(M.DRILLS).length, 40, 0);
   eq("peer group: the planted name is the one found, and the high-vol decoy never is", each("peers", d => { const q = d.q;
     return q.planted < 0 ? d.ans.nothing : !d.ans.nothing && d.ans.k === q.planted && d.ans.k !== q.decoy && (d.ans.c === 0) === (q.mult > 1); }), 0, 0);
   eq("…and the answer follows from the numbers on the screen alone", each("peers", d => { const r = d.q.iv.map((x, i) => x / d.q.rv[i]), o = r.slice().sort((a, b) => a - b),
@@ -1086,6 +1173,10 @@ PAGES["program"] = () => {
     return (ch > 0) === (q.dd > 0) && (d.ans.c === 0) === (q.dd < 0); }), 0, 0);
   eq("vol moving with spot: the extra delta has the sign of vanna times the vol change", each("shadow", d => { const q = d.q,
     va = M.bs(q.S1, q.K, q.T, 0.25 + q.dv / 2, 0.045, 0, q.call).vanna * q.dv; return (va * q.db > 0) === (d.ans.c === 0); }), 0, 0);
+  eq("hidden delta: the stock trade offsets the vega P&L of a 1% rally", each("lean", d => { const q = d.q, volPnl = q.vega * (q.sig * (1 - q.beta * 0.01) - q.sig);
+    return Math.abs(volPnl + d.ans.n * 0.01) < 1e-6; }), 0, 0);
+  eq("weighted vega: P&L of a one-point front move when the back moves sqrt(Tf/Tb)", each("wvega", d => { const q = d.q;
+    return Math.abs(q.fv * 1 + q.bv * Math.sqrt(q.fm) / Math.sqrt(q.bm) - d.ans.n) < 1e-9 && Math.abs(d.ans.n) >= 2; }), 0, 0);
   eq("dice: fair value is the mean over every roll of the hidden dice", each("dice", d => { const { n, seen } = d.q; let tot = 0, cnt = 0;
     const rec = (k, s) => { if (k === 0) { tot += s; cnt++; return; } for (let f = 1; f <= 6; f++) rec(k - 1, s + f); }; rec(n - 1, seen); return Math.abs(d.ans.n - tot / cnt) < 1e-9; }), 0, 0);
   eq("overround at −110 both sides is 4.76%", (2 * 110 / 210 - 1) * 100, 4.76, 0.005);
