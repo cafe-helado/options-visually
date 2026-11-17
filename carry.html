@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>The Carry Curve — dividends and borrow, read off the options</title>
+<meta name="description" content="Line up the forwards across expiries and you have the market&#x27;s dividend forecast and its borrow curve. What a jelly roll trades, and who loses when a dividend changes.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Carry Curve — dividends and borrow, read off the options">
+<meta property="og:description" content="Line up the forwards across expiries and you have the market&#x27;s dividend forecast and its borrow curve. What a jelly roll trades, and who loses when a dividend changes.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">No. 23 &middot; The carry curve</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>One number per expiry</span><i></i></a>
+  <a href="#c2"><span>Inside the roll</span><i></i></a>
+  <a href="#c3"><span>A dividend surprise</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation</div>
+    <h1>Dividends and borrow, read off the <em>options</em></h1>
+    <p class="sub">Every expiry on a chain quotes a forward. Line them up and you have the market's dividend forecast and its borrow curve, whether or not anyone meant to publish them.</p>
+  </div>
+  <div class="scrollcue">Scroll &darr;</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">Page 07 built parity at one expiry and page 17 used it to fix the forward before reading implied vols. This page lines the forwards up across expiries. The result is a term structure of carry, and three things follow from it: where the dividends sit, what the stock costs to borrow at each horizon, and who gains or loses when a dividend changes.</p>
+  <ol>
+    <li><b>Chapter 01 reads one chain.</b> Call-minus-put at each expiry becomes a single annualized rate.</li>
+    <li><b>Chapter 02 looks between expiries,</b> which is what a jelly roll trades, and separates dividend from borrow.</li>
+    <li><b>Chapter 03 changes the dividend</b> and shows where the money moves. If you run conversions, this is your exposure.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation &mdash; every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>F(T)</td><td>The forward to expiry T, read from parity: strike plus call-minus-put grown at the interest rate.</td></tr>
+      <tr><td>Carry</td><td>How far the forward sits below stock-plus-interest, as a rate per year. It is dividends plus borrow, with nothing else in it.</td></tr>
+      <tr><td>b</td><td>The borrow fee: what a short seller pays per year to borrow the shares. One percent on an easy name, thirty or more on a hard one.</td></tr>
+      <tr><td>D</td><td>The cash dividend per quarter. $0.60 on a $100 stock is a 2.4% yield.</td></tr>
+      <tr><td>Jelly roll</td><td>Long the synthetic stock in one expiry and short it in another, at one strike. Its price is the difference between two call-minus-puts.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>Each expiry quotes one number, and the numbers make a curve</h2>
+    <p class="dek">Take call-minus-put at every expiry, turn each into a forward, and ask how much each forward gives up against simply holding the stock on borrowed money.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A $100 stock pays 60 cents a quarter, costs 1% a year to borrow, and money is at 4.5%. The red dots are the eight listed expiries. For each one the figure takes the forward that parity implies and annualizes its shortfall against 100 grown at 4.5%. The dashed line is the same stock with the dividend removed.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Carry to each expiry, per year</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>What the chain implies</span>
+            <span><i class="swl" style="background:var(--grey)"></i>With no dividend: borrow alone</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Listed expiries</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The stock</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>A sawtooth that dies away. Each tooth is a dividend arriving; the level it settles to is the dividend yield plus the borrow.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>The thirty-day expiry reads 1.00%, because no dividend falls inside it and all it sees is borrow. The sixty-day reads 4.64%: one 60-cent dividend spread over two months is a large annual rate. By a year the curve has settled at 3.38%, close to the 2.4% yield plus the 1% fee.</p>
+    <p>So a single expiry's carry is hard to read by itself. A front-month number of 4.6% on this stock is not expensive borrow; it is a dividend divided by a short time, the same arithmetic that makes event vol look enormous on page 03.</p>
+  </div>
+
+  <div class="mline">carry(T) = r &minus; ln( F(T) / S ) / T</div>
+  <p class="mread">Reads as: <b>the interest rate, minus the rate at which the forward actually grows from spot.</b> Whatever is missing went to the people who hold the shares: dividends to the owner, fees to the lender.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Make the stock hard to borrow now, easing later. <b>Predict</b> which end of the curve rises most.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"b0":0.12,"b1":0.02}' data-focus="cv1">12% today, settling to 2%</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"div":0,"b0":0.12,"b1":0.02}' data-focus="cv1">Same, with no dividend</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"div":0.6,"b0":0.01,"b1":0.01}' data-focus="cv1">Reset</button>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>The front rises most: 10.5% to thirty days against 5.6% to two years. A borrow squeeze the market expects to pass shows up as an inverted carry curve, and the long-dated options barely notice. That is the difference between a name that is hard to borrow this month and one that is structurally hard to borrow, and it is visible before you ask a stock-loan desk anything.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">The two-month expiry implies 4.6% carry and the one-year implies 3.4%. The stock pays a quarterly dividend. What is the likeliest reading?</p>
+    <div class="opts">
+      <button>Borrow is expensive now and expected to ease</button>
+      <button data-ok="1">One dividend falls inside two months, and a lump over a short time annualizes high</button>
+      <button>The front-month options are mispriced</button>
+      <button>Rates are expected to fall</button>
+    </div>
+    <div class="ans"><b>A dividend in a short window.</b> Before blaming borrow, subtract the dividends you know about. What is left is the borrow curve, and on this stock it is flat at 1%. The first answer is what the same picture would mean on a stock that pays nothing.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>Between two expiries there is exactly one unknown</h2>
+    <p class="dek">The carry from one expiry to the next is what a jelly roll trades. Fix the borrow and it tells you the dividend; fix the dividend and it tells you the borrow.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The figure takes each pair of neighboring expiries and asks what cash dividend the gap between their forwards implies, given a borrow fee you supply. The dotted lines are the dates the company is expected to go ex. Then it lets the market disagree with the company about the fourth one.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Dividend implied by each pair of expiries</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Implied cash dividend in the interval</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Expected ex-dates</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The market, and your assumption</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>Each bar is as tall as the dividends inside its interval: 60 cents where there is one ex-date, nothing where there is none, $1.20 where there are two.</figcaption>
+  </figure>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>The market starts pricing the fourth dividend at half. <b>Predict</b> which bar moves, and whether any other does.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"d4":0.3,"b0":0.01,"bk":0.01}' data-focus="cv2">Market prices a cut to $0.30</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"d4":0.6,"b0":0.01,"bk":0.03}' data-focus="cv2">No cut, but you assume 3% borrow</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"d4":0.6,"b0":0.01,"bk":0.01}' data-focus="cv2">Reset</button>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>Only the bar from 273 to 365 days moves, from 60 cents to 30. Every other interval is untouched, because a forward-to-forward comparison sees only what happens between its two dates. In prices: the jelly roll at the 100 strike across that interval goes from $0.27 to $0.56. Somebody long the far synthetic and short the near one has made 29 cents a share on a dividend that has not been announced.</p>
+    <p>The second button is the caution. Leave the dividend alone and read the same chain assuming 3% borrow when the market is using 1%, and every bar shrinks: the interval from 91 to 182 days reads 10 cents instead of 60, and the one with no dividend in it goes negative. One number per interval cannot separate a smaller dividend from cheaper borrow. You need an outside fact for one of them, and on most names the dividend is the one you can look up.</p>
+  </div>
+
+  <div class="mline">D<sub>implied</sub> = F(T<sub>1</sub>) &times; e<sup>(r &minus; b)(T<sub>2</sub> &minus; T<sub>1</sub>)</sup> &minus; F(T<sub>2</sub>)</div>
+  <p class="mread">Reads as: <b>grow the near forward to the far date at the rate less the borrow fee; whatever the far forward falls short by is the dividend the market expects in between.</b></p>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A company's declared dividend is $0.60. The interval containing the next ex-date implies $0.45, using your stock-loan desk's borrow quote. Which is the weakest conclusion?</p>
+    <div class="opts">
+      <button>The market sees some chance of a cut</button>
+      <button>The market's borrow over that interval is lower than my desk's quote</button>
+      <button data-ok="1">The options are mispriced and the roll is free money</button>
+      <button>The ex-date may fall outside the interval I think it is in</button>
+    </div>
+    <div class="ans"><b>Free money is the weakest.</b> The other three are each a real explanation and each can be checked: the company's payout history, a second borrow quote, the ex-date calendar. Until those are ruled out the roll is a bet on a dividend, with the people who know the company best on the other side.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>A dividend change is a delta nobody hedged</h2>
+    <p class="dek">Hold the stock price still and change the dividend. The options move anyway, and a conversion moves most of all.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">The company halves its dividend, 60 cents to 30, and for the purpose of the figure the stock does not react. Every forward rises by the dividends that will no longer be paid. The figure shows what that does to a two-year call, a two-year put and a conversion, per contract, at each strike.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>P&amp;L per contract when the dividend changes</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Long call</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Long put</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Conversion: long stock, long put, short call</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The change</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The call and put lines are always the same distance apart, and that distance is the green line. A conversion's dividend exposure does not depend on the strike.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Eight dividends fall before the two-year expiry, and halving them removes $2.30 of present value. The at-the-money call gains $138 a contract and the put loses $87. The call takes 60% of the change and the put most of the rest, which is roughly the split of their deltas: a higher forward is worth to an option what a higher stock price would be.</p>
+    <p>The conversion loses $225 a contract at every strike. It was long the stock in order to collect those dividends, and it had sold the forward at a price that assumed them. A reversal makes the same $225. This is the sense in which a conversion is long dividends and a reversal is short them: completely, with no delta to dilute it.</p>
+    <p>The assumption that the stock holds still is the generous one. A cut usually comes with a falling share price, and a book of conversions on a company in trouble is long the stock's dividends at the moment they are least safe. That is why the implied dividend in chapter 02 is worth reading before the announcement and not after.</p>
+  </div>
+
+  <div class="mline">&Delta;(C &minus; P) = &minus; &Delta;PV(dividends) &times; e<sup>&minus;bT</sup></div>
+  <p class="mread">Reads as: <b>call-minus-put at any strike rises by the present value of the dividends removed, shaded slightly for the borrow fee.</b> A conversion is short call-minus-put, so it loses exactly that.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Raise the dividend instead. <b>Predict</b> which side of a conversion desk is pleased.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"nd":0.9,"mo":24}' data-focus="cv3">Raised to $0.90</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"nd":0,"mo":24}' data-focus="cv3">Suspended entirely</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"nd":0.3,"mo":12}' data-focus="cv3">Halved, one-year options</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long 500 one-year conversions on a stock paying $0.60 a quarter. The company halves the dividend and the stock is unchanged. Roughly what happens?</p>
+    <div class="opts">
+      <button>Nothing; a conversion is a locked-in loan</button>
+      <button>You make about $58,000</button>
+      <button data-ok="1">You lose about $58,000</button>
+      <button>You lose about $24,000, the call's share of the change</button>
+    </div>
+    <div class="ans"><b>You lose about $58,000.</b> Four dividends fall inside the year, halving them removes $1.17 of present value, and each conversion loses $116: 500 &times; $116. The loan was locked in on the interest rate and on the strike, and on nothing else. The last answer applies a delta to a position that has none.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation &mdash; why the forward is all you need</summary>
+    <div class="body">
+      <p>A call minus a put at one strike pays the stock minus the strike at expiry, with certainty. Its value today is therefore the present value of the forward minus the strike.</p>
+      <div class="mline">C &minus; P = e<sup>&minus;rT</sup> ( F &minus; K )</div>
+      <p class="mread">Reads as: <b>the synthetic is worth the discounted gap between the forward and the strike.</b></p>
+      <p>The forward itself is the stock, less the dividends a holder collects before expiry, grown at the interest rate and shrunk by what a lender of the shares is paid. Nothing about volatility enters, which is why these readings survive any argument about the smile.</p>
+      <p><b>Where it breaks.</b> American options can be exercised early, and the right is worth most exactly around dividends and on hard-to-borrow names, so listed call-minus-put is not a clean forward there; use strikes near the money, where the early-exercise value is smallest, or the roll. Dividends are treated as known cash amounts and the borrow fee as a smooth curve. Real fees jump, real shares get recalled, and a forward that looks rich can be a loan nobody will let you keep.</p>
+    </div>
+  </details>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Assumptions: European options, a flat interest rate, cash dividends on known dates, and a borrow fee that decays smoothly from today's level. In the real world the failures are called early exercise, recall, special dividends and ex-date changes. Related: <a href="parity.html">the parity machine</a>, <a href="early-exercise.html">when to exercise</a>, <a href="screen.html#c6">finding the forward on a screen</a>.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* ── the model ────────────────────────────────────────────────────────
+   One stock, a flat interest rate, a cash dividend every quarter, and a
+   borrow fee that starts at b0 today and settles toward b1. The forward to
+   T is the stock, less the dividends paid before T, grown at the rate and
+   shrunk by the fee. Every option here is European and priced off it. */
+const CAR = { S: 100, r: 0.045, vol: 0.28, tau: 0.25, divDays: [40, 131, 222, 313, 404, 495, 586, 677], exp: [30, 60, 91, 182, 273, 365, 547, 730] };
+const divAmt = (i, p) => i === 3 && p.d4 !== undefined ? p.d4 : p.div;
+function feeInt(T, p){ return p.b1 * T + (p.b0 - p.b1) * CAR.tau * (1 - Math.exp(-T / CAR.tau)); }
+function pvDiv(T, p){ let s = 0; CAR.divDays.forEach((d, i) => { if (d <= T * 365 + 1e-9) s += divAmt(i, p) * Math.exp(-CAR.r * d / 365); }); return s; }
+function fwd(T, p){ return (CAR.S - pvDiv(T, p)) * Math.exp(CAR.r * T - feeInt(T, p)); }
+/* what the chain shows: call minus put at one strike, and the forward parity gives back */
+function cMinusP(T, K, p){ return Math.exp(-CAR.r * T) * (fwd(T, p) - K); }
+function parityFwd(T, K, p){ return K + cMinusP(T, K, p) * Math.exp(CAR.r * T); }
+/* all-in carry to T: how far the forward sits below stock-plus-interest, per year */
+function carryTo(T, p){ return CAR.r - Math.log(fwd(T, p) / CAR.S) / T; }
+/* the same between two expiries: the rate inside a jelly roll */
+function carryBetween(T1, T2, p){ return CAR.r - Math.log(fwd(T2, p) / fwd(T1, p)) / (T2 - T1); }
+/* the dividend an interval implies, if you take the borrow over it as known */
+function impliedDiv(T1, T2, p, bKnown){ return fwd(T1, p) * Math.exp((CAR.r - bKnown) * (T2 - T1)) - fwd(T2, p); }
+function avgFee(T1, T2, p){ return (feeInt(T2, p) - feeInt(T1, p)) / (T2 - T1); }
+/* a jelly roll at strike K: long the far synthetic, short the near one */
+function jelly(T1, T2, K, p){ return cMinusP(T2, K, p) - cMinusP(T1, K, p); }
+/* an option on that forward */
+function optPx(T, K, call, p){ return bs(CAR.S - pvDiv(T, p), K, T, CAR.vol, CAR.r, feeInt(T, p) / T, call).price; }
+function divShock(T, K, p, newDiv){ const q = Object.assign({}, p, { div: newDiv, d4: undefined });
+  const c = optPx(T, K, true, q) - optPx(T, K, true, p), pt = optPx(T, K, false, q) - optPx(T, K, false, p);
+  return { c, p: pt, conv: pt - c, dPV: pvDiv(T, q) - pvDiv(T, p) }; }
+
+function dotAt(o, x, y, col){ const g = o.g; g.save(); g.fillStyle = col; g.beginPath(); g.arc(o.X(x), o.Y(y), 4, 0, 6.2832); g.fill(); g.restore(); }
+function bars(o, xs0, xs1, ys, col){ const g = o.g; g.save(); g.fillStyle = col; g.globalAlpha = .78;
+  ys.forEach((y, i) => { const a = o.X(xs0[i]) + 2, b = o.X(xs1[i]) - 2, t = o.Y(Math.max(y, 0)), z = o.Y(Math.min(y, 0)); g.fillRect(a, t, Math.max(1, b - a), Math.max(1, z - t)); }); g.restore(); }
+const pc = v => (v * 100).toFixed(2) + "%";
+const dl = v => (v < -.005 ? "−$" : "$") + Math.abs(v).toFixed(2);
+const dl0 = v => (v < -.5 ? "−$" : v > .5 ? "+$" : "$") + Math.abs(v).toFixed(0);
+const EXP = CAR.exp.map(d => d / 365);
+
+/* ══════════ HERO — a forward curve with its dividend steps ══════════ */
+(function(){
+  const cv = document.getElementById("heroCv"); let w, h, g, raf, t0 = 0;
+  function size(){ const dpr = window.devicePixelRatio || 1; w = cv.clientWidth; h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr;
+    g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function paint(ph){
+    g.fillStyle = C("--chalk"); g.fillRect(0, 0, w, h);
+    const X = T => w * (.42 + .55 * T / 2), Y = F => h * (.62 - (F - 100) * .05);
+    [[{ div: .6, b0: .01, b1: .01 }, C("--grey"), .35], [{ div: .6, b0: .02 + .08 * (.5 + .5 * Math.sin(ph)), b1: .02 }, C("--blue"), .5]].forEach(([p, col, a]) => {
+      g.strokeStyle = col; g.globalAlpha = a; g.lineWidth = 1.7; g.beginPath();
+      for (let j = 0; j <= 240; j++){ const T = .01 + 2 * j / 240, y = Y(fwd(T, p)); j ? g.lineTo(X(T), y) : g.moveTo(X(T), y); } g.stroke(); });
+    g.globalAlpha = .3; g.fillStyle = C("--ochre"); CAR.divDays.forEach(d => { g.beginPath(); g.arc(X(d / 365), h * .86, 3, 0, 6.2832); g.fill(); }); g.globalAlpha = 1;
+  }
+  function frame(ts){ if (!t0) t0 = ts; paint((ts - t0) / 2400); raf = requestAnimationFrame(frame); }
+  function start(){ size(); paint(1.1); if (!RM) raf = requestAnimationFrame(frame); }
+  start();
+  window.addEventListener("resize", () => { cancelAnimationFrame(raf); t0 = 0; start(); });
+})();
+
+/* ══════════ 01 — one number per expiry ══════════ */
+const s1 = { div: 0.60, b0: 0.01, b1: 0.01 };
+(function(){
+  sliders(document.getElementById("ctl1"), [
+    { id: "d1", k: "div", lbl: "D", name: "Quarterly dividend", min: 0, max: 1.5, step: 0.05, fmt: v => "$" + v.toFixed(2) },
+    { id: "b01", k: "b0", lbl: "b₀", name: "Borrow fee today", min: 0, max: 0.30, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" },
+    { id: "b11", k: "b1", lbl: "b∞", name: "Borrow fee it settles to", min: 0, max: 0.10, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" }
+  ], s1, () => draw(),"c1");
+  window.draw1 = draw;
+  function draw(){
+    const p = s1, nd = Object.assign({}, p, { div: 0 }), xs = [], a = [], b = [];
+    for (let d = 20; d <= 730; d += 2){ xs.push(d); a.push(carryTo(d / 365, p) * 100); b.push(carryTo(d / 365, nd) * 100); }
+    const top = Math.max(6, Math.max.apply(null, a) * 1.12);
+    const o = Fig(document.getElementById("cv1"), { h: 300, x0: 20, x1: 730, y0: 0, y1: top, pad: { l: 54, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0) + "d", v => v.toFixed(0) + "%", 6, 5);
+    clip(o, () => { line(o, xs, b, C("--grey"), 2, [5, 4]); line(o, xs, a, C("--blue"), 2.4); EXP.forEach(T => dotAt(o, T * 365, carryTo(T, p) * 100, C("--verm"))); });
+    document.getElementById("kv1").innerHTML = kvHTML([
+      ["30-day forward, from parity", parityFwd(EXP[0], 100, p).toFixed(2)],
+      ["Carry to 30 days", pc(carryTo(EXP[0], p))],
+      ["Carry to 60 days", pc(carryTo(EXP[1], p))],
+      ["Carry to 1 year", pc(carryTo(EXP[5], p))],
+      ["Carry to 2 years", pc(carryTo(EXP[7], p))],
+      ["Dividend yield + long-run borrow", pc(4 * p.div / CAR.S + p.b1)],
+      ["1-year call minus put at 100", dl(cMinusP(EXP[5], 100, p))]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — between two expiries ══════════ */
+const s2 = { div: 0.60, d4: 0.60, b0: 0.01, b1: 0.01, bk: 0.01 };
+function rows2(p){ const out = []; for (let i = 1; i < EXP.length; i++) out.push({ a: CAR.exp[i - 1], b: CAR.exp[i], carry: carryBetween(EXP[i - 1], EXP[i], p),
+  imp: impliedDiv(EXP[i - 1], EXP[i], p, p.bk), jelly: jelly(EXP[i - 1], EXP[i], 100, p) }); return out; }
+(function(){
+  sliders(document.getElementById("ctl2"), [
+    { id: "d42", k: "d4", lbl: "D₄", name: "Fourth dividend, as the market prices it", min: 0, max: 1.5, step: 0.05, fmt: v => "$" + v.toFixed(2) },
+    { id: "b02", k: "b0", lbl: "b₀", name: "Borrow fee today", min: 0, max: 0.30, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" },
+    { id: "bk2", k: "bk", lbl: "b", name: "Borrow you assume when reading it", min: 0, max: 0.10, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" }
+  ], s2, () => draw(),"c2");
+  window.draw2 = draw;
+  function draw(){
+    const p = s2, R = rows2(p), top = Math.max(1.4, Math.max.apply(null, R.map(r => r.imp)) * 1.2), lo = Math.min(0, Math.min.apply(null, R.map(r => r.imp)) * 1.2);
+    const o = Fig(document.getElementById("cv2"), { h: 290, x0: 30, x1: 730, y0: lo, y1: top, pad: { l: 54, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0) + "d", v => "$" + v.toFixed(2), 6, 5);
+    clip(o, () => { bars(o, R.map(r => r.a), R.map(r => r.b), R.map(r => r.imp), C("--blue")); });
+    CAR.divDays.forEach(d => vline(o, d, C("--ochre"), null, [2, 4]));
+    const q = R[4];
+    document.getElementById("kv2").innerHTML = kvHTML([
+      ["Interval read below", q.a + "d → " + q.b + "d"],
+      ["Near forward / far forward", fwd(EXP[4], p).toFixed(2) + " / " + fwd(EXP[5], p).toFixed(2)],
+      ["Carry inside the roll", pc(q.carry)],
+      ["Jelly roll at the 100 strike", dl(q.jelly)],
+      ["Dividend it implies", dl(q.imp)],
+      ["Dividend the company has declared", dl(p.div)],
+      ["Verdict", Math.abs(q.imp - p.div) < 0.03 ? "the market believes the dividend" : q.imp < p.div ? "priced for a cut, or borrow above your assumption" : "priced for a raise, or borrow below your assumption"]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — a dividend surprise ══════════ */
+const s3 = { nd: 0.30, mo: 24 };
+const P3 = { div: 0.60, b0: 0.01, b1: 0.01 };
+(function(){
+  sliders(document.getElementById("ctl3"), [
+    { id: "n3", k: "nd", lbl: "D′", name: "New quarterly dividend", min: 0, max: 1.2, step: 0.05, fmt: v => "$" + v.toFixed(2) },
+    { id: "m3", k: "mo", lbl: "T", name: "Expiry", min: 3, max: 24, step: 3, fmt: v => v.toFixed(0) + "m" }
+  ], s3, () => draw(),"c3");
+  window.draw3 = draw;
+  function draw(){
+    const T = s3.mo / 12, xs = [], c = [], pt = [], cv = [];
+    for (let K = 70; K <= 130; K += 1){ const r = divShock(T, K, P3, s3.nd); xs.push(K); c.push(r.c * 100); pt.push(r.p * 100); cv.push(r.conv * 100); }
+    const m = Math.max(40, Math.max.apply(null, c.concat(pt, cv).map(Math.abs))) * 1.12;
+    const o = Fig(document.getElementById("cv3"), { h: 300, x0: 70, x1: 130, y0: -m, y1: m, pad: { l: 58, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => dl0(v), 6, 4);
+    clip(o, () => { line(o, xs, cv, C("--moss"), 2.2, [6, 4]); line(o, xs, c, C("--blue"), 2.4); line(o, xs, pt, C("--verm"), 2.4); });
+    vline(o, CAR.S, C("--ochre"), "spot", [2, 4]);
+    const a = divShock(T, 100, P3, s3.nd);
+    document.getElementById("kv3").innerHTML = kvHTML([
+      ["PV of dividends to expiry, before", dl(pvDiv(T, P3))],
+      ["  after", dl(pvDiv(T, P3) + a.dPV)],
+      ["100 call, per contract", dl0(a.c * 100)],
+      ["100 put, per contract", dl0(a.p * 100)],
+      ["Conversion at any strike", dl0(a.conv * 100)],
+      ["Reversal at any strike", dl0(-a.conv * 100)],
+      ["Call's share of the change", (a.dPV ? Math.abs(a.c / a.dPV) : 0).toFixed(2)]
+    ]);
+  }
+})();
+
+function drawAll(){ window.draw1(); window.draw2(); window.draw3(); }
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

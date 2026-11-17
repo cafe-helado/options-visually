@@ -841,7 +841,7 @@ const STN = [
   { n: 1, t: "Payoff is a bet on a distribution", say: "You pay a premium for a payoff that depends on where the stock ends up. Long is a small known loss and a rare big win; short is the reverse. Winning often and being fairly priced are different things.",
     see: [["black-scholes.html", "Price from paths"], ["binomial.html", "One step, two outcomes"]], gate: [["payoff"]], real: "Take one option off a live screen. Write its break-even and the percent move the stock needs to get there." },
   { n: 2, t: "Call minus put is the forward", say: "A long call and a short put at one strike are long stock, financed. So calls and puts at a strike carry the same vol, and any difference is carry: rates, dividends, borrow. A conversion is a loan.",
-    see: [["parity.html", "The parity machine"], ["forwards.html", "Cost of carry"], ["early-exercise.html", "When to exercise"]], gate: [["synth"], ["headparity"], ["revcon"], ["parity", "htb"]],
+    see: [["parity.html", "The parity machine"], ["forwards.html", "Cost of carry"], ["early-exercise.html", "When to exercise"], ["carry.html", "The carry curve"]], gate: [["synth"], ["headparity"], ["revcon"], ["parity", "htb"]],
     real: "One strike off a live screen: compute C − P and S − K·e^(−rT). Explain the gap in one word — rate, dividend or borrow." },
   { n: 3, t: "Vol is the price, and σ√T is the ruler", say: "Implied vol is the option's price in a unit you can compare across strikes and expiries, like the yield on a bond. It is not a forecast of direction. Vol over sixteen is a typical day; the straddle is the expected move.",
     see: [["screen.html", "Reading the screen"], ["rulers.html", "Which ruler"], ["tools.html", "Vol to moves"]], gate: [["rule16"], ["strad2iv"]],

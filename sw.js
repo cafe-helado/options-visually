@@ -23,7 +23,7 @@
    this file — the inlined dist/ copies are meant to be opened from disk and
    register nothing.
    ═══════════════════════════════════════════════════════════════════════ */
-const CACHE = "options-visually-v9";
+const CACHE = "options-visually-v10";
 const FONTS = "options-visually-fonts";
 
 /* Every URL is relative, so the worker works at / on a dev server and at
@@ -53,6 +53,7 @@ const PRECACHE = [
   "merger.html",
   "playbook.html",
   "dynamics.html",
+  "carry.html",
   "workbook.html",
   "tools.html",
   "program.html",

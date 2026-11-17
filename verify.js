@@ -1179,6 +1179,58 @@ PAGES["book"] = () => {
   eq("check: 200,000 x 1.5 squared = 450,000", 200000 * 1.5 * 1.5, 450000, 0);
 };
 
+PAGES["carry"] = () => {
+  /* Page 23. The forward model is checked against a second construction
+     (step the stock through each dividend date), then every prose number. */
+  const M = load("carry.html", ["CAR", "fwd", "pvDiv", "feeInt", "carryTo", "carryBetween", "impliedDiv", "jelly",
+    "cMinusP", "parityFwd", "optPx", "divShock", "rows2", "s1", "s2", "s3", "P3", "bs"]);
+  const E = M.CAR.exp.map(d => d / 365), p = { div: 0.6, b0: 0.01, b1: 0.01 }, h = { div: 0.6, b0: 0.12, b1: 0.02 };
+  yes("defaults", M.s1.div === 0.6 && M.s1.b0 === 0.01 && M.s2.d4 === 0.6 && M.s2.bk === 0.01 && M.s3.nd === 0.3 && M.s3.mo === 24);
+  /* second route to the forward: carry cash forward day by day, paying each dividend as it falls */
+  const stepFwd = (T, q) => { let x = M.CAR.S, t = 0; const pay = M.CAR.divDays.filter(d => d <= T * 365).map(d => d / 365);
+    /* the model escrows dividends, so the equivalent forward subtracts each one grown from its date at r less the fee */
+    let f = M.CAR.S * Math.exp(M.CAR.r * T - M.feeInt(T, q));
+    pay.forEach(d => { f -= q.div * Math.exp(-M.CAR.r * d) * Math.exp(M.CAR.r * T - M.feeInt(T, q)); }); return f; };
+  eq("forward to 1y matches the dividend-by-dividend build", M.fwd(1, p), stepFwd(1, p), 1e-9);
+  eq("parity at any strike returns the forward", M.parityFwd(E[5], 87, p), M.fwd(E[5], p), 1e-9);
+  eq("call minus put from priced options equals the parity value", M.optPx(1, 100, true, p) - M.optPx(1, 100, false, p), M.cMinusP(1, 100, p), 1e-9);
+  console.log("    ch01");
+  eq("carry to 30 days 1.00%", M.carryTo(E[0], p) * 100, 1.00, 0.006);
+  eq("carry to 60 days 4.64%", M.carryTo(E[1], p) * 100, 4.64, 0.006);
+  eq("carry to a year 3.38%", M.carryTo(E[5], p) * 100, 3.38, 0.006);
+  eq("no dividend: flat at the borrow", M.carryTo(E[3], { div: 0, b0: 0.01, b1: 0.01 }) * 100, 1.00, 1e-6);
+  eq("$0.60 a quarter is a 2.4% yield", 4 * 0.6 / 100 * 100, 2.4, 1e-9);
+  eq("squeeze: 10.5% to thirty days", M.carryTo(E[0], h) * 100, 10.5, 0.06);
+  eq("squeeze: 5.6% to two years", M.carryTo(E[7], h) * 100, 5.6, 0.06);
+  yes("squeeze inverts the curve", M.carryTo(E[0], h) > M.carryTo(E[7], h));
+  console.log("    ch02");
+  const R = M.rows2(M.s2), cut = M.rows2(Object.assign({}, M.s2, { d4: 0.3 })), b3 = M.rows2(Object.assign({}, M.s2, { bk: 0.03 }));
+  eq("one ex-date: 60 cents", R[0].imp, 0.60, 0.003);
+  eq("none: nothing", R[1].imp, 0, 0.003);
+  eq("two: $1.20", R[5].imp, 1.20, 0.006);
+  eq("cut: the 273-365 bar reads 30 cents", cut[4].imp, 0.30, 0.003);
+  yes("cut: no other bar moves", cut.every((r, i) => i === 4 || Math.abs(r.imp - R[i].imp) < 1e-9));
+  eq("jelly roll before: $0.27", R[4].jelly, 0.27, 0.006);
+  eq("jelly roll after: $0.56", cut[4].jelly, 0.56, 0.006);
+  eq("  a gain of 29 cents", cut[4].jelly - R[4].jelly, 0.29, 0.006);
+  eq("wrong borrow: 91-182 reads 10 cents", b3[2].imp, 0.10, 0.006);
+  yes("  and the empty interval goes negative", b3[1].imp < 0);
+  yes("  every bar shrinks", b3.every((r, i) => r.imp < R[i].imp));
+  console.log("    ch03");
+  const a = M.divShock(2, 100, M.P3, 0.3), b = M.divShock(1, 100, M.P3, 0.3);
+  eq("two years: $2.30 of present value removed", -a.dPV, 2.30, 0.006);
+  eq("  call +$138", a.c * 100, 138, 0.6);
+  eq("  put -$87", a.p * 100, -87, 0.6);
+  eq("  call takes 60%", a.c / -a.dPV, 0.60, 0.006);
+  eq("  conversion -$225", a.conv * 100, -225, 0.6);
+  eq("  the same at the 80 and 120 strikes", M.divShock(2, 80, M.P3, 0.3).conv - M.divShock(2, 120, M.P3, 0.3).conv, 0, 1e-9);
+  eq("  formula: change in C-P = -dPV * exp(-bT)", -a.conv, -a.dPV * Math.exp(-M.feeInt(2, M.P3)), 1e-9);
+  eq("one year: $1.17 removed", -b.dPV, 1.17, 0.006);
+  eq("  each conversion loses $116", b.conv * 100, -116, 0.6);
+  eq("  500 of them: about $58,000", 500 * b.conv * 100, -58000, 200);
+  yes("a raise pleases the conversion side", M.divShock(2, 100, M.P3, 0.9).conv > 0);
+};
+
 PAGES["program"] = () => {
   /* The program's drills carry computed keys. Each is re-derived here a
      different way from the one the page uses, over a few hundred deals. */

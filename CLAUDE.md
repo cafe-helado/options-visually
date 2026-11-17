@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. Twenty-two pages live, plus three companions: the program, the workbook and the toolkit.
+no dependencies. Twenty-three pages live, plus three companions: the program, the workbook and the toolkit.
 
 ## Before you change anything
 
@@ -139,7 +139,7 @@ Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proo
 
 ## Offline, and installing to a phone
 
-The series is a PWA. `sw.js` precaches all twenty-two pages, the three companions and the engine on
+The series is a PWA. `sw.js` precaches all twenty-three pages, the three companions and the engine on
 install — about 2MB — and serves everything from that cache afterwards, so the
 whole thing works with no network. Three strategies, and the split is deliberate:
 
@@ -178,7 +178,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all twenty-two pages are live, plus the program, the workbook and the toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
+Nothing unbuilt — all twenty-three pages are live, plus the program, the workbook and the toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
@@ -259,6 +259,22 @@ move". verify.js failed it: at 40 realized against 25 implied it is 1.72,
 because theta is fixed while the gamma and spot–vol terms scale with
 movement. The sentence now says so. A claim of invariance needs a claim per
 slider, not one.
+
+## Page 23, and seeding the harness
+
+`carry.html` is one model: `fwd(T,p)` is the stock less escrowed dividends,
+grown at the rate and shrunk by a decaying borrow fee. Everything else
+(`carryTo`, `carryBetween`, `impliedDiv`, `jelly`, `divShock`) is read off
+that forward, and verify.js rebuilds it dividend by dividend as a check.
+
+`verify.js` now replaces `Math.random` with a generator seeded per page, so
+a failing claim reproduces. `VERIFY_SEED=n node verify.js` tries another
+seed; a claim that passes on one and fails on another has a tolerance its
+sample does not support. Thirteen seeds passed when this was added.
+
+`check.js` finds slider groups with the regex `,"key");` — no space after
+the comma. Written as `, "key")` the group is invisible and every preset
+button for it is reported as unregistered.
 
 ## The `line()` trap
 

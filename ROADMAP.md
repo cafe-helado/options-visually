@@ -671,3 +671,23 @@ Moontower (spot–vol beta in delta, sampling). All numbers recomputed here.
 Still open from the same gap list: normalized skew and a chain order of
 operations on screen.html, index-equivalent gamma on book.html, judgment
 questions on questions.html.
+
+## 23 · The Carry Curve  ✅ live (carry.html)
+
+Implied dividends and the borrow term structure, from forwards lined up
+across expiries. $100 stock, 4.5% rate, $0.60 a quarter, 1% borrow.
+
+1. One number per expiry — carry(T) = r − ln(F/S)/T: 1.00% to 30 days, 4.64%
+   to 60 (one dividend in a short window), 3.38% to a year. A squeeze from
+   12% settling to 2% reads 10.5% at the front and 5.6% at two years.
+2. Inside the roll — the dividend each pair of expiries implies, given a
+   borrow. A cut to $0.30 in the fourth payment moves only the 273–365 bar;
+   the 100-strike jelly roll goes $0.27 → $0.56. Read with 3% borrow instead
+   of 1% and the 91–182 interval shows 10 cents, not 60.
+3. A dividend surprise — halve the dividend with the stock unchanged: two-year
+   ATM call +$138, put −$87, conversion −$225 at every strike ($2.30 of PV).
+   500 one-year conversions lose about $58,000.
+
+Still open from the same deep-cut list: capital and margin as the sizing
+constraint, US listed market structure, dispersion weighting schemes,
+variance-swap mark-to-market.
