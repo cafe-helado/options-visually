@@ -1653,7 +1653,7 @@ PAGES["program"] = () => {
 };
 
 PAGES["playbook"] = () => {
-  const M = load("playbook.html", ["simulate", "statsOf", "s1", "PB"]);
+  const M = load("playbook.html", ["simulate", "statsOf", "s1", "PB", "PB", "PBSHAPE", "SHAPES", "shapeSkew", "shapeSvg"]);
   const s = M.simulate(M.s1), A = M.statsOf(s.idx), B = M.statsOf(s.pw), Cc = M.statsOf(s.th);
   eq("default history has three crash months", s.idx.filter(r => r < -0.15).length, 3, 0);
   eq("put-writing wins 93% of months", B.win * 100, 93, 0.5);
@@ -1668,6 +1668,12 @@ PAGES["playbook"] = () => {
   yes("fifteen strategies, each with all four sections",
     M.PB.length === 15 && M.PB.every(x => x.harvest && x.how && x.lose && x.win && x.pg.length));
   yes("every linked page exists", M.PB.every(x => x.pg.every(([h]) => fs.existsSync(path.join(ROOT, h)))));
+  { yes("every strategy has a return shape", M.PB.every(x => M.SHAPES[M.PBSHAPE[x.n]]));
+    yes("short-vol shapes are negatively skewed", M.shapeSkew("short") < -1);
+    yes("the tail hedge is positively skewed", M.shapeSkew("long") > 1);
+    yes("the symmetric shape has no skew", Math.abs(M.shapeSkew("sym")) < 1e-6);
+    yes("put-writing is drawn short, tail hedging long", M.PBSHAPE["Systematic put-writing"] === "short" && M.PBSHAPE["Tail-risk hedging"] === "long");
+    yes("the SVG is a path, not empty", M.shapeSvg("short").indexOf("<path") > 0); }
 };
 
 const only = process.argv[2];

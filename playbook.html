@@ -323,6 +323,27 @@ const PB=[
   lose:"Gamma is enormous at expiry (page 19): small moves swing positions violently, and sellers can lose many days of income in an hour.",
   win:"Treat them as gamma trades with a few hours to work, size by the worst intraday move, and remember that at this horizon the bid–offer is a large fraction of the premium.",pg:[["atlas.html","19"],["screen.html","17"]]}
 ];
+/* A schematic of each strategy's monthly return distribution: a mixture of
+   normals chosen for its shape, not simulated. Drawn as an inline SVG so the
+   fourteen cards can be compared by eye. */
+const SHAPES={
+  short:{mix:[[0.85,0.6,0.5],[0.15,-2.4,0.9]],say:"many small gains, a rare large loss"},
+  long:{mix:[[0.85,-0.6,0.5],[0.15,2.4,0.9]],say:"steady small losses, a rare large gain"},
+  sym:{mix:[[1,0.1,1.0]],say:"wins and losses of similar size; the edge is in the average"},
+  narrow:{mix:[[0.96,0.2,0.3],[0.04,-2.4,0.7]],say:"small and steady, with an operational tail"},
+  capped:{mix:[[1,0,0.55]],say:"both tails cut off, by design"}
+};
+const PBSHAPE={"Systematic put-writing":"short","Covered-call overwriting":"short","Collars and hedges for concentrated stock":"capped","Tail-risk hedging":"long",
+  "Delta-hedged volatility arbitrage":"sym","Dispersion and correlation trading":"short","Earnings and event volatility":"sym","Skew and term-structure relative value":"sym",
+  "VIX futures and volatility products":"short","Market making and gamma scalping":"short","Merger arbitrage with options":"short","Dividend and financing trades":"narrow",
+  "Structured products and autocallables":"short","Convertible arbitrage":"short","Short-dated (0DTE) options trading":"sym"};
+function shapeDensity(k,x){return SHAPES[k].mix.reduce((a,[w,m,sd])=>a+w*Math.exp(-0.5*Math.pow((x-m)/sd,2))/(sd*Math.sqrt(2*Math.PI)),0);}
+function shapeSkew(k){let m1=0,m2=0,m3=0,W=0;for(let x=-6;x<=6;x+=0.02){const d=shapeDensity(k,x);W+=d;m1+=d*x;}m1/=W;
+  for(let x=-6;x<=6;x+=0.02){const d=shapeDensity(k,x)/W;m2+=d*(x-m1)*(x-m1);m3+=d*Math.pow(x-m1,3);}return m3/Math.pow(m2,1.5);}
+function shapeSvg(k){if(!SHAPES[k])return "";let mx=0;const pts=[];for(let i=0;i<=80;i++){const x=-4.5+9*i/80,d=shapeDensity(k,x);pts.push([x,d]);mx=Math.max(mx,d);}
+  const X=x=>((x+4.5)/9*220).toFixed(1),Y=d=>(44-d/mx*38).toFixed(1);
+  return '<svg viewBox="0 0 220 50" width="220" height="50" role="img" aria-label="Return shape: '+SHAPES[k].say+'"><line x1="'+X(0)+'" y1="4" x2="'+X(0)+'" y2="46" stroke="var(--grey)" stroke-dasharray="2 3"/>'+
+    '<path d="M'+pts.map(p=>X(p[0])+" "+Y(p[1])).join(" L")+'" fill="none" stroke="var(--blue)" stroke-width="1.8"/><line x1="0" y1="45" x2="220" y2="45" stroke="var(--hair)"/></svg>';}
 const WHO={all:"All",inst:"Institutions",fund:"Hedge funds",dealer:"Dealers",retail:"Retail"};
 let PBSEL="all";
 (function(){
@@ -333,7 +354,7 @@ let PBSEL="all";
   window.draw2=draw;
   function draw(){
     box.innerHTML=PB.filter(x=>PBSEL==="all"||x.who===PBSEL).map(x=>`<details class="fgCard"><summary><b>${x.n}</b> <span class="fgTag">${WHO[x.who]}</span></summary>
-      <div class="fgBody"><p><b>Why it pays.</b> ${x.harvest}</p><p><b>How it is run.</b> ${x.how}</p>
+      <div class="fgBody">${PBSHAPE[x.n]?`<p class="fgShape">${shapeSvg(PBSHAPE[x.n])}<br><b>Return shape.</b> ${SHAPES[PBSHAPE[x.n]].say.charAt(0).toUpperCase()+SHAPES[PBSHAPE[x.n]].say.slice(1)}. Losses left of the dotted line, gains right; a schematic, not a simulation.</p>`:""}<p><b>Why it pays.</b> ${x.harvest}</p><p><b>How it is run.</b> ${x.how}</p>
       <p><b>How it loses.</b> ${x.lose}</p><p><b>What it takes to win.</b> ${x.win}</p>
       <p class="fgSee">Go deeper: ${x.pg.map(([h,n])=>`<a data-h="${h}">page ${n}</a>`).join(" · ")}</p></div></details>`).join("");
     box.querySelectorAll("[data-h]").forEach(a=>a.setAttribute("href",a.dataset.h));
