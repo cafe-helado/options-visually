@@ -205,7 +205,7 @@
     <p><b>Jumps.</b> Let the stock occasionally gap by a random amount, as it does through an earnings release or a headline. Merton's model adds exactly that — a Poisson arrival of lognormal jumps — and it has a closed form, so no simulation is needed. Give the jumps a negative mean and the resulting density has a fat left tail, which the surface reports as skew.</p>
     <p><b>Stochastic volatility.</b> Let the volatility itself be random. If vol moves independently of spot, the terminal distribution becomes a mixture of lognormals with different widths, which is fat-tailed on <em>both</em> sides. The surface reports that as a symmetric smile with no skew. To get skew you need vol to move <em>against</em> spot — the leverage effect — which is why real stochastic-vol models carry a correlation parameter and why it is always negative for equities.</p>
     <p>Here is the problem: at one expiry, calibrated to the same data, both produce curves you cannot tell apart by eye. The panels below start with settings that look nearly identical at three months.</p>
-    <p><b>The test is the term structure.</b> Jumps arrive at a rate, so their variance accumulates with time just as the diffusion's does — what does not accumulate is their <em>asymmetry</em>. Over a short window one or two lopsided shocks dominate and bend the surface violently; over a long window many jumps add up and, by the central limit theorem, the sum looks increasingly normal: skewness falls like 1/√T, and the skew washes out. Stochastic volatility has no such decay — the vol-of-vol keeps working at every horizon. The numbers are stark: jump-driven skew falls from <b>8.46 vol points at one month to 0.40 at three years</b>, while the mixture's stays essentially flat at 0.3 to 0.6 throughout.</p>
+    <p><b>The test is the term structure.</b> Jumps arrive at a rate, so their variance accumulates with time just as the diffusion's does — what does not accumulate is their <em>asymmetry</em>. Over a short window one or two lopsided shocks dominate and bend the surface violently; over a long window many jumps add up and, by the central limit theorem, the sum looks increasingly normal: skewness falls like 1/√T, and the skew washes out. Stochastic volatility has no such decay — the vol-of-vol keeps working at every horizon. The numbers are stark: jump-driven skew falls from <b>8.24 vol points at one month to 0.40 at three years</b>, while the mixture's stays essentially flat at 0.3 to 0.6 throughout.</p>
     <p>So when you see a surface whose skew collapses as you go out in time, that is a market pricing event risk. When the skew persists into the long end, that is a market pricing a regime.</p>
   </div>
 
@@ -506,7 +506,7 @@
     <p class="q">Jumps and stochastic volatility both make a smile. How do you tell them apart?</p>
     <div class="opts">
       <button>By the shape of the smile at a single expiry</button>
-      <button data-ok="1">By term structure. Jump skew decays fast with maturity — 8.46 vol points at one month against 0.40 at three years — while a stochastic-vol smile is far more stable across tenors</button>
+      <button data-ok="1">By term structure. Jump skew decays fast with maturity — 8.24 vol points at one month against 0.40 at three years — while a stochastic-vol smile is far more stable across tenors</button>
       <button>By the level of at-the-money volatility</button>
       <button>You cannot distinguish them at all</button>
     </div>

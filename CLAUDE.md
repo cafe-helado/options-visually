@@ -57,6 +57,10 @@ script, compute the numbers, then write the sentence. Doing this caught:
 - a variance swap payoff coded in decimals when vega notional is dollars per
   volatility *point* — a clean 100x error that surfaced only because the prose
   carried independently computed numbers to check against (page 09)
+- four stale figures on pages 02, 06 and 09 found when the thin pages got
+  claims: a jump skew of 8.46 where the page computes 8.24, a variance strike of
+  30.44 where it is 30.40, a "half-yearly" jump that gave the once-in-two-years
+  number, and a post-fill drift quoted from one random draw
 - a tick on page 05 quoted as 11.57 vol points on a "seven-day five-delta"; a
   five-delta weekly is 0.70 at any volatility, and 11.57 belongs to a 0.2-delta.
   It had stood since the page was written because the page had no claims

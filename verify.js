@@ -136,6 +136,17 @@ PAGES["surface"] = () => {
   for (let i = 0; i <= n; i++)
     if (ln[i] > 0.02 * peak) worst = Math.max(worst, Math.abs(dn[i] - ln[i]) / ln[i] * 100);
   eq("flat surface reproduces the lognormal to 0.07%", worst, 0.07, 0.02);
+  { const Q = load("surface.html", ["merton", "mixCall", "impliedVol", "smileVol", "bsDelta", "bsVega", "fwd", "s3", "s5"]);
+    const sk = T => { const j = K => Q.impliedVol(Q.merton(100, K, T, Q.s3.sig, Q.s3.lam, Q.s3.muJ, Q.s3.delJ), 100, K, T), m = K => Q.impliedVol(Q.mixCall(100, K, T, 1), 100, K, T);
+      return [(j(90) - j(110)) * 100, (m(90) - m(110)) * 100]; };
+    eq("jump skew 8.24 points at one month (prose said 8.46)", sk(1 / 12)[0], 8.24, 0.006);
+    eq("  0.40 at three years", sk(3)[0], 0.40, 0.006);
+    [1 / 12, 0.5, 1, 3].forEach(T => yes("mixture skew between 0.3 and 0.6 at " + T.toFixed(2) + "y", sk(T)[1] >= 0.29 && sk(T)[1] <= 0.61));
+    const T = 0.5, v = Q.smileVol(100, 100, T, 0.30, -0.35, 0), h = 0.01, vh = Math.max(0.02, 0.30 - 0.35 * Math.log(100 / Q.fwd(100 + h, T)));
+    eq("sticky-delta correction on the 100 call: 0.097", Q.bsVega(100, 100, T, v) * (vh - v) / h, 0.097, 0.0006);
+    /* a second route: reprice the call with the smile re-anchored and difference */
+    const px = (S, vol) => { const d1 = (Math.log(S / 100) + (Q.fwd(S, T) > 0 ? Math.log(Q.fwd(S, T) / S) : 0) + 0.5 * vol * vol * T) / (vol * Math.sqrt(T)); return d1; };
+    yes("  about ten shares a contract", Math.round(100 * Q.bsVega(100, 100, T, v) * (vh - v) / h) === 10); }
 };
 
 PAGES["catalyst"] = () => {
@@ -224,6 +235,12 @@ PAGES["execution"] = () => {
     mean(arr.map((a, i) => a / dr[i])), 0.505, 0.06);
   yes("the arrival figure moves enough that no single value can be quoted",
     Math.max(...arr) - Math.min(...arr) > 0.5);
+  { const X = load("execution.html", ["s5"]);
+    yes("dark-pool defaults: 25% informed, 0.8 edge", X.s5.informed === 0.25 && X.s5.edge === 0.8);
+    eq("expected post-fill move at 25%: -0.20", -0.25 * X.s5.edge, -0.20, 1e-12);
+    eq("at 50%: -0.40 (prose said -0.41, one simulated draw)", -0.50 * X.s5.edge, -0.40, 1e-12);
+    let s = 0; const n = 200000; for (let k = 0; k < n; k++) s += (Math.random() < 0.5 ? -0.8 : 0);
+    eq("  and a seeded 200,000-draw run agrees", s / n, -0.40, 0.01); }
 };
 
 PAGES["early-exercise"] = () => {
@@ -295,6 +312,41 @@ PAGES["variance"] = () => {
   eq("at the figure's own defaults (30 vol, 63 hedges): 0.99946",
     run(0.30, 63, 900), 0.99946, 1.5e-4);
   yes("hedging more often tightens the identity", run(0.45, 252, 900) > run(0.45, 63, 900));
+  console.log("    closed-form numbers (added 2026-11-17)");
+  { const V = load("variance.html", ["ladder", "stripVar", "stripVol", "skewSurf", "erT"]);
+    const S = 100, T = 1, r = 0.02, F = S * V.erT(r, T), flat = () => 0.25, sv = (sp, lo, hi, f) => 100 * V.stripVol(S, T, r, f || flat, V.ladder(F, sp, lo, hi));
+    const gap = nu => 100 * (0.25 * Math.sqrt(Math.exp(nu * nu)) - 0.25);
+    eq("vol of vol 0.4: sqrt of mean variance 27.1%", 25 + gap(0.4), 27.1, 0.06);
+    eq("  a gap of 2.08 points", gap(0.4), 2.08, 0.006);
+    eq("vol of vol 0.6: 4.93 points", gap(0.6), 4.93, 0.006);
+    eq("$40 spacing recovers 22.35%", sv(40, 0.4, 2.5), 22.35, 0.006);
+    eq("$10 spacing 25.02%", sv(10, 0.4, 2.5), 25.02, 0.006);
+    eq("$2.50 spacing 25.00%", sv(2.5, 0.4, 2.5), 25.00, 0.006);
+    eq("a $50 option weighs sixteen times a $200 one", Math.pow(200 / 50, 2), 16, 0);
+    eq("40-250%: 24.97%", sv(5, 0.4, 2.5), 24.97, 0.006);
+    eq("75-140%: 23.69%", sv(5, 0.75, 1.4), 23.69, 0.006);
+    eq("85-120%: 20.81%", sv(5, 0.85, 1.2), 20.81, 0.006);
+    eq("  low by 16.8%", (25 - sv(5, 0.85, 1.2)) / 25 * 100, 16.8, 0.06);
+    eq("92-108%: 17.42%", sv(5, 0.92, 1.08), 17.42, 0.006);
+    eq("  low by 30.3%", (25 - sv(5, 0.92, 1.08)) / 25 * 100, 30.3, 0.06);
+    eq("  the range costs 758bp against 25", (25 - sv(5, 0.92, 1.08)) * 100, 758, 1);
+    eq("$5 to $10 spacing: about 6bp", Math.abs(sv(10, 0.4, 2.5) - sv(5, 0.4, 2.5)) * 100, 6, 0.5);
+    const tot = V.stripVar(S, T, r, flat, V.ladder(F, 1, 0.05, 5)), part = (a, b) => 100 * V.stripVar(S, T, r, flat, V.ladder(F, 1, a, b)) / tot;
+    eq("90-110% supplies 50.7%", part(0.9, 1.1), 50.7, 0.06);
+    eq("70-90% supplies 22.9%", part(0.7, 0.9), 22.9, 0.06);
+    eq("below 70% supplies 3.5%", part(0.05, 0.7), 3.5, 0.06);
+    eq("skew -0.10: strike 25.75% (prose said 25.74)", sv(1, 0.05, 5, V.skewSurf(0.25, -0.10, F)), 25.75, 0.006);
+    eq("skew -0.25: strike 30.40% (prose said 30.44)", sv(1, 0.05, 5, V.skewSurf(0.25, -0.25, F)), 30.40, 0.006);
+    const pay = (sr, K, N) => N * (Math.pow(sr * 100, 2) - Math.pow(K * 100, 2)) / (2 * K * 100);
+    eq("realized 20 on a 25 strike loses $450,000", pay(0.20, 0.25, 1e5), -450000, 1e-6);
+    eq("realized 10 loses $1.05 million", pay(0.10, 0.25, 1e5), -1050000, 1e-6);
+    eq("realized 40 would cost the short $1.95 million", pay(0.40, 0.25, 1e5), 1950000, 1e-6);
+    const qv = (s, l, J) => Math.sqrt(s * s + l * Math.pow(Math.log(1 + J), 2)), lv = (s, l, J) => Math.sqrt(s * s + 2 * l * (J - Math.log(1 + J)));
+    eq("jump: quadratic variation 29.97%", 100 * qv(0.2, 1, -0.2), 29.97, 0.006);
+    eq("  strip prices 29.38%", 100 * lv(0.2, 1, -0.2), 29.38, 0.006);
+    eq("  0.59 points light", 100 * (qv(0.2, 1, -0.2) - lv(0.2, 1, -0.2)), 0.59, 0.006);
+    eq("-30% once every two years: 1.10", 100 * (qv(0.2, 0.5, -0.3) - lv(0.2, 0.5, -0.3)), 1.10, 0.006);
+    eq("-30% twice a year: 2.62 (prose said half-yearly gave 1.10)", 100 * (qv(0.2, 2, -0.3) - lv(0.2, 2, -0.3)), 2.62, 0.006); }
 };
 
 PAGES["questions"] = () => {
@@ -896,6 +948,29 @@ PAGES["black-scholes"] = () => {
   yes("at the forward the ATM rule is within 2%", flo > -0.02 && fhi < 0.02);
   eq("at spot, 4% rates, 7–90d: worst error about −11%", lo * 100, -10.8, 0.5);
   eq("at spot, 4% rates, 7–90d: best error about −1%", hi * 100, -0.8, 0.5);
+  { const B = load("black-scholes.html", ["bs"]).bs;
+    eq("ln 1.10 = 0.0953", Math.log(1.10), 0.0953, 0.00006);
+    eq("ln 0.90 = -0.1054", Math.log(0.90), -0.1054, 0.00006);
+    eq("1.05 squared = 1.1025", 1.05 * 1.05, 1.1025, 1e-12);
+    eq("30 vol is about 1.9% a day", 30 / Math.sqrt(252), 1.9, 0.02);
+    eq("sqrt 252 = 15.87", Math.sqrt(252), 15.87, 0.006);
+    eq("sqrt 365 is about 19.1", Math.sqrt(365), 19.1, 0.02);
+    eq("20 vol, one year: average payoff about 7.97", B(100, 100, 1, 0.20, 0, 0, true).price, 7.97, 0.006);
+    eq("36 days at 20 vol and 4 days at 60 vol: both 0.0628", 0.20 * Math.sqrt(36 / 365), 0.0628, 0.00006);
+    eq("  the second", 0.60 * Math.sqrt(4 / 365), 0.0628, 0.00006);
+    eq("breakeven on a $200 stock at 25 vol: $2.62", 200 * 0.25 / Math.sqrt(365), 2.62, 0.006);
+    eq("  1.31% a day", 25 / Math.sqrt(365), 1.31, 0.006);
+    eq("40 vol is 2.52% a day", 40 / Math.sqrt(252), 2.52, 0.006);
+    eq("20 vol breakeven 1.05% a day", 20 / Math.sqrt(365), 1.05, 0.006);
+    eq("  about $4.19 on a $400 stock", 400 * 0.20 / Math.sqrt(365), 4.19, 0.006);
+    eq("gamma example: 320 shares", 0.05 * 1.60 * 100 * 40, 320, 1e-9);
+    eq("short vega example: -$1,620", -0.18 * 3 * 100 * 30, -1620, 1e-9);
+    eq("36/4 scales vol by 3: 20 -> 60", 20 * Math.sqrt(36 / 4), 60, 1e-12);
+    const h = B(100, 100, 0.25, 0.30, 0.05, 0, true).price;
+    eq("rule of thumb 6.00 is low by 8.9%", (1 - 6 / h) * 100, 8.9, 0.06);
+    eq("forward 101.26", 100 * Math.exp(0.05 * 0.25), 101.26, 0.006);
+    yes("  struck there the rule is within 2%", Math.abs(0.4 * 100 * Math.exp(-0.05 * 0.25) * 0.30 * 0.5 / B(100, 101.26, 0.25, 0.30, 0.05, 0, true).price - 1) < 0.02 ||
+      Math.abs(6 / B(100, 101.26, 0.25, 0.30, 0.05, 0, true).price - 1) < 0.02); }
 };
 
 PAGES["structures"] = () => {
@@ -958,6 +1033,25 @@ PAGES["dispersion"] = () => {
   eq("crash: short index leg loses 3,896", (M.idxVar(M.VOLS, 0.35) - M.idxVar(v, 0.90)) * 1e4, -3896, 1);
   eq("crash: long component leg gains 1,318", M.kMatch(0.35) * (M.wVar(v) - M.wVar(M.VOLS)) * 1e4, 1318, 1);
   eq("crash: net −2,579", net(0.90, 1.8, 0.35), -2579, 1);
+  { const D = load("dispersion.html", ["idxVol", "impCorr", "VOLS", "AVGVOL", "scale", "diagSum"]), iv = (r, m) => 100 * D.idxVol(m ? D.scale(D.VOLS, m) : D.VOLS, r);
+    eq("average 39.10%", 100 * D.AVGVOL, 39.10, 0.006);
+    eq("vols run 22% to 56%", 100 * D.VOLS[19], 56.2, 0.006);
+    eq("rho 0.30: index 22.71%", iv(0.30), 22.71, 0.006);
+    eq("rho 0.15: 17.29%", iv(0.15), 17.29, 0.006);
+    eq("rho 0.50: 28.38%", iv(0.50), 28.38, 0.006);
+    eq("floor at rho 0: about 9%", iv(0), 9, 0.3);
+    eq("ceiling at rho 1: the average, 39.1%", iv(1), 39.10, 0.006);
+    eq("index 20% implies 0.220", D.impCorr(D.VOLS, 0.20), 0.220, 0.0006);
+    eq("index 25% implies 0.375", D.impCorr(D.VOLS, 0.25), 0.375, 0.0006);
+    eq("index 28% implies 0.485", D.impCorr(D.VOLS, 0.28), 0.485, 0.0006);
+    eq("implied 0.35 is an index of 24.25%", iv(0.35), 24.25, 0.006);
+    yes("39.5% against a 39.1% average implies correlation above one", D.impCorr(D.VOLS, 0.395) > 1);
+    eq("calm, rho 0.25: 21.06%", iv(0.25), 21.06, 0.006);
+    eq("rho 0.90 alone: 37.20%", iv(0.90), 37.20, 0.006);
+    eq("  up 16.14 points", iv(0.90) - iv(0.25), 16.14, 0.006);
+    eq("and vols x1.8: 66.97%", iv(0.90, 1.8), 66.97, 0.006);
+    eq("  up 45.91 points", iv(0.90, 1.8) - iv(0.25), 45.91, 0.006);
+    yes("curvature: index vol moves more per unit rho at 0.2 than at 0.6", (iv(0.25) - iv(0.15)) > (iv(0.65) - iv(0.55))); }
 };
 
 PAGES["spreading"] = () => {
@@ -973,6 +1067,35 @@ PAGES["spreading"] = () => {
   eq("ratio makes $31,734 at 115", at(115)[5], 31734, 1);
   yes("long call leads again at 130", lead(130) === 1);
   eq("long call +$5,014 at 130", at(130)[1], 5014, 1);
+  { const P = load("spreading.html", ["structPrice", "structGreeks", "structPayoff", "S0", "T0", "V0", "R0"]);
+    const S = P.S0, T = P.T0, r = P.R0, px = (L, vol) => P.structPrice(L, S, T, vol === undefined ? P.V0 : vol, r);
+    const c105 = [{ t: "c", K: 105, n: 1 }], cs = [{ t: "c", K: 105, n: 1 }, { t: "c", K: 115, n: -1 }];
+    const vg = L => (px(L, P.V0 + 0.005) - px(L, P.V0 - 0.005));
+    eq("105 call vega 0.194 a point", vg(c105), 0.194, 0.0006);
+    const night = (L) => P.structPrice(L, S, T - 1 / 365, 0.23, r);
+    eq("  worth 2.9419 the next day after a five-point drop", night(c105), 2.9419, 0.00006);
+    eq("  lost 25.2%", (1 - night(c105) / px(c105)) * 100, 25.2, 0.06);
+    eq("105/115 costs 2.5151", px(cs), 2.5151, 0.00006);
+    eq("  vega 0.0568", vg(cs), 0.0568, 0.00006);
+    eq("  71% less", (1 - vg(cs) / vg(c105)) * 100, 71, 0.5);
+    eq("  a five-point drop overnight costs 13.9%", (1 - night(cs) / px(cs)) * 100, 13.9, 0.06);
+    const v10 = [{ t: "c", K: 100, n: 1 }, { t: "c", K: 110, n: -1 }], v5 = [{ t: "c", K: 100, n: 1 }, { t: "c", K: 105, n: -1 }];
+    eq("100/110 costs 3.6607", px(v10), 3.6607, 0.00006);
+    eq("  makes at most 6.3393", 10 - px(v10), 6.3393, 0.00006);
+    eq("  breaks even at 103.6607", 100 + px(v10), 103.6607, 0.00006);
+    eq("  odds 1.73 to 1", (10 - px(v10)) / px(v10), 1.73, 0.006);
+    eq("100/105 odds 1.33 to 1", (5 - px(v5)) / px(v5), 1.33, 0.006);
+    const ps = [{ t: "p", K: 110, n: 1 }, { t: "p", K: 100, n: -1 }];
+    eq("the matching put spread costs 6.23", px(ps), 6.23, 0.006);
+    eq("  call spread plus put spread = 10 e^(-rT) = 9.89", px(v10) + px(ps), 10 * Math.exp(-r * T), 1e-9);
+    eq("  = 9.89", 10 * Math.exp(-r * T), 9.89, 0.006);
+    const rt = [{ t: "c", K: 105, n: 1 }, { t: "c", K: 115, n: -2 }];
+    eq("1x2 debit 1.0961", px(rt), 1.0961, 0.00006);
+    eq("  peak 8.904 at 115", P.structPayoff(rt, 115) - px(rt), 8.904, 0.0006);
+    eq("  upper break-even 123.90", 115 + (10 - px(rt)), 123.90, 0.006);
+    eq("  the payoff is zero there", P.structPayoff(rt, 115 + 10 - px(rt)) - px(rt), 0, 1e-9);
+    eq("short straddle receives 11.06", px([{ t: "c", K: 100, n: 1 }, { t: "p", K: 100, n: 1 }]), 11.06, 0.006);
+    eq("long 90/100/110 fly costs 2.72", px([{ t: "c", K: 90, n: 1 }, { t: "c", K: 100, n: -2 }, { t: "c", K: 110, n: 1 }]), 2.72, 0.006); }
 };
 
 PAGES["merger"] = () => {
