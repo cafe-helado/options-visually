@@ -1161,9 +1161,9 @@ PAGES["dynamics"] = () => {
 };
 
 PAGES["book"] = () => {
-  /* The page had no claims until chapter 05 was added. These cover that
-     chapter only; chapters 01-04 and 06 are still unchecked here. */
-  const M = load("book.html", ["gammaPnl", "idxBook", "sI"]);
+  /* The page had no claims until chapter 05 was added. These cover chapters
+     05 and 08 only; the older chapters are still unchecked here. */
+  const M = load("book.html", ["gammaPnl", "idxBook", "sI", "PNL", "pnlBook", "pnlDay", "sP", "bs"]);
   yes("defaults", M.sI.g1 === 1000 && M.sI.b1 === 0.5 && M.sI.g2 === -500 && M.sI.b2 === 2 && M.sI.x === 2);
   const r = M.idxBook(M.sI, 2);
   eq("summed gamma is +$500,000 per 1%", (M.sI.g1 + M.sI.g2) * 1000, 500000, 0);
@@ -1177,6 +1177,39 @@ PAGES["book"] = () => {
   eq("  the book is flat there", M.idxBook(Object.assign({}, M.sI, { b2: Math.sqrt(0.5) }), 3).real, 0, 1e-6);
   eq("betas of 1: the sum is right", M.idxBook(Object.assign({}, M.sI, { b1: 1, b2: 1 }), 3).real, M.idxBook(M.sI, 3).raw, 1e-6);
   eq("check: 200,000 x 1.5 squared = 450,000", 200000 * 1.5 * 1.5, 450000, 0);
+  console.log("    ch08 · the day's P&L");
+  { const d = M.pnlDay(M.sP), B = M.pnlBook(), P = M.PNL;
+    yes("defaults", M.sP.x === -2 && M.sP.dvf === 1.5 && M.sP.dvb === 0.8 && M.sP.days === 1 && M.sP.edge === 3 && M.sP.lots === 50);
+    eq("short 8,174 shares", B.shares, -8174, 0);
+    eq("marked value +$1,752", d.actual, 1752, 0.6);
+    eq("delta -$1", d.delta, -1, 0.6);
+    eq("gamma +$192", d.gamma, 192, 0.6);
+    eq("theta -$274", d.theta, -274, 0.6);
+    eq("vega +$1,637", d.vega, 1637, 0.6);
+    eq("  ninety-day leg +$3,135", 200 * 100 * B.g[0].vega * 0.008, 3135, 0.6);
+    eq("  thirty-day leg -$1,497", -100 * 100 * B.g[1].vega * 0.015, -1497, 0.6);
+    eq("  summed vega $2,920 a point", (200 * B.g[0].vega - 100 * B.g[1].vega), 2920, 1);
+    eq("vanna and volga +$212", d.cross, 212, 0.6);
+    eq("unexplained -$14", d.unexplained, -14, 0.6);
+    yes("  under one percent of the day", Math.abs(d.unexplained / d.total) < 0.01);
+    eq("carry +$64", d.carry, 64, 0.6);
+    eq("  cash about $703,000", B.cash, 703000, 400);
+    eq("  earning $87 a day", B.cash * P.r / 365, 87, 0.6);
+    eq("  against $22 of borrow", 8174 * 100 * P.borrow / 365, 22, 0.6);
+    eq("new trade +$150", d.trade, 150, 1e-9);
+    eq("fees -$32", d.fees, -32, 0.6);
+    eq("the day: $1,934", d.total, 1934, 0.6);
+    eq("  the bars add to the total", d.delta + d.gamma + d.theta + d.vega + d.cross + d.unexplained + d.carry + d.trade + d.fees, d.total, 1e-6);
+    /* the real number by a route that never touches a greek: reprice each leg by hand */
+    const S1 = 98, re = 200 * 100 * (M.bs(S1, 100, 89 / 365, 0.308, P.r, 0, true).price - M.bs(100, 100, 90 / 365, 0.30, P.r, 0, true).price)
+      - 100 * 100 * (M.bs(S1, 105, 29 / 365, 0.295, P.r, 0, true).price - M.bs(100, 105, 30 / 365, 0.28, P.r, 0, true).price) - 8174 * (S1 - 100);
+    eq("  marked value by direct repricing", re, d.actual, 1e-6);
+    const c = M.pnlDay(Object.assign({}, M.sP, { x: -5, dvf: 6, dvb: 3 })), w = M.pnlDay(Object.assign({}, M.sP, { x: 0, dvf: 0, dvb: 0, days: 3 }));
+    eq("crash: vanna and volga $2,044", c.cross, 2044, 0.6);
+    eq("crash: unexplained $214", c.unexplained, 214, 0.6);
+    eq("weekend: theta -$821", w.theta, -821, 0.6);
+    eq("weekend: carry +$193", w.carry, 193, 0.6);
+    eq("check: -5,000 predicted, +40,000 shown, 45,000 unexplained", 40000 - -5000, 45000, 0); }
 };
 
 PAGES["carry"] = () => {
@@ -1229,6 +1262,65 @@ PAGES["carry"] = () => {
   eq("  each conversion loses $116", b.conv * 100, -116, 0.6);
   eq("  500 of them: about $58,000", 500 * b.conv * 100, -58000, 200);
   yes("a raise pleases the conversion side", M.divShock(2, 100, M.P3, 0.9).conv > 0);
+};
+
+PAGES["converts"] = () => {
+  /* Page 24. Bond-plus-option decomposition, the carry account, the vol edge,
+     and the credit link. */
+  const M = load("converts.html", ["CB", "bondFloor", "cbOpt", "cbPrice", "cbDelta", "parity", "cbImplied", "hedgedCb",
+    "linkSpread", "cbCarry", "volEdge", "breakevenVol", "breakevenLink", "year2", "s1", "s2", "s3", "bs"]);
+  yes("defaults", M.s1.S === 80 && M.s1.vol === 0.35 && M.s1.s === 0.03 && M.s2.vi === 0.28 && M.s2.vr === 0.38 && M.s2.fund === 0.05 && M.s2.borrow === 0.005 && M.s3.k === 10);
+  console.log("    ch01");
+  /* floor by a second route: sum the five coupons and the face by hand */
+  let fl = 1000 * Math.exp(-0.07 * 5); for (let t = 1; t <= 5; t++) fl += 20 * Math.exp(-0.07 * t);
+  eq("bond floor $786", M.bondFloor(0.03), fl, 1e-9); eq("  = 786", fl, 786, 0.5);
+  eq("convertible $1,023 at $80", M.cbPrice(80, 0.35, 0.03), 1023, 0.5);
+  eq("premium over parity 27.9%", (M.cbPrice(80, 0.35, 0.03) / 800 - 1) * 100, 27.9, 0.06);
+  eq("option worth $237", M.cbPrice(80, 0.35, 0.03) - M.bondFloor(0.03), 237, 0.5);
+  eq("delta 6.4 shares", M.cbDelta(80, 0.35), 6.4, 0.06);
+  eq("$6.70 per vol point", M.CB.cr * M.cbOpt(80, 0.35).vega / 100, 6.70, 0.03);
+  eq("at $40: $828", M.cbPrice(40, 0.35, 0.03), 828, 0.5);
+  eq("  $42 over the floor", M.cbPrice(40, 0.35, 0.03) - M.bondFloor(0.03), 42, 0.5);
+  eq("at $200: $2,028", M.cbPrice(200, 0.35, 0.03), 2028, 0.6);
+  eq("  1.4% over parity", (M.cbPrice(200, 0.35, 0.03) / 2000 - 1) * 100, 1.4, 0.06);
+  eq("implied vol round-trips", M.cbImplied(M.cbPrice(80, 0.28, 0.03), 80, 0.03), 0.28, 1e-6);
+  yes("wider spread moves the left of the curve most", (M.cbPrice(40, 0.35, 0.03) - M.cbPrice(40, 0.35, 0.09)) / M.cbPrice(40, 0.35, 0.03) > (M.cbPrice(200, 0.35, 0.03) - M.cbPrice(200, 0.35, 0.09)) / M.cbPrice(200, 0.35, 0.03));
+  console.log("    ch02");
+  const y = M.year2(M.s2), c = y.c;
+  eq("bought for $976", c.px, 976, 0.5);
+  eq("short 6.09 shares", M.cbDelta(80, 0.28), 6.09, 0.006);
+  eq("  worth $487", c.sh, 487, 0.5);
+  eq("financing costs $48.80", -c.fund, 48.80, 0.03);
+  eq("short proceeds earn about $24", c.rebate, 24, 0.5);
+  eq("borrow costs $2.40", -c.borrow, 2.40, 0.06);
+  eq("carry -$6.90", c.net, -6.90, 0.03);
+  eq("  the four lines add up", 20 + c.fund + c.rebate + c.borrow, c.net, 1e-9);
+  eq("vol edge at 38 realized: $16.20", y.e, 16.20, 0.03);
+  eq("expected year +$9.30", y.net, 9.30, 0.03);
+  eq("break-even realized 32.6%", y.be * 100, 32.6, 0.06);
+  eq("  the year is zero there", M.year2(M.s2, y.be).net, 0, 1e-6);
+  eq("no edge when realized = implied", M.volEdge(80, 0.28, 0.28), 0, 1e-12);
+  eq("$67 cheap against 38%", M.cbPrice(80, 0.38, 0.03) - c.px, 67, 0.6);
+  eq("gamma pays $47 on a 40% fall", M.hedgedCb(80, 0.28, 0.03, -0.4, 0), 47, 0.5);
+  yes("  and is positive on a rise too", M.hedgedCb(80, 0.28, 0.03, 0.4, 0) > 0);
+  /* the edge formula against a hedged simulation of one year: daily rehedge at implied-vol deltas */
+  { let tot = 0; const n = 3000, dt = 1 / 252, vi = 0.28, vr = 0.38, g0 = M.cbOpt(80, vi);
+    for (let i = 0; i < n; i++) { const z = Math.sqrt(-2 * Math.log(Math.random() || 1e-12)) * Math.cos(2 * Math.PI * Math.random());
+      const S1 = 80 * Math.exp(vr * Math.sqrt(dt) * z - 0.5 * vr * vr * dt);
+      const a = M.cbOpt(S1, vi, 5 - dt).price - g0.price - g0.delta * (S1 - 80) - 0.04 * dt * (g0.price - g0.delta * 80); tot += M.CB.cr * a; }
+    eq("one-day hedged steps, annualized, agree with the formula", tot / n * 252, M.volEdge(80, vi, vr), 2.5); }
+  const hb = M.year2(Object.assign({}, M.s2, { borrow: 0.06 }));
+  eq("6% borrow: carry about -$34", hb.c.net, -34, 0.5);
+  eq("  year about -$17", hb.net, -17, 0.5);
+  eq("  break-even 46.4%", hb.be * 100, 46.4, 0.06);
+  console.log("    ch03");
+  eq("spread fixed, -30%: +$19.90", M.hedgedCb(80, 0.35, 0.03, -0.3, 0), 19.90, 0.06);
+  eq("10bp per 1%: spread 600bp after -30%", (0.03 + M.linkSpread(-0.3, 10)) * 1e4, 600, 1e-6);
+  eq("  floor $681", M.bondFloor(0.06), 681, 0.5);
+  eq("  hedged P&L -$84.80", M.hedgedCb(80, 0.35, 0.03, -0.3, M.linkSpread(-0.3, 10)), -84.80, 0.06);
+  eq("  the right side is unchanged", M.hedgedCb(80, 0.35, 0.03, 0.3, M.linkSpread(0.3, 10)), M.hedgedCb(80, 0.35, 0.03, 0.3, 0), 1e-12);
+  eq("break-even 1.8bp per 1%", M.breakevenLink(80, 0.35, 0.03, -0.3), 1.8, 0.03);
+  yes("delta shrinks as the stock falls", M.cbDelta(56, 0.35) < M.cbDelta(80, 0.35));
 };
 
 PAGES["program"] = () => {

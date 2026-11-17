@@ -40,7 +40,8 @@
   <a href="#c5"><span>Gamma across names</span><i></i></a>
   <a href="#c6"><span>Limits</span><i></i></a>
   <a href="#c7"><span>The report</span><i></i></a>
-  <a href="#c8"><span>Check yourself</span><i></i></a>
+  <a href="#c8"><span>The day's P&amp;L</span><i></i></a>
+  <a href="#c9"><span>Check yourself</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -500,6 +501,94 @@
 <section class="chapter" id="c8">
   <div class="chead">
     <div class="cnum">08</div>
+    <h2>Where the day's P&amp;L came from</h2>
+    <p class="dek">A volatility book computes its P&amp;L twice every day: once from prices, once from yesterday's risk. The first is the number. The second is whether you understand it.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A small book on one stock at $100: long 200 ninety-day 100 calls, short 100 thirty-day 105 calls, and short 8,174 shares to make it delta-neutral at last night's close. Today the stock falls 2%, thirty-day vol rises a point and a half, ninety-day vol rises 0.8, and you buy 50 more calls three cents under your own mark. The figure builds the day's P&amp;L one cause at a time.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>One day's P&amp;L, by cause</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--moss)"></i>Adds</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Subtracts</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Unexplained</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Total</span>
+          </span>
+        </div>
+        <canvas id="cvPnl" height="320"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The day</h4>
+        <div id="ctlPnl"></div>
+        <div class="kv" style="margin-top:20px" id="kvPnl"></div>
+      </div>
+    </div>
+    <figcaption>Each bar starts where the last one ended. The first six add up to the change in the book's marked value; the last three are cash that never touched an option model.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>The number itself is simple. Reprice every position at tonight's marks, subtract last night's value, and add the cash that moved. The book's marked value rose <b>$1,752</b>. Carry added $64, the new trade $150, fees took $32, and the day is <b>$1,934</b>.</p>
+    <p>The explanation takes last night's greeks and today's moves and predicts that $1,752 without repricing anything:</p>
+    <p><b>Delta, &minus;$1.</b> The book was hedged flat, so a 2% move earns nothing at first order. A large number here means the hedge was wrong or late.</p>
+    <p><b>Gamma, +$192.</b> Half the book's gamma times the move squared. This is the realized-volatility line: over a month, the sum of these against the sum of theta is whether the stock moved more than you paid for.</p>
+    <p><b>Theta, &minus;$274.</b> One calendar day of decay, long options against short ones. On a Monday it is three days' worth.</p>
+    <p><b>Vega, +$1,637.</b> Each expiry's vega times that expiry's own vol change: the ninety-day calls made $3,135 and the short thirty-day calls lost $1,497. The book's summed vega is $2,920 a point, and a report that multiplied that by a single "vol up one point" would have said $2,920. Vega has to be attributed bucket by bucket or it explains nothing.</p>
+    <p><b>Vanna and volga, +$212.</b> The second-order terms: spot and vol moving together, and vol moving a long way. Small on a day like this, and the largest line on the days people remember.</p>
+    <p><b>Unexplained, &minus;$14.</b> What is left when the predicted change is subtracted from the real one. Under one percent of the day here.</p>
+  </div>
+
+  <div class="mline">P&amp;L = &Delta;(marked value) + carry + new-trade edge &minus; fees</div>
+  <p class="mread">Reads as: <b>what the positions are worth tonight minus what they were worth last night, plus interest, borrow and dividends, plus the difference between where you traded and where you mark, less what you paid to trade.</b></p>
+
+  <div class="mline">&Delta;(marked value) &asymp; &Delta;&middot;dS + &frac12;&Gamma;&middot;dS&sup2; + &Theta;&middot;dt + &Sigma; vega<sub>T</sub>&middot;d&sigma;<sub>T</sub> + vanna&middot;dS&middot;d&sigma; + &frac12; volga&middot;d&sigma;&sup2; + unexplained</div>
+  <p class="mread">Reads as: <b>the move times delta, the move squared times half of gamma, the time passed times theta, each expiry's vol change times its vega, the cross terms, and whatever the list missed.</b></p>
+
+  <div class="prose">
+    <p>Three lines sit outside the greeks, and on a real desk they are where the arguments are.</p>
+    <p><b>Carry</b> is interest on the cash the book holds or owes, the fee on borrowed shares, and dividends received or paid on stock positions. Here the short stock leaves the book holding about $703,000, which earns $87 a day at 4.5%, against $22 of borrow. It is small daily and large annually, and it is the line a conversion or reversal book lives on.</p>
+    <p><b>New-trade edge</b> is the gap between your fill and your own mark at the time. Buying 50 calls three cents under the mark books $150 today. It is real only if the mark is right, which is why desks watch whether positions bought "with edge" go on to make or lose money afterwards.</p>
+    <p><b>The marks</b> are not a line, but every line depends on them. Liquid options are marked near the mid; the rest are marked off a fitted surface, and moving that surface moves P&amp;L with no trade at all. Vol funds therefore have the marks checked by someone who is not paid on them, against broker quotes or a pricing service.</p>
+    <p>That is why the unexplained bar is the one a risk manager reads first. On an ordinary day it should be a few percent of the total. When it is not, the causes are a short list: a move big enough that third-order terms matter; a mark that changed for a reason other than the market; a trade booked wrong or missing; a dividend, split or other corporate action the model did not know about; or a position that is not what the system thinks it is. Four of those five are operations problems, found by reconciling positions and cash to the prime broker before anyone trusts the number.</p>
+    <p>Above the desk the fund adds one more layer: trading P&amp;L, less financing and expenses, gives the change in net asset value before management and performance fees. That part is accounting. The part worth being able to do in your head is the attribution.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>A crash day: the stock falls 5%, thirty-day vol jumps six points and ninety-day three. <b>Predict</b> which bar grows most relative to the default day.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cPnl" data-patch='{"x":-5,"dvf":6,"dvb":3,"days":1}' data-focus="cvPnl">A crash day</button>
+      <button class="act ghost" data-preset="cPnl" data-patch='{"x":0,"dvf":0,"dvb":0,"days":3}' data-focus="cvPnl">A quiet weekend</button>
+      <button class="act ghost" data-preset="cPnl" data-patch='{"x":-2,"dvf":1.5,"dvb":0.8,"days":1,"edge":3}' data-focus="cvPnl">Reset</button>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>Vanna and volga grow almost tenfold, from $212 to $2,044, and the unexplained goes from $14 to $214. On the quiet weekend there is only decay and carry: three days of theta cost $821 and three days of carry bring in $193.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">The stock was unchanged, implied vols were unchanged, and the book shows +$40,000 against a theta of &minus;$5,000. No trades. What do you check first?</p>
+    <div class="opts">
+      <button>Nothing; a gain is a gain</button>
+      <button>Whether realized volatility was high intraday</button>
+      <button data-ok="1">The marks and the positions: something was re-marked, mis-booked, or hit by a corporate action</button>
+      <button>Whether gamma was larger than reported</button>
+    </div>
+    <div class="ans"><b>Marks and positions.</b> With no move in spot or vol, the greeks predict &minus;$5,000 and the unexplained is $45,000. Intraday movement cannot produce it in a book that did not trade, and gamma earns nothing on a zero close-to-close move. An unexplained gain is the same problem as an unexplained loss, and it tends to reverse.</div>
+  </div>
+</section>
+
+<!-- ══════════ 09 ══════════ -->
+<section class="chapter" id="c9">
+  <div class="chead">
+    <div class="cnum">09</div>
     <h2>Check yourself</h2>
     <p class="dek">Six questions across the page, and the series.</p>
   </div>
@@ -1052,7 +1141,69 @@ const sI = { g1: 1000, b1: 0.5, g2: -500, b2: 2, x: 2 };
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();drawIdx();draw5();draw6();}
+/* ══════════ 08 — where the day's P&L came from ══════════
+   A three-line book on one stock. The day's P&L is computed twice: once by
+   repricing everything and adding the cash flows (the real number), once
+   greek by greek from last night's risk (the explanation). The gap is the
+   unexplained. */
+const PNL = { S: 100, r: 0.045, borrow: 0.01, fee: 0.65,
+  legs: [{ n: 200, K: 100, d: 90, v: 0.30, call: true, name: "Long 200 90-day 100 calls" },
+         { n: -100, K: 105, d: 30, v: 0.28, call: true, name: "Short 100 30-day 105 calls" }] };
+function pnlBook(){ const g = PNL.legs.map(l => bs(PNL.S, l.K, l.d / 365, l.v, PNL.r, 0, l.call));
+  const shares = -Math.round(PNL.legs.reduce((a, l, i) => a + l.n * 100 * g[i].delta, 0));
+  const cash = -PNL.legs.reduce((a, l, i) => a + l.n * 100 * g[i].price, 0) - shares * PNL.S;
+  return { g, shares, cash }; }
+function pnlDay(p){
+  const B = pnlBook(), dS = PNL.S * p.x / 100, S1 = PNL.S + dS, dt = p.days / 365, dv = [p.dvb / 100, p.dvf / 100];
+  let actual = B.shares * dS, delta = B.shares * dS, gamma = 0, theta = 0, vega = 0, cross = 0;
+  PNL.legs.forEach((l, i) => { const q = l.n * 100, g = B.g[i];
+    actual += q * (bs(S1, l.K, l.d / 365 - dt, l.v + dv[i], PNL.r, 0, l.call).price - g.price);
+    delta += q * g.delta * dS; gamma += q * 0.5 * g.gamma * dS * dS; theta += q * g.theta * dt; vega += q * g.vega * dv[i];
+    cross += q * (g.vanna * dS * dv[i] + 0.5 * g.volga * dv[i] * dv[i]); });
+  const carry = B.cash * PNL.r * dt - Math.abs(B.shares) * PNL.S * PNL.borrow * dt;
+  const trade = p.lots * 100 * p.edge / 100, fees = -p.lots * PNL.fee;
+  const explained = delta + gamma + theta + vega + cross;
+  return { B, actual, delta, gamma, theta, vega, cross, carry, trade, fees, explained, unexplained: actual - explained,
+    total: actual + carry + trade + fees };
+}
+const sP = { x: -2, dvf: 1.5, dvb: 0.8, days: 1, edge: 3, lots: 50 };
+(function(){
+  const m = v => (v < -.5 ? "−$" : v > .5 ? "+$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  sliders(document.getElementById("ctlPnl"), [
+    { id: "xP", k: "x", lbl: "ΔS", name: "Stock move", min: -6, max: 6, step: 0.1, fmt: v => (v > 0 ? "+" : "") + v.toFixed(1) + "%" },
+    { id: "fP", k: "dvf", lbl: "Δσ₁", name: "30-day vol change, points", min: -5, max: 8, step: 0.1, fmt: v => (v > 0 ? "+" : "") + v.toFixed(1) },
+    { id: "bP", k: "dvb", lbl: "Δσ₂", name: "90-day vol change, points", min: -5, max: 8, step: 0.1, fmt: v => (v > 0 ? "+" : "") + v.toFixed(1) },
+    { id: "dP", k: "days", lbl: "Δt", name: "Calendar days passed", min: 0, max: 3, step: 1, fmt: v => v.toFixed(0) },
+    { id: "eP", k: "edge", lbl: "e", name: "Edge on today's 50-lot trade, cents", min: -10, max: 10, step: 0.5, fmt: v => v.toFixed(1) + "¢" }
+  ], sP, () => draw(),"cPnl");
+  window.drawPnl = draw;
+  function draw(){
+    const r = pnlDay(sP), items = [["Delta", r.delta], ["Gamma", r.gamma], ["Theta", r.theta], ["Vega", r.vega], ["Vanna, volga", r.cross], ["Unexplained", r.unexplained], ["Carry", r.carry], ["New trades", r.trade], ["Fees", r.fees]];
+    let run = 0, lo = 0, hi = 0; const segs = items.map(([n, v]) => { const a = run; run += v; lo = Math.min(lo, run); hi = Math.max(hi, run); return [n, a, run, v]; });
+    const pad = Math.max(500, (hi - lo) * .12), o = Fig(document.getElementById("cvPnl"), { h: 320, x0: 0, x1: items.length + 1, y0: lo - pad, y1: hi + pad, pad: { l: 64, r: 14, t: 14, b: 34 } });
+    axes(o, () => "", v => (v < 0 ? "−" : "") + "$" + (Math.abs(v) / 1000).toFixed(1) + "k", 1, 5);
+    const g = o.g; g.save(); g.font = "9.5px 'IBM Plex Mono', monospace"; g.textAlign = "center";
+    segs.forEach(([n, a, b, v], i) => { const x0 = o.X(i + .15), x1 = o.X(i + .85), y0 = o.Y(Math.max(a, b)), y1 = o.Y(Math.min(a, b));
+      g.fillStyle = n === "Unexplained" ? C("--ochre") : v >= 0 ? C("--moss") : C("--verm"); g.globalAlpha = .85; g.fillRect(x0, y0, x1 - x0, Math.max(1.5, y1 - y0));
+      g.globalAlpha = 1; g.fillStyle = C("--grey"); g.fillText(NARROW() ? n.slice(0, 3) : n, (x0 + x1) / 2, o.P.t + o.ph + 16); });
+    const xt0 = o.X(items.length + .15), xt1 = o.X(items.length + .85); g.fillStyle = C("--blue"); g.globalAlpha = .9;
+    g.fillRect(xt0, o.Y(Math.max(0, r.total)), xt1 - xt0, Math.max(1.5, Math.abs(o.Y(0) - o.Y(r.total)))); g.globalAlpha = 1; g.fillStyle = C("--ink");
+    g.fillText("Total", (xt0 + xt1) / 2, o.P.t + o.ph + 16); g.restore();
+    document.getElementById("kvPnl").innerHTML = kvHTML([
+      ["Stock hedge", r.B.shares.toLocaleString("en-US") + " shares"],
+      ["Mark-to-market change", m(r.actual)],
+      ["  explained by the greeks", m(r.explained)],
+      ["  unexplained", m(r.unexplained)],
+      ["Carry", m(r.carry)],
+      ["New trades, against your mark", m(r.trade)],
+      ["Fees", m(r.fees)],
+      ["Day's P&L", m(r.total)],
+      ["Unexplained ÷ |P&L|", (Math.abs(r.total) > 1 ? Math.abs(r.unexplained / r.total) * 100 : 0).toFixed(1) + "%"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();drawIdx();draw5();draw6();drawPnl();}
 LAB.boot(drawAll);
 
 </script>

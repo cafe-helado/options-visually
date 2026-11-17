@@ -691,3 +691,20 @@ across expiries. $100 stock, 4.5% rate, $0.60 a quarter, 1% borrow.
 Still open from the same deep-cut list: capital and margin as the sizing
 constraint, US listed market structure, dispersion weighting schemes,
 variance-swap mark-to-market.
+
+## 24 · Convertibles  ✅ live (converts.html)
+
+Convertible arbitrage as a volatility trade. $1,000 face, 5 years, 2% coupon,
+ten shares per bond, 4% risk-free; priced as bond floor + ten calls.
+
+1. A bond with a call — at $80, 35 vol, 300bp: $1,023, floor $786, parity
+   $800, 27.9% premium, delta 6.4 shares, $6.70 per vol point.
+2. The vol trade — bought at 28% for $976, short 6.09 shares. Carry −$6.90
+   (coupon 20, financing −48.80, short interest +24, borrow −2.40). Vol edge
+   ½ΓS²(σr² − σi²) = $16.20 at 38% realized; year +$9.30; break-even 32.6%.
+   At 6% borrow the break-even is 46.4%.
+3. The floor is not a floor — spread fixed, −30% makes $19.90; widening 10bp
+   per 1% fall loses $84.80; break-even 1.8bp per 1%.
+
+book.html also gained chapter 08, the day's P&L by cause (mark-to-market,
+greek attribution by bucket, carry, new-trade edge, fees, unexplained).

@@ -1,7 +1,7 @@
 # Options, visually — working notes
 
 An interactive series on options theory. Static HTML, no framework, no build step,
-no dependencies. Twenty-three pages live, plus three companions: the program, the workbook and the toolkit.
+no dependencies. Twenty-four pages live, plus three companions: the program, the workbook and the toolkit.
 
 ## Before you change anything
 
@@ -139,7 +139,7 @@ Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proo
 
 ## Offline, and installing to a phone
 
-The series is a PWA. `sw.js` precaches all twenty-three pages, the three companions and the engine on
+The series is a PWA. `sw.js` precaches all twenty-four pages, the three companions and the engine on
 install — about 2MB — and serves everything from that cache afterwards, so the
 whole thing works with no network. Three strategies, and the split is deliberate:
 
@@ -178,7 +178,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all twenty-three pages are live, plus the program, the workbook and the toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
+Nothing unbuilt — all twenty-four pages are live, plus the program, the workbook and the toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
@@ -275,6 +275,21 @@ sample does not support. Thirteen seeds passed when this was added.
 `check.js` finds slider groups with the regex `,"key");` — no space after
 the comma. Written as `, "key")` the group is invisible and every preset
 button for it is reported as unregistered.
+
+## Page 24, and the P&L chapter on page 11
+
+`converts.html` prices a convertible as `bondFloor(s)` plus `CB.cr` calls.
+That decomposition is for seeing three behaviors, not for marking a book,
+and the derivation box lists what it ignores. Prose there quotes dollars to
+the dime; round to what the figure's readout shows or the claim fails by
+four cents, as two did.
+
+`book.html` chapter 08 (`pnlDay`) computes a day's P&L twice: by repricing
+every leg, and greek by greek from the opening risk. verify.js reprices the
+legs by hand as a third route. Insert new chapters with the `renum` helper
+pattern (shift section ids, nav links and `cnum` from the highest down);
+preset keys like `"c5"` are slider-group names, not section ids, and do not
+move.
 
 ## The `line()` trap
 

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Convertibles — volatility bought through a bond</title>
+<meta name="description" content="A convertible bond taken apart into floor, parity and option; convertible arbitrage as a volatility trade with carry; and the credit risk the option model leaves out.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Convertibles — volatility bought through a bond">
+<meta property="og:description" content="A convertible bond taken apart into floor, parity and option; convertible arbitrage as a volatility trade with carry; and the credit risk the option model leaves out.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">No. 24 &middot; Convertibles</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>A bond with a call</span><i></i></a>
+  <a href="#c2"><span>The vol trade inside</span><i></i></a>
+  <a href="#c3"><span>The floor that moves</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation</div>
+    <h1>Volatility bought through a <em>bond</em></h1>
+    <p class="sub">A convertible is a long-dated call option that a company sold cheaply to raise money. Convertible arbitrage is the business of buying it, hedging the stock, and finding out what else came attached.</p>
+  </div>
+  <div class="scrollcue">Scroll &darr;</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">You need delta hedging from page 01 and the idea from page 21 that a hedged option earns realized volatility against the implied volatility it was bought at. This page applies both to an instrument that is not listed on any options exchange. Volatility arbitrage in its plain form is chapter 02; the other two chapters are what makes the convertible version different.</p>
+  <ol>
+    <li><b>Chapter 01 takes the instrument apart:</b> a bond floor, a conversion value, and the option between them.</li>
+    <li><b>Chapter 02 is the trade.</b> Long the bond, short the shares, and a yearly account of carry and volatility.</li>
+    <li><b>Chapter 03 is the risk the option model leaves out.</b> The bond inside is a loan to the company whose stock you are short.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation &mdash; every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>Face</td><td>What the bond repays at maturity. $1,000 here, in five years, with a 2% coupon.</td></tr>
+      <tr><td>Conversion ratio</td><td>Shares received per bond on conversion. Ten here, so the conversion price is $100 a share.</td></tr>
+      <tr><td>Parity</td><td>What the bond is worth converted today: ten times the stock price.</td></tr>
+      <tr><td>Bond floor</td><td>What the bond would be worth with the conversion right removed: its coupons and face, discounted at the risk-free rate plus the company's credit spread.</td></tr>
+      <tr><td>s</td><td>The credit spread, in basis points. 300bp means the company borrows at three points over governments.</td></tr>
+      <tr><td>&sigma;<sub>i</sub>, &sigma;<sub>r</sub></td><td>The volatility the bond's price implies, and the volatility the stock goes on to realize.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>A bond with a call stapled to it</h2>
+    <p class="dek">Below it sits a bond, above it sits the stock, and the price is a curve between the two.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A five-year bond with a 2% coupon that can be exchanged for ten shares. The stock is at $80, so converting today would get you $800 of stock for a bond that repays $1,000. Move the stock and watch the price travel between two straight lines.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The convertible against the stock price</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Convertible</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Bond floor</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Parity</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="320"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Stock, vol and credit</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>At low stock prices the curve lies down on the floor and behaves like a bond. At high prices it climbs onto parity and behaves like ten shares. In between it is neither, and that is where it is traded.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>At $80 the bond is worth $1,023. Its floor is $786 and its parity is $800, so a buyer pays 27.9% over conversion value. The difference between the price and the floor, $237, is the option: ten five-year calls struck at $100.</p>
+    <p>The same instrument reads three ways depending on where the stock is. At $40 it is $828, forty-two dollars over the floor, and almost all of its risk is the company's credit. At $200 it is $2,028, 1.4% over parity, and it is stock. Around the conversion price it is an option, with a delta of 6.4 shares a bond and $6.70 of value per volatility point.</p>
+  </div>
+
+  <div class="mline">convertible &asymp; bond floor + conversion ratio &times; call( S, conversion price )</div>
+  <p class="mread">Reads as: <b>the bond you would own without the conversion right, plus that many call options on the stock struck at the conversion price.</b> It is an approximation and the last chapter is about where it fails.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Widen the credit spread. <b>Predict</b> which part of the curve moves most: the left, the middle, or the right.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"s":0.09}' data-focus="cv1">Spread to 900bp</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"s":0.03,"vol":0.6}' data-focus="cv1">Volatility to 60%</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"S":80,"s":0.03,"vol":0.35}' data-focus="cv1">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A convertible trades at $1,020 with the stock far below the conversion price and a bond floor of $1,000. What are you mostly buying?</p>
+    <div class="opts">
+      <button>Stock, with a small yield</button>
+      <button>Volatility</button>
+      <button data-ok="1">The company's credit, with a small out-of-the-money option attached</button>
+      <button>Nothing identifiable; the three cannot be separated</button>
+    </div>
+    <div class="ans"><b>Credit.</b> Twenty dollars of option on a thousand of bond. Its delta and vega are small and its price will move with the spread, so hedging it with stock hedges almost none of the risk. Desks call these busted convertibles and trade them as bonds.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The trade is volatility arbitrage, with a bond to finance</h2>
+    <p class="dek">Buy the bond, short its delta in stock, and rehedge. What you earn is the gap between the volatility you paid and the volatility you get, plus or minus the carry.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">This bond is priced at a 28% volatility. You buy it for $976 and short 6.09 shares against it. The upper figure moves the stock with the hedge left alone. The lower figure runs a year of rehedging and asks what it is expected to make, as a function of the volatility the stock actually delivers.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The hedged bond when the stock moves</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Long one bond, short its delta</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="250"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Expected first-year P&amp;L per bond, against realized volatility</h3></div>
+        <canvas id="cv2b" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Price, path and plumbing</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The upper curve is the gamma: paid on a move either way, $47 on a 40% fall. The lower line is what that gamma is worth over a year. It crosses zero to the right of the volatility you paid, because the carry has to be earned back first.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Start with the cash, before the stock moves at all. The bond pays a $20 coupon. Financing $976 at 5% costs $48.80. The short sale raises $487, which earns about $24, and the shares cost about $2.40 to borrow. Net carry is <b>&minus;$6.90</b> a bond a year.</p>
+    <p>Now the volatility. If the stock realizes the 28% the bond was priced at, rehedging earns nothing in expectation and the year loses the carry. If it realizes 38%, the hedging earns about $16.20 and the year makes <b>$9.30</b>. The stock has to realize 32.6% for the position to break even.</p>
+  </div>
+
+  <div class="mline">vol edge per year &asymp; &frac12; &Gamma; S&sup2; ( &sigma;<sub>r</sub>&sup2; &minus; &sigma;<sub>i</sub>&sup2; )</div>
+  <p class="mread">Reads as: <b>half the position's gamma, times the stock price squared, times the gap between realized and implied variance.</b> This is the whole of volatility arbitrage in one line: you are long or short that gap, scaled by gamma, and everything else is cost.</p>
+
+  <div class="prose">
+    <p>That line is the same for a listed option, and the general trade is the one page 21 lists as delta-hedged volatility arbitrage: forecast realized volatility, buy what is priced below the forecast, sell what is priced above, hedge the delta, and size by vega. Three things it leaves out decide whether the forecast gets paid. The gap is earned through gamma, so it matters where the stock is when the movement comes, not only how much there is. Each rehedge crosses a spread. And the option can reprice against you long before the realized volatility shows up.</p>
+    <p>The reason to do it through a convertible is the price. Convertibles are issued by companies that want cheap financing, to buyers who mostly cannot short stock, so the option inside has often been priced below listed options on the same name. Here the bond would be worth $67 more if it were priced at 38% instead of 28%. That discount is the edge, and it is also a statement that nobody else wanted the package, which is the subject of the next chapter.</p>
+    <p>The carry line is the fragile part. Make the stock hard to borrow and the year turns negative even with volatility on your side.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>The borrow fee goes from 0.5% to 6%. <b>Predict</b> the realized volatility the trade now needs.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"borrow":0.06}' data-focus="cv2b">Borrow at 6%</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"borrow":0.005,"vr":0.28}' data-focus="cv2b">Realized equals implied</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"vi":0.28,"vr":0.38,"fund":0.05,"borrow":0.005}' data-focus="cv2b">Reset</button>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>At a 6% fee the carry is about &minus;$34, the expected year is about &minus;$17 even at 38% realized, and the break-even climbs to 46.4%. A convertible that looks ten points cheap against listed volatility can be fairly priced once the borrow is counted, and names with large convertible issues outstanding are often exactly the ones that are expensive to short, because every arbitrageur holding the bond is short the stock.</p>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You buy a convertible at 28% implied, hedge it, and the stock realizes 28% all year. What did you make?</p>
+    <div class="opts">
+      <button>Nothing; you bought volatility at fair value</button>
+      <button>The coupon</button>
+      <button data-ok="1">The carry, which here is a small loss: coupon and short interest, less financing and borrow</button>
+      <button>The option's theta</button>
+    </div>
+    <div class="ans"><b>The carry.</b> With realized equal to implied the gamma pays for the decay and no more. What is left is the plumbing, &minus;$6.90 here. A position can have positive carry, when the coupon is high or funding is cheap, and then fair volatility is enough; the point is that the two are separate lines and both have to be written down.</div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section class="chapter" id="c3">
+  <div class="chead">
+    <div class="cnum">03</div>
+    <h2>The floor is not a floor</h2>
+    <p class="dek">The bond inside the convertible is a loan to the company. When the stock falls far enough, the loan is what you are worried about.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Chapter 02's upper figure showed a hedged convertible making money when the stock falls. It assumed the credit spread stayed at 300 basis points while the equity lost a third of its value. The slider below lets the spread widen as the stock falls, by a fixed number of basis points for each 1%.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Hedged P&amp;L per bond, with and without the credit moving</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Spread held at 300bp</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Spread widens as the stock falls</span>
+          </span>
+        </div>
+        <canvas id="cv3" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The link</h4>
+        <div id="ctl3"></div>
+        <div class="kv" style="margin-top:20px" id="kv3"></div>
+      </div>
+    </div>
+    <figcaption>The right half is unchanged. The left half folds down: the position that was long gamma on paper is short the stock's bad outcomes.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>With the spread fixed, a 30% fall makes $19.90 a bond. Let it widen ten basis points for each 1% the stock loses and the spread is 600bp after the fall, the floor has dropped from $786 to $681, and the hedged position has lost <b>$84.80</b>. The break-even is 1.8 basis points of widening per 1% of stock, which is very little.</p>
+    <p>The short stock does hedge some of this, since a falling share price pays the short. It is the wrong size for it. The delta was set by an option model that knows nothing about default, and it shrinks as the stock falls, at the moment the credit exposure is growing. Desks address that by hedging more stock than the model delta on weak credits, or by buying credit protection or puts, and each of those costs carry that chapter 02 did not count.</p>
+    <p>Two more things belong here that no slider captures. The link between spread and stock is an assumption and it is not linear: it is quiet for long periods and violent in a few weeks. And the holders are concentrated. When many funds own the same bonds on leverage and one is forced to sell, the bonds cheapen, the others mark down, and the selling spreads, which is what happened across the convertible market in 2008. Cheapness that widens is a loss before it is an opportunity.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p><b>Predict</b> whether higher volatility helps or hurts the left side once the credit link is on.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c3" data-patch='{"k":10,"vol":0.6}' data-focus="cv3">Volatility at 60%</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"k":0,"vol":0.35}' data-focus="cv3">Credit link off</button>
+      <button class="act ghost" data-preset="c3" data-patch='{"k":10,"vol":0.35}' data-focus="cv3">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A hedged convertible book is long gamma on the risk report. The equity market falls 25% with credit spreads widening sharply. The likeliest result is:</p>
+    <div class="opts">
+      <button>A gain, since long gamma is paid on large moves</button>
+      <button>Roughly flat; the short stock offsets the bond</button>
+      <button data-ok="1">A loss: the bond floors fall with credit, the model deltas were too small for that, and the bonds may cheapen further as other holders sell</button>
+      <button>A loss only if the stocks are hard to borrow</button>
+    </div>
+    <div class="ans"><b>A loss.</b> The gamma on the report is the option's. The position also holds a corporate bond for each option, and in that scenario the bond is the larger risk. This is the general lesson of the page: an arbitrage is defined by what it hedges, and judged by what it does not.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation &mdash; what the bond-plus-option model assumes</summary>
+    <div class="body">
+      <p>The page prices the convertible as two separate things: a stream of coupons and principal discounted at the risk-free rate plus a spread, and a number of call options struck at the conversion price and discounted at the risk-free rate alone.</p>
+      <div class="mline">V = &Sigma; coupon &times; e<sup>&minus;(r+s)t</sup> + face &times; e<sup>&minus;(r+s)T</sup> + CR &times; C( S, face / CR, T, &sigma;, r )</div>
+      <p class="mread">Reads as: <b>the credit-risky bond, plus conversion-ratio calls with a strike equal to the face value per share.</b></p>
+      <p><b>Where it breaks.</b> The strike is not fixed: converting means giving up the bond, whose value moves with rates and credit, so the option is really an exchange of one risky asset for another. Most convertibles can be called by the issuer once the stock is well above the conversion price, which cuts the option's life short and its value with it. Many carry investor puts, dividend protection and takeover clauses that change the payoff. Conversion creates new shares, which dilutes the stock the option is written on. And if the company defaults, the option is worth nothing at the same moment the bond is impaired, which the separate discount rates ignore. Production models put stock and default on one lattice; the decomposition here is for seeing the three behaviors, not for marking a book.</p>
+    </div>
+  </details>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Assumptions: a non-callable five-year bond, no dividends, a flat risk-free rate, constant volatility, a credit spread that is either fixed or a straight-line function of the stock's fall, and a first-year volatility edge computed from today's gamma. In the real world the failures are called issuer calls, credit-equity correlation, borrow recalls and crowded exits. Related: <a href="playbook.html">the strategies people run</a>, <a href="carry.html">borrow read off the options</a>, <a href="dynamics.html">what a hedge does when vol moves</a>.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* ── the model ────────────────────────────────────────────────────────
+   A convertible is priced here as a straight bond plus CR call options
+   struck at the conversion price. The bond is discounted at the risk-free
+   rate plus a credit spread; the option at the risk-free rate. It ignores
+   issuer calls, puts, dilution and the credit risk of the option itself,
+   and the prose says so. */
+const CB = { face: 1000, cr: 10, T: 5, cpn: 0.02, r: 0.04 };
+function bondFloor(s, T){ T = T === undefined ? CB.T : T; const y = CB.r + s; let v = CB.face * Math.exp(-y * T);
+  for (let t = T; t > 1e-9; t -= 1) v += CB.face * CB.cpn * Math.exp(-y * t); return v; }
+function cbOpt(S, vol, T, q){ T = T === undefined ? CB.T : T; return bs(S, CB.face / CB.cr, T, vol, CB.r, q || 0, true); }
+function cbPrice(S, vol, s, T, q){ return bondFloor(s, T) + CB.cr * cbOpt(S, vol, T, q).price; }
+function cbDelta(S, vol, T, q){ return CB.cr * cbOpt(S, vol, T, q).delta; }           /* shares per bond */
+const parity = S => CB.cr * S;
+function cbImplied(px, S, s){ const opt = (px - bondFloor(s)) / CB.cr; if (opt <= Math.max(0, S - CB.face / CB.cr * Math.exp(-CB.r * CB.T))) return NaN;
+  let lo = 0.01, hi = 2; for (let i = 0; i < 80; i++){ const m = (lo + hi) / 2; if (cbOpt(S, m).price < opt) lo = m; else hi = m; } return (lo + hi) / 2; }
+/* long one bond, short its delta in shares, then the stock moves by m (a fraction) and the spread by ds */
+function hedgedCb(S, vol, s, m, ds){ const d = cbDelta(S, vol), S1 = S * (1 + m); return cbPrice(S1, vol, s + (ds || 0)) - cbPrice(S, vol, s) - d * (S1 - S); }
+/* spread that widens as the stock falls: k basis points per 1% fall, nothing on the way up */
+const linkSpread = (m, k) => m < 0 ? -m * 100 * k / 1e4 : 0;
+/* one year of carry on the hedged position, per bond */
+function cbCarry(S, vol, s, p){ const px = cbPrice(S, vol, s), sh = cbDelta(S, vol) * S;
+  return { coupon: CB.face * CB.cpn, fund: -px * p.fund, rebate: sh * p.fund, borrow: -sh * p.borrow, px, sh,
+    net: CB.face * CB.cpn - px * p.fund + sh * p.fund - sh * p.borrow }; }
+/* the vol trade: bought at implied vi, the stock then realizes vr. One year of hedging, expected. */
+function volEdge(S, vi, vr){ const g = cbOpt(S, vi); return 0.5 * CB.cr * g.gamma * S * S * (vr * vr - vi * vi); }
+function breakevenVol(S, vi, carry){ const k = 0.5 * CB.cr * cbOpt(S, vi).gamma * S * S, x = vi * vi - carry / k; return x > 0 ? Math.sqrt(x) : 0; }
+function breakevenLink(S, vol, s, m){ let lo = 0, hi = 80; for (let i = 0; i < 50; i++){ const k = (lo + hi) / 2; if (hedgedCb(S, vol, s, m, linkSpread(m, k)) > 0) lo = k; else hi = k; } return (lo + hi) / 2; }
+
+function curve(o, f, col, w, dash, n){ const xs = [], ys = []; n = n || 140;
+  for (let i = 0; i <= n; i++){ const x = o.x0 + (o.x1 - o.x0) * i / n; xs.push(x); ys.push(f(x)); } line(o, xs, ys, col, w, dash); }
+function dotAt(o, x, y, col){ const g = o.g; g.save(); g.fillStyle = col; g.beginPath(); g.arc(o.X(x), o.Y(y), 4.5, 0, 6.2832); g.fill(); g.restore(); }
+const d0 = v => (v < -.5 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const d1 = v => (v < -.05 ? "−$" : v > .05 ? "+$" : "$") + Math.abs(v).toFixed(1);
+const pc1 = v => (v * 100).toFixed(1) + "%";
+
+/* ══════════ HERO ══════════ */
+(function(){
+  const cv = document.getElementById("heroCv"); let w, h, g, raf, t0 = 0;
+  function size(){ const dpr = window.devicePixelRatio || 1; w = cv.clientWidth; h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr;
+    g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function paint(ph){
+    g.fillStyle = C("--chalk"); g.fillRect(0, 0, w, h);
+    const X = S => w * (.40 + .57 * (S - 20) / 180), Y = v => h * (.92 - (v - 500) / 1700 * .8), s = .03 + .03 * (.5 + .5 * Math.sin(ph));
+    const ln = (f, col, a, lw, dash) => { g.strokeStyle = col; g.globalAlpha = a; g.lineWidth = lw; g.setLineDash(dash || []); g.beginPath();
+      for (let j = 0; j <= 90; j++){ const S = 20 + 180 * j / 90; j ? g.lineTo(X(S), Y(f(S))) : g.moveTo(X(S), Y(f(S))); } g.stroke(); g.setLineDash([]); };
+    ln(S => parity(S), C("--grey"), .35, 1.3, [4, 5]); ln(() => bondFloor(s), C("--ochre"), .5, 1.3, [4, 5]); ln(S => cbPrice(S, .35, s), C("--blue"), .6, 2);
+    g.globalAlpha = 1;
+  }
+  function frame(ts){ if (!t0) t0 = ts; paint((ts - t0) / 2600); raf = requestAnimationFrame(frame); }
+  function start(){ size(); paint(1); if (!RM) raf = requestAnimationFrame(frame); }
+  start();
+  window.addEventListener("resize", () => { cancelAnimationFrame(raf); t0 = 0; start(); });
+})();
+
+/* ══════════ 01 — a bond with a call stapled on ══════════ */
+const s1 = { S: 80, vol: 0.35, s: 0.03 };
+(function(){
+  sliders(document.getElementById("ctl1"), [
+    { id: "S1", k: "S", lbl: "S", name: "Stock price", min: 20, max: 220, step: 1, fmt: v => "$" + v.toFixed(0) },
+    { id: "v1", k: "vol", lbl: "σ", name: "Volatility", min: 0.1, max: 0.8, step: 0.01, fmt: pc1 },
+    { id: "c1", k: "s", lbl: "s", name: "Credit spread", min: 0, max: 0.15, step: 0.0025, fmt: v => (v * 1e4).toFixed(0) + "bp" }
+  ], s1, () => draw(),"c1");
+  window.draw1 = draw;
+  function draw(){
+    const p = s1, o = Fig(document.getElementById("cv1"), { h: 320, x0: 20, x1: 220, y0: 400, y1: 2300, pad: { l: 58, r: 14, t: 14 } });
+    axes(o, v => "$" + v.toFixed(0), v => "$" + v.toFixed(0), 6, 5);
+    clip(o, () => { curve(o, S => parity(S), C("--grey"), 1.8, [5, 4]); curve(o, () => bondFloor(p.s), C("--ochre"), 1.8, [5, 4]); curve(o, S => cbPrice(S, p.vol, p.s), C("--blue"), 2.6); dotAt(o, p.S, cbPrice(p.S, p.vol, p.s), C("--verm")); });
+    vline(o, CB.face / CB.cr, C("--grey"), "conversion price", [2, 4]);
+    const px = cbPrice(p.S, p.vol, p.s), fl = bondFloor(p.s);
+    document.getElementById("kv1").innerHTML = kvHTML([
+      ["Convertible", d0(px)],
+      ["Bond floor", d0(fl)],
+      ["Parity (10 shares)", d0(parity(p.S))],
+      ["Premium over parity", pc1(px / parity(p.S) - 1)],
+      ["Premium over the floor", d0(px - fl)],
+      ["Delta, shares per bond", cbDelta(p.S, p.vol).toFixed(2)],
+      ["Per volatility point", d1(CB.cr * cbOpt(p.S, p.vol).vega / 100)],
+      ["Per 100bp of spread", d1(bondFloor(p.s + 0.01) - fl)]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — the hedge, and the vol trade inside it ══════════ */
+const s2 = { vi: 0.28, vr: 0.38, fund: 0.05, borrow: 0.005 };
+const S2 = 80, SP2 = 0.03;
+function year2(p, vr){ const c = cbCarry(S2, p.vi, SP2, p), e = volEdge(S2, p.vi, vr === undefined ? p.vr : vr); return { c, e, net: c.net + e, be: breakevenVol(S2, p.vi, c.net) }; }
+(function(){
+  sliders(document.getElementById("ctl2"), [
+    { id: "vi2", k: "vi", lbl: "σᵢ", name: "Vol the bond is priced at", min: 0.15, max: 0.6, step: 0.01, fmt: pc1 },
+    { id: "vr2", k: "vr", lbl: "σᵣ", name: "Vol the stock realizes", min: 0.1, max: 0.7, step: 0.01, fmt: pc1 },
+    { id: "f2", k: "fund", lbl: "f", name: "Your funding rate", min: 0, max: 0.10, step: 0.0025, fmt: v => (v * 100).toFixed(2) + "%" },
+    { id: "b2", k: "borrow", lbl: "b", name: "Stock borrow fee", min: 0, max: 0.15, step: 0.0025, fmt: v => (v * 100).toFixed(2) + "%" }
+  ], s2, () => draw(),"c2");
+  window.draw2 = draw;
+  function draw(){
+    const p = s2, y = year2(p);
+    const o = Fig(document.getElementById("cv2"), { h: 250, x0: -40, x1: 40, y0: -8, y1: Math.max(40, hedgedCb(S2, p.vi, SP2, -.4, 0) * 1.15), pad: { l: 58, r: 14, t: 14 } });
+    axes(o, v => (v > 0 ? "+" : "") + v.toFixed(0) + "%", v => d0(v), 8, 4);
+    clip(o, () => curve(o, m => hedgedCb(S2, p.vi, SP2, m / 100, 0), C("--blue"), 2.6));
+    vline(o, 0, C("--ochre"), "hedged here", [2, 4]);
+    const f = v => year2(p, v / 100).net, a = Math.max(Math.abs(f(10)), Math.abs(f(70)), 20) * 1.1;
+    const o2 = Fig(document.getElementById("cv2b"), { h: 230, x0: 10, x1: 70, y0: -a, y1: a, pad: { l: 58, r: 14, t: 14 } });
+    axes(o2, v => v.toFixed(0) + "%", v => d0(v), 6, 4);
+    clip(o2, () => { curve(o2, f, C("--blue"), 2.6); dotAt(o2, p.vr * 100, y.net, C("--verm")); });
+    vline(o2, p.vi * 100, C("--grey"), "priced at", [2, 4]); if (y.be > 0.1 && y.be < 0.7) vline(o2, y.be * 100, C("--moss"), Math.abs(y.be - p.vi) < .035 ? "" : "break-even", [2, 4]);
+    document.getElementById("kv2").innerHTML = kvHTML([
+      ["Bond price / shares short", d0(y.c.px) + " / " + cbDelta(S2, p.vi).toFixed(2)],
+      ["Coupon", d1(y.c.coupon)],
+      ["Financing the bond", d1(y.c.fund)],
+      ["Interest on the short proceeds", d1(y.c.rebate)],
+      ["Borrow fee", d1(y.c.borrow)],
+      ["Cash carry, per bond per year", d1(y.c.net)],
+      ["Vol edge: realized against implied", d1(y.e)],
+      ["Expected year", d1(y.net)],
+      ["Break-even realized vol", y.be > 0 ? pc1(y.be) : "none"],
+      ["Cheapness if it realizes σᵣ to maturity", d1(cbPrice(S2, p.vr, SP2) - y.c.px)]
+    ]);
+  }
+})();
+
+/* ══════════ 03 — the floor is not a floor ══════════ */
+const s3 = { k: 10, vol: 0.35 };
+const S3 = 80, SP3 = 0.03;
+(function(){
+  sliders(document.getElementById("ctl3"), [
+    { id: "k3", k: "k", lbl: "k", name: "Spread widening per 1% fall, bp", min: 0, max: 30, step: 0.5, fmt: v => v.toFixed(1) },
+    { id: "v3", k: "vol", lbl: "σ", name: "Volatility", min: 0.15, max: 0.7, step: 0.01, fmt: pc1 }
+  ], s3, () => draw(),"c3");
+  window.draw3 = draw;
+  function draw(){
+    const p = s3, f = m => hedgedCb(S3, p.vol, SP3, m / 100, linkSpread(m / 100, p.k)), lo = Math.min(-20, f(-40) * 1.1);
+    const o = Fig(document.getElementById("cv3"), { h: 310, x0: -40, x1: 40, y0: lo, y1: Math.max(45, -lo * .25), pad: { l: 58, r: 14, t: 14 } });
+    axes(o, v => (v > 0 ? "+" : "") + v.toFixed(0) + "%", v => d0(v), 8, 5);
+    clip(o, () => { curve(o, m => hedgedCb(S3, p.vol, SP3, m / 100, 0), C("--grey"), 2.2); curve(o, f, C("--blue"), 2.6); });
+    vline(o, 0, C("--ochre"), "hedged here", [2, 4]);
+    const sp = SP3 + linkSpread(-.3, p.k);
+    document.getElementById("kv3").innerHTML = kvHTML([
+      ["Spread now", (SP3 * 1e4).toFixed(0) + "bp"],
+      ["Spread after a 30% fall", (sp * 1e4).toFixed(0) + "bp"],
+      ["Bond floor now / after", d0(bondFloor(SP3)) + " / " + d0(bondFloor(sp))],
+      ["Hedged P&L, stock −30%, spread fixed", d1(hedgedCb(S3, p.vol, SP3, -.3, 0))],
+      ["Hedged P&L, stock −30%, with widening", d1(f(-30))],
+      ["Hedged P&L, stock +30%", d1(f(30))],
+      ["Widening that erases the gamma at −30%", breakevenLink(S3, p.vol, SP3, -.3).toFixed(1) + "bp per 1%"]
+    ]);
+  }
+})();
+
+function drawAll(){ window.draw1(); window.draw2(); window.draw3(); }
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>
