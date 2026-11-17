@@ -986,8 +986,14 @@ PAGES["tools"] = () => {
   eq("a quarter carries half the year's sigma", mt[3].sd / mt[4].sd, 0.5, 1e-12);
   eq("straddle is 0.7979 of sigma", mt[2].st / mt[2].sd, 0.79788, 1e-5);
   /* the cone must recover a known vol from a constant-vol series */
+  /* Seeded, and ten times longer than it was: drawn from Math.random over ten
+     years this claim failed about one run in four, on a tolerance the series
+     was too short to meet. */
+  let sd = 20261117; const u = () => { sd = (sd + 0x6D2B79F5) | 0; let t = Math.imul(sd ^ (sd >>> 15), 1 | sd);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const z = () => Math.sqrt(-2 * Math.log(u() || 1e-12)) * Math.cos(2 * Math.PI * u());
   let p = 100; const px = [p];
-  for (let i = 0; i < 2520; i++) { p *= Math.exp(-0.5 * 0.09 / 252 + 0.30 / Math.sqrt(252) * M.gauss()); px.push(p); }
+  for (let i = 0; i < 25200; i++) { p *= Math.exp(-0.5 * 0.09 / 252 + 0.30 / Math.sqrt(252) * z()); px.push(p); }
   const c = M.coneOf(px, [21, 252]);
   eq("cone median at 21d recovers 30% vol", c[0].med, 0.30, 0.015);
   eq("cone median at 252d recovers 30% vol", c[1].med, 0.30, 0.015);
