@@ -279,7 +279,13 @@ const WB=[
      {q:"Coupon $20; bond bought for 976 and financed at 5%; short $487 of stock earning 5% and costing 0.5% to borrow. Net carry per year?",f:()=>20-976*0.05+487*0.05-487*0.005,u:"$",how:"Four lines: coupon, financing, short interest, borrow."},
      {q:"Half the position's gamma times S² is $245 per unit of variance. Bought at 28% implied, the stock realizes 38%. First-year vol edge?",f:()=>245*(0.38*0.38-0.28*0.28),u:"$",how:"½ΓS² × (σr² − σi²)."},
      {q:"Same position with −$6.90 of carry: what realized vol breaks even?",f:()=>Math.sqrt(0.28*0.28+6.9/245),u:"%",d:1,how:"Solve ½ΓS²(σ² − σi²) = −carry."},
-     {q:"Why is the option model's delta too small a hedge on a weak credit?",ans:"It hedges the option and ignores the bond. When the stock falls the credit spread widens and the bond floor drops, which the model delta does not cover, and that delta shrinks as the stock falls."}]}
+     {q:"Why is the option model's delta too small a hedge on a weak credit?",ans:"It hedges the option and ignores the bond. When the stock falls the credit spread widens and the bond floor drops, which the model delta does not cover, and that delta shrinks as the stock falls."}]},
+ {n:"25",href:"capital.html",t:"Capital",
+  r:[[NAT,"risk considerations, and how much of a spread to do"],[SIN,"sizing, and why leverage decides who survives"],[TAL,"the difference between a risk measure and a margin rule"]],
+  p:[{q:"A short put brings in $132 and the strategy-based requirement is $1,632. Return on capital if the premium is kept?",f:()=>132/1632,u:"%",d:1,how:"P&L divided by requirement."},
+     {q:"$100,000 of capital, a risk-based requirement of $872 a contract, and a rule to use half the capital. How many contracts?",f:()=>Math.floor(0.5*100000/872),u:"",d:0,how:"Round down."},
+     {q:"Equity is $86,895 and the requirement has risen to $59,792. Excess?",f:()=>86895-59792,u:"$",d:0,how:"Equity minus requirement."},
+     {q:"Why does excess fall faster than equity in a selloff?",ans:"The loss reduces equity while the same move, and the rise in implied volatility that comes with it, increase the requirement. Both sides of the subtraction move against you."}]}
 ];
 
 /* ══════════════ render ══════════════ */

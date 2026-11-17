@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>Capital — the constraint that sizes a book</title>
+<meta name="description" content="The same short put under three margin rules, return on capital, and why a position sized to today&#x27;s requirement meets a margin call on a move it should have survived.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Capital — the constraint that sizes a book">
+<meta property="og:description" content="The same short put under three margin rules, return on capital, and why a position sized to today&#x27;s requirement meets a margin call on a move it should have survived.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">No. 25 &middot; Capital</span>
+  </div>
+</header>
+
+<div class="progress" id="prog"></div>
+<nav class="chapnav" id="chapnav" aria-label="Chapters">
+  <a href="#c1"><span>Three capital numbers</span><i></i></a>
+  <a href="#c2"><span>The requirement moves</span><i></i></a>
+</nav>
+
+<div class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="heroInner">
+    <div class="eyebrow">An interactive derivation</div>
+    <h1>Capital is the <em>constraint</em></h1>
+    <p class="sub">Edge says whether a trade is worth doing. Margin says how much of it you are allowed to do, and that number changes on the day you least want it to.</p>
+  </div>
+  <div class="scrollcue">Scroll &darr;</div>
+</div>
+
+<main>
+
+<div class="orient">
+  <h2>Start here</h2>
+  <p class="lede">Every page so far has measured a trade by its P&amp;L. A desk measures it by P&amp;L per dollar of capital tied up, and the capital is set by a margin rule, not by the premium. This page uses two simplified rules to show how the same trade earns three different returns, and why a position is sized by what its margin becomes in a bad week.</p>
+  <ol>
+    <li><b>Chapter 01</b> margins one short put three ways and computes the return on each.</li>
+    <li><b>Chapter 02</b> sizes a book against today's requirement, then moves the market.</li>
+    <li><b>The two rules here are skeletons.</b> Real requirements add minimums, concentration charges and whatever your clearing firm decides. Ask for the actual schedule before sizing anything.</li>
+  </ol>
+  <details class="drop">
+    <summary>Notation &mdash; every symbol used on this page</summary>
+    <table class="ntab">
+      <tr><td>Requirement</td><td>The equity a broker or clearing firm demands against a position. Also called margin.</td></tr>
+      <tr><td>Strategy-based</td><td>A formula per position type. For a short put: the premium, plus the larger of 20% of the stock price less the out-of-the-money amount, and 10% of the strike.</td></tr>
+      <tr><td>Risk-based</td><td>The worst loss when the stock is moved across a range, here 15% either way in ten steps, and the whole position is repriced. Portfolio margin works this way.</td></tr>
+      <tr><td>Excess</td><td>Equity minus requirement. When it reaches zero you get a margin call.</td></tr>
+      <tr><td>u</td><td>Utilization: the share of your capital that today's requirement uses.</td></tr>
+    </table>
+  </details>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section class="chapter" id="c1">
+  <div class="chead">
+    <div class="cnum">01</div>
+    <h2>One trade, three capital numbers</h2>
+    <p class="dek">The premium is what you collect. The requirement is what you must post. The return is one divided by the other, and the rule sets the denominator.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Sell one 30-day 95 put on a $100 stock at 30 vol. The blue line is what the position makes or loses if the stock moves today; the green line is the same put with a 90 put bought underneath it. The red dots mark the worst point in a 15% range, which is what a risk-based rule charges.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>P&amp;L across the range a risk-based rule scans</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Short put</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Short put spread</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Worst point: the requirement</span>
+          </span>
+        </div>
+        <canvas id="cv1" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The trade</h4>
+        <div id="ctl1"></div>
+        <div class="kv" style="margin-top:20px" id="kv1"></div>
+      </div>
+    </div>
+    <figcaption>The put you buy underneath costs a third of the premium and cuts the capital by more than half. That exchange is the reason spreads exist.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>The put brings in $132. Under the strategy-based formula it ties up <b>$1,632</b>, so keeping the whole premium is an 8.1% return on capital for the month. Under the risk-based rule the worst loss in the scan is <b>$872</b>, and the same $132 is 15.2%. Nothing about the trade changed; the account type did.</p>
+    <p>Buy the 90 put and the credit falls to $93, but the most the position can lose is <b>$407</b>, and the return on that is 22.7%. The spread earns less money and more per dollar of capital, which is the comparison that matters when capital is what you run out of.</p>
+    <p>A hedged position is the extreme case. A conversion's P&amp;L is flat across the whole scan, so a risk-based rule asks for almost nothing and the binding number becomes a minimum or a haircut on the stock. That is why financing trades are run in size on small spreads, and why their return is quoted on the balance sheet they use and not on premium.</p>
+  </div>
+
+  <div class="mline">return on capital = P&amp;L &divide; requirement &nbsp;&nbsp;&nbsp; risk-based requirement = &minus; min over the scan of ( repriced value &minus; today's value )</div>
+  <p class="mread">Reads as: <b>divide what the trade makes by what it ties up; and under a risk-based rule, what it ties up is the largest loss found when the stock is walked across the range.</b></p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Sell the put at the money instead. <b>Predict</b> which grows faster, the premium or the risk-based requirement.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c1" data-patch='{"K":100}' data-focus="cv1">At the money</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"K":95,"vol":0.6}' data-focus="cv1">Double the vol</button>
+      <button class="act ghost" data-preset="c1" data-patch='{"K":95,"days":30,"vol":0.3,"w":5}' data-focus="cv1">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Two trades each expect to make $1,000. One ties up $5,000 for a month, the other $20,000 for a month. Capital is your limit. Which do you prefer, all else equal?</p>
+    <div class="opts">
+      <button>Neither; the expected P&amp;L is the same</button>
+      <button data-ok="1">The first: you can do four of them with the capital the second uses</button>
+      <button>The second; a larger requirement means a safer trade</button>
+      <button>The second; it has more premium</button>
+    </div>
+    <div class="ans"><b>The first.</b> 20% on capital against 5%. The caution is in "all else equal": a small requirement often means a rule that has not seen the risk, and the next chapter is about what happens when it does.</div>
+  </div>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section class="chapter" id="c2">
+  <div class="chead">
+    <div class="cnum">02</div>
+    <h2>The requirement moves against you</h2>
+    <p class="dek">A position sized to today's margin is sized to a number that rises exactly as your equity falls.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">An account with $100,000 sells the same 95 puts until the risk-based requirement uses half its capital. That is 57 contracts and $7,538 of premium. Now the stock falls, and implied vol rises one point for each 1% it loses. The blue line is the account's equity. The red line is what the rule demands.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Equity and requirement as the stock moves</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Account equity</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Requirement</span>
+          </span>
+        </div>
+        <canvas id="cv2" height="310"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Sizing and the market</h4>
+        <div id="ctl2"></div>
+        <div class="kv" style="margin-top:20px" id="kv2"></div>
+      </div>
+    </div>
+    <figcaption>The two lines close from both sides. Where they meet, the position is reduced for you, at whatever the market is paying that day.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>After a 5% fall the position has lost $13,105, so equity is $86,895. The requirement has not stayed at $49,685; the puts are now at the money and more volatile, and the rule wants <b>$59,792</b>. Excess has gone from $50,315 to $27,103 on a loss of thirteen thousand. The lines meet at a fall of <b>10.7%</b>.</p>
+    <p>Utilization is the whole lever. At 80% the account holds 91 contracts and the call comes at a fall of 2.8%, a move this stock makes about one month in three. At 30% it holds 34 and survives to 24.8%. The premium collected rises in a straight line with size; the distance to a forced exit collapses.</p>
+    <p>So the sizing question is not "what does margin allow today" but "what will the requirement be after the move I must be able to survive, and will I still have excess". Work it backwards: pick the stress, reprice the book and the margin there, and size so equity still clears it. Page 21's put-writers who are still in business are the ones who did this, and the rule that leverage is what turns a drawdown into ruin is this figure stated in words.</p>
+    <p>Two things make the real case worse than the figure. Requirements are raised by decision as well as by formula: clearing firms lift house margins in stressed markets, on the names under stress. And everyone with the same position meets the same call on the same day, which is why forced selling shows up as a gap and not as a slide.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Use 80% of capital. <b>Predict</b> how far the stock can fall before the call.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="c2" data-patch='{"u":0.8}' data-focus="cv2">Use 80%</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"u":0.3}' data-focus="cv2">Use 30%</button>
+      <button class="act ghost" data-preset="c2" data-patch='{"u":0.5,"k":1,"days":30}' data-focus="cv2">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A short-option book uses 60% of its capital as margin and has just lost 8% of its equity in a selloff. What has most likely happened to its excess?</p>
+    <div class="opts">
+      <button>It fell by 8% of equity</button>
+      <button data-ok="1">It fell by much more, because the requirement rose while equity fell</button>
+      <button>It rose, because the options are worth more</button>
+      <button>It is unchanged; margin is set when the trade is put on</button>
+    </div>
+    <div class="ans"><b>Much more.</b> Excess is equity minus requirement, and a selloff moves both the wrong way: the loss comes out of equity, and the same move and higher vol put more into the requirement. In the figure a 13% loss of equity removed 46% of the excess.</div>
+  </div>
+
+  <details class="derive">
+    <summary>Derivation &mdash; what the two rules are, and what they leave out</summary>
+    <div class="body">
+      <p>The strategy-based figure is the standard formula for an uncovered short equity put, applied per contract.</p>
+      <div class="mline">requirement = premium + max( 20% &times; S &minus; out-of-the-money amount , 10% &times; K )</div>
+      <p class="mread">Reads as: <b>the premium you received, plus a fifth of the stock price reduced by how far out of the money the put is, with a floor of a tenth of the strike.</b></p>
+      <p>The risk-based figure reprices the position at ten stock prices from 15% down to 15% up, at unchanged volatility, and takes the largest loss.</p>
+      <p><b>Where it breaks.</b> Real portfolio margin also offsets correlated underlyings, applies a minimum per contract, adds charges for concentrated or illiquid positions, and treats indexes with a narrower range than single stocks. It does not shock volatility in the standard scan, which is why chapter 02 has to add the vol move by hand. Firms that clear their own trades are bound by net-capital haircuts instead, a third calculation with its own schedule. None of these is a model of what you can lose; each is a rule about what you must post.</p>
+    </div>
+  </details>
+</section>
+
+</main>
+
+<footer>
+  <p class="n">Assumptions: one stock, European puts, two simplified margin rules, implied vol that rises in a straight line as the stock falls, and no time passing during the move. In the real world the failures are called house margin, concentration add-ons, intraday calls and liquidation at the worst price. Related: <a href="playbook.html">the strategies people run</a>, <a href="book.html">running a book</a>, <a href="tools.html">Kelly sizing</a>.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* ── the model ────────────────────────────────────────────────────────
+   Two simplified margin regimes. Strategy-based: the published formula for
+   a short equity put (premium, plus the larger of 20% of the stock less the
+   out-of-the-money amount and 10% of the strike). Risk-based: the worst
+   loss when the stock is moved across a +/-15% range in ten steps and the
+   position repriced. Real rules add concentration charges, minimums and
+   house add-ons; these two are the skeleton. */
+const CAP = { S: 100, r: 0.045, mult: 100 };
+const legPx = (S, T, v, l) => bs(S, l.K, T, v, CAP.r, 0, l.call).price;
+const posVal = (S, T, v, legs) => CAP.mult * legs.reduce((a, l) => a + l.n * legPx(S, T, v, l), 0);
+function stratMargin(S, T, v, K){ const prem = legPx(S, T, v, { K, call: false }); return CAP.mult * (prem + Math.max(0.20 * S - Math.max(0, S - K), 0.10 * K)); }
+function riskMargin(S, T, v, legs, range){ range = range || 0.15; const v0 = posVal(S, T, v, legs); let w = 0;
+  for (let i = -5; i <= 5; i++){ const pl = posVal(S * (1 + range * i / 5), T, v, legs) - v0; if (pl < w) w = pl; } return -w; }
+function maxLoss(Ks, Kl, credit){ return CAP.mult * (Ks - Kl - credit); }
+/* a book of short puts sized to use a fraction u of capital, then the stock moves m and vol rises k points per 1% fall */
+function stress(p, m){ const T = p.days / 365, legs = [{ n: -1, K: p.K, call: false }], m0 = riskMargin(CAP.S, T, p.vol, legs), N = Math.floor(p.u * p.cap / m0);
+  const S1 = CAP.S * (1 + m), v1 = p.vol + Math.max(0, -m * 100) * p.k / 100, pnl = N * (posVal(S1, T, v1, legs) - posVal(CAP.S, T, p.vol, legs));
+  const req = N * riskMargin(S1, T, v1, legs); return { N, m0, pnl, equity: p.cap + pnl, req, excess: p.cap + pnl - req, v1 }; }
+function callPoint(p){ if (stress(p, 0).excess <= 0) return 0; let lo = -0.5, hi = 0; if (stress(p, lo).excess > 0) return NaN;
+  for (let i = 0; i < 50; i++){ const x = (lo + hi) / 2; if (stress(p, x).excess > 0) hi = x; else lo = x; } return (lo + hi) / 2; }
+
+function curve(o, f, col, w, dash, n){ const xs = [], ys = []; n = n || 100;
+  for (let i = 0; i <= n; i++){ const x = o.x0 + (o.x1 - o.x0) * i / n; xs.push(x); ys.push(f(x)); } line(o, xs, ys, col, w, dash); }
+function dotAt(o, x, y, col){ const g = o.g; g.save(); g.fillStyle = col; g.beginPath(); g.arc(o.X(x), o.Y(y), 4.5, 0, 6.2832); g.fill(); g.restore(); }
+const d0 = v => (v < -.5 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const pc1 = v => (v * 100).toFixed(1) + "%";
+
+/* ══════════ HERO ══════════ */
+(function(){
+  const cv = document.getElementById("heroCv"); let w, h, g;
+  function paint(){ const dpr = window.devicePixelRatio || 1; w = cv.clientWidth; h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr;
+    g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = C("--chalk"); g.fillRect(0, 0, w, h);
+    const p = { K: 95, days: 30, vol: 0.30, u: 0.5, cap: 100000, k: 1 }, X = m => w * (.42 + .55 * (m + .3) / .4), Y = v => h * (.9 - v / 130000 * .75);
+    [[m => stress(p, m).equity, C("--blue")], [m => stress(p, m).req, C("--verm")]].forEach(([f, col]) => { g.strokeStyle = col; g.globalAlpha = .5; g.lineWidth = 1.8; g.beginPath();
+      for (let j = 0; j <= 60; j++){ const m = -.3 + .4 * j / 60; j ? g.lineTo(X(m), Y(f(m))) : g.moveTo(X(m), Y(f(m))); } g.stroke(); }); g.globalAlpha = 1; }
+  paint(); window.addEventListener("resize", paint);
+})();
+
+/* ══════════ 01 — one trade, three capital numbers ══════════ */
+const s1 = { K: 95, days: 30, vol: 0.30, w: 5 };
+function cap1(p){ const T = p.days / 365, naked = [{ n: -1, K: p.K, call: false }], spr = [{ n: -1, K: p.K, call: false }, { n: 1, K: p.K - p.w, call: false }];
+  const prem = CAP.mult * legPx(CAP.S, T, p.vol, naked[0]), credit = prem - CAP.mult * legPx(CAP.S, T, p.vol, spr[1]);
+  return { T, naked, spr, prem, credit, strat: stratMargin(CAP.S, T, p.vol, p.K), risk: riskMargin(CAP.S, T, p.vol, naked), ml: maxLoss(p.K, p.K - p.w, credit / CAP.mult), sprRisk: riskMargin(CAP.S, T, p.vol, spr) }; }
+(function(){
+  sliders(document.getElementById("ctl1"), [
+    { id: "K1", k: "K", lbl: "K", name: "Put strike sold", min: 80, max: 105, step: 1, fmt: v => v.toFixed(0) },
+    { id: "d1", k: "days", lbl: "T", name: "Days to expiry", min: 5, max: 120, step: 1, fmt: v => v.toFixed(0) + "d" },
+    { id: "v1", k: "vol", lbl: "σ", name: "Implied volatility", min: 0.1, max: 0.8, step: 0.01, fmt: pc1 },
+    { id: "w1", k: "w", lbl: "w", name: "Width of the spread", min: 1, max: 15, step: 1, fmt: v => "$" + v.toFixed(0) }
+  ], s1, () => draw(),"c1");
+  window.draw1 = draw;
+  function draw(){
+    const p = s1, c = cap1(p), f = legs => m => posVal(CAP.S * (1 + m / 100), c.T, p.vol, legs) - posVal(CAP.S, c.T, p.vol, legs);
+    const o = Fig(document.getElementById("cv1"), { h: 300, x0: -15, x1: 15, y0: -Math.max(c.risk, 300) * 1.12, y1: Math.max(c.prem, 100) * 1.6, pad: { l: 60, r: 14, t: 14 } });
+    axes(o, v => (v > 0 ? "+" : "") + v.toFixed(0) + "%", v => d0(v), 6, 5);
+    clip(o, () => { curve(o, f(c.spr), C("--moss"), 2.4); curve(o, f(c.naked), C("--blue"), 2.6); dotAt(o, -15, -c.risk, C("--verm")); dotAt(o, -15, f(c.spr)(-15), C("--verm")); });
+    vline(o, 0, C("--ochre"), "today", [2, 4]);
+    document.getElementById("kv1").innerHTML = kvHTML([
+      ["Premium collected", d0(c.prem)],
+      ["Strategy-based requirement", d0(c.strat)],
+      ["  return on it, if kept", pc1(c.prem / c.strat)],
+      ["Risk-based requirement", d0(c.risk)],
+      ["  return on it, if kept", pc1(c.prem / c.risk)],
+      ["Spread: credit / most it can lose", d0(c.credit) + " / " + d0(c.ml)],
+      ["  return on the most it can lose", pc1(c.credit / c.ml)],
+      ["Spread: risk-based requirement", d0(c.sprRisk)]
+    ]);
+  }
+})();
+
+/* ══════════ 02 — the requirement moves against you ══════════ */
+const s2 = { u: 0.5, k: 1, days: 30, K: 95, vol: 0.30, cap: 100000 };
+(function(){
+  sliders(document.getElementById("ctl2"), [
+    { id: "u2", k: "u", lbl: "u", name: "Share of capital used as margin", min: 0.1, max: 0.95, step: 0.05, fmt: v => (v * 100).toFixed(0) + "%" },
+    { id: "k2", k: "k", lbl: "k", name: "Vol points gained per 1% fall", min: 0, max: 3, step: 0.1, fmt: v => v.toFixed(1) },
+    { id: "d2", k: "days", lbl: "T", name: "Days to expiry", min: 5, max: 120, step: 1, fmt: v => v.toFixed(0) + "d" }
+  ], s2, () => draw(),"c2");
+  window.draw2 = draw;
+  function draw(){
+    const p = s2, a = stress(p, 0), cp = callPoint(p), b = stress(p, -0.05);
+    const o = Fig(document.getElementById("cv2"), { h: 310, x0: -30, x1: 10, y0: 0, y1: p.cap * 1.35, pad: { l: 64, r: 14, t: 14 } });
+    axes(o, v => (v > 0 ? "+" : "") + v.toFixed(0) + "%", v => "$" + (v / 1000).toFixed(0) + "k", 8, 5);
+    clip(o, () => { curve(o, m => stress(p, m / 100).req, C("--verm"), 2.6); curve(o, m => stress(p, m / 100).equity, C("--blue"), 2.6); });
+    vline(o, 0, C("--ochre"), "today", [2, 4]); if (isFinite(cp) && cp > -0.3) vline(o, cp * 100, C("--verm"), "margin call", [2, 4]);
+    document.getElementById("kv2").innerHTML = kvHTML([
+      ["Contracts sold", a.N.toFixed(0)],
+      ["Premium collected", d0(a.N * CAP.mult * legPx(CAP.S, p.days / 365, p.vol, { K: p.K, call: false }))],
+      ["Requirement today", d0(a.req)],
+      ["After a 5% fall: P&L", d0(b.pnl)],
+      ["  equity", d0(b.equity)],
+      ["  requirement", d0(b.req)],
+      ["  excess", d0(b.excess)],
+      ["Margin call at a move of", isFinite(cp) ? (cp * 100).toFixed(1) + "%" : "beyond −50%"]
+    ]);
+  }
+})();
+
+function drawAll(){ window.draw1(); window.draw2(); }
+LAB.boot(drawAll);
+
+</script>
+</body>
+</html>

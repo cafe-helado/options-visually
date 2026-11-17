@@ -1022,8 +1022,8 @@ PAGES["workbook"] = () => {
   const M = load("workbook.html", ["__wb"]);
   const W = M.__wb, all = [];
   W.forEach(e => e.p.forEach((p, i) => all.push([e.n + "." + (i + 1), p])));
-  yes("twenty-four sections, one per page, every one with a reading list and at least three problems",
-    W.length === 24 && W.every(e => e.r.length >= 1 && e.p.length >= 3));
+  yes("twenty-five sections, one per page, every one with a reading list and at least three problems",
+    W.length === 25 && W.every(e => e.r.length >= 1 && e.p.length >= 3));
   yes("every page link points at a file that exists",
     W.every(e => fs.existsSync(path.join(ROOT, e.href))));
   yes("every numeric answer is finite", all.every(([, p]) => !p.f || isFinite(p.f())));
@@ -1062,7 +1062,9 @@ PAGES["workbook"] = () => {
     eq("24.1 premium 27.9%", P("24")[0].f() * 100, 27.9, 0.06);
     eq("24.2 carry about -$6.90", P("24")[1].f(), -6.9, 0.03);
     eq("24.3 edge about $16.20", P("24")[2].f(), 16.2, 0.06);
-    eq("24.4 break-even 32.6%", P("24")[3].f() * 100, 32.6, 0.06); }
+    eq("24.4 break-even 32.6%", P("24")[3].f() * 100, 32.6, 0.06);
+    eq("25.1 return on capital 8.1%", P("25")[0].f() * 100, 8.1, 0.06);
+    eq("25.2 contracts at 50% utilization", P("25")[1].f(), 57, 0); }
 };
 
 PAGES["tools"] = () => {
@@ -1538,6 +1540,44 @@ PAGES["microstructure"] = () => {
   eq("the same at 60 vol: the ratio does not depend on volatility", (() => { let lo = 100, hi = 250; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (B(100, m, 7 / 365, 0.60, 0, 0, true).delta > 0.05) lo = m; else hi = m; } return 0.01 / (B(100, lo, 7 / 365, 0.60, 0, 0, true).vega / 100); })(), 0.70, 0.02);
   eq("the old 11.57 is a strike 13% out of the money", 0.01 / (B(100, 112.9, 7 / 365, 0.30, 0, 0, true).vega / 100), 11.57, 1.2);
   yes("  which is a 0.2-delta, not a five-delta", B(100, 112.9, 7 / 365, 0.30, 0, 0, true).delta < 0.003);
+};
+
+PAGES["capital"] = () => {
+  /* Page 25. Two simplified margin rules, return on capital, and the stress. */
+  const M = load("capital.html", ["CAP", "legPx", "posVal", "stratMargin", "riskMargin", "maxLoss", "stress", "callPoint", "cap1", "s1", "s2", "bs", "ncdf"]);
+  yes("defaults", M.s1.K === 95 && M.s1.days === 30 && M.s1.vol === 0.30 && M.s1.w === 5 && M.s2.u === 0.5 && M.s2.k === 1 && M.s2.cap === 100000);
+  const c = M.cap1(M.s1), P = M.bs(100, 95, 30 / 365, 0.30, 0.045, 0, false).price;
+  eq("premium $132", c.prem, 132, 0.5);
+  eq("strategy-based $1,632", c.strat, 1632, 0.5);
+  eq("  by the formula, by hand", 100 * (P + Math.max(0.20 * 100 - 5, 0.10 * 95)), c.strat, 1e-9);
+  eq("  8.1% on it", c.prem / c.strat * 100, 8.1, 0.06);
+  eq("risk-based $872", c.risk, 872, 0.5);
+  eq("  the worst point is the bottom of the range", 100 * (M.bs(85, 95, 30 / 365, 0.30, 0.045, 0, false).price - P), c.risk, 1e-9);
+  eq("  15.2% on it", c.prem / c.risk * 100, 15.2, 0.06);
+  eq("spread credit $93", c.credit, 93, 0.5);
+  eq("  most it can lose $407", c.ml, 407, 0.5);
+  eq("  22.7% on that", c.credit / c.ml * 100, 22.7, 0.06);
+  yes("the bought put costs about a third of the premium", (c.prem - c.credit) / c.prem > 0.27 && (c.prem - c.credit) / c.prem < 0.34);
+  yes("  and cuts the capital by more than half", c.ml < c.strat / 2 && c.sprRisk < c.risk / 2);
+  const conv = [{ n: 1, K: 100, call: false }, { n: -1, K: 100, call: true }]; let w = 0;
+  for (let i = -5; i <= 5; i++) { const S1 = 100 * (1 + 0.03 * i), pl = M.posVal(S1, 30 / 365, 0.30, conv) - M.posVal(100, 30 / 365, 0.30, conv) + 100 * (S1 - 100); if (pl < w) w = pl; }
+  eq("a conversion is flat across the scan", -w, 0, 1e-6);
+  eq("check: 1,000 on 5,000 is 20%, on 20,000 is 5%", 1000 / 5000 / (1000 / 20000), 4, 1e-12);
+  const a = M.stress(M.s2, 0), b = M.stress(M.s2, -0.05);
+  eq("57 contracts", a.N, 57, 0);
+  eq("$7,538 of premium", a.N * c.prem, 7538, 1);
+  eq("requirement today $49,685", a.req, 49685, 1);
+  eq("after -5%: lost $13,105", b.pnl, -13105, 1);
+  eq("  equity $86,895", b.equity, 86895, 1);
+  eq("  requirement $59,792", b.req, 59792, 1);
+  eq("  excess $50,315 -> $27,103", b.excess, 27103, 1); eq("  (excess today)", a.excess, 50315, 1);
+  eq("  46% of the excess gone on a 13% loss", (a.excess - b.excess) / a.excess * 100, 46, 0.6);
+  eq("margin call at -10.7%", M.callPoint(M.s2) * 100, -10.7, 0.06);
+  eq("  excess is zero there", M.stress(M.s2, M.callPoint(M.s2)).excess, 0, 1);
+  const hi = Object.assign({}, M.s2, { u: 0.8 }), lo = Object.assign({}, M.s2, { u: 0.3 });
+  eq("80%: 91 contracts", M.stress(hi, 0).N, 91, 0); eq("  call at -2.8%", M.callPoint(hi) * 100, -2.8, 0.06);
+  eq("30%: 34 contracts", M.stress(lo, 0).N, 34, 0); eq("  survives to -24.8%", M.callPoint(lo) * 100, -24.8, 0.06);
+  eq("a 2.8% monthly fall happens about one month in three", M.ncdf(Math.log(1 - 0.028) / (0.30 * Math.sqrt(30 / 365))) * 100, 37, 1);
 };
 
 PAGES["program"] = () => {

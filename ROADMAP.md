@@ -1,6 +1,6 @@
 # Roadmap
 
-Twenty-four pages and three companions. Each needs a result that is hard to believe from a description and
+Twenty-five pages and three companions. Each needs a result that is hard to believe from a description and
 obvious once you have watched it — if a page has no such moment, it is an article,
 not a page in this series.
 
@@ -708,3 +708,15 @@ ten shares per bond, 4% risk-free; priced as bond floor + ten calls.
 
 book.html also gained chapter 08, the day's P&L by cause (mark-to-market,
 greek attribution by bucket, carry, new-trade edge, fees, unexplained).
+
+## 25 · Capital  ✅ live (capital.html)
+
+Margin as the constraint. 30-day 95 put on a $100 stock at 30 vol: premium
+$132; strategy-based requirement $1,632 (8.1%), risk-based $872 (15.2%),
+95/90 spread max loss $407 (22.7%). $100,000 at 50% utilization is 57
+contracts; a 5% fall with vol +5 costs $13,105, lifts the requirement from
+$49,685 to $59,792, and the margin call is at −10.7% (−2.8% at 80%
+utilization, −24.8% at 30%).
+
+Still not built: US listed market structure, dispersion weighting schemes,
+variance-swap mark-to-market, surface fitting and marking.
