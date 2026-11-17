@@ -1163,7 +1163,7 @@ PAGES["dynamics"] = () => {
 PAGES["book"] = () => {
   /* The page had no claims until chapter 05 was added. These cover chapters
      05 and 08 only; the older chapters are still unchecked here. */
-  const M = load("book.html", ["gammaPnl", "idxBook", "sI", "PNL", "pnlBook", "pnlDay", "sP", "bs"]);
+  const M = load("book.html", ["gammaPnl", "idxBook", "sI", "PNL", "pnlBook", "pnlDay", "sP", "bs", "fields", "sFld"]);
   yes("defaults", M.sI.g1 === 1000 && M.sI.b1 === 0.5 && M.sI.g2 === -500 && M.sI.b2 === 2 && M.sI.x === 2);
   const r = M.idxBook(M.sI, 2);
   eq("summed gamma is +$500,000 per 1%", (M.sI.g1 + M.sI.g2) * 1000, 500000, 0);
@@ -1210,6 +1210,42 @@ PAGES["book"] = () => {
     eq("weekend: theta -$821", w.theta, -821, 0.6);
     eq("weekend: carry +$193", w.carry, 193, 0.6);
     eq("check: -5,000 predicted, +40,000 shown, 45,000 unexplained", 40000 - -5000, 45000, 0); }
+  console.log("    ch09 · the columns, decoded");
+  { const f = M.fields(M.sFld), b = f.bump, near = (x, y, tol) => Math.abs(x - y) <= tol * Math.abs(y);
+    yes("defaults: 100 x 30-day 260 calls, $250, 30 vol", M.sFld.n === 100 && M.sFld.S === 250 && M.sFld.K === 260 && M.sFld.days === 30 && M.sFld.vol === 0.30 && M.sFld.call === 1);
+    eq("GammaShares 173", f.GammaShares, 173, 0.5);
+    eq("DollarGamma $43,316", f.DollarGamma, 43316, 1);
+    eq("DollarGammaPct $108,289", f.DollarGammaPct, 108289, 1);
+    eq("  = 433 shares at $250", 433 * 250, f.DollarGammaPct, 100);
+    eq("  shares gained on a 1% move: 433", f.GammaShares * 2.5, 433, 0.5);
+    eq("gamma P&L of a 1% move $541", f.GammaPnl1Pct, 541, 0.6);
+    eq("  = half of 433 x $2.50", 0.5 * f.GammaShares * 2.5 * 2.5, f.GammaPnl1Pct, 1e-6);
+    eq("DeltaShares 3,557", f.DeltaShares, 3557, 0.6);
+    eq("DollarDelta $889,220", f.DollarDelta, 889220, 1);
+    eq("  1% of it is $8,892", f.DollarDelta / 100, 8892, 0.6);
+    eq("theta -$1,439 a day", f.ThetaDay, -1439, 0.6);
+    eq("break-even move 1.63%", f.Breakeven, 1.63, 0.006);
+    eq("vega $2,670", f.Vega, 2670, 0.6);
+    eq("vanna $14,157", f.Vanna, 14157, 1);
+    eq("charm -34 shares a day", f.CharmDay, -34, 0.6);
+    eq("one-year option counts 29% in weighted vega", Math.sqrt(30 / 365) * 100, 29, 0.5);
+    eq("vega per 1.00 of vol is $267,000", f.Vega * 100, 267000, 60);
+    eq("calendar theta is 31% below trading-day theta", (1 - 252 / 365) * 100, 31, 0.5);
+    eq("the P&L figure is 200 times smaller than DollarGammaPct", f.DollarGammaPct / f.GammaPnl1Pct, 200, 1e-9);
+    eq("DollarGamma and DollarGammaPct differ by 2.5x at $250", f.DollarGammaPct / f.DollarGamma, 2.5, 1e-9);
+    const h = M.fields(Object.assign({}, M.sFld, { S: 100, K: 104 }));
+    eq("  and are equal at $100", h.DollarGammaPct, h.DollarGamma, 1e-9);
+    /* every field against a bump-and-reprice that never reads the greek */
+    yes("reprice: DollarDelta", near(b.DollarDelta, f.DollarDelta, 0.001));
+    yes("reprice: DollarGammaPct", near(b.DollarGammaPct, f.DollarGammaPct, 0.01));
+    yes("reprice: gamma P&L of 1%", near(b.GammaPnl1Pct, f.GammaPnl1Pct, 0.01));
+    yes("reprice: theta", near(b.ThetaDay, f.ThetaDay, 0.02));
+    yes("reprice: vega", near(b.Vega, f.Vega, 0.001));
+    yes("reprice: vanna", near(b.Vanna, f.Vanna, 0.01));
+    yes("reprice: charm", near(b.CharmDay, f.CharmDay, 0.05));
+    const sh = M.fields(Object.assign({}, M.sFld, { n: -100 }));
+    yes("short flips every field", sh.DollarGammaPct === -f.DollarGammaPct && sh.Vega === -f.Vega && sh.ThetaDay === -f.ThetaDay);
+    eq("check: half of 200,000 x 9 / 100 = 9,000", 0.5 * 200000 * 9 / 100, 9000, 0); }
 };
 
 PAGES["carry"] = () => {

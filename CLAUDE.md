@@ -284,6 +284,11 @@ and the derivation box lists what it ignores. Prose there quotes dollars to
 the dime; round to what the figure's readout shows or the claim fails by
 four cents, as two did.
 
+`book.html` chapter 09 (`fields`) is a decoder for report columns such as
+DollarGammaPct; every field carries a bump-and-reprice twin in `f.bump`.
+Its default stock is $250 on purpose: at $100 the per-dollar and
+per-percent gamma fields are equal and the page teaches nothing.
+
 `book.html` chapter 08 (`pnlDay`) computes a day's P&L twice: by repricing
 every leg, and greek by greek from the opening risk. verify.js reprices the
 legs by hand as a third route. Insert new chapters with the `renum` helper

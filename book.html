@@ -41,7 +41,8 @@
   <a href="#c6"><span>Limits</span><i></i></a>
   <a href="#c7"><span>The report</span><i></i></a>
   <a href="#c8"><span>The day's P&amp;L</span><i></i></a>
-  <a href="#c9"><span>Check yourself</span><i></i></a>
+  <a href="#c9"><span>The columns</span><i></i></a>
+  <a href="#c10"><span>Check yourself</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -589,6 +590,81 @@
 <section class="chapter" id="c9">
   <div class="chead">
     <div class="cnum">09</div>
+    <h2>The columns on the report, decoded</h2>
+    <p class="dek">Risk systems print a dozen fields with names like DollarGammaPct. Each is one of four greeks multiplied by something, and the something is where people go wrong.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">One position: long 100 thirty-day 260 calls on a $250 stock at 30 vol. The table computes every field a typical report shows for it, from the definition, and where it can it checks the number by moving the input and repricing. Change the position and watch which fields scale with what.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Every field for one position</h3></div>
+        <table class="wtab" id="fldTab"></table>
+      </div>
+      <div class="rail panel">
+        <h4>The position</h4>
+        <div id="ctlFld"></div>
+      </div>
+    </div>
+    <figcaption>Field names differ from one system to the next. The definitions in the last column are what to match against your own report, and the reprice figures are how to test it.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>The three gamma fields are the ones that cause trouble, because they are the same quantity in three units.</p>
+    <p><b>GammaShares, 173.</b> Shares of delta the position gains when the stock rises $1. It answers "how many shares do I trade to rehedge a one-dollar move".</p>
+    <p><b>DollarGamma, $43,316.</b> Those 173 shares valued at $250. Dollars of delta gained per $1 move.</p>
+    <p><b>DollarGammaPct, $108,289.</b> Dollars of delta gained per 1% move. A 1% move here is $2.50, so the position gains 433 shares, worth $108,289. This is the version that compares across stocks, because a 1% move means the same thing on a $20 stock and a $500 one, and it is the "gamma cash" of chapter 01.</p>
+    <p>The P&amp;L that goes with it has a half in it. A hedged position that gains 433 shares over a $2.50 move was holding, on average, half of them along the way: half of 433 times $2.50 is <b>$541</b>.</p>
+  </div>
+
+  <div class="mline">DollarGammaPct = &Gamma; &times; 100 &times; contracts &times; S&sup2; &divide; 100 &nbsp;&nbsp;&nbsp; P&amp;L(x%) = &frac12; &times; DollarGammaPct &times; x&sup2; &divide; 100</div>
+  <p class="mread">Reads as: <b>gamma in shares, times the stock price squared, per hundred; and a move of x percent pays half of that times x squared over a hundred.</b> For a 2% move, multiply the 1% figure by four.</p>
+
+  <div class="prose">
+    <p>The rest follow the same pattern: a per-share greek, times 100, times contracts, then into dollars.</p>
+    <p><b>DollarDelta, $889,220,</b> is the stock position that would move the same: 3,557 shares at $250. One percent of it, $8,892, is the P&amp;L of a 1% move before gamma.</p>
+    <p><b>Theta, &minus;$1,439 a day,</b> set against the $541 a 1% move pays, gives the <b>break-even move of 1.63%</b>: the daily move at which gamma earns back the decay.</p>
+    <p><b>Vega, $2,670,</b> is per volatility point. <b>WeightedVega</b> restates it for a move in one-month vol by scaling with the square root of 30 over the days to expiry, so a thirty-day option is unchanged and a one-year option counts for about 29% of its raw vega.</p>
+    <p><b>Vanna, $14,157,</b> is dollars of delta gained when vol rises a point, and <b>Charm, &minus;34 shares a day,</b> is delta lost overnight with nothing moving. Both are deltas you did not trade, which is why they sit on a hedger's screen.</p>
+    <p>Before trusting any of these on a system you did not build, pin down five conventions, because each has at least two versions in use:</p>
+    <p><b>Per dollar or per percent.</b> At a stock price of exactly $100, DollarGamma and DollarGammaPct are the same number, so a test on a $100 stock tells you nothing. At $250 they differ by 2.5 times.</p>
+    <p><b>With or without the half.</b> Some systems report the P&amp;L of a 1% move and call it dollar gamma. That is $541 here, two hundred times smaller than $108,289.</p>
+    <p><b>Per vol point or per unit of vol.</b> Vega of $2,670 a point is $267,000 per 1.00 of volatility.</p>
+    <p><b>Calendar or trading days.</b> Theta per calendar day is about 31% smaller than theta per trading day, and only one of them is right for a Friday.</p>
+    <p><b>Sign.</b> Short positions should flip every field. A report that shows short options with positive gamma is showing the option's greek, not the position's.</p>
+    <p>The test is always the same one the table runs: move the input by the stated amount, reprice, and see whether the field predicted the change.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Put the same option on a $100 stock with a 104 strike. <b>Predict</b> which two gamma fields become equal.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cFld" data-patch='{"S":100,"K":104}' data-focus="fldTab">A $100 stock</button>
+      <button class="act ghost" data-preset="cFld" data-patch='{"n":-100}' data-focus="fldTab">Short it instead</button>
+      <button class="act ghost" data-preset="cFld" data-patch='{"n":100,"S":250,"K":260,"days":30,"vol":0.3,"call":1}' data-focus="fldTab">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A report shows DollarGammaPct of $200,000 on a hedged position. The stock moves 3%. Roughly what did gamma make?</p>
+    <div class="opts">
+      <button>$6,000</button>
+      <button data-ok="1">$9,000</button>
+      <button>$18,000</button>
+      <button>$600,000</button>
+    </div>
+    <div class="ans"><b>$9,000.</b> Half of 200,000, times three squared, over a hundred. $6,000 multiplies by the move without squaring it; $18,000 forgets the half; $600,000 is the change in dollar delta, which is what you rehedge, not what you made.</div>
+  </div>
+</section>
+
+<!-- ══════════ 10 ══════════ -->
+<section class="chapter" id="c10">
+  <div class="chead">
+    <div class="cnum">10</div>
     <h2>Check yourself</h2>
     <p class="dek">Six questions across the page, and the series.</p>
   </div>
@@ -1203,7 +1279,70 @@ const sP = { x: -2, dvf: 1.5, dvb: 0.8, days: 1, edge: 3, lots: 50 };
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();drawIdx();draw5();draw6();drawPnl();}
+/* ══════════ 09 — the columns, decoded ══════════
+   One position, every commonly quoted field computed from its definition,
+   and each one checked against a reprice. Names differ between systems;
+   the definitions are what to pin down. */
+function fields(p){
+  const T = p.days / 365, S = p.S, n = p.n, M = 100, g = bs(S, p.K, T, p.vol, 0.045, 0, p.call === 1), q = n * M;
+  const f = {
+    Delta: g.delta, DeltaShares: q * g.delta, DollarDelta: q * g.delta * S,
+    Gamma: g.gamma, GammaShares: q * g.gamma, DollarGamma: q * g.gamma * S, DollarGammaPct: q * g.gamma * S * S / 100,
+    GammaPnl1Pct: 0.5 * q * g.gamma * S * S / 1e4,
+    ThetaDay: q * g.theta / 365, Vega: q * g.vega / 100, WeightedVega: q * g.vega / 100 * Math.sqrt(30 / p.days),
+    Vanna: q * g.vanna * S / 100, Volga: q * g.volga / 1e4, CharmDay: q * g.charm / 365,
+    Breakeven: g.gamma !== 0 ? Math.sqrt(Math.max(0, -2 * (g.theta / 365) / (g.gamma * S * S))) * 100 : 0
+  };
+  /* the same quantities by bumping and repricing, never touching a greek */
+  const px = (s, v, t) => bs(s, p.K, t, v, 0.045, 0, p.call === 1), dd = (s, v, t) => q * px(s, v, t).delta * s, up = S * 1.01, dn = S * 0.99;
+  f.bump = {
+    DollarDelta: q * (px(S + 0.01, p.vol, T).price - px(S - 0.01, p.vol, T).price) / 0.02 * S,
+    DollarGammaPct: (dd(up, p.vol, T) - dd(dn, p.vol, T)) / 2 - f.DollarDelta * 0.01,
+    GammaPnl1Pct: q * ((px(up, p.vol, T).price + px(dn, p.vol, T).price) / 2 - g.price),
+    ThetaDay: q * (px(S, p.vol, T - 1 / 365).price - g.price),
+    Vega: q * (px(S, p.vol + 0.005, T).price - px(S, p.vol - 0.005, T).price),
+    Vanna: dd(S, p.vol + 0.005, T) - dd(S, p.vol - 0.005, T),
+    CharmDay: q * (px(S, p.vol, T - 1 / 365).delta - g.delta)
+  };
+  return f;
+}
+const sFld = { n: 100, S: 250, K: 260, days: 30, vol: 0.30, call: 1 };
+(function(){
+  const d = v => (v < -.5 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  const sh = v => (v < 0 ? "−" : "") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 }) + " sh";
+  sliders(document.getElementById("ctlFld"), [
+    { id: "nF", k: "n", lbl: "n", name: "Contracts (negative is short)", min: -500, max: 500, step: 10, fmt: v => v.toFixed(0) },
+    { id: "SF", k: "S", lbl: "S", name: "Stock price", min: 20, max: 500, step: 1, fmt: v => "$" + v.toFixed(0) },
+    { id: "KF", k: "K", lbl: "K", name: "Strike", min: 20, max: 500, step: 1, fmt: v => v.toFixed(0) },
+    { id: "dF", k: "days", lbl: "T", name: "Days to expiry", min: 2, max: 365, step: 1, fmt: v => v.toFixed(0) + "d" },
+    { id: "vF", k: "vol", lbl: "σ", name: "Implied volatility", min: 0.08, max: 1, step: 0.01, fmt: v => (v * 100).toFixed(0) + "%" },
+    { id: "cF", k: "call", lbl: "c/p", name: "Call (1) or put (0)", min: 0, max: 1, step: 1, fmt: v => v ? "call" : "put" }
+  ], sFld, () => draw(),"cFld");
+  window.drawFld = draw;
+  function draw(){
+    const f = fields(sFld), b = f.bump, R = [
+      ["Delta", f.Delta.toFixed(3), "per share", "Option price change per $1 of stock, one share's worth."],
+      ["DeltaShares", sh(f.DeltaShares), "shares", "Delta × 100 × contracts. The stock position that moves the same."],
+      ["DollarDelta", d(f.DollarDelta), "$", "DeltaShares × S. P&L per 1% move is one hundredth of this. Reprice: " + d(b.DollarDelta) + "."],
+      ["Gamma", f.Gamma.toFixed(4), "per share per $1", "Change in Delta for a $1 move."],
+      ["GammaShares", sh(f.GammaShares), "shares per $1", "Gamma × 100 × contracts. Shares of delta gained per $1."],
+      ["DollarGamma", d(f.DollarGamma), "$ per $1", "GammaShares × S. Change in DollarDelta from gamma for a $1 move."],
+      ["DollarGammaPct", d(f.DollarGammaPct), "$ per 1%", "GammaShares × S² ÷ 100. Change in DollarDelta from gamma for a 1% move. Reprice: " + d(b.DollarGammaPct) + "."],
+      ["Gamma P&L, 1% move", d(f.GammaPnl1Pct), "$", "Half of DollarGammaPct × 1%. What a 1% move pays a hedged position. Reprice: " + d(b.GammaPnl1Pct) + "."],
+      ["Theta", d(f.ThetaDay), "$ per calendar day", "One day's decay. Reprice a day forward: " + d(b.ThetaDay) + "."],
+      ["Vega", d(f.Vega), "$ per vol point", "P&L for implied vol up one point. Reprice: " + d(b.Vega) + "."],
+      ["WeightedVega", d(f.WeightedVega), "$ per 30-day vol point", "Vega × √(30 ÷ days). Vega restated for a move in one-month vol."],
+      ["Vanna", d(f.Vanna), "$ of delta per vol point", "Change in DollarDelta when vol rises a point. Reprice: " + d(b.Vanna) + "."],
+      ["Volga", d(f.Volga), "$ of vega per vol point", "Change in Vega when vol rises a point."],
+      ["Charm", sh(f.CharmDay), "shares per day", "Change in DeltaShares overnight with nothing else moving. Reprice: " + sh(b.CharmDay) + "."],
+      ["Break-even move", f.Breakeven.toFixed(2) + "%", "% per day", "The daily move at which gamma P&L equals theta."]
+    ];
+    document.getElementById("fldTab").innerHTML = "<tr><th>Field</th><th>Value</th><th>Unit</th><th>What it is</th></tr>" +
+      R.map(r => "<tr><td><b>" + r[0] + "</b></td><td>" + r[1] + "&nbsp;&nbsp;&nbsp;</td><td>" + r[2] + "</td><td>" + r[3] + "</td></tr>").join("");
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();drawIdx();draw5();draw6();drawPnl();drawFld();}
 LAB.boot(drawAll);
 
 </script>
