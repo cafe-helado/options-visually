@@ -1454,6 +1454,92 @@ PAGES["binomial"] = () => {
   yes("step limit is (sigma/r)^2", Math.abs(M.stepLimit(0.10, 0.08) - Math.pow(0.10 / 0.08, 2)) < 1e-9);
 };
 
+PAGES["forwards"] = () => {
+  /* The page had no claims. Closed-form numbers only; the trees are checked against Black-76. */
+  const M = load("forwards.html", ["fwd", "fwdDisc", "b76", "futTree", "bs", "s3"]);
+  eq("forward 101.5113", M.fwd(100, 0.05, 0.02, 0.5), 101.5113, 0.00006);
+  eq("expected spot at -20% drift, 2% yield: 80.25", 100 * Math.exp(-0.20 - 0.02), 80.25, 0.006);
+  eq("  at +25%: 125.86", 100 * Math.exp(0.25 - 0.02), 125.86, 0.006);
+  eq("no-dividend one-year forward 105.1271", M.fwd(100, 0.05, 0, 1), 105.1271, 0.00006);
+  eq("  by the discrete route with no dividends", M.fwdDisc(100, 0.05, 1, []), 105.1271, 0.00006);
+  eq("2.50 special at three months: 102.5316", M.fwdDisc(100, 0.05, 1, [[0.25, 2.50]]), 102.5316, 0.00006);
+  yes("  a bigger effect than three 60-cent dividends", 105.1271 - M.fwdDisc(100, 0.05, 1, [[0.25, 2.50]]) > 105.1271 - M.fwdDisc(100, 0.05, 1, [[0.25, 0.6], [0.5, 0.6], [0.75, 0.6]]));
+  eq("$17,240 of notional per contract", 172.40 * 100, 17240, 1e-9);
+  eq("cash settlement: $8,347", (5283.47 - 5200) * 100, 8347, 1e-6);
+  eq("ten contracts: $83,470", 10 * (5283.47 - 5200) * 100, 83470, 1e-6);
+  const F = M.fwd(100, 0.06, 0, 0.5), bsC = M.bs(100, 100, 0.5, 0.30, 0.06, 0, true), bC = M.b76(F, 100, 0.5, 0.30, 0.06, true);
+  eq("forward 103.0455", F, 103.0455, 0.00006);
+  eq("Black-Scholes 9.882656", bsC.price, 9.882656, 0.0000006);
+  eq("Black-76 on the forward gives the same", bC.price, bsC.price, 1e-9);
+  eq("delta 0.5977 on the spot model", bsC.delta, 0.5977, 0.00006);
+  eq("delta 0.5801 with respect to the forward", bC.delta, 0.5801, 0.00006);
+  eq("  ratio 0.970446 = exp(-0.03)", bC.delta / bsC.delta, Math.exp(-0.03), 1e-6);
+  eq("  about 1.8 contracts fewer per hundred", 100 * (bsC.delta - bC.delta), 1.8, 0.06);
+  const e = (F0, cp) => M.b76(F0, 100, 1, 0.30, 0.08, cp).price, am = (F0, cp) => M.futTree(F0, 100, 1, 0.30, 0.08, 800, cp, true);
+  eq("F=130 European call 30.9927", e(130, true), 30.9927, 0.00006);
+  eq("  American 32.2092", am(130, true), 32.2092, 0.01);
+  eq("  premium 1.2166", am(130, true) - e(130, true), 1.2166, 0.01);
+  eq("F=70 European put 29.0132", e(70, false), 29.0132, 0.00006);
+  eq("  premium 1.4492", am(70, false) - e(70, false), 1.4492, 0.01);
+  eq("F=140 European call 39.0630, below intrinsic by 0.9370", 40 - e(140, true), 0.9370, 0.00006);
+  eq("F=200: below intrinsic by 7.5506", 100 - e(200, true), 7.5506, 0.00006);
+  eq("at the money, call and put premiums are equal", am(100, true) - e(100, true), am(100, false) - e(100, false), 1e-9);
+  eq("  0.2205", am(100, true) - e(100, true), 0.2205, 0.01);
+};
+
+PAGES["real-world"] = () => {
+  /* The page had no claims. Chapters 03 and 04 are closed-form and checked
+     here; chapters 01-02 quote simulated hedging errors and are not. */
+  const M = load("real-world.html", ["mixVol", "mixPrice", "impliedVol", "bs", "s3", "s4"]);
+  const S = 100, r = 0.03, w = 0.85, v1 = 0.18, v2 = 0.42;
+  yes("defaults: 85% at 18 vol, 15% at 42", M.s3.w === w && M.s3.v1 === v1 && M.s3.v2 === v2 && M.s3.T === 1);
+  const iv = K => { const cp = K >= 100; return 100 * M.impliedVol(S, K, 1, r, cp, M.mixPrice(S, K, 1, w, v1, v2, r, cp)); };
+  eq("mixture smile: 25.27% at 70", iv(70), 25.27, 0.006);
+  eq("  22.00% at 90", iv(90), 22.00, 0.006);
+  eq("  21.60% at the money", iv(100), 21.60, 0.006);
+  eq("  22.11% at 120", iv(120), 22.11, 0.006);
+  eq("  22.87% at 130", iv(130), 22.87, 0.006);
+  eq("variance-matched vol 23.238%", 100 * M.mixVol(w, v1, v2), 23.238, 0.0006);
+  eq("  by hand", 100 * Math.sqrt(0.85 * 0.0324 + 0.15 * 0.1764), 23.238, 0.0006);
+  eq("flat vol overprices the body: 10.67", M.bs(S, 100, 1, M.mixVol(w, v1, v2), r, 0, true).price, 10.67, 0.006);
+  eq("  against the mixture's 10.03", M.mixPrice(S, 100, 1, w, v1, v2, r, true), 10.03, 0.006);
+  eq("and underprices the left tail: 0.380", M.bs(S, 70, 1, M.mixVol(w, v1, v2), r, 0, false).price, 0.380, 0.0006);
+  eq("  against 0.566", M.mixPrice(S, 70, 1, w, v1, v2, r, false), 0.566, 0.0006);
+  eq("sqrt(32) = 5.66", Math.sqrt(32), 5.66, 0.006);
+  /* chapter 04: one volatility on a skewed surface */
+  yes("defaults: 25 ATM, -0.30 skew, six months", M.s4.atm === 0.25 && M.s4.skew === -0.30 && M.s4.T === 0.5);
+  const T = 0.5, F = S * Math.exp(r * T), surf = K => Math.max(0.04, 0.25 - 0.30 * Math.log(K / F));
+  const mk = K => M.bs(S, K, T, surf(K), r, 0, K >= F).price, fl = K => M.bs(S, K, T, 0.25, r, 0, K >= F).price, er = K => 100 * (fl(K) - mk(K)) / mk(K);
+  eq("75 strike: market 1.0296", mk(75), 1.0296, 0.00006);
+  eq("  flat model 0.2689", fl(75), 0.2689, 0.00006);
+  eq("  low by 74%", er(75), -74, 0.5);
+  eq("115 strike: flat model 46% high", er(115), 46, 0.5);
+  eq("125 strike: 213% high", er(125), 213, 0.5);
+  eq("  on an option worth 0.37", mk(125), 0.37, 0.006);
+  eq("at-the-money error about 2%", Math.abs(er(100)), 2, 0.7);
+};
+
+PAGES["microstructure"] = () => {
+  /* The page had no claims. Writing the first one found that "one cent is
+     11.57 vol points on a seven-day five-delta" was wrong by a factor of
+     sixteen: that figure belongs to a strike about 13% out of the money, a
+     0.2-delta. A five-delta weekly is 0.70, at any volatility. Chapters 03-05
+     quote simulation results and are not checked here. */
+  const M = load("microstructure.html", ["bs", "s1"]);
+  const B = M.bs, strikeFor = (d, T) => { let lo = 100, hi = 160; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (B(100, m, T, 0.30, 0, 0, true).delta > d) lo = m; else hi = m; } return lo; };
+  const K5 = strikeFor(0.05, 7 / 365), v5 = B(100, K5, 7 / 365, 0.30, 0, 0, true).vega / 100, v6 = B(100, 100, 180 / 365, 0.30, 0, 0, true).vega / 100;
+  eq("six-month ATM: a cent is 0.04 vol points", 0.01 / v6, 0.04, 0.005);
+  eq("seven-day five-delta: a cent is 0.70 vol points", 0.01 / v5, 0.70, 0.006);
+  eq("  its vega is about 0.014 a point", v5, 0.014, 0.0006);
+  eq("  by the closed form S sqrt(T) n(d1) / 100 with N(d1) = 0.05", 100 * Math.sqrt(7 / 365) * Math.exp(-0.5 * 1.6449 * 1.6449) / Math.sqrt(2 * Math.PI) / 100, v5, 0.0002);
+  eq("a nickel is 0.2 vol wide on the first", 0.05 / v6, 0.2, 0.03);
+  eq("  and 3.5 vol wide on the second", 0.05 / v5, 3.5, 0.03);
+  eq("nearly twenty times more", (0.01 / v5) / (0.01 / v6), 19.2, 0.3);
+  eq("the same at 60 vol: the ratio does not depend on volatility", (() => { let lo = 100, hi = 250; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (B(100, m, 7 / 365, 0.60, 0, 0, true).delta > 0.05) lo = m; else hi = m; } return 0.01 / (B(100, lo, 7 / 365, 0.60, 0, 0, true).vega / 100); })(), 0.70, 0.02);
+  eq("the old 11.57 is a strike 13% out of the money", 0.01 / (B(100, 112.9, 7 / 365, 0.30, 0, 0, true).vega / 100), 11.57, 1.2);
+  yes("  which is a 0.2-delta, not a five-delta", B(100, 112.9, 7 / 365, 0.30, 0, 0, true).delta < 0.003);
+};
+
 PAGES["program"] = () => {
   /* The program's drills carry computed keys. Each is re-derived here a
      different way from the one the page uses, over a few hundred deals. */

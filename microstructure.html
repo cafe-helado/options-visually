@@ -85,7 +85,7 @@
 
   <div class="prose">
     <p class="lead">A market maker thinks in volatility. The screen shows price. The conversion between them is vega, and because vega varies enormously across a chain while the tick size does not, <b>the same one-cent increment means completely different things at different strikes</b>.</p>
-    <p>On a six-month at-the-money option, vega is large — a cent is about <b>0.04 vol points</b>, an amount too small to care about. On a seven-day five-delta option, vega is tiny, and that same cent is <b>11.57 vol points</b>. A nickel-wide market is 0.2 vol wide in the first case and <b>58 vol wide</b> in the second.</p>
+    <p>On a six-month at-the-money option, vega is large — a cent is about <b>0.04 vol points</b>, an amount too small to care about. On a seven-day five-delta option, vega is tiny, and that same cent is <b>0.70 vol points</b>. A nickel-wide market is 0.2 vol wide in the first case and <b>3.5 vol wide</b> in the second.</p>
     <p>This single table explains a set of things that otherwise look like separate facts. Why far out-of-the-money short-dated markets appear absurdly wide in percentage terms. Why you cannot quote them tightly even if you want to — the tick will not let you. Why a market maker will happily show a penny market in one option and refuse to show anything reasonable in another on the same underlying. And why an "edge" of two cents is meaningless until you know which option it was in.</p>
     <p>The practical version: <b>before reacting to a quoted spread, convert it to vol.</b> A market that looks scandalous in cents is often unremarkable in vol, and occasionally the reverse.</p>
   </div>
@@ -113,7 +113,7 @@
     <figcaption>The curve is essentially 1/vega, and vega collapses in the wings and toward expiry — so the cost of a tick explodes exactly where options are cheapest. That inversion is why the cheapest options are the most expensive to trade.</figcaption>
   </figure>
   <details class="derive">
-    <summary>Derivation — why one tick is worth 300 times more on one option than another</summary>
+    <summary>Derivation — why one tick is worth twenty times more on one option than another</summary>
     <div class="body">
       <p>A quoted price and a quoted volatility are the same information in different units. The exchange rate between them is vega.</p>
       <div class="mline">Δσ = Δprice / vega</div>
@@ -121,7 +121,7 @@
       <p>So the volatility value of a fixed tick is not a property of the tick. It is a property of the denominator, and vega collapses in exactly the situations where the tick does not.</p>
       <div class="mline">vega = S·e<sup>−qT</sup>·n(d<sub>1</sub>)·√T</div>
       <p class="mread">Reads as: <b>vega is large when there is time left and the option is near the money, and vanishes otherwise.</b> The √T kills short expiries; the n(d₁) kills far strikes.</p>
-      <p>Both factors shrink together on a short-dated out-of-the-money option, so the denominator becomes tiny while the numerator stays fixed at one cent. That is the whole explanation for the 0.04-versus-11.57 figure in the table: the numerator never changed.</p>
+      <p>Both factors shrink together on a short-dated out-of-the-money option, so the denominator becomes tiny while the numerator stays fixed at one cent. That is the whole explanation for the 0.04-versus-0.70 figure in the table: the numerator never changed.</p>
       <p><b>Where it breaks.</b> The conversion assumes there <em>is</em> an implied volatility to move — that the quoted price sits inside the no-arbitrage bounds and the option has enough value to invert. On the deepest, shortest options the price is essentially all intrinsic and the implied volatility is barely identified, so a one-tick move can imply an enormous volatility change or none at all depending on rounding. At that point the vol quote is an artefact of the price grid rather than a measurement, which is why desks stop quoting those series in volatility and start quoting them in cents.</p>
     </div>
   </details>
@@ -142,11 +142,11 @@
     <p class="q">A weekly 5-delta call is quoted 0.05 at 0.10. Is that a wide market?</p>
     <div class="opts">
       <button>Yes — a 100% spread in percentage terms is outrageous</button>
-      <button data-ok="1">In cents it is five ticks; in vol it may be tens of points. Convert before judging, and expect it to be wide because the tick will not permit tighter</button>
+      <button data-ok="1">In cents it is five ticks; in vol it is about three and a half points. Convert before judging, and expect it to be wide because the tick will not permit tighter</button>
       <button>No — five cents is always tight</button>
       <button>Cannot say without knowing the delta</button>
     </div>
-    <div class="ans"><b>Convert it to vol first.</b> Five cents on an option with a vega of roughly 0.001 per point is dozens of vol points, which sounds appalling and is only a few ticks from the tightest market the grid allows — a single penny on that vega is still about ten vol points, so no quote on this line can ever look tight in vol. The percentage-of-premium framing is the least useful one available, because the denominator is tiny by construction. The last answer is not wrong that delta matters, but it is vega, not delta, that sets the conversion.</div>
+    <div class="ans"><b>Convert it to vol first.</b> Five cents on an option with a vega of roughly 0.014 per point is about 3.5 vol points, which sounds wide and is only a few ticks from the tightest market the grid allows — a single penny on that vega is still 0.7 of a vol point, twenty times what it is on a six-month at-the-money option, and further out the wing it runs to tens of points. The percentage-of-premium framing is the least useful one available, because the denominator is tiny by construction. The last answer is not wrong that delta matters, but it is vega, not delta, that sets the conversion.</div>
   </div>
 </section>
 
@@ -499,11 +499,11 @@
     <p class="q">One cent on a 180-day at-the-money option is 0.04 vol points. Roughly what is it on a 7-day 5-delta?</p>
     <div class="opts">
       <button>About the same — a cent is a cent</button>
-      <button data-ok="1">About 11.6 volatility points, because vega has collapsed and the tick has not</button>
-      <button>About 0.4 volatility points</button>
+      <button data-ok="1">About 0.7 volatility points, because vega has collapsed and the tick has not</button>
+      <button>About 0.07 volatility points</button>
       <button>It cannot be computed</button>
     </div>
-    <div class="ans"><b>About 11.6 points — nearly 300 times more.</b> The tick is fixed in price and wildly variable in volatility, because the conversion divides by vega and vega vanishes for short-dated far strikes.</div>
+    <div class="ans"><b>About 0.7 points — nearly twenty times more.</b> The tick is fixed in price and wildly variable in volatility, because the conversion divides by vega and vega vanishes for short-dated far strikes.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">

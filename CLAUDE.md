@@ -57,6 +57,9 @@ script, compute the numbers, then write the sentence. Doing this caught:
 - a variance swap payoff coded in decimals when vega notional is dollars per
   volatility *point* — a clean 100x error that surfaced only because the prose
   carried independently computed numbers to check against (page 09)
+- a tick on page 05 quoted as 11.57 vol points on a "seven-day five-delta"; a
+  five-delta weekly is 0.70 at any volatility, and 11.57 belongs to a 0.2-delta.
+  It had stood since the page was written because the page had no claims
 - a breach rate on page 18 quoted from a 400k-draw simulation when the page
   integrates it exactly; the simulation said 37.56% and the truth is 37.39%,
   and the same page's estimator figures were quoted from one run of a
@@ -178,7 +181,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-All twenty-four pages are built, plus the program, the workbook and the toolkit. What is not done: five topics listed at the end of ROADMAP.md (capital and margin, listed market structure, dispersion weighting, variance-swap mark-to-market, surface fitting), and verify claims for forwards, microstructure and real-world, which still have none. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
+All twenty-four pages are built, plus the program, the workbook and the toolkit. What is not done: five topics listed at the end of ROADMAP.md (capital and margin, listed market structure, dispersion weighting, variance-swap mark-to-market, surface fitting), and verify claims for the simulated chapters of microstructure and real-world, which quote random runs. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
