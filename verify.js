@@ -979,7 +979,11 @@ PAGES["merger"] = () => {
   /* chapter 06 */
   eq("GoPro after a $0.30 special: $4.20", M.divPrice(5, 2, 0.30, 2 / 3), 4.20, 1e-9);
   eq("…not $4.30", M.divNaive(5, 2, 0.30, 2 / 3), 4.30, 1e-9);
-  eq("VZIO after a $0.20 special: $10.95", M.divPrice(11.5, 7.95, 0.20, 0.80), 10.95, 1e-9);
+  /* The prose said "80% implied odds", which needs a $7.95 standalone the page
+     never states; its own tree breaks at $7.51, where $10.79 is 82%. */
+  eq("VZIO: $10.79 against a $7.51 break is 82% at zero rates", (10.79 - 7.51) / (11.5 - 7.51) * 100, 82, 0.3);
+  eq("VZIO after a $0.20 special: $10.95", M.divPrice(11.5, 7.51, 0.20, (10.79 - 7.51) / (11.5 - 7.51)), 10.95, 0.006);
+  eq("  up 16 cents", M.divPrice(11.5, 7.51, 0.20, (10.79 - 7.51) / (11.5 - 7.51)) - 10.79, 0.16, 0.006);
   /* chapter 07: the biotech readout */
   const st = M.s7;
   eq("spot $20 implies 62.5% odds", M.mixSpot(st), 20, 1e-9);
