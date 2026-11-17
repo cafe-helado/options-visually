@@ -266,6 +266,28 @@
     <p>The last identity on the desk sheet is the <b>buy-write</b>, and it carries a condition that is almost never written down:</p>
     <div class="mline">C − intrinsic = P + r/c</div>
     <p class="mread">Reads as: <b>a call's extrinsic value equals the put's value plus carry.</b> The condition: "intrinsic" here means the <em>signed</em> quantity S − K, not max(S − K, 0).</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The buy-write identity across strikes</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Put + carry</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Call − (S − K), signed</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Call − max(S − K, 0)</span>
+          </span>
+        </div>
+        <canvas id="cvBw" height="280"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The market</h4>
+        <div id="ctlBw"></div>
+        <div class="kv" style="margin-top:20px" id="kvBw"></div>
+      </div>
+    </div>
+    <figcaption>The green line sits exactly on the blue one at every strike. The red line agrees only in the money; above spot it peels away by exactly K − S, which is the error the sheet's wording invites. Five dollars above a $100 stock, the true sides are 8.93 and the floored one reads 3.93.</figcaption>
+  </figure>
     <p>That distinction is not pedantry. With S = 90 and K = 95, using the signed amount the identity holds exactly; using true intrinsic, which floors at zero, the two sides come out 1.61 and 6.61. Desk usage always means the signed parity amount, and the identity is stated without the caveat because on a buy-write the call is normally in the money. Take the sheet literally on an out-of-the-money strike and you will get a wrong answer with no warning.</p>
   </div>
 
@@ -446,6 +468,27 @@
     <div class="mline">Compound = 360 × ( (K / (K − Interest))<sup>1/Days</sup> − 1 ) × 100</div>
     <p class="mread">Reads as: <b>what daily rate, compounded every day, produces that same dollar interest.</b></p>
     <p>Under thirty days the two agree to well under a basis point — on the 17-day example they are 2.9647% and 2.9669%, a difference of about a fifth of a basis point. Past a few months the gap widens, and on a jelly roll spanning several months it is worth several basis points, which is more than the spread being competed over.</p>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Simple rate minus the true compound rate, by days to expiry</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Revcon convention: interest is K less its discounted value</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Jelly-roll sheet: interest accrues forward on K</span>
+          </span>
+        </div>
+        <canvas id="cvConv" height="280"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The rate</h4>
+        <div id="ctlConv"></div>
+        <div class="kv" style="margin-top:20px" id="kvConv"></div>
+      </div>
+    </div>
+    <figcaption>Both lines start at zero and fan out in opposite directions. At a true 4% the gap is 0.4bp at 17 days, 4bp at six months and 8bp at a year, in opposite directions on the two conventions.</figcaption>
+  </figure>
     <p><b>The trap.</b> Take a jelly roll priced at exactly 4.00% on chapter 08's sheet — which <em>accrues</em> interest forward on the strike, K((1 + r/360)<sup>days</sup> − 1) — and run it back through the simple-rate formula and you get 4.007%, not 4.000%. Nothing is broken — you asked a different question. But if the pricer quotes compound and the screen you compare against quotes simple, you are looking at a spread that is partly a units artifact. Fix the convention before you argue about the number.</p>
     <p>Notice that the two compound conventions on this page point in opposite directions, which is the whole trap in miniature. The revcon formula above treats the interest as K minus its <em>discounted</em> value, and on that convention compound sits slightly above simple for positive rates and slightly <em>closer to zero</em> for negative ones. The jelly-roll sheet accrues forward instead, and there simple sits above compound. That is ordinary compounding behavior and not a sign error in the pricer, but it surprises people the first time a negative implied rate comes back less negative under compounding.</p>
   </div>
@@ -1369,7 +1412,65 @@ const s9={div:0.80,sig:.35,days:60,tEx:.6,rate:4.5};
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw7();draw9();}
+/* ══════════ 04 figure — the buy-write identity ══════════ */
+const sBw = { S: 100, days: 90, r: 4.5, v: 0.28 };
+function bwRow(K, p){ const T = p.days / 365, r = p.r / 100, c = bs(p.S, K, T, p.v, r, 0, true).price, pu = bs(p.S, K, T, p.v, r, 0, false).price, carry = K * (1 - Math.exp(-r * T));
+  return { c, p: pu, carry, rhs: pu + carry, signed: c - (p.S - K), floored: c - Math.max(p.S - K, 0), straddle: c + pu, combo: c - pu }; }
+(function(){
+  sliders(document.getElementById("ctlBw"), [
+    { id: "SBw", k: "S", lbl: "S", name: "Stock price", min: 80, max: 120, step: 0.5, fmt: v => v.toFixed(1) },
+    { id: "dBw", k: "days", lbl: "T", name: "Days to expiry", min: 7, max: 365, step: 1, fmt: v => v.toFixed(0) + "d" },
+    { id: "rBw", k: "r", lbl: "r", name: "Interest rate", min: 0, max: 8, step: 0.25, fmt: v => v.toFixed(2) + "%" }
+  ], sBw, () => draw(),"cBw");
+  window.drawBw = draw;
+  function draw(){
+    const xs = [], a = [], b = [], c = [];
+    for (let K = 80; K <= 120.001; K += 0.5){ const w = bwRow(K, sBw); xs.push(K); a.push(w.rhs); b.push(w.signed); c.push(w.floored); }
+    const top = Math.max.apply(null, a.concat(b, c)) * 1.1;
+    const o = Fig(document.getElementById("cvBw"), { h: 280, x0: 80, x1: 120, y0: 0, y1: top, pad: { l: 54, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => v.toFixed(1), 8, 5);
+    clip(o, () => { line(o, xs, c, C("--verm"), 2.2); line(o, xs, a, C("--blue"), 4); line(o, xs, b, C("--moss"), 1.8, [5, 4]); });
+    vline(o, sBw.S, C("--ochre"), "spot", [2, 4]);
+    const k = Math.round(sBw.S + 5), w = bwRow(k, sBw);
+    document.getElementById("kvBw").innerHTML = kvHTML([
+      ["Strike read, 5 above spot", k.toFixed(0)],
+      ["Put + carry", w.rhs.toFixed(2)],
+      ["Call − (S − K)", w.signed.toFixed(2)],
+      ["Call − max(S − K, 0)", w.floored.toFixed(2)],
+      ["Gap on the floored version", (w.rhs - w.floored).toFixed(2)],
+      ["Straddle / combo at that strike", w.straddle.toFixed(2) + " / " + w.combo.toFixed(2)]
+    ]);
+  }
+})();
+
+/* ══════════ 07 figure — simple against compound ══════════ */
+const sConv = { rate: 4.0, K: 100, days: 180 };
+function convGap(rate, K, d){ const q = rate / 100 / 360, Ir = K - K / Math.pow(1 + q, d), Ij = K * (Math.pow(1 + q, d) - 1);
+  return { rev: (simpleRate(Ir, K, d) - rate) * 100, jr: (simpleRate(Ij, K, d) - rate) * 100, Ir, Ij }; }
+(function(){
+  sliders(document.getElementById("ctlConv"), [
+    { id: "rC", k: "rate", lbl: "r", name: "True compound rate", min: 0.25, max: 8, step: 0.25, fmt: v => v.toFixed(2) + "%" },
+    { id: "dC", k: "days", lbl: "d", name: "Days read", min: 1, max: 720, step: 1, fmt: v => v.toFixed(0) }
+  ], sConv, () => draw(),"cConv");
+  window.drawConv = draw;
+  function draw(){
+    const xs = [], a = [], b = []; for (let d = 1; d <= 720; d += 3){ const g = convGap(sConv.rate, 100, d); xs.push(d); a.push(g.rev); b.push(g.jr); }
+    const m = Math.max(2, Math.max.apply(null, a.concat(b).map(Math.abs))) * 1.15;
+    const o = Fig(document.getElementById("cvConv"), { h: 280, x0: 0, x1: 720, y0: -m, y1: m, pad: { l: 54, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0) + "d", v => v.toFixed(0) + "bp", 6, 4);
+    clip(o, () => { line(o, xs, a, C("--blue"), 2.4); line(o, xs, b, C("--verm"), 2.4); });
+    vline(o, sConv.days, C("--ochre"), "read", [2, 4]);
+    const g = convGap(sConv.rate, 100, sConv.days);
+    document.getElementById("kvConv").innerHTML = kvHTML([
+      ["Days", sConv.days.toFixed(0)],
+      ["Revcon convention: simple − true", (g.rev >= 0 ? "+" : "") + g.rev.toFixed(2) + "bp"],
+      ["Jelly sheet: simple − true", (g.jr >= 0 ? "+" : "") + g.jr.toFixed(2) + "bp"],
+      ["Interest on a $100 strike, revcon / jelly", "$" + g.Ir.toFixed(4) + " / $" + g.Ij.toFixed(4)]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();drawBw();draw5();draw7();drawConv();draw9();}
 LAB.boot(drawAll);
 
 </script>

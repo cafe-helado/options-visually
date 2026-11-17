@@ -163,6 +163,9 @@
           </span>
         </div>
         <canvas id="cv2" height="290"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>The same roll (273 → 365 days) priced at every strike</h3>
+          <span class="legend" style="margin:0"><span><i class="swl" style="background:var(--blue)"></i>Jelly roll price</span><span><i class="swl" style="background:var(--grey)"></i>Interest part alone</span></span></div>
+        <canvas id="cv2b" height="190"></canvas>
       </div>
       <div class="rail panel">
         <h4>The market, and your assumption</h4>
@@ -170,7 +173,7 @@
         <div class="kv" style="margin-top:20px" id="kv2"></div>
       </div>
     </div>
-    <figcaption>Each bar is as tall as the dividends inside its interval: 60 cents where there is one ex-date, nothing where there is none, $1.20 where there are two.</figcaption>
+    <figcaption>Each bar is as tall as the dividends inside its interval: 60 cents where there is one ex-date, nothing where there is none, $1.20 where there are two. The lower panel prices one roll across strikes. It is a straight line: its slope is interest on the strike, about a cent per dollar of strike over these three months, and the gap below the grey line is the dividend and borrow. Strike changes the interest you lend at, never the dividend you are betting on.</figcaption>
   </figure>
 
   <div class="try">
@@ -393,6 +396,11 @@ function rows2(p){ const out = []; for (let i = 1; i < EXP.length; i++) out.push
     clip(o, () => { bars(o, R.map(r => r.a), R.map(r => r.b), R.map(r => r.imp), C("--blue")); });
     CAR.divDays.forEach(d => vline(o, d, C("--ochre"), null, [2, 4]));
     const q = R[4];
+    const dfd = Math.exp(-CAR.r * EXP[4]) - Math.exp(-CAR.r * EXP[5]), jlo = Math.min(0, jelly(EXP[4], EXP[5], 60, p)), jhi = Math.max(140 * dfd, jelly(EXP[4], EXP[5], 140, p));
+    const o2 = Fig(document.getElementById("cv2b"), { h: 190, x0: 60, x1: 140, y0: jlo - 0.1, y1: jhi * 1.08, pad: { l: 54, r: 14, t: 10 } });
+    axes(o2, v => v.toFixed(0), v => "$" + v.toFixed(2), 8, 4);
+    clip(o2, () => { const xs = [], a = [], b = []; for (let K = 60; K <= 140; K += 1){ xs.push(K); a.push(jelly(EXP[4], EXP[5], K, p)); b.push(K * (Math.exp(-CAR.r * EXP[4]) - Math.exp(-CAR.r * EXP[5]))); }
+      line(o2, xs, b, C("--grey"), 1.8, [5, 4]); line(o2, xs, a, C("--blue"), 2.6); });
     document.getElementById("kv2").innerHTML = kvHTML([
       ["Interval read below", q.a + "d → " + q.b + "d"],
       ["Near forward / far forward", fwd(EXP[4], p).toFixed(2) + " / " + fwd(EXP[5], p).toFixed(2)],

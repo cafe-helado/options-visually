@@ -1457,6 +1457,11 @@ PAGES["carry"] = () => {
   eq("  each conversion loses $116", b.conv * 100, -116, 0.6);
   eq("  500 of them: about $58,000", 500 * b.conv * 100, -58000, 200);
   yes("a raise pleases the conversion side", M.divShock(2, 100, M.P3, 0.9).conv > 0);
+  { const j1 = K => M.jelly(E[4], E[5], K, p), sl = (j1(120) - j1(80)) / 40, intr = Math.exp(-M.CAR.r * E[4]) - Math.exp(-M.CAR.r * E[5]);
+    eq("roll price is linear in strike: slope = discount-factor difference", sl, intr, 1e-12);
+    eq("  about a cent per dollar of strike", sl, 0.0107, 0.0006);
+    yes("  and the second difference is zero", Math.abs(j1(80) - 2 * j1(100) + j1(120)) < 1e-12);
+    eq("  the gap to the interest line is the PV of the dividend and borrow", 100 * intr - j1(100), Math.exp(-M.CAR.r * E[4]) * M.fwd(E[4], p) - Math.exp(-M.CAR.r * E[5]) * M.fwd(E[5], p), 1e-9); }
 };
 
 PAGES["converts"] = () => {
@@ -1521,7 +1526,7 @@ PAGES["converts"] = () => {
 PAGES["parity"] = () => {
   /* The page had no claims. These cover the revcon rate examples, the two
      conventions, the jelly-roll sheet values and the straddle/combo split. */
-  const M = load("parity.html", ["simpleRate", "compRate", "intFromComp", "legComp", "legSimple", "jrNewton", "s5", "s7"]);
+  const M = load("parity.html", ["simpleRate", "compRate", "intFromComp", "legComp", "legSimple", "jrNewton", "s5", "s7", "convGap", "bwRow", "sBw", "sConv"]);
   eq("commission: $0.25 an option is $0.005 a share over two legs", 0.25 / 100 * 2, 0.005, 1e-12);
   /* interest embedded in each quote, then the page's own rate function */
   eq("1: 0.3475, K25, 18d, div 0.40 -> 3.80%", M.simpleRate(0.40 - 0.3475 - 0.005, 25, 18), 3.80, 0.006);
@@ -1547,6 +1552,17 @@ PAGES["parity"] = () => {
   /* straddle 7.80 and combo 5.42 split into call and put */
   eq("call = (7.80 + 5.42) / 2 = 6.61", (7.80 + 5.42) / 2, 6.61, 1e-9);
   eq("put = (7.80 - 5.42) / 2 = 1.19", (7.80 - 5.42) / 2, 1.19, 1e-9);
+  { const w = M.bwRow(105, M.sBw), g = d => M.convGap(4, 100, d);
+    yes("buy-write figure defaults", M.sBw.S === 100 && M.sBw.days === 90 && M.sBw.r === 4.5);
+    eq("signed version holds exactly", w.signed, w.rhs, 1e-9);
+    eq("  8.93 at the 105 strike", w.rhs, 8.93, 0.006);
+    eq("floored version reads 3.93", w.floored, 3.93, 0.006);
+    eq("  off by K - S", w.rhs - w.floored, 5, 1e-9);
+    yes("in the money all three agree", Math.abs(M.bwRow(95, M.sBw).floored - M.bwRow(95, M.sBw).rhs) < 1e-9);
+    eq("4%, 17 days: 0.4bp", Math.abs(g(17).rev), 0.4, 0.05);
+    eq("4%, six months: 4bp", Math.abs(g(180).rev), 4, 0.05);
+    eq("4%, a year: 8bp", Math.abs(g(365).rev), 8, 0.25);
+    yes("opposite directions: revcon simple below true, jelly simple above", g(180).rev < 0 && g(180).jr > 0); }
 };
 
 PAGES["binomial"] = () => {
