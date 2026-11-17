@@ -1022,8 +1022,8 @@ PAGES["workbook"] = () => {
   const M = load("workbook.html", ["__wb"]);
   const W = M.__wb, all = [];
   W.forEach(e => e.p.forEach((p, i) => all.push([e.n + "." + (i + 1), p])));
-  yes("twenty-one sections (pages 01-20 and 22), every one with a reading list and at least three problems",
-    W.length === 21 && W.every(e => e.r.length >= 1 && e.p.length >= 3));
+  yes("twenty-four sections, one per page, every one with a reading list and at least three problems",
+    W.length === 24 && W.every(e => e.r.length >= 1 && e.p.length >= 3));
   yes("every page link points at a file that exists",
     W.every(e => fs.existsSync(path.join(ROOT, e.href))));
   yes("every numeric answer is finite", all.every(([, p]) => !p.f || isFinite(p.f())));
@@ -1052,6 +1052,17 @@ PAGES["workbook"] = () => {
     eq("22.2 weighted vega is -$45,000", e.p[1].f(), -45000, 1e-6);
     eq("22.3 two-day vol by summing two correlated returns", e.p[2].f(), 0.20 * Math.sqrt((1 + 1 + 2 * 0.2) / 2), 1e-12);
     eq("22.4 break-even vol move is 0.60 points", e.p[3].f(), 0.60, 1e-12); }
+  { const P = n => W.find(x => x.n === n).p;
+    yes("sections run 01 to 24 in order", W.map(x => +x.n).every((n, i) => n === i + 1));
+    eq("21.1 put-writing year is +4.5%", P("21")[0].f(), 0.045, 1e-12);
+    eq("21.3 tail hedge nets -11% over eight years", P("21")[2].f(), -0.11, 1e-12);
+    eq("23.1 carry 3.38%", P("23")[0].f() * 100, 3.38, 0.006);
+    eq("23.3 implied dividend about $0.59", P("23")[2].f(), 0.59, 0.006);
+    eq("23.4 conversions lose $46,000", P("23")[3].f(), -46000, 1e-6);
+    eq("24.1 premium 27.9%", P("24")[0].f() * 100, 27.9, 0.06);
+    eq("24.2 carry about -$6.90", P("24")[1].f(), -6.9, 0.03);
+    eq("24.3 edge about $16.20", P("24")[2].f(), 16.2, 0.06);
+    eq("24.4 break-even 32.6%", P("24")[3].f() * 100, 32.6, 0.06); }
 };
 
 PAGES["tools"] = () => {
@@ -1382,11 +1393,72 @@ PAGES["converts"] = () => {
   yes("delta shrinks as the stock falls", M.cbDelta(56, 0.35) < M.cbDelta(80, 0.35));
 };
 
+PAGES["parity"] = () => {
+  /* The page had no claims. These cover the revcon rate examples, the two
+     conventions, the jelly-roll sheet values and the straddle/combo split. */
+  const M = load("parity.html", ["simpleRate", "compRate", "intFromComp", "legComp", "legSimple", "jrNewton", "s5", "s7"]);
+  eq("commission: $0.25 an option is $0.005 a share over two legs", 0.25 / 100 * 2, 0.005, 1e-12);
+  /* interest embedded in each quote, then the page's own rate function */
+  eq("1: 0.3475, K25, 18d, div 0.40 -> 3.80%", M.simpleRate(0.40 - 0.3475 - 0.005, 25, 18), 3.80, 0.006);
+  eq("2: 0.36, K25, 17d, div 0.40 -> 2.96%", M.simpleRate(0.40 - 0.36 - 0.005, 25, 17), 2.96, 0.006);
+  eq("3: 0.347, K25, 17d -> 4.07%", M.simpleRate(0.40 - 0.347 - 0.005, 25, 17), 4.07, 0.006);
+  eq("4: reverse 0.015, K10, 39d -> -1.85%", M.simpleRate(-0.015 - 0.005, 10, 39), -1.85, 0.006);
+  eq("5: offer 0.3171, K300, 38d, div 0.95, no comm -> 4.00%", M.simpleRate(0.3171 + 0.95, 300, 38), 4.00, 0.006);
+  eq("6: HTB credit 0.65, K20, 28d -> 41.5%", M.simpleRate(0.65 - 0.005, 20, 28), 41.5, 0.06);
+  eq("  interest is 0.645", 0.65 - 0.005, 0.645, 1e-12);
+  eq("the additive shortcut returns 64.8% on example 2", M.simpleRate(0.36 + 0.40 + 0.005, 25, 17), 64.8, 0.06);
+  eq("lending at 2.96% against 3.39% funding loses 43bp", (3.39 - 2.96) * 100, 43, 1e-9);
+  eq("17-day example, simple: 2.9647%", M.simpleRate(0.035, 25, 17), 2.9647, 0.00006);
+  eq("17-day example, compound: 2.9669%", M.compRate(0.035, 25, 17), 2.9669, 0.00006);
+  yes("  about a fifth of a basis point apart", Math.abs(M.compRate(0.035, 25, 17) - M.simpleRate(0.035, 25, 17)) * 100 < 0.3);
+  eq("a 12% convert against 15% borrow is a three-point loss", 15 - 12, 3, 0);
+  /* jelly roll sheet values, each built leg by leg and by a second route (direct compounding) */
+  const leg = (K, d, r) => K * (Math.pow(1 + r / 100 / 360, d) - 1);
+  eq("A: 75 -> 70, no dividend: 0.2165", M.legComp(70, 31, 4, 0, 0) - M.legComp(75, 3, 4, 0, 0), 0.2165, 0.00006);
+  eq("  by direct compounding", leg(70, 31, 4) - leg(75, 3, 4), M.legComp(70, 31, 4, 0, 0) - M.legComp(75, 3, 4, 0, 0), 1e-12);
+  eq("  Newton recovers 4.00% from it", M.jrNewton(leg(70, 31, 4) - leg(75, 3, 4), 70, 31, 75, 3, 0, 0), 4.00, 1e-6);
+  yes("  the hand-computed 0.21569 is the wrong one", Math.abs(0.21569 - (leg(70, 31, 4) - leg(75, 3, 4))) > 0.0005);
+  yes("default jelly roll is example A", M.s7.Kn === 75 && M.s7.dn === 3 && M.s7.Kf === 70 && M.s7.df === 31 && M.s7.rate === 4.0);
+  /* straddle 7.80 and combo 5.42 split into call and put */
+  eq("call = (7.80 + 5.42) / 2 = 6.61", (7.80 + 5.42) / 2, 6.61, 1e-9);
+  eq("put = (7.80 - 5.42) / 2 = 1.19", (7.80 - 5.42) / 2, 1.19, 1e-9);
+};
+
+PAGES["binomial"] = () => {
+  /* Read in full on 2026-11-17 with nothing found; these pin the numbers. */
+  const M = load("binomial.html", ["crrParams", "lattice", "treePrice", "stepLimit", "bs"]);
+  const T = (N, am) => M.treePrice(100, 100, 1, 0.30, 0.05, N, true, !!am), BS = M.bs(100, 100, 1, 0.30, 0.05, 0, true);
+  eq("one step: half a share, 45 borrowed, costs 5", 0.5 * 100 - 45, 5, 0);
+  eq("  delta = (10 - 0) / (110 - 90)", (10 - 0) / (110 - 90), 0.5, 0);
+  eq("Black-Scholes 14.2312", BS.price, 14.2312, 0.00006);
+  eq("one step 16.9640", T(1), 16.9640, 0.00006);
+  eq("ten steps 13.9408", T(10), 13.9408, 0.00006);
+  eq("a hundred 14.2018", T(100), 14.2018, 0.00006);
+  eq("sixteen hundred 14.2294", T(1600), 14.2294, 0.00006);
+  eq("doubling N halves the error (400 -> 800)", (T(400) - BS.price) / (T(800) - BS.price), 2.0, 0.01);
+  eq("N=40 low by 0.0734", T(40) - BS.price, -0.0734, 0.00006);
+  eq("N=41 high by 0.0672", T(41) - BS.price, 0.0672, 0.00006);
+  eq("25 steps off by +0.1103", T(25) - BS.price, 0.1103, 0.00006);
+  eq("25/26 average off by -0.0012", (T(25) + T(26)) / 2 - BS.price, -0.0012, 0.00006);
+  eq("N=400 raw -0.0074", T(400) - BS.price, -0.0074, 0.00006);
+  eq("N=400 averaged -0.0002", (T(400) + T(401)) / 2 - BS.price, -0.0002, 0.00006);
+  const pe = M.treePrice(80, 100, 1, 0.30, 0.10, 500, false, false), pa = M.treePrice(80, 100, 1, 0.30, 0.10, 500, false, true);
+  eq("European put 16.24", pe, 16.2413, 0.01);
+  eq("American put 20.27", pa, 20.2680, 0.01);
+  eq("  premium 24.8% of the European value", (pa - pe) / pe * 100, 24.8, 0.15);
+  eq("American call = European call with no dividend", T(200, true), T(200, false), 1e-9);
+  eq("p = 1.0761 at 10 vol, 8% rates, two years, one step", M.crrParams(0.10, 0.08, 2).p, 1.0761, 0.00006);
+  eq("p = 1.3867 at four years", M.crrParams(0.10, 0.08, 4).p, 1.3867, 0.00006);
+  eq("p = 1.5388 at 5 vol, 10% rates, one year", M.crrParams(0.05, 0.10, 1).p, 1.5388, 0.00006);
+  eq("one-step example: p = 0.5 at zero rates", (1 - 0.9) / (1.1 - 0.9), 0.5, 1e-12);
+  yes("step limit is (sigma/r)^2", Math.abs(M.stepLimit(0.10, 0.08) - Math.pow(0.10 / 0.08, 2)) < 1e-9);
+};
+
 PAGES["program"] = () => {
   /* The program's drills carry computed keys. Each is re-derived here a
      different way from the one the page uses, over a few hundred deals. */
   const M = load("program.html", ["seed", "deal", "DRILLS", "SPOT", "STN", "gradeOf", "isRight", "boxOf", "dueList",
-    "gateOK", "stationState", "summary", "loopLines", "GAP", "DAY", "FEE", "bs", "pinRisk", "poolShare", "parseLog", "betterSprint", "SPRINT"]);
+    "gateOK", "stationState", "summary", "loopLines", "GAP", "DAY", "FEE", "bs", "pinRisk", "poolShare", "parseLog", "betterSprint", "SPRINT", "gradesByDay"]);
   const N = 400, each = (type, f) => { let bad = 0; for (let i = 1; i <= N; i++) { M.seed(i * 7919); if (!f(M.deal(type))) bad++; } return bad; };
   eq("seven stations", M.STN.length, 7, 0);
   yes("every gate names a real drill", M.STN.every(s => s.gate.every(g => g.every(t => M.DRILLS[t]))));
@@ -1420,6 +1492,9 @@ PAGES["program"] = () => {
 
   /* the second batch: carry, exercise, assignment, hedging behavior, games */
   eq("forty drills", Object.keys(M.DRILLS).length, 40, 0);
+  { const now = 1e12, DAY = 864e5, G = M.gradesByDay([{ t: now - 1000, g: "A" }, { t: now - 2000, g: "F" }, { t: now - DAY - 5, g: "C" }, { t: now - 13.5 * DAY, g: "B" }, { t: now - 15 * DAY, g: "A" }], now);
+    yes("grades chart: 14 days, today last, older reps dropped", G.length === 14 && G[13].ab === 1 && G[13].f === 1 && G[12].c === 1 && G[0].ab === 1
+      && G.reduce((a, d) => a + d.ab + d.c + d.f, 0) === 4); }
   eq("peer group: the planted name is the one found, and the high-vol decoy never is", each("peers", d => { const q = d.q;
     return q.planted < 0 ? d.ans.nothing : !d.ans.nothing && d.ans.k === q.planted && d.ans.k !== q.decoy && (d.ans.c === 0) === (q.mult > 1); }), 0, 0);
   eq("…and the answer follows from the numbers on the screen alone", each("peers", d => { const r = d.q.iv.map((x, i) => x / d.q.rv[i]), o = r.slice().sort((a, b) => a - b),

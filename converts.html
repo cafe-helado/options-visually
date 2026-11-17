@@ -235,6 +235,8 @@
           </span>
         </div>
         <canvas id="cv3" height="310"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>The assumption: credit spread against the stock move</h3></div>
+        <canvas id="cv3b" height="170"></canvas>
       </div>
       <div class="rail panel">
         <h4>The link</h4>
@@ -242,7 +244,7 @@
         <div class="kv" style="margin-top:20px" id="kv3"></div>
       </div>
     </div>
-    <figcaption>The right half is unchanged. The left half folds down: the position that was long gamma on paper is short the stock's bad outcomes.</figcaption>
+    <figcaption>The lower panel is the whole assumption: a spread that climbs in a straight line as the stock falls and does nothing as it rises. Real spreads sit still for months and then gap. In the upper panel the right half is unchanged. The left half folds down: the position that was long gamma on paper is short the stock's bad outcomes.</figcaption>
   </figure>
 
   <div class="prose">
@@ -430,6 +432,9 @@ const S3 = 80, SP3 = 0.03;
     axes(o, v => (v > 0 ? "+" : "") + v.toFixed(0) + "%", v => d0(v), 8, 5);
     clip(o, () => { curve(o, m => hedgedCb(S3, p.vol, SP3, m / 100, 0), C("--grey"), 2.2); curve(o, f, C("--blue"), 2.6); });
     vline(o, 0, C("--ochre"), "hedged here", [2, 4]);
+    const o2 = Fig(document.getElementById("cv3b"), { h: 170, x0: -40, x1: 40, y0: 0, y1: Math.max(800, (SP3 + linkSpread(-.4, p.k)) * 1e4 * 1.1), pad: { l: 58, r: 14, t: 10 } });
+    axes(o2, v => (v > 0 ? "+" : "") + v.toFixed(0) + "%", v => v.toFixed(0) + "bp", 8, 3);
+    clip(o2, () => { curve(o2, () => SP3 * 1e4, C("--grey"), 2); curve(o2, m => (SP3 + linkSpread(m / 100, p.k)) * 1e4, C("--blue"), 2.6); });
     const sp = SP3 + linkSpread(-.3, p.k);
     document.getElementById("kv3").innerHTML = kvHTML([
       ["Spread now", (SP3 * 1e4).toFixed(0) + "bp"],

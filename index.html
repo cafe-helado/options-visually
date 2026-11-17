@@ -77,6 +77,17 @@
 .colophon{max-width:1180px;margin:0 auto;padding:0 34px 90px}
 .colophon p{max-width:66ch;color:var(--ink2);font-weight:300;font-size:15.5px;line-height:1.65}
 @media(max-width:760px){.colophon{padding:0 16px 70px}}
+.map{max-width:1180px;margin:34px auto 8px;padding:0 24px}
+.map h2{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:500;margin:0 0 14px}
+.map .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.map .idea{background:var(--card);border:1px solid var(--hair);border-top:3px solid var(--blue);border-radius:2px;padding:14px 13px 12px}
+.map .idea .k{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--blue);letter-spacing:.08em}
+.map .idea h3{font-family:'Fraunces',serif;font-size:15.5px;line-height:1.22;margin:5px 0 10px;font-weight:700}
+.map .idea a{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.35;color:var(--ink);text-decoration:none;padding:5px 0;border-top:1px solid var(--hair)}
+.map .idea a b{color:var(--grey);font-weight:500;margin-right:6px}
+.map .idea a:hover{color:var(--blue)}
+.map .idea.pr{border-top-color:var(--moss)}
+.map .note{font-family:'Newsreader',serif;font-size:15px;color:var(--grey);margin:12px 0 0}
 </style>
 </head>
 <body>
@@ -86,6 +97,21 @@
   <h1>Options, <em>visually</em></h1>
   <p class="sub">Derivations you can run. Each page builds its subject out of simulation first and names the formula afterwards, on the theory that watching something happen beats being told it is true.</p>
   <p class="sub" style="margin-top:14px"><a href="program.html" style="color:var(--blue)">New here, or training for a seat? Start with the program &rarr;</a></p>
+</div>
+
+<div class="map">
+  <h2>The series on one screen: seven ideas, and the pages that build each</h2>
+  <div class="cols">
+    <div class="idea"><div class="k">1</div><h3>A payoff is a bet on a distribution</h3><a href="black-scholes.html"><b>01</b>Price from paths</a><a href="binomial.html"><b>12</b>One step, two outcomes</a></div>
+    <div class="idea"><div class="k">2</div><h3>Call minus put is the forward</h3><a href="parity.html"><b>07</b>The parity machine</a><a href="forwards.html"><b>13</b>Cost of carry</a><a href="early-exercise.html"><b>08</b>When to exercise</a><a href="carry.html"><b>23</b>Dividends and borrow</a></div>
+    <div class="idea"><div class="k">3</div><h3>Vol is the price, and &sigma;&radic;T is the ruler</h3><a href="screen.html"><b>17</b>Reading the screen</a><a href="rulers.html"><b>18</b>Two rulers</a><a href="tools.html"><b>TK</b>Vol to moves</a></div>
+    <div class="idea"><div class="k">4</div><h3>Hedged, it is realized against implied</h3><a href="atlas.html"><b>19</b>The Greek atlas</a><a href="real-world.html"><b>15</b>Where it breaks</a><a href="dynamics.html"><b>22</b>When the surface moves</a><a href="converts.html"><b>24</b>Vol through a bond</a></div>
+    <div class="idea"><div class="k">5</div><h3>The surface prices each piece of the distribution</h3><a href="surface.html"><b>02</b>Skew and density</a><a href="catalyst.html"><b>03</b>Events</a><a href="structures.html"><b>04</b>Structures</a><a href="spreading.html"><b>14</b>Choosing a spread</a><a href="variance.html"><b>09</b>Variance</a><a href="dispersion.html"><b>10</b>Correlation</a></div>
+    <div class="idea"><div class="k">6</div><h3>Edge is what is left after costs</h3><a href="microstructure.html"><b>05</b>Spreads and flow</a><a href="execution.html"><b>06</b>Hedging and execution</a><a href="merger.html"><b>20</b>Deals</a><a href="playbook.html"><b>21</b>Strategies that get run</a></div>
+    <div class="idea"><div class="k">7</div><h3>Size it, and run the book</h3><a href="book.html"><b>11</b>Risk, P&amp;L, the columns</a><a href="tools.html"><b>TK</b>Kelly sizing</a></div>
+    <div class="idea pr"><div class="k">&check;</div><h3>Practice</h3><a href="program.html"><b>PG</b>The program</a><a href="questions.html"><b>16</b>Forty questions</a><a href="workbook.html"><b>WB</b>Problem sets</a></div>
+  </div>
+  <p class="note">Read left to right if you are starting out: each idea needs the ones before it. The full descriptions follow in page order.</p>
 </div>
 
 <div class="shelf">
@@ -376,7 +402,7 @@
     <div>
       <h3>The Workbook</h3>
       <p class="subj">Problems and reading for every page</p>
-      <p>A printable problem set for pages 01 to 20 and 22, each matched to the chapters of Natenberg, Sinclair, Hull, Gatheral, Bennett and Taleb that cover the same ground. Numeric answers are computed by the same engine as the pages, so the key cannot drift from the arithmetic, and the coding-minded pages carry a build-it exercise in Python.</p>
+      <p>A printable problem set for all twenty-four pages, each matched to the chapters of Natenberg, Sinclair, Hull, Gatheral, Bennett and Taleb that cover the same ground. Numeric answers are computed by the same engine as the pages, so the key cannot drift from the arithmetic, and the coding-minded pages carry a build-it exercise in Python.</p>
       <div class="tags"><span>Problem sets</span><span>Reading map</span><span>Printable</span><span>Build it</span></div>
     </div>
     <span class="st live">Live &rarr;</span>

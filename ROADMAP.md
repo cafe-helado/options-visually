@@ -1,6 +1,6 @@
 # Roadmap
 
-Eleven pages. Each needs a result that is hard to believe from a description and
+Twenty-four pages and three companions. Each needs a result that is hard to believe from a description and
 obvious once you have watched it — if a page has no such moment, it is an article,
 not a page in this series.
 

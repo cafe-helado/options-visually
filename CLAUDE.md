@@ -85,7 +85,7 @@ mkpage.py             assembles a page from a body fragment + a script fragment
 build.py              inlines assets into dist/ for standalone distribution
 check.js              structural pre-flight; run before every commit
 verify.js             numeric pre-flight: does the prose match what the pages compute
-ROADMAP.md            all eleven pages, with verified numbers for unbuilt ones
+ROADMAP.md            every page, with its verified numbers
 STYLE-GUIDE.md        design tokens, chapter anatomy, non-negotiables
 README.md             publishing and how to add a page
 ```
@@ -178,7 +178,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all twenty-four pages are live, plus the program, the workbook and the toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
+All twenty-four pages are built, plus the program, the workbook and the toolkit. What is not done: five topics listed at the end of ROADMAP.md (capital and margin, listed market structure, dispersion weighting, variance-swap mark-to-market, surface fitting), and verify claims for forwards, microstructure and real-world, which still have none. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a

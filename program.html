@@ -169,6 +169,9 @@
     </div>
   </div>
   <div class="panel" style="margin-top:14px">
+    <h4>Reps by day, last two weeks</h4>
+    <canvas id="cvGrades" height="170"></canvas>
+    <p class="quiet" style="margin:6px 0 16px"><i class="swl" style="background:var(--moss)"></i> A or B &nbsp; <i class="swl" style="background:var(--ochre)"></i> C &nbsp; <i class="swl" style="background:var(--verm)"></i> F</p>
     <div id="repHost"></div>
     <div class="btnrow" style="margin-top:14px"><button class="act ghost" data-act="print" data-what="report">Print the readiness report</button></div>
   </div>
@@ -910,7 +913,18 @@ function renderTrack(){
   /* check.js reads href out of string literals, so links are set after rendering */
   Array.prototype.forEach.call(document.getElementById("trackHost").querySelectorAll("a[data-h]"), el => el.setAttribute("href", el.getAttribute("data-h")));
 }
+/* grades by day, last 14 days: stacked A/B, C, F. Painted once per render, never animated. */
+function gradesByDay(reps, now){ const DAY = 864e5, out = []; for (let i = 13; i >= 0; i--) out.push({ ab: 0, c: 0, f: 0 });
+  reps.forEach(x => { const k = 13 - Math.floor((now - x.t) / DAY); if (k < 0 || k > 13) return; const o = out[k]; if (x.g === "A" || x.g === "B") o.ab++; else if (x.g === "C") o.c++; else o.f++; });
+  return out; }
+function drawGrades(){ const cv = document.getElementById("cvGrades"); if (!cv || typeof Fig !== "function") return;
+  const D = gradesByDay(L.reps, Date.now()), mx = Math.max(4, Math.max.apply(null, D.map(d => d.ab + d.c + d.f)));
+  const o = Fig(cv, { h: 170, x0: 0, x1: 14, y0: 0, y1: mx * 1.1, pad: { l: 34, r: 8, t: 8, b: 22 } });
+  axes(o, v => v >= 14 ? "today" : "", v => v.toFixed(0), 14, 4);
+  const g = o.g; g.save(); D.forEach((d, i) => { let y = 0; [[d.ab, "--moss"], [d.c, "--ochre"], [d.f, "--verm"]].forEach(([n, col]) => { if (!n) return;
+    g.fillStyle = C(col); g.globalAlpha = .88; g.fillRect(o.X(i + .14), o.Y(y + n), o.X(i + .86) - o.X(i + .14), o.Y(y) - o.Y(y + n)); y += n; }); }); g.restore(); }
 function renderLedger(){
+  drawGrades();
   const now = Date.now(), s = summary(L.reps, L.real, now), due = dueList(L.reps, now);
   document.getElementById("dueHost").innerHTML = due.length ? due.slice(0, 8).map(x => '<button class="act ghost" data-act="go" data-type="' + x.t + '">' + DRILLS[x.t][2] + " · box " + x.b + "</button>").join("")
     : '<span class="quiet">Nothing is due. Deal from the station you are on.</span>';
