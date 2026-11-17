@@ -23,7 +23,7 @@
    this file — the inlined dist/ copies are meant to be opened from disk and
    register nothing.
    ═══════════════════════════════════════════════════════════════════════ */
-const CACHE = "options-visually-v12";
+const CACHE = "options-visually-v13";
 const FONTS = "options-visually-fonts";
 
 /* Every URL is relative, so the worker works at / on a dev server and at

@@ -1698,6 +1698,21 @@ PAGES["real-world"] = () => {
   eq("125 strike: 213% high", er(125), 213, 0.5);
   eq("  on an option worth 0.37", mk(125), 0.37, 0.006);
   eq("at-the-money error about 2%", Math.abs(er(100)), 2, 0.7);
+  console.log("    ch02 · hedging error, the figure's opening run (seeded)");
+  { const H = load("real-world.html", ["s2"]); H.__rows.length = 0; global.draw2();
+    const r = k => H.__rows.find(x => x[0] === k)[1];
+    eq("diffusion sd at 8 rebalances 2.90", parseFloat(r("Diffusion sd at N=8")), 2.90, 0.006);
+    eq("  at 256: 0.535", parseFloat(r("  at N=256")), 0.535, 0.0006);
+    eq("  improvement 5.4x", parseFloat(H.__rows.filter(x => x[0] === "  improvement")[0][1]), 5.4, 0.06);
+    eq("jumps at 8: 3.50", parseFloat(r("With jumps at N=8")), 3.50, 0.006);
+    eq("  at 256: 1.85", parseFloat(H.__rows.filter(x => x[0] === "  at N=256")[1][1]), 1.85, 0.006);
+    eq("  improvement 1.9x", parseFloat(H.__rows.filter(x => x[0] === "  improvement")[1][1]), 1.9, 0.06);
+    eq("diagnostic, diffusion 8.2 -> 8.6", parseFloat(r("Diagnostic, diffusion").split("→")[1]), 8.6, 0.06);
+    eq("  starts at 8.2", parseFloat(r("Diagnostic, diffusion")), 8.2, 0.06);
+    eq("diagnostic, jumps 9.9 -> 29.7", parseFloat(r("Diagnostic, jumps").split("→")[1]), 29.7, 0.06);
+    eq("sqrt 32 = 5.66", Math.sqrt(32), 5.66, 0.006);
+    const imp = [0, 1, 3, 4].map(k => { H.__rows.length = 0; global.seed2(k); return parseFloat(H.__rows.filter(x => x[0] === "  improvement")[1][1]); });
+    yes("jumps cap the improvement below 2.1x on four more runs", imp.every(x => x < 2.1)); }
 };
 
 PAGES["microstructure"] = () => {
@@ -1732,6 +1747,26 @@ PAGES["microstructure"] = () => {
     yes("pro-rata fill never falls as displayed size rises", mono);
     eq("sweep of 1,000, showing 400: filled 400", A.allocate(1000, 400, "pr"), 400, 0);
     eq("check: quoting 500, a sweep larger than the price fills all 500", A.allocate(1000, 500, "pr"), 500, 0); }
+  console.log("    ch03 · quoting width, closed form");
+  { const Q = load("microstructure.html", ["ncdf", "npdf", "s3"]), f = Q.s3.informed, e = Q.s3.edge, n = Q.s3.arrivals;
+    const ex = w => { const a = w / e, pI = 2 * (1 - Q.ncdf(a)), eI = w * pI - e * 2 * Q.npdf(a), pU = Math.exp(-w / 0.8); return { fills: n * (f * pI + (1 - f) * pU), pnl: n * (f * eI + (1 - f) * w * pU) }; };
+    eq("0.20 wide: 321 fills of 400", ex(0.2).fills, 321, 0.5);
+    eq("  loses 30.8 (prose said 31.3, one simulated run)", ex(0.2).pnl, -30.8, 0.06);
+    eq("3.50 wide: 2.38 per fill (prose said 2.41)", ex(3.5).pnl / ex(3.5).fills, 2.38, 0.006);
+    eq("  about six fills", ex(3.5).fills, 6, 0.5);
+    let bw = 0, bp = -1e9; for (let w = 0.1; w <= 4; w += 0.001) { const p = ex(w).pnl; if (p > bp) { bp = p; bw = w; } }
+    eq("optimum around 1.2", bw, 1.2, 0.05); }
+  console.log("    ch05 · pinning, the figure's opening run (seeded)");
+  { const P = load("microstructure.html", ["s5"]); P.__rows.length = 0; global.draw5();
+    const r = k => parseFloat(P.__rows.find(x => x[0] === k)[1]);
+    eq("unhedged mean distance 2.58", r("Unhedged |S−K|"), 2.58, 0.006);
+    eq("long gamma 1.73", r("Long gamma"), 1.73, 0.006);
+    eq("short gamma 3.57", r("Short gamma"), 3.57, 0.006);
+    eq("within 50 cents, unhedged 11.8%", r("Within 50¢, unhedged"), 11.8, 0.06);
+    eq("  long gamma 24.9%", r("Within 50¢, long Γ"), 24.9, 0.06);
+    eq("  short gamma 3.9%", r("Within 50¢, short Γ"), 3.9, 0.06);
+    const runs = [1, 2, 3, 4, 5, 6, 7].map(k => { P.__rows.length = 0; global.seed5(k); return [r("Long gamma"), r("Short gamma"), r("Unhedged |S−K|")]; });
+    yes("the ordering holds on seven more runs", runs.every(([l, s, u]) => l < u && u < s)); }
 };
 
 PAGES["capital"] = () => {

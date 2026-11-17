@@ -208,7 +208,7 @@
   <div class="prose">
     <p class="lead">Adverse selection is usually defined and rarely felt. Here it is a number you can move.</p>
     <p>You quote a two-sided market some number of vol points wide around your fair value. Flow arrives. <b>Uninformed traders</b> hit your quote because they want the option — the tighter you are, the more of them you win. <b>Informed traders</b> only trade when your quote is wrong by more than their edge, which means every fill from them is a fill you did not want.</p>
-    <p>Quote too tight and the arithmetic is brutal. At a 0.20 vol-point half-width you get filled on <b>321</b> of 400 arrivals and lose <b>31.3</b> — you are winning enormous volume and most of the volume that matters is picking you off. Widen and volume collapses while P&amp;L per fill climbs; at 3.50 wide you make <b>2.41 per fill</b> and only trade six times.</p>
+    <p>Quote too tight and the arithmetic is brutal. At a 0.20 vol-point half-width you get filled on <b>321</b> of 400 arrivals and lose <b>30.8</b> — you are winning enormous volume and most of the volume that matters is picking you off. Widen and volume collapses while P&amp;L per fill climbs; at 3.50 wide you make <b>2.38 per fill</b> and only trade six times. These are expected values; the figure averages 500 simulated sessions and lands within a few tenths of them.</p>
     <p>The optimum sits in between, around <b>1.2 vol points</b> in these settings, and it is the same shape as page 06's execution problem viewed from the other side of the trade — a quantity you want more of, against a cost that grows with getting it.</p>
     <p>Watch the informed percentage column as you widen. It <em>rises</em>: informed traders are the last to be deterred, because they only trade when they have an edge big enough to cross your spread. You cannot widen your way out of <span class="term" data-t="Adverse selection" data-def="The cost of being filled by someone who knew more than you. It is not a fee — it is the systematic tendency of your fills to happen just before the price moves against you.">adverse selection</span>, only price it.</p>
   </div>
@@ -320,7 +320,7 @@
     <p class="lead">The story goes: dealers are long gamma, so they sell rallies and buy dips to stay hedged, which dampens the market. Or they are short gamma, so they buy rallies and sell dips, which amplifies it. Both halves of that are correct as descriptions of hedging behavior.</p>
     <p>What is usually left out is that hedging flow only moves the market <b>if it is large relative to everything else trading</b>. That is a condition, it is quantitative, and it is frequently not met.</p>
     <p>The simulation makes the dependence explicit by putting price impact on a slider. At low impact the three cases — no hedging, long-gamma dealers, short-gamma dealers — are statistically indistinguishable. My first attempt at this figure used an impact coefficient small enough that the effect vanished entirely into the noise, and that failure is worth more than the eventual success: <b>the mechanism is real and its magnitude is an empirical question with a frequently unimpressive answer.</b></p>
-    <p>Raise impact enough and the textbook result appears cleanly. Long-gamma dealers pull spot toward the strike — mean distance falls from <b>2.46 to 1.50</b>, and the share finishing within fifty cents rises from <b>12.2% to 19.4%</b>. Short-gamma dealers push it away: mean distance <b>4.41</b>, with only <b>0.8%</b> finishing near the strike.</p>
+    <p>At the impact the figure opens with, the textbook result appears cleanly. Long-gamma dealers pull spot toward the strike — mean distance falls from <b>2.58</b> to <b>1.73</b>, and the share finishing within fifty cents roughly doubles, from <b>11.8%</b> to <b>24.9%</b>. Short-gamma dealers push it away: mean distance <b>3.57</b>, with only <b>3.9%</b> finishing near the strike. Those are the opening run; press for another and each moves by a few percent, but the ordering never changes.</p>
     <p>Two honest caveats to carry alongside any dealer-positioning argument. <b>Positioning is inferred, not observed</b> — nobody publishes net dealer gamma, and the estimates rest on assumptions about who initiated each trade. And the flows compete with everything else in the market, so the same nominal gamma matters enormously on a quiet expiration Friday in a single name and not at all on a heavy day in an index.</p>
   </div>
 
@@ -910,8 +910,11 @@ const s5={impact:.0006,gamma:4000,steps:80,noise:.35};
     const a=[];for(let i=0;i<n;i++)a.push(sim(G,imp,false));
     return {st:stat(a),near:a.filter(x=>x<0.5).length/a.length,a};
   }
+  let RUN5=0;
   window.draw5=draw;
-  function draw(){
+  window.seed5=k=>{RUN5=k;draw();};
+  function draw(){ withSeed(20261117 + RUN5, drawInner); }
+  function drawInner(){
     const runs=900;
     const flat=batch(0,s5.impact,runs),
           lng=batch(s5.gamma,s5.impact,runs),
@@ -975,8 +978,8 @@ const s5={impact:.0006,gamma:4000,steps:80,noise:.35};
       ["Effect","friction, not attraction"]
     ]);
   }
-  document.getElementById("run5").addEventListener("click",draw);
-  document.getElementById("run6").addEventListener("click",drawPaths);
+  document.getElementById("run5").addEventListener("click",()=>{RUN5++;draw();});
+  document.getElementById("run6").addEventListener("click",()=>{RUN5++;withSeed(20261117 + RUN5, drawPaths);});
   sliders(document.getElementById("ctl6"),[
     {id:"g6",k:"gamma",lbl:"Γ",name:"Dealer gamma",min:0,max:12000,step:200,fmt:v=>(v/1000).toFixed(1)+"k"},
     {id:"i6",k:"impact",lbl:"κ",name:"Price impact",min:0,max:.002,step:.00002,fmt:v=>(v*1e4).toFixed(2)+"e-4"}
