@@ -1041,7 +1041,11 @@ PAGES["program"] = () => {
     const d = M.deal(t); if (!d.key || !d.template || !(d.sec > 0) || /NaN|undefined/.test(d.key + d.html)) return false; } return true; }));
 
   /* the second batch: carry, exercise, assignment, hedging behavior, games */
-  eq("thirty-seven drills", Object.keys(M.DRILLS).length, 37, 0);
+  eq("thirty-eight drills", Object.keys(M.DRILLS).length, 38, 0);
+  eq("peer group: the planted name is the one found, and the high-vol decoy never is", each("peers", d => { const q = d.q;
+    return q.planted < 0 ? d.ans.nothing : !d.ans.nothing && d.ans.k === q.planted && d.ans.k !== q.decoy && (d.ans.c === 0) === (q.mult > 1); }), 0, 0);
+  eq("…and the answer follows from the numbers on the screen alone", each("peers", d => { const r = d.q.iv.map((x, i) => x / d.q.rv[i]), o = r.slice().sort((a, b) => a - b),
+    m = (o[2] + o[3]) / 2, far = r.filter(x => Math.abs(x - m) >= 0.15).length; return d.ans.nothing ? far === 0 : far === 1; }), 0, 0);
   const cp = (S, K, T, v, r) => M.bs(S, K, T, v, r, 0, true).price - M.bs(S, K, T, v, r, 0, false).price;
   eq("jelly roll: far synthetic minus near, less the dividends between", each("jelly", d => { const q = d.q;
     return Math.abs(d.ans.n - (cp(77, q.K, q.T2, 0.3, q.r) - cp(77, q.K, q.T1, 0.3, q.r) - q.dv)) < 1e-6; }), 0, 0);

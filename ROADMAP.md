@@ -613,14 +613,14 @@ The series run as a trainee class, on the shape trading firms publish for
 their own: theory first, then timed practice, then a desk. Seven stations
 (payoff, parity, vol as a price, hedged P&L, the surface, edge after costs,
 sizing), each naming pages to watch, drills to clear twice running, and one
-real-screen task. Thirty-seven drills with computed keys (carry and exercise:
+real-screen task. Thirty-eight drills with computed keys (carry and exercise:
 jelly roll, implied borrow, early exercise, assignment, pin risk, dividend
 play; hedging behavior: Greek signs, hedge split, overnight bleed, vol moving
-with spot; four trading games), plus a ten-rep head-math sprint. Seven are
+with spot; four trading games), plus a ten-rep head-math sprint. Eight are
 "spot the mispricing" screens (one strike off parity, a hard-to-borrow chain
 that is not an arbitrage, a gap inside the bid-offer, a box against funding,
-a negative butterfly, falling total variance, and a mock-pit pile of fills
-that collapses to a butterfly), some of which have nothing on them. Grading
+a negative butterfly, falling total variance, a mock-pit pile of fills
+that collapses to a butterfly, and a peer table with one name out of line), some of which have nothing on them. Grading
 is A/B first try, C second try after the steps, F otherwise. A Leitner
 ledger in localStorage (gaps of 1, 2, 4, 8, 16 days), a printable readiness
 report, the edge map (nine families: signal, structure, other side, what

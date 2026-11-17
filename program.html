@@ -94,7 +94,7 @@
   <p class="lede">The series, run the way a trading firm runs a trainee class: a short track of ideas in order, a pit where you answer against a clock, and a ledger that decides what you practice next. The pages show you a thing happening. This page finds out whether you can do it.</p>
   <ol>
     <li><b>The track</b> — seven stations. Each one names a page to watch, drills to clear, and one thing to do on a real screen.</li>
-    <li><b>The pit</b> — thirty-seven timed drills with computed answers, and a ten-rep head-math sprint. Some screens have something to trade. Some have nothing, and saying so is the right answer.</li>
+    <li><b>The pit</b> — thirty-eight timed drills with computed answers, and a ten-rep head-math sprint. Some screens have something to trade. Some have nothing, and saying so is the right answer.</li>
     <li><b>The ledger</b> — every rep is graded and scheduled to come back. It also prints a one-page readiness report.</li>
     <li><b>The edge map</b> — where option edge comes from, one family at a time, and what kills each.</li>
     <li><b>The trade memo</b> — the blanks to fill before any trade, printable.</li>
@@ -144,7 +144,7 @@
     <p class="lbl">3 · Vol as a price</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="rule16">Rule of 16</button><button class="act ghost" data-act="go" data-type="strad2iv">Straddle to vol</button><button class="act ghost" data-act="go" data-type="tick">A tick in vol</button></div>
     <p class="lbl">4 · Hedged P&amp;L</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="hedge">Delta hedge</button><button class="act ghost" data-act="go" data-type="gpnl">Hedged P&amp;L</button><button class="act ghost" data-act="go" data-type="sign">Greek signs</button><button class="act ghost" data-act="go" data-type="split">Hedge split</button><button class="act ghost" data-act="go" data-type="bleed">Overnight bleed</button><button class="act ghost" data-act="go" data-type="shadow">Vol moves with spot</button></div>
     <p class="lbl">5 · The surface</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="fwdvar">Forward vol</button><button class="act ghost" data-act="go" data-type="event">Event move</button><button class="act ghost" data-act="go" data-type="corr">Implied correlation</button><button class="act ghost" data-act="go" data-type="structure">Which structure</button><button class="act ghost" data-act="go" data-type="calendar">Term structure</button><button class="act ghost" data-act="go" data-type="fly">Call prices</button></div>
-    <p class="lbl">6 · Edge after costs</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="clean">Clean vol</button><button class="act ghost" data-act="go" data-type="fairiv">Fair vol and edge</button><button class="act ghost" data-act="go" data-type="inside">Quote</button><button class="act ghost" data-act="go" data-type="box">Box</button><button class="act ghost" data-act="go" data-type="dissect">Mock pit</button></div>
+    <p class="lbl">6 · Edge after costs</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="clean">Clean vol</button><button class="act ghost" data-act="go" data-type="fairiv">Fair vol and edge</button><button class="act ghost" data-act="go" data-type="inside">Quote</button><button class="act ghost" data-act="go" data-type="box">Box</button><button class="act ghost" data-act="go" data-type="dissect">Mock pit</button><button class="act ghost" data-act="go" data-type="peers">Peer group</button></div>
     <p class="lbl">7 · Sizing</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="kelly">Sizing</button></div>
     <p class="lbl">Trading games · any time</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="dice">Dice market</button><button class="act ghost" data-act="go" data-type="devig">Overround</button><button class="act ghost" data-act="go" data-type="potodds">Pot odds</button><button class="act ghost" data-act="go" data-type="bayes">Backtest odds</button></div>
   </details>
@@ -241,6 +241,7 @@
     <dt>Structure</dt><dd>Buy the cheap vol, sell the rich, hedge the direction.</dd>
     <dt>Other side</dt><dd>The flow itself: overwriting programs, structured products, put sellers.</dd>
     <dt>What kills it</dt><dd>Cheap that is only a flow artifact. Crowding. A premium that lasted years and then reversed.</dd>
+    <dt>Drill</dt><dd><button class="act ghost" data-act="go" data-type="peers">Peer group</button></dd>
     <dt>Read</dt><dd><a href="playbook.html" style="color:var(--blue)">The playbook</a> · <a href="tools.html" style="color:var(--blue)">Vol cone</a></dd></dl></details>
   <details class="edge"><summary>8 · Providing liquidity</summary><dl>
     <dt>Mispriced</dt><dd>Nothing. You are paid the spread for standing there.</dd>
@@ -746,6 +747,27 @@ function dBayes(){
     tag: "BAYES", sec: 120, key: "Prior odds " + (pr / (1 - pr)).toFixed(4) + " × likelihood ratio " + (pw / fp).toFixed(0) + " = " + (pr / (1 - pr) * pw / fp).toFixed(3) + ", which is " + post.toFixed(1) + "%." + (post < 50 ? " A good backtest on a long shot is still probably wrong." : " The prior did most of the work: start lower and the same backtest proves much less.") };
 }
 
+function dPeers(){
+  const nm = ["AAA", "BBB", "CCC", "DDD", "EEE", "FFF"], base = pick([1.08, 1.15, 1.22]);
+  const rv = nm.map(() => Math.round(uni(20, 34))), ratio = nm.map(() => base + uni(-.03, .03));
+  const decoy = Math.floor(rnd() * 6); rv[decoy] = Math.round(rv[decoy] * 1.6);
+  let planted = -1, mult = 1;
+  if (rnd() < .78){ do { planted = Math.floor(rnd() * 6); } while (planted === decoy); mult = pick([.74, .78, 1.28, 1.34]); ratio[planted] *= mult; }
+  const iv = nm.map((_, i) => Math.round(rv[i] * ratio[i] * 10) / 10), shown = iv.map((x, i) => x / rv[i]);
+  const med = shown.slice().sort((a, b) => a - b), m = (med[2] + med[3]) / 2;
+  let j = 0; shown.forEach((x, i) => { if (Math.abs(x - m) > Math.abs(shown[j] - m)) j = i; });
+  const none = Math.abs(shown[j] - m) < .15;
+  return { html: "<p>Six names in one sector. For each, the 30-day implied vol and the vol the stock has realized over the last 30 days. Is any name's implied out of line with the group?</p>" +
+      tbl(["Name", "Implied", "Realized"], nm.map((x, i) => [x, iv[i].toFixed(1), rv[i]])),
+    choices: ["Rich — sell its vol against the group", "Cheap — buy its vol against the group", "Nothing stands out"], ks: nm, numLabel: null,
+    ans: { c: none ? 2 : shown[j] > m ? 0 : 1, k: none ? null : j, n: null, tol: 0, nothing: none }, q: { iv, rv, planted, decoy, mult },
+    template: "1) Implied ÷ realized for each name. 2) Compare each ratio with the group's. A name whose implied is high because its realized is high is not rich. " +
+      "3) One ratio far from the rest is the candidate. 4) Before believing it, ask who is trading that name and why.",
+    tag: "SCALE-vs-SHAPE", sec: 150,
+    key: (none ? "Nothing. " : nm[j] + " is " + (shown[j] > m ? "rich" : "cheap") + ": its implied is " + shown[j].toFixed(2) + "× its realized against about " + m.toFixed(2) + "× for the group. ") +
+      nm[decoy] + " has the highest vol on the screen, but its realized is just as high, so its ratio is ordinary." + (none ? "" : " Then check for a flow reason — an overwriter, an event in the window — before calling it edge.") };
+}
+
 const DRILLS = {
   payoff: [dPayoff, 1, "Payoff at expiry"], synth: [dSynth, 2, "Synthetics"], headparity: [dHeadParity, 2, "Parity in your head"], revcon: [dRevcon, 2, "Conversion rate"],
   parity: [dParity, 2, "Chain"], htb: [dHtb, 2, "Chain"], jelly: [dJelly, 2, "Jelly roll"], borrow: [dBorrow, 2, "Implied borrow"],
@@ -756,11 +778,11 @@ const DRILLS = {
   bleed: [dBleed, 4, "Overnight bleed"], shadow: [dShadow, 4, "Vol moves with spot"],
   fwdvar: [dFwdvar, 5, "Forward vol"], event: [dEvent, 5, "Event move"], corr: [dCorr, 5, "Implied correlation"], structure: [dStructure, 5, "Which structure"],
   calendar: [dCalendar, 5, "Term structure"], fly: [dFly, 5, "Call prices"],
-  clean: [dClean, 6, "Clean vol"], fairiv: [dFairiv, 6, "Fair vol and edge"], kelly: [dKelly, 7, "Sizing"],
+  clean: [dClean, 6, "Clean vol"], peers: [dPeers, 6, "Peer group"], fairiv: [dFairiv, 6, "Fair vol and edge"], kelly: [dKelly, 7, "Sizing"],
   dice: [dDice, 0, "Dice market"], devig: [dDevig, 0, "Overround"], potodds: [dPotodds, 0, "Pot odds"], bayes: [dBayes, 0, "Backtest odds"]
 };
 const SPRINT = ["headparity", "strad2iv", "rule16", "hedge"];
-const SPOT = ["parity", "htb", "inside", "box", "fly", "calendar", "dissect"];
+const SPOT = ["parity", "htb", "inside", "box", "fly", "calendar", "dissect", "peers"];
 function deal(type){ const D = DRILLS[type], d = D[0](); d.type = type; d.st = D[1]; d.grp = D[2]; return d; }
 
 /* ── grading: right first time is A (B if over the clock); right on the
