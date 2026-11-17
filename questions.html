@@ -6,10 +6,10 @@
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#EDF0EC">
 <title>Junior Trader Questions — Options, visually</title>
-<meta name="description" content="Thirty-seven options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
+<meta name="description" content="Forty options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Junior Trader Questions — Options, visually">
-<meta property="og:description" content="Thirty-seven options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
+<meta property="og:description" content="Forty options questions on a ladder from warm-up to hard, six worked at full length, and a randomized drill. Why a six-wide call spread cannot be worth six, why four quarterly options cost twice the year, and how you sell at 30, realize 25 and still lose.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +48,7 @@
   <div class="heroInner">
     <div class="eyebrow">An interactive derivation · No. 16</div>
     <h1>The questions they <em>ask</em> you</h1>
-    <p class="sub">Thirty-seven questions on a ladder, from ones with a single right answer to ones with no formula at all — and six of them worked at full length. Each is a trap built around a plausible wrong answer, and each resolves in a figure you can move.</p>
+    <p class="sub">Forty questions on a ladder, from ones with a single right answer to ones with no formula at all — and six of them worked at full length. Each is a trap built around a plausible wrong answer, and each resolves in a figure you can move.</p>
   </div>
   <div class="scrollcue">Scroll ↓</div>
 </div>
@@ -84,7 +84,7 @@
   <div class="chead">
     <div class="cnum">01</div>
     <h2>Start with the ones that have a single right answer</h2>
-    <p class="dek">Thirty-seven questions on three rungs. Read, decide, then press — and watch the figure settle it.</p>
+    <p class="dek">Forty questions on three rungs. Read, decide, then press — and watch the figure settle it.</p>
   </div>
 
   <div class="prose">
@@ -1099,7 +1099,29 @@
    fig:{title:"A reverser's all-in cost against the borrow fee",cap:"The converter's return is the implied rate; the reverser pays the implied rate plus the borrow. On hard-to-borrow names the gap is the whole trade.",
      x0:0,x1:0.10,xf:v=>(v*100).toFixed(0)+"%",yf:v=>(v*100).toFixed(1)+"%",
      leg:[["Reverser's cost","--verm"],["Converter's rate","--moss"]],
-     f:[b=>0.045+b,()=>0.045],col:["--verm","--moss"],dash:[null,[5,5]]}}
+     f:[b=>0.045+b,()=>0.045],col:["--verm","--moss"],dash:[null,[5,5]]}},
+  {t:3,q:"Your book is gamma-neutral and long vega, and risk wants the vega cut. A colleague suggests selling one-month straddles against it. What does that do?",
+   o:["Cuts the vega cleanly \u2014 a straddle is the purest short-vega trade","Cuts a little vega and leaves you heavily short gamma. Sell the long-dated options the vega came from instead","Adds vega, because short-dated options have negative vega","Nothing to gamma, since straddles are delta-neutral"],ok:1,
+   why:"Vega per unit of gamma grows in proportion to time: about 2.1 for a one-month at-the-money option at 25 vol and 25 for a one-year, twelve times as much. To remove a given amount of vega with one-month options you take on twelve times the gamma that the same vega in one-years would cost you, and the book stops being gamma-neutral. Vega that came from the back of the curve has to leave by the back of the curve. Whether the one-month even moves with the tenor you are long is a second problem: page 22 chapter 03.",
+   fig:{title:"Vega bought per unit of gamma, by expiry",cap:"A straight line through the origin. Short-dated options are a gamma instrument that happens to have some vega; long-dated ones are the reverse.",
+     x0:1,x1:24,xf:v=>v.toFixed(0)+"m",yf:v=>v.toFixed(0),
+     leg:[["Vega per point \u00f7 gamma","--blue"]],
+     f:[m=>{const g=bs(S0,100,m/12,V,R,0,true);return g.vega/100/g.gamma;}],col:["--blue"],dash:[null],marks:[[1,"--verm","1m"],[12,"--moss","12m"]]}},
+  {t:3,q:"You buy a straddle into earnings, unhedged. Your forecast of the size of the move is exactly right, and it is the same as the market's. How often do you lose money?",
+   o:["Half the time \u2014 a fair bet is a coin flip","About 58% of the time","Never; the forecast was right","About 32% of the time \u2014 whenever the move is inside one standard deviation"],ok:1,
+   why:"A fairly priced straddle costs the average absolute move, which is 0.80 standard deviations. Most moves are smaller than the average one \u2014 a normal variable lands inside 0.80 sigma 57.5% of the time \u2014 and the few large ones pay for the rest. Being right about volatility buys you a fair bet with a losing hit rate, so what is left to manage is the sizing and the patience, not the forecast. Page 03 has the same number from the other side.",
+   fig:{title:"Where the move lands, in standard deviations",cap:"Everything left of the red line is a losing straddle. The area is 57.5%; the long right tail is where the money is made back.",
+     x0:0,x1:3,xf:v=>v.toFixed(1),yf:v=>v.toFixed(1),
+     leg:[["Density of the absolute move","--blue"]],
+     f:[x=>2*npdf(x)],col:["--blue"],dash:[null],marks:[[Math.sqrt(2/Math.PI),"--verm","cost"]]}},
+  {t:3,q:"You are short gamma and the stock has been realizing more than you sold. Should you hedge more often or less often?",
+   o:["More often, always \u2014 tighter hedging always loses less","Less often, always \u2014 every hedge crosses a spread","It depends on whether the moves trend or reverse: tighter in a trend, wider in chop, and costs set the limit either way","It makes no difference to the expected result"],ok:2,
+   why:"A hedger pays or earns the volatility measured at their own hedging interval. When returns trend, volatility sampled at longer intervals is higher than at short ones, so a short-gamma book that lets deltas run pays the larger number: hedge tighter. When returns reverse, the long-interval number is lower, and waiting lets moves cancel before you pay for them. With a daily autocorrelation of +0.15 the weekly figure is 13% above the daily; at \u22120.15 it is 11% below. Frequency is neutral only on a random walk. Page 22 chapter 05.",
+   fig:{title:"Volatility you pay, relative to daily, by hedging interval",cap:"Above one, waiting costs a short-gamma book; below one, waiting helps. The sign of the autocorrelation decides which line you are on.",
+     x0:1,x1:21,xf:v=>v.toFixed(0)+"d",yf:v=>v.toFixed(2),
+     leg:[["Trending, \u03c6 = +0.15","--verm"],["Reversing, \u03c6 = \u22120.15","--moss"]],
+     f:[k=>{let s=1;for(let j=1;j<k;j++)s+=2*(1-j/k)*Math.pow(0.15,j);return Math.sqrt(s);},k=>{let s=1;for(let j=1;j<k;j++)s+=2*(1-j/k)*Math.pow(-0.15,j);return Math.sqrt(s);}],
+     col:["--verm","--moss"],dash:[null,null],marks:[[5,"--grey","weekly"]]}}
   ];
 
   let tier=1,idx=0,answered=false;

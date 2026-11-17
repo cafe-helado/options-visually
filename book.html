@@ -37,9 +37,10 @@
   <a href="#c2"><span>The matrix</span><i></i></a>
   <a href="#c3"><span>Where greeks stop</span><i></i></a>
   <a href="#c4"><span>Bucketed vega</span><i></i></a>
-  <a href="#c5"><span>Limits</span><i></i></a>
-  <a href="#c6"><span>The report</span><i></i></a>
-  <a href="#c7"><span>Check yourself</span><i></i></a>
+  <a href="#c5"><span>Gamma across names</span><i></i></a>
+  <a href="#c6"><span>Limits</span><i></i></a>
+  <a href="#c7"><span>The report</span><i></i></a>
+  <a href="#c8"><span>Check yourself</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -287,6 +288,7 @@
     <p>Watch what that does. A genuine parallel move of +2 volatility points makes <b>$863</b>, close to the naive net-vega prediction of $834. But a front-up-ten, back-down-one-and-a-half twist makes <b>$864</b>; a front-down-six, back-up-five twist makes <b>$1,238</b>; and a front-up-twelve, back-down-three twist makes <b>$743</b>. Same book, same net vega, and a spread of nearly <b>67%</b> between the outcomes — with nothing that a single number could have distinguished.</p>
     <p>Which is why real risk systems bucket. The convention is a set of tenor buckets with vega reported in each, and the discipline is that limits are set per bucket rather than on the total. A desk that is flat on net vega and running plus-and-minus a thousand in adjacent buckets is not flat; it has a term-structure position that nobody has approved.</p>
     <p>The same argument applies twice more, and for the same reason. Bucket by <b>strike</b> as well as by tenor, because a book long wings and short the body has zero net vega and a large skew position. And remember from <a href="surface.html#c5" style="color:var(--blue)">page 02</a> that the delta you are bucketing is itself model-dependent — sticky-strike and sticky-delta conventions produce different vega attributions from identical prices.</p>
+    <p>Bucketing shows where the vega is. It does not say how to add the buckets, and the answer depends on how much each tenor moves when the front does: <a href="dynamics.html#c3">page 22, chapter 03</a>.</p>
   </div>
 
   <figure class="bleed">
@@ -339,6 +341,74 @@
 <section class="chapter" id="c5">
   <div class="chead">
     <div class="cnum">05</div>
+    <h2>Gamma across names needs a common move</h2>
+    <p class="dek">Chapter 01 said gamma does not add across underlyings. It can be made to, once you say what move you are adding it against.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Two positions. Long gamma worth $1,000,000 of delta per 1% in a utility, and short gamma worth $500,000 per 1% in a technology stock. Add them and the book is long $500,000 per 1%, which says a market move in either direction makes money. The figure moves the index and lets each name follow it by its own beta.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>P&amp;L of the two-name book when the index moves</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>What the summed gamma predicts</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Each name moving by its beta</span>
+          </span>
+        </div>
+        <canvas id="cvIdx" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The two names</h4>
+        <div id="ctlIdx"></div>
+        <div class="kv" style="margin-top:20px" id="kvIdx"></div>
+      </div>
+    </div>
+    <figcaption>The grey curve smiles and the blue one frowns. The sum had the wrong sign because it gave a 1% move in the utility the same weight as a 1% move in a stock that travels four times as far.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>On a 2% index move the summed gamma predicts a gain of $10,000. With the utility at a beta of 0.5 and the technology name at 2.0, the utility moves 1% and makes $5,000 while the technology name moves 4% and loses $40,000. The book loses $35,000.</p>
+  </div>
+
+  <div class="mline">index-equivalent gamma = &Sigma; &Gamma;<sub>cash</sub> &times; &beta;&sup2;</div>
+  <p class="mread">Reads as: <b>before adding, multiply each name's gamma cash by its beta squared.</b> Squared, because beta scales the move and gamma P&amp;L goes with the move squared. Here 1,000,000 &times; 0.25 &minus; 500,000 &times; 4 = &minus;$1,750,000 per 1% of index.</p>
+
+  <div class="prose">
+    <p>That number answers one question: what happens when the market moves and everything follows it. It is silent on the days a name moves alone, and for those the original gammas are the right ones, name by name. A book can be short index-equivalent gamma and still make money most days from single-stock noise, which is a dispersion position whether or not anyone called it one. Page 10 is that trade taken on purpose.</p>
+    <p>Beta is an assumption. It is estimated from history, it drifts, and in a selloff betas of defensive names tend to rise toward one, which makes the frown here an understatement of the bad case rather than an overstatement.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p><b>Predict</b> the beta on the technology name at which the book is flat to an index move, with the utility left at 0.5.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cIdx" data-patch='{"b2":0.71}' data-focus="cvIdx">Technology beta 0.71</button>
+      <button class="act ghost" data-preset="cIdx" data-patch='{"b1":1,"b2":1}' data-focus="cvIdx">Both betas 1: the sum is right</button>
+      <button class="act ghost" data-preset="cIdx" data-patch='{"b1":0.5,"b2":2,"g1":1000,"g2":-500}' data-focus="cvIdx">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You are long $200,000 of gamma cash per 1% in a beta-1.5 name and want to offset its index exposure with short SPY gamma. How much SPY gamma cash do you sell?</p>
+    <div class="opts">
+      <button>$200,000 per 1%</button>
+      <button>$300,000 per 1%</button>
+      <button data-ok="1">$450,000 per 1%</button>
+      <button>$133,000 per 1%</button>
+    </div>
+    <div class="ans"><b>$450,000.</b> 200,000 &times; 1.5&sup2;. The $300,000 answer scales by beta once, which is right for delta and wrong for gamma. What you are left with afterwards is the name's own movement around the index, which is the part you presumably wanted.</div>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section class="chapter" id="c6">
+  <div class="chead">
+    <div class="cnum">06</div>
     <h2>Limits, and the question underneath them</h2>
     <p class="dek">A limit is not a prediction. It is a statement about how much of a specific bad day the firm is willing to own.</p>
   </div>
@@ -387,10 +457,10 @@
   </div>
 </section>
 
-<!-- ══════════ 06 ══════════ -->
-<section class="chapter" id="c6">
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
   <div class="chead">
-    <div class="cnum">06</div>
+    <div class="cnum">07</div>
     <h2>Reading the report end to end</h2>
     <p class="dek">The order in which you look at it is most of the skill.</p>
   </div>
@@ -426,10 +496,10 @@
   </div>
 </section>
 
-<!-- ══════════ 07 ══════════ -->
-<section class="chapter" id="c7">
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
   <div class="chead">
-    <div class="cnum">07</div>
+    <div class="cnum">08</div>
     <h2>Check yourself</h2>
     <p class="dek">Six questions across the page, and the series.</p>
   </div>
@@ -488,7 +558,7 @@
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
-    <span class="lab">Question 5 · chapter 05</span>
+    <span class="lab">Question 5 · chapter 06</span>
     <p class="q">What is a limit breach actually telling you?</p>
     <div class="opts">
       <button>That the firm predicts a loss of that size</button>
@@ -500,7 +570,7 @@
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
-    <span class="lab">Question 6 · chapter 06</span>
+    <span class="lab">Question 6 · chapter 07</span>
     <p class="q">The book made $40,000 yesterday and the greeks predicted $5,000. What is the first thing to check?</p>
     <div class="opts">
       <button>Nothing — you made money, which is the objective</button>
@@ -946,7 +1016,43 @@ const s5={size:1};
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();}
+/* ══════════ 05 — gamma across names ══════════
+   Gamma cash g is dollars of delta gained per 1% move in that name.
+   A move of x% therefore makes 0.5 * g * x * x / 100. */
+const gammaPnl = (g, x) => 0.5 * g * x * x / 100;
+function idxBook(p, x) { const raw = gammaPnl((p.g1 + p.g2) * 1000, x), n1 = gammaPnl(p.g1 * 1000, p.b1 * x), n2 = gammaPnl(p.g2 * 1000, p.b2 * x);
+  return { raw, n1, n2, real: n1 + n2, eq: (p.g1 * p.b1 * p.b1 + p.g2 * p.b2 * p.b2) * 1000 }; }
+const sI = { g1: 1000, b1: 0.5, g2: -500, b2: 2, x: 2 };
+(function(){
+  const k = v => (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  sliders(document.getElementById("ctlIdx"), [
+    { id: "g1I", k: "g1", lbl: "Γ₁", name: "Utility gamma cash, $k per 1%", min: -2000, max: 2000, step: 50, fmt: v => v.toFixed(0) },
+    { id: "b1I", k: "b1", lbl: "β₁", name: "Utility beta", min: 0.2, max: 2.5, step: 0.01, fmt: v => v.toFixed(2) },
+    { id: "g2I", k: "g2", lbl: "Γ₂", name: "Technology gamma cash, $k per 1%", min: -2000, max: 2000, step: 50, fmt: v => v.toFixed(0) },
+    { id: "b2I", k: "b2", lbl: "β₂", name: "Technology beta", min: 0.2, max: 2.5, step: 0.01, fmt: v => v.toFixed(2) },
+    { id: "xI", k: "x", lbl: "x", name: "Index move marked", min: -4, max: 4, step: 0.1, fmt: v => v.toFixed(1) + "%" }
+  ], sI, () => draw(),"cIdx");
+  window.drawIdx = draw;
+  function draw(){
+    const xs = [], a = [], b = []; for (let x = -4; x <= 4.001; x += 0.1) { const r = idxBook(sI, x); xs.push(x); a.push(r.raw); b.push(r.real); }
+    const m = Math.max(1000, Math.max.apply(null, a.concat(b).map(Math.abs))) * 1.1;
+    const o = Fig(document.getElementById("cvIdx"), { h: 300, x0: -4, x1: 4, y0: -m, y1: m, pad: { l: 64, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0) + "%", v => (v < 0 ? "−" : "") + "$" + (Math.abs(v) / 1000).toFixed(0) + "k", 8, 4);
+    clip(o, () => { line(o, xs, a, C("--grey"), 2.2); line(o, xs, b, C("--blue"), 2.6); });
+    vline(o, sI.x, C("--ochre"), "marked", [2, 4]);
+    const r = idxBook(sI, sI.x);
+    document.getElementById("kvIdx").innerHTML = kvHTML([
+      ["Gamma cash, summed", k((sI.g1 + sI.g2) * 1000) + " per 1%"],
+      ["Index-equivalent gamma", k(r.eq) + " per 1%"],
+      ["Utility moves", (sI.b1 * sI.x).toFixed(2) + "%  →  " + k(r.n1)],
+      ["Technology moves", (sI.b2 * sI.x).toFixed(2) + "%  →  " + k(r.n2)],
+      ["Sum predicts", k(r.raw)],
+      ["Book makes", k(r.real)]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();drawIdx();draw5();draw6();}
 LAB.boot(drawAll);
 
 </script>

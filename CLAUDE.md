@@ -189,8 +189,8 @@ It teaches nothing new — it re-asks the other fifteen subjects in the shape a 
 comes in, on a difficulty ladder, because recognizing gamma and *answering* "you are
 long a 25-delta call and the stock rallies five percent, are you longer?" are
 different skills. Its unit is the card: a question, four options where three are real
-misconceptions, a reason, and a figure spec the shared renderer draws. Thirty-seven of
-them now, in tiers of 12 / 13 / 12. Adding a card is a ~12-line object in the `CARDS`
+misconceptions, a reason, and a figure spec the shared renderer draws. Forty of
+them now, in tiers of 12 / 13 / 15. Adding a card is a ~12-line object in the `CARDS`
 array; the renderer takes `{x0,x1,f:[...],col,
 dash,marks,extra}` and works out its own y-range. Keep the tiers honest — a warm-up
 card must have exactly one right answer, and a hard card must have an answer that is

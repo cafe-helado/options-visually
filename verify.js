@@ -277,8 +277,18 @@ PAGES["variance"] = () => {
 PAGES["questions"] = () => {
   const M = load("questions.html", ["bs", "ncdf", "npdf", "__deck", "__run7", "__drill"]);
   const B = M.bs, D = M.__deck;
-  eq("the deck holds thirty-seven cards", D.length, 37, 0);
-  eq("tiers run 12 / 13 / 12", [1, 2, 3].map(t => D.filter(c => c.t === t).length).join("/") === "12/13/12" ? 1 : 0, 1, 0);
+  eq("the deck holds forty cards", D.length, 40, 0);
+  eq("tiers run 12 / 13 / 15", [1, 2, 3].map(t => D.filter(c => c.t === t).length).join("/") === "12/13/15" ? 1 : 0, 1, 0);
+  { const B = global.bs || M.bs, a = B(100, 100, 1 / 12, 0.25, 0.04, 0, true), b = B(100, 100, 1, 0.25, 0.04, 0, true);
+    eq("card: vega per gamma, one month, about 2.1", a.vega / 100 / a.gamma, 2.1, 0.05);
+    eq("card: vega per gamma, one year, 25", b.vega / 100 / b.gamma, 25, 0.01);
+    eq("card: twelve times as much", (b.vega / b.gamma) / (a.vega / a.gamma), 12, 1e-6);
+    const nc = x => { let s = 0; const n = 20000; for (let i = 0; i < n; i++) { const z = -x + 2 * x * (i + 0.5) / n; s += Math.exp(-z * z / 2); } return s * 2 * x / n / Math.sqrt(2 * Math.PI); };
+    eq("card: a fair straddle costs 0.80 sigma", Math.sqrt(2 / Math.PI), 0.80, 0.003);
+    eq("card: a move lands inside that 57.5% of the time", 100 * nc(Math.sqrt(2 / Math.PI)), 57.5, 0.02);
+    const vr = (k, f) => { let s = 1; for (let j = 1; j < k; j++) s += 2 * (1 - j / k) * Math.pow(f, j); return Math.sqrt(s); };
+    eq("card: weekly is 13% above daily at +0.15", (vr(5, 0.15) - 1) * 100, 13, 0.5);
+    eq("card: and 11% below at -0.15", (1 - vr(5, -0.15)) * 100, 11, 0.5); }
   yes("every card has four options and exactly one right answer",
     D.every(c => c.o.length === 4 && c.ok >= 0 && c.ok < 4));
   yes("every card carries a reason and a figure spec",
@@ -408,7 +418,8 @@ PAGES["questions"] = () => {
 
 PAGES["screen"] = () => {
   const M = load("screen.html", ["bs", "ncdf", "sigAt", "oneSigma",
-    "strikeForDelta", "ivFrom", "__drill", "s1", "s2", "s3", "s4", "s5", "s6"]);
+    "strikeForDelta", "ivFrom", "__drill", "s1", "s2", "s3", "s4", "s5", "s6",
+    "fwdRow", "fwdVol", "ivCarry", "FWD", "sF"]);
   const B = M.bs;
   console.log("    ch02 · a strike's distance in sigmas");
   eq("$100 at 30 vol, 30 days: one sigma is $8.60",M.oneSigma(100,0.30,30/365),8.601,2e-3);
@@ -480,6 +491,38 @@ PAGES["screen"] = () => {
    yes("an answer well outside the band is rejected",
      Q.every(q=>Math.abs((q.a+Math.max(q.tol*10,1))-q.a)>q.tol));}
 
+  console.log("    ch05 · normalized skew");
+  { const vf = K => M.sigAt(100, K, 30 / 365, 0.28, -0.35, 0.25, 0);
+    eq("100 strike shows 28.12%", vf(100) * 100, 28.12, 0.006);
+    eq("90 strike over the 100 strike is 1.142", vf(90) / vf(100), 1.142, 0.0006);
+    eq("  a 14.2% premium", (vf(90) / vf(100) - 1) * 100, 14.2, 0.06);
+    eq("110 strike at an 11.1% discount", (1 - vf(110) / vf(100)) * 100, 11.1, 0.06); }
+  console.log("    ch06 · find the forward first");
+  { const a = M.fwdRow(100, 0.06, 0), w = M.fwdRow(115, 0.06, 0), F = M.FWD;
+    yes("defaults: 6% borrow, screen assumes none", M.sF.q === 0.06 && M.sF.q0 === 0);
+    eq("100 strike trades 27.8%", a.v * 100, 27.8, 0.06);
+    eq("  calls say 23.8%", a.ivC * 100, 23.8, 0.06);
+    eq("  puts say 31.3%", a.ivP * 100, 31.3, 0.06);
+    eq("screen forward 100.99", F.S * Math.exp(F.r * F.T), 100.99, 0.006);
+    eq("market forward 99.51", F.S * Math.exp((F.r - 0.06) * F.T), 99.51, 0.006);
+    eq("  parity at 100 recovers it", a.F, F.S * Math.exp((F.r - 0.06) * F.T), 1e-9);
+    eq("  the gap is $1.48", F.S * Math.exp(F.r * F.T) - a.F, 1.48, 0.006);
+    eq("call 5.201", a.c, 5.201, 0.0006); eq("put 5.688", a.p, 5.688, 0.0006);
+    eq("e^rT = 1.0099", Math.exp(F.r * F.T), 1.0099, 0.00006);
+    eq("forward implies a 6% borrow", F.r - Math.log(a.F / F.S) / F.T, 0.06, 1e-9);
+    eq("115 call reads 21.7%", w.ivC * 100, 21.7, 0.06);
+    eq("  against a true 23.5%", w.v * 100, 23.5, 0.06);
+    eq("  off by 1.8", (w.v - w.ivC) * 100, 1.8, 0.06);
+    eq("115 put reads 32.9%", w.ivP * 100, 32.9, 0.06);
+    eq("  off by 9.4", (w.ivP - w.v) * 100, 9.4, 0.06);
+    yes("the 85 call is below the screen's parity bound", isNaN(M.fwdRow(85, 0.06, 0).ivC));
+    const m = M.fwdRow(100, 0.06, 0.06);
+    eq("right forward: call IV = put IV = traded", Math.abs(m.ivC - m.v) + Math.abs(m.ivP - m.v), 0, 1e-6);
+    const d = M.fwdRow(100, 0, 0.03);
+    yes("phantom dividend: calls read ABOVE puts", d.ivC > d.ivP);
+    /* forward error lands by delta: the IV error ratio matches the delta ratio */
+    const dc = Math.abs(B(F.S, 115, F.T, w.v, F.r, 0.06, true).delta), dp = Math.abs(B(F.S, 115, F.T, w.v, F.r, 0.06, false).delta);
+    yes("in-the-money put carries more delta than the out-of-the-money call", dp > 3 * dc); }
 };
 
 /* ── run ─────────────────────────────────────────────────────────────── */
@@ -952,8 +995,8 @@ PAGES["workbook"] = () => {
   const M = load("workbook.html", ["__wb"]);
   const W = M.__wb, all = [];
   W.forEach(e => e.p.forEach((p, i) => all.push([e.n + "." + (i + 1), p])));
-  yes("twenty pages, every one with a reading list and at least three problems",
-    W.length === 20 && W.every(e => e.r.length >= 1 && e.p.length >= 3));
+  yes("twenty-one sections (pages 01-20 and 22), every one with a reading list and at least three problems",
+    W.length === 21 && W.every(e => e.r.length >= 1 && e.p.length >= 3));
   yes("every page link points at a file that exists",
     W.every(e => fs.existsSync(path.join(ROOT, e.href))));
   yes("every numeric answer is finite", all.every(([, p]) => !p.f || isFinite(p.f())));
@@ -977,6 +1020,11 @@ PAGES["workbook"] = () => {
   eq("19.1 breakeven 1.5703%", A("19.1") * 100, 1.5703, 1e-4);
   eq("20.1 odds with carry 80%", A("20.1"), 0.80, 1e-12);
   eq("20.2 special dividend: $4.20", A("20.2"), 4.20, 1e-12);
+  { const e = W.find(x => x.n === "22");
+    eq("22.1 hidden-delta hedge is $160,000", e.p[0].f(), 160000, 1e-6);
+    eq("22.2 weighted vega is -$45,000", e.p[1].f(), -45000, 1e-6);
+    eq("22.3 two-day vol by summing two correlated returns", e.p[2].f(), 0.20 * Math.sqrt((1 + 1 + 2 * 0.2) / 2), 1e-12);
+    eq("22.4 break-even vol move is 0.60 points", e.p[3].f(), 0.60, 1e-12); }
 };
 
 PAGES["tools"] = () => {
@@ -1105,6 +1153,26 @@ PAGES["dynamics"] = () => {
   eq("05 simulated daily", 100 * sm[0], 16, 0.25);
   eq("05 simulated weekly vs exact", 100 * sm[1], 16 * Math.sqrt(M.varRatio(5, .15)), 0.35);
   eq("05 simulated monthly vs exact", 100 * sm[2], 16 * Math.sqrt(M.varRatio(21, .15)), 0.6);
+
+};
+
+PAGES["book"] = () => {
+  /* The page had no claims until chapter 05 was added. These cover that
+     chapter only; chapters 01-04 and 06 are still unchecked here. */
+  const M = load("book.html", ["gammaPnl", "idxBook", "sI"]);
+  yes("defaults", M.sI.g1 === 1000 && M.sI.b1 === 0.5 && M.sI.g2 === -500 && M.sI.b2 === 2 && M.sI.x === 2);
+  const r = M.idxBook(M.sI, 2);
+  eq("summed gamma is +$500,000 per 1%", (M.sI.g1 + M.sI.g2) * 1000, 500000, 0);
+  eq("sum predicts +$10,000 on a 2% index move", r.raw, 10000, 1e-6);
+  eq("utility moves 1% and makes $5,000", r.n1, 5000, 1e-6);
+  eq("technology moves 4% and loses $40,000", r.n2, -40000, 1e-6);
+  eq("book loses $35,000", r.real, -35000, 1e-6);
+  eq("index-equivalent gamma is -$1,750,000 per 1%", r.eq, -1750000, 1e-6);
+  eq("  and it reproduces the P&L", M.gammaPnl(r.eq, 2), r.real, 1e-6);
+  eq("flat at a technology beta of 0.71", Math.sqrt(1000 * 0.25 / 500), 0.71, 0.005);
+  eq("  the book is flat there", M.idxBook(Object.assign({}, M.sI, { b2: Math.sqrt(0.5) }), 3).real, 0, 1e-6);
+  eq("betas of 1: the sum is right", M.idxBook(Object.assign({}, M.sI, { b1: 1, b2: 1 }), 3).real, M.idxBook(M.sI, 3).raw, 1e-6);
+  eq("check: 200,000 x 1.5 squared = 450,000", 200000 * 1.5 * 1.5, 450000, 0);
 };
 
 PAGES["program"] = () => {
@@ -1236,7 +1304,19 @@ PAGES["playbook"] = () => {
 
 const only = process.argv[2];
 const names = only ? [only.replace(/\.html$/, "")] : Object.keys(PAGES);
+/* Every Monte Carlo claim used to draw from the real Math.random, so the
+   harness could fail on a page nobody had touched (the vol cone did, about
+   one run in four). The generator is now seeded per page: a failure is a
+   failure of the page, and it reproduces. VERIFY_SEED=n tries another seed;
+   a claim that passes on one seed and fails on another has a tolerance
+   tighter than its sample supports. */
+const SEED0 = +(process.env.VERIFY_SEED || 20261117);
+function seedRandom(a) {
+  Math.random = function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
 for (const name of names) {
+  seedRandom(SEED0 + [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7));
   if (!PAGES[name]) { console.error("no claims recorded for " + name); process.exit(2); }
   console.log("\n  " + name + ".html");
   try { PAGES[name](); }

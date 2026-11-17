@@ -252,7 +252,14 @@ const WB=[
   p:[{q:"Target $4, cash deal $5, standalone $2, one year, 10% funding. Implied odds?",f:()=>(4*1.1-2)/(5-2),u:"%",d:1,how:"p·D + (1 − p)·SV = S(1 + rT)."},
      {q:"Same deal at zero rates, then a $0.30 special dividend paid either way. New price?",f:()=>(2/3)*(5+0.30)+(1/3)*2,u:"$",how:"Only the close state gains the dividend: S + p·q."},
      {q:"Stock deal: long the target at $4, short $5 of acquirer. The acquirer rallies 30% and the deal breaks. Loss?",f:()=>(2-4)-5*0.30,u:"$",how:"Target to standalone, plus the open short."},
-     {q:"A second request knocks a cash target from $10.79 to $10.47. Name the two components.",ans:"Lower odds of closing — the quick-clearance branch is gone — and a longer wait, which adds carry on the takeout. On the page's tree, about 23 cents and 9 cents."}]}
+     {q:"A second request knocks a cash target from $10.79 to $10.47. Name the two components.",ans:"Lower odds of closing — the quick-clearance branch is gone — and a longer wait, which adds carry on the takeout. On the page's tree, about 23 cents and 9 cents."}]},
+ {n:"22",href:"dynamics.html",t:"Surface Dynamics",
+  r:[[TAL,"shadow gamma, and vega weighted across the term structure"],["Bergomi, Stochastic Volatility Modeling","the skew-stickiness ratio and why its break-even is 2"],[BEN,"skew theta and what a risk reversal carries"],[GAT,"how local and stochastic volatility move the smile"]],
+  p:[{q:"You are long $8,000 of vega per point at 25 vol and the vol on your strikes falls 0.8% of itself per 1% rally. How many dollars of stock do you buy to be flat?",f:()=>8000*25*0.8,u:"$",d:0,how:"Hidden delta = −vega × vol × β, so the hedge is the opposite."},
+     {q:"Short $60k of one-month vega, long $45k of nine-month. Net P&L if one-month vol rises a point and moves fade with root-time?",f:()=>(-60+45*Math.sqrt(1/9))*1000,u:"$",d:0,how:"The nine-month moves √(1/9) = a third of a point."},
+     {q:"Daily-close vol is 20% and daily returns have autocorrelation +0.2. What is the vol on two-day closes?",f:()=>0.20*Math.sqrt(1+0.2),u:"%",d:2,how:"σ₂ = σ₁ √(1 + φ) for k = 2."},
+     {q:"Skew slope is −0.30 per unit of log-strike. How many points must at-the-money vol fall on a 1% rally for a hedged long-skew position to break even?",f:()=>2*0.30,u:"",d:2,how:"Break-even is R = 2: at-the-money vol moves twice the slope, if realized equals implied."},
+     {q:"A risk system shows one gamma number. Why do desks ask for up-gamma and down-gamma?",ans:"Because vol moves with spot. In a selloff the vol on a downside strike rises, which pushes an out-of-the-money put's delta further than gamma said; in a rally it falls. The delta you must trade is larger one way than the other, and one number cannot say that."}]}
 ];
 
 /* ══════════════ render ══════════════ */

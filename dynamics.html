@@ -519,7 +519,7 @@ const s1 = { ssr: 2, b: -.35, atm: .30, T: .5 };
     { id: "b1", k: "b", lbl: "b", name: "Skew (slope)", min: -.8, max: 0, step: .01, fmt: v => v.toFixed(2) },
     { id: "a1", k: "atm", lbl: "σ", name: "ATM volatility", min: .1, max: .8, step: .01, fmt: pct },
     { id: "T1", k: "T", lbl: "T", name: "Expiry", min: .08, max: 2, step: .02, fmt: v => (v * 12).toFixed(1) + "m" }
-  ], s1, () => draw(), "c1");
+  ], s1, () => draw(),"c1");
   window.draw1 = draw;
   function draw(){
     const p = s1, f = m => 100 * hedgedMove(100, p.T, true, m / 100, p), ss = Object.assign({}, p, { ssr: 1 }), f1 = m => 100 * hedgedMove(100, p.T, true, m / 100, ss);
@@ -555,7 +555,7 @@ function gam2(p){ const T = p.days / 365, e = S => 100 * effDelta(K2, S, T, fals
     { id: "b2", k: "b", lbl: "b", name: "Skew (slope)", min: -.8, max: 0, step: .01, fmt: v => v.toFixed(2) },
     { id: "a2", k: "atm", lbl: "σ", name: "ATM volatility", min: .1, max: .8, step: .01, fmt: pct },
     { id: "d2", k: "days", lbl: "T", name: "Days to expiry", min: 7, max: 180, step: 1, fmt: v => v.toFixed(0) + "d" }
-  ], s2, () => draw(), "c2");
+  ], s2, () => draw(),"c2");
   window.draw2 = draw;
   function draw(){
     const p = s2, T = p.days / 365, G = gam2(p), ss = Object.assign({}, p, { ssr: 1 });
@@ -590,7 +590,7 @@ const book3 = p => [{ T: .25, vega: p.front }, { T: p.mo / 12, vega: p.back }];
     { id: "f3", k: "front", lbl: "V₃", name: "3-month vega, $k per point", min: -80, max: 0, step: 1, fmt: v => v.toFixed(0) },
     { id: "k3", k: "back", lbl: "V", name: "Long-dated vega, $k per point", min: 0, max: 100, step: 1, fmt: v => v.toFixed(0) },
     { id: "m3", k: "mo", lbl: "T", name: "Long-dated tenor", min: 6, max: 36, step: 1, fmt: v => v.toFixed(0) + "m" }
-  ], s3, () => draw(), "c3");
+  ], s3, () => draw(),"c3");
   window.draw3 = draw;
   function draw(){
     const p = s3, B = book3(p), f = h => vegaNet(B, .25, h), raw = f(0), a = Math.max(Math.abs(raw), Math.abs(f(1)), 5) * 1.25;
@@ -626,7 +626,7 @@ function carry4(p){ const q = P4(p), o = rr(q), LOTS = 10000, th = o.theta * LOT
     { id: "b4", k: "b", lbl: "b", name: "Skew (slope)", min: -.7, max: -.05, step: .01, fmt: v => v.toFixed(2) },
     { id: "v4", k: "rv", lbl: "σᵣ", name: "Realized volatility", min: .1, max: .5, step: .01, fmt: pct },
     { id: "m4", k: "mo", lbl: "T", name: "Expiry", min: 1, max: 12, step: 1, fmt: v => v.toFixed(0) + "m" }
-  ], s4, () => draw(), "c4");
+  ], s4, () => draw(),"c4");
   window.draw4 = draw;
   function draw(){
     const p = s4, c = carry4(p), f = s => rr(Object.assign(P4(p), { ssr: s })).exp * 10000, a = Math.max(Math.abs(f(0)), Math.abs(f(3)), 20) * 1.15;
@@ -656,7 +656,7 @@ function samp5(p){ const r = arPath(50400, p.vol / Math.sqrt(252), p.phi, SEED5)
   sliders(document.getElementById("ctl5"), [
     { id: "p5", k: "phi", lbl: "φ", name: "Does yesterday predict today", min: -.3, max: .4, step: .01, fmt: v => sgn(v, 2) },
     { id: "v5", k: "vol", lbl: "σ", name: "Daily-sampled volatility", min: .08, max: .6, step: .01, fmt: pct }
-  ], s5, () => draw(), "c5");
+  ], s5, () => draw(),"c5");
   window.draw5 = draw;
   function draw(){
     const p = s5, th = k => 100 * p.vol * Math.sqrt(varRatio(k, p.phi)), sm = samp5(p), top = Math.max(th(21), 100 * p.vol) * 1.35, bot = Math.min(th(21), 100 * p.vol) * .7;

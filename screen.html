@@ -38,8 +38,9 @@
   <a href="#c3"><span>Delta is the ruler</span><i></i></a>
   <a href="#c4"><span>What each column says</span><i></i></a>
   <a href="#c5"><span>Skew and term, by eye</span><i></i></a>
-  <a href="#c6"><span>The five-second scan</span><i></i></a>
-  <a href="#c7"><span>Drills</span><i></i></a>
+  <a href="#c6"><span>Find the forward</span><i></i></a>
+  <a href="#c7"><span>The five-second scan</span><i></i></a>
+  <a href="#c8"><span>Drills</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -60,7 +61,7 @@
   <ol>
     <li><b>Chapter 02 is the one to take away.</b> A strike's distance in dollars means nothing. Its distance in standard deviations means everything, and converting between them in your head is the whole skill.</li>
     <li><b>Chapter 03 fixes a rule of thumb almost everyone half-knows.</b> The 16-delta option is about a one-sigma strike — inside three months. At a year it is 1.56 sigma, and the put side is not symmetric with the call side at all.</li>
-    <li><b>Chapter 06 is a procedure</b>, not an idea: what to look at first, second and third, on a live chain you can re-parameterise.</li>
+    <li><b>Chapter 07 is a procedure</b>, not an idea: what to look at first, second and third, on a live chain you can re-parameterise.</li>
   </ol>
   <details class="drop">
     <summary>Notation — every symbol used on this page</summary>
@@ -316,6 +317,7 @@
   <div class="prose">
     <p class="lead">Scan the IV column downward. If the numbers fall as the strike rises, the column is skewed, and how fast they fall is how skewed. On the example chain here — thirty days, 28% at the money — the 90 strike shows <b>32.10%</b> and the 110 shows <b>24.99%</b>, so the column drops seven volatility points across four strikes.</p>
     <p>The standard way to compress that into one number is the <span class="term" data-t="Risk reversal" data-def="The 25-delta put's implied volatility minus the 25-delta call's. A single number for how much more the downside costs than the upside, and the way skew is quoted between desks.">risk reversal</span>: the 25-delta put's implied minus the 25-delta call's. On this surface it is <b>3.77 points</b> at thirty days, <b>6.47</b> at ninety and <b>12.29</b> at a year, because a skew defined in log-moneyness reaches further out as the strikes spread.</p>
+    <p>Points are the wrong unit for comparing names, or one name across regimes. Seven points of skew on a 28-vol stock and seven points on a 70-vol stock are not the same steepness. Divide instead: the 90 strike's 32.10% over the 100 strike's 28.12% is 1.142, so the downside trades at a <b>14.2% premium</b>, and the 110 strike at an 11.1% discount. That ratio is <span class="term" data-t="Normalized skew" data-def="Wing implied vol divided by at-the-money implied vol, minus one. It measures skew as a percentage of the vol level, so that names and regimes with different vol can be compared.">normalized skew</span>, and it is the one to rank on. Read it against three things before calling it steep: the vol level, since wing vols move less than at-the-money vol and the ratio therefore compresses when vol is high and stretches when it is low; the name's own history; and what the rest of the market is doing that day.</p>
     <p>Now scan across expiries instead, at the money. A flat term structure is a stock with nothing scheduled. A front month standing well above the back is the screen telling you a <em>date</em> exists — and the size of the step says what the market has priced for it. With a 28% baseline and one event worth a 7% move, the quoted at-the-money runs <b>82.1%</b> at three days, <b>57.8%</b> at a week, <b>37.2%</b> at a month and <b>29.7%</b> at six months. The event has not moved; its share of the remaining variance has. <a href="catalyst.html" style="color:var(--blue)">Page 03</a> is that arithmetic in full.</p>
   </div>
 
@@ -368,12 +370,83 @@
 <section class="chapter" id="c6">
   <div class="chead">
     <div class="cnum">06</div>
+    <h2>Before you believe the IV column, find the forward</h2>
+    <p class="dek">Every implied vol on a screen was computed from a forward price somebody assumed. If the assumption is wrong, so is the whole column.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Here is a ninety-day chain on a stock that costs 6% a year to borrow. The screen does not know that. It backs each implied vol out of the option's price using the interest rate alone, and plots calls and puts separately. Both lines come from the same market, in which a call and a put at one strike have the same volatility.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>One market, two IV columns</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>IV from calls</span>
+            <span><i class="swl" style="background:var(--verm)"></i>IV from puts</span>
+            <span><i class="swl" style="background:var(--grey)"></i>The vol actually traded</span>
+          </span>
+        </div>
+        <canvas id="cvFwd" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Carry</h4>
+        <div id="ctlFwd"></div>
+        <div class="kv" style="margin-top:20px" id="kvFwd"></div>
+      </div>
+    </div>
+    <figcaption>The two columns open like scissors, and each blade is furthest from the truth on its in-the-money side. Where the call line stops, the call is quoted below what the screen thinks is its minimum value, and no volatility can explain it.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>At the 100 strike the calls say 23.8% and the puts say 31.3%. The market is trading 27.8%. Nothing is mispriced: the screen believes the forward is 100.99 and the options are priced off 99.51, and that $1.48 lands in the call as cheapness and in the put as richness.</p>
+    <p>The forward is on the screen if you look for it. Take any strike near the money and use parity:</p>
+  </div>
+
+  <div class="mline">F = K + (C &minus; P) &times; e<sup>rT</sup></div>
+  <p class="mread">Reads as: <b>the forward is the strike plus the call-minus-put, grown at the interest rate to expiry.</b> Here 100 + (5.201 &minus; 5.688) &times; 1.0099 = 99.51, and a forward that far below spot-plus-interest is a 6% borrow.</p>
+
+  <div class="prose">
+    <p>So the order is fixed. Forward first, from call-minus-put at one or two strikes around the money. Then the implied vols, using that forward. Only then the shape. A screen that skips the first step shows you carry and calls it skew.</p>
+    <p>And when you cannot fix the forward, lean on the out-of-the-money side. A forward error moves an option's price by its delta, so the deep in-the-money option, with a delta near one, absorbs nearly all of it. At the 115 strike the out-of-the-money call reads 21.7% against a true 23.5%, off by 1.8 points; the in-the-money put reads 32.9%, off by 9.4.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Tell the screen about the borrow. <b>Predict</b> what the two lines do when its assumed carry matches the market's.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cFwd" data-patch='{"q":0.06,"q0":0.06}' data-focus="cvFwd">Give the screen the right forward</button>
+      <button class="act ghost" data-preset="cFwd" data-patch='{"q":0.06,"q0":0}' data-focus="cvFwd">Back to the naive screen</button>
+      <button class="act ghost" data-preset="cFwd" data-patch='{"q":0,"q0":0.03}' data-focus="cvFwd">Screen assumes a dividend that is not there</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">A screen shows put implied vols well above call implied vols at every strike, by a similar amount. The first thing to conclude is:</p>
+    <div class="opts">
+      <button>Puts are rich; sell them against calls</button>
+      <button>The skew is unusually steep</button>
+      <button data-ok="1">The screen's forward is too high: a borrow cost or dividend it does not know about</button>
+      <button>The data feed is broken</button>
+    </div>
+    <div class="ans"><b>The forward is too high.</b> Skew is a difference across strikes; this is a difference between calls and puts at the same strike, which parity does not allow. The only free parameter is the forward. Selling the "rich" puts against the calls is a reversal, and what you would collect is exactly the borrow you then pay.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
     <h2>The five-second scan</h2>
     <p class="dek">A procedure, in order. It is short because the point is that it fits in the time before somebody expects an answer.</p>
   </div>
 
   <div class="prose">
     <p class="lead">Everything above is a conversion. This is the order to do them in, and it is worth doing in the same order every time until it stops being a list and becomes a glance.</p>
+    <p><b>Zero — check that calls and puts agree.</b> If the two IV columns differ at the same strike, the screen has the wrong forward. Fix that first, as in chapter 06; nothing below means anything until they agree.</p>
     <p><b>One — get the sigma.</b> Spot times the at-the-money implied times √T. One number, and every strike distance on the screen is now readable. On the chain below it is printed at the top of the panel, and after a hundred chains you will be computing it before the page has finished loading.</p>
     <p><b>Two — locate the money.</b> Not the 50-delta; the strike nearest the <em>forward</em>. On short-dated equity chains they are nearly the same, and on anything long-dated or high-carry they are not.</p>
     <p><b>Three — read the shape of the IV column.</b> Not the values, the slope. Falling as strikes rise is ordinary equity skew. Falling then rising is a smile, which means the wings are bid on both sides and usually means jump risk. Flat is either an index in a calm week or a screen showing you a model rather than a market.</p>
@@ -429,10 +502,10 @@
   </div>
 </section>
 
-<!-- ══════════ 07 ══════════ -->
-<section class="chapter" id="c7">
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
   <div class="chead">
-    <div class="cnum">07</div>
+    <div class="cnum">08</div>
     <h2>Drill the conversions</h2>
     <p class="dek">Sigmas, strike distances and deltas, at the speed the screen moves.</p>
   </div>
@@ -541,7 +614,7 @@
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
-    <span class="lab">Question 6 · chapter 06</span>
+    <span class="lab">Question 6 · chapter 07</span>
     <p class="q">A strike shows enormous open interest and almost no volume today. What does that tell you?</p>
     <div class="opts">
       <button>It is illiquid and should be ignored</button>
@@ -884,6 +957,7 @@ const s5={atm:0.28,skew:-0.35,J:0,days:30};
       ["25Δ put strike",kp.toFixed(2)+"  at "+(vf(kp)*100).toFixed(2)+"%"],
       ["25Δ call strike",kc.toFixed(2)+"  at "+(vf(kc)*100).toFixed(2)+"%"],
       ["Risk reversal",rr.toFixed(3)+" pts"],
+      ["90% strike over ATM",(vf(90)/vf(S)).toFixed(3)+"  ("+((vf(90)/vf(S)-1)*100).toFixed(1)+"% premium)"],
       ["Front (3d) IV",(sigAt(S,S,3/365,s5.atm,s5.skew,0.25,s5.J)*100).toFixed(2)+"%"],
       ["Back (180d) IV",(sigAt(S,S,180/365,s5.atm,s5.skew,0.25,s5.J)*100).toFixed(2)+"%"],
       ["Front over back",(sigAt(S,S,3/365,s5.atm,s5.skew,0.25,s5.J)
@@ -1044,8 +1118,55 @@ const s6={S:100,days:30,atm:0.28,skew:-0.35,step:5};
   window.__drill=()=>{const o=[];for(let i=0;i<2;i++){tier=i+1;for(let j=0;j<300;j++)o.push(make());}tier=1;return o;};
 })();
 
+/* ══════════ 06 — find the forward first ══════════
+   The market prices off a forward that includes a borrow cost q. The screen
+   backs out implied vols assuming q0. When q0 != q the call and put columns
+   separate, and the in-the-money side of each is the most wrong. */
+function ivCarry(price, S, K, T, r, q, isCall) {
+  const lo0 = bs(S, K, T, 0.002, r, q, isCall).price;
+  if (price <= lo0 + 1e-9) return NaN;
+  let lo = 0.002, hi = 6;
+  for (let i = 0; i < 90; i++) { const m = (lo + hi) / 2; if (bs(S, K, T, m, r, q, isCall).price < price) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+const FWD = { S: 100, T: 90 / 365, r: 0.04, atm: 0.28, skew: -0.35 };
+function fwdVol(K, q) { const k = Math.log(K / (FWD.S * Math.exp((FWD.r - q) * FWD.T))); return Math.max(0.04, FWD.atm + FWD.skew * k + 0.25 * k * k); }
+function fwdRow(K, q, q0) {
+  const v = fwdVol(K, q), c = bs(FWD.S, K, FWD.T, v, FWD.r, q, true).price, p = bs(FWD.S, K, FWD.T, v, FWD.r, q, false).price;
+  return { v, c, p, ivC: ivCarry(c, FWD.S, K, FWD.T, FWD.r, q0, true), ivP: ivCarry(p, FWD.S, K, FWD.T, FWD.r, q0, false),
+    F: K + (c - p) * Math.exp(FWD.r * FWD.T) };
+}
+const sF = { q: 0.06, q0: 0 };
+(function(){
+  sliders(document.getElementById("ctlFwd"), [
+    { id: "qF", k: "q", lbl: "b", name: "What the stock costs to borrow", min: 0, max: 0.15, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" },
+    { id: "q0F", k: "q0", lbl: "b₀", name: "What the screen assumes", min: 0, max: 0.15, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" }
+  ], sF, () => draw(),"cFwd");
+  window.drawFwd = draw;
+  function draw(){
+    const xs = [], tv = [], ic = [], ip = [];
+    for (let K = 80; K <= 120; K += 0.5) { const r = fwdRow(K, sF.q, sF.q0); xs.push(K); tv.push(r.v * 100); ic.push(r.ivC * 100); ip.push(r.ivP * 100); }
+    const o = Fig(document.getElementById("cvFwd"), { h: 300, x0: 80, x1: 120, y0: 10, y1: 50, pad: { l: 58, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => v.toFixed(0) + "%", 5, 4);
+    clip(o, () => { line(o, xs, tv, C("--grey"), 2); line(o, xs, ic, C("--blue"), 2.4); line(o, xs, ip, C("--verm"), 2.4); });
+    vline(o, FWD.S, C("--ochre"), "spot", [2, 4]);
+    const a = fwdRow(100, sF.q, sF.q0), w = fwdRow(115, sF.q, sF.q0), pt = v => isFinite(v) ? (v * 100).toFixed(1) + "%" : "none: below parity";
+    const Fs = FWD.S * Math.exp((FWD.r - sF.q0) * FWD.T), qi = FWD.r - Math.log(a.F / FWD.S) / FWD.T;
+    document.getElementById("kvFwd").innerHTML = kvHTML([
+      ["Forward the screen assumes", Fs.toFixed(2)],
+      ["Forward from parity at 100", a.F.toFixed(2)],
+      ["Borrow that forward implies", (qi * 100).toFixed(1) + "%"],
+      ["100 strike: traded vol", pt(a.v)],
+      ["100 strike: call IV / put IV", pt(a.ivC) + " / " + pt(a.ivP)],
+      ["115 call (out of the money)", pt(w.ivC)],
+      ["115 put (in the money)", pt(w.ivP)],
+      ["115 strike: traded vol", pt(w.v)]
+    ]);
+  }
+})();
+
 function drawAll(){
-  drawHero();draw1();draw2();draw3();draw4();draw5();draw6();drawDrill();
+  drawHero();draw1();draw2();draw3();draw4();draw5();drawFwd();draw6();drawDrill();
 }
 LAB.boot(drawAll);
 
