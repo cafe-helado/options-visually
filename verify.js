@@ -147,6 +147,22 @@ PAGES["surface"] = () => {
     /* a second route: reprice the call with the smile re-anchored and difference */
     const px = (S, vol) => { const d1 = (Math.log(S / 100) + (Q.fwd(S, T) > 0 ? Math.log(Q.fwd(S, T) / S) : 0) + 0.5 * vol * vol * T) / (vol * Math.sqrt(T)); return d1; };
     yes("  about ten shares a contract", Math.round(100 * Q.bsVega(100, 100, T, v) * (vh - v) / h) === 10); }
+  { const F = load("surface.html", ["ftQuotes", "ftFit", "ftEval", "ftLin", "ftTrue", "ftMinFly", "ftFly", "sFit"]);
+    const q0 = F.ftQuotes(0), q6 = F.ftQuotes(-0.06), p0 = F.ftFit(q0), p6 = F.ftFit(q6), pd = F.ftFit(q6.filter(x => x.K !== 110));
+    yes("fit defaults: clean quotes, all used", F.sFit.bad === 0 && F.sFit.drop === 0);
+    [92.5, 107.5, 112.5].forEach(K => yes("clean: both methods within about 0.13 pts at " + K, Math.abs(F.ftEval(p0, K) - F.ftTrue(K)) < 0.0013 && Math.abs(F.ftLin(q0, K) - F.ftTrue(K)) < 0.0013));
+    eq("clean: straight-line fly at 105 is -$0.010", F.ftMinFly(K => F.ftLin(q0, K)).m, -0.010, 0.0006);
+    eq("  at the 90 strike", F.ftMinFly(K => F.ftLin(q0, K)).at, 90, 0);
+    yes("  smaller negative ones at 105 and 115", F.ftFly(K => F.ftLin(q0, K), 105, 0.5) < 0 && F.ftFly(K => F.ftLin(q0, K), 115, 0.5) < 0);
+    yes("clean: fitted marks have no negative fly", F.ftMinFly(K => F.ftEval(p0, K)).m > 0);
+    eq("stale 110: straight lines mark 112.5 at 23.34", 100 * F.ftLin(q6, 112.5), 23.34, 0.006);
+    eq("  true 26.22", 100 * F.ftTrue(112.5), 26.22, 0.006);
+    eq("  fly at 105 goes to -$0.117", F.ftMinFly(K => F.ftLin(q6, K)).m, -0.117, 0.0006);
+    eq("  fitted marks 112.5 at 24.93", 100 * F.ftEval(p6, 112.5), 24.93, 0.006);
+    eq("  at-the-money moves 0.67", 100 * (F.ftEval(p0, 100) - F.ftEval(p6, 100)), 0.67, 0.006);
+    eq("  the 90 strike moves 0.12", 100 * (F.ftEval(p0, 90) - F.ftEval(p6, 90)), 0.12, 0.006);
+    yes("  fitted marks still have no negative fly", F.ftMinFly(K => F.ftEval(p6, K)).m > 0);
+    yes("dropping the quote restores the fit to within 0.3 pts everywhere", [80, 90, 100, 110, 120].every(K => Math.abs(F.ftEval(pd, K) - F.ftTrue(K)) < 0.003)); }
 };
 
 PAGES["catalyst"] = () => {
@@ -347,6 +363,19 @@ PAGES["variance"] = () => {
     eq("  0.59 points light", 100 * (qv(0.2, 1, -0.2) - lv(0.2, 1, -0.2)), 0.59, 0.006);
     eq("-30% once every two years: 1.10", 100 * (qv(0.2, 0.5, -0.3) - lv(0.2, 0.5, -0.3)), 1.10, 0.006);
     eq("-30% twice a year: 2.62 (prose said half-yearly gave 1.10)", 100 * (qv(0.2, 2, -0.3) - lv(0.2, 2, -0.3)), 2.62, 0.006); }
+  { const W = load("variance.html", ["vsMtm", "vsBreakeven", "vsVega", "sMtm", "MT"]);
+    yes("mark defaults", W.sMtm.t === 0.5 && W.sMtm.rv === 20 && W.sMtm.kn === 25 && W.MT.N === 1e5 && W.MT.K === 25);
+    eq("variance notional $2,000 per point squared", W.MT.N / (2 * W.MT.K), 2000, 0);
+    eq("shortfall 112.5 points squared", 625 - (0.5 * 400 + 0.5 * 625), 112.5, 1e-12);
+    eq("undiscounted -$225,000", -112.5 * 2000, -225000, 0);
+    eq("marked -$220,545", W.vsMtm(0.5, 20, 25), -220545, 1);
+    eq("break-even for the rest 29.15", W.vsBreakeven(0.5, 20), 29.15, 0.006);
+    eq("  zero mark there", W.vsMtm(0.5, 20, W.vsBreakeven(0.5, 20)), 0, 1e-6);
+    eq("three months left: 36.06", W.vsBreakeven(0.75, 20), 36.06, 0.006);
+    eq("five weeks left: 51.48", W.vsBreakeven(0.9, 20), 51.48, 0.006);
+    eq("vega halfway about $50,000 a point", W.vsVega(0.5, 25), 50000, 1100);
+    eq("  by bumping the mark", W.vsMtm(0.5, 20, 25.5) - W.vsMtm(0.5, 20, 24.5), W.vsVega(0.5, 25), 1);
+    eq("check: all at 25, three quarters through, worth zero", W.vsMtm(0.75, 25, 25), 0, 1e-9); }
 };
 
 PAGES["questions"] = () => {
@@ -1052,6 +1081,17 @@ PAGES["dispersion"] = () => {
     eq("and vols x1.8: 66.97%", iv(0.90, 1.8), 66.97, 0.006);
     eq("  up 45.91 points", iv(0.90, 1.8) - iv(0.25), 45.91, 0.006);
     yes("curvature: index vol moves more per unit rho at 0.2 than at 0.6", (iv(0.25) - iv(0.15)) > (iv(0.65) - iv(0.55))); }
+  { const Z = load("dispersion.html", ["kTheta", "kVega", "wtPnl", "sWt"]);
+    eq("theta-weighted leg 0.359", Z.kTheta(), 0.359, 0.0006);
+    eq("vega-weighted leg 0.620", Z.kVega(), 0.620, 0.0006);
+    eq("  73% more", (Z.kVega() / Z.kTheta() - 1) * 100, 73, 0.5);
+    [0.6, 1.2, 1.8].forEach(m => eq("theta-weighted flat at " + m + "x, correlation as implied", Z.wtPnl(Z.kTheta(), m, 0.35), 0, 1e-6));
+    eq("vega-weighted +$956,000 at 1.8x", Z.wtPnl(Z.kVega(), 1.8, 0.35), 956000, 500);
+    eq("  -$273,000 at 0.6x", Z.wtPnl(Z.kVega(), 0.6, 0.35), -273000, 500);
+    eq("correlation 0.60: both lose $362,000", Z.wtPnl(Z.kTheta(), 1, 0.6), -362000, 500);
+    eq("  identical", Z.wtPnl(Z.kVega(), 1, 0.6), Z.wtPnl(Z.kTheta(), 1, 0.6), 1e-6);
+    eq("crisis: theta-weighted -$2.58m", Z.wtPnl(Z.kTheta(), 1.8, 0.9) / 1e6, -2.58, 0.006);
+    eq("  vega-weighted -$1.62m", Z.wtPnl(Z.kVega(), 1.8, 0.9) / 1e6, -1.62, 0.006); }
 };
 
 PAGES["spreading"] = () => {
@@ -1679,6 +1719,19 @@ PAGES["microstructure"] = () => {
   eq("the same at 60 vol: the ratio does not depend on volatility", (() => { let lo = 100, hi = 250; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (B(100, m, 7 / 365, 0.60, 0, 0, true).delta > 0.05) lo = m; else hi = m; } return 0.01 / (B(100, lo, 7 / 365, 0.60, 0, 0, true).vega / 100); })(), 0.70, 0.02);
   eq("the old 11.57 is a strike 13% out of the money", 0.01 / (B(100, 112.9, 7 / 365, 0.30, 0, 0, true).vega / 100), 11.57, 1.2);
   yes("  which is a 0.2-delta, not a five-delta", B(100, 112.9, 7 / 365, 0.30, 0, 0, true).delta < 0.003);
+  { const A = load("microstructure.html", ["allocate", "AL", "sAl"]);
+    yes("allocation defaults", A.sAl.q === 150 && A.sAl.s === 100 && A.AL.cust === 20 && A.AL.a === 200 && A.AL.b === 50);
+    eq("130 left after the customer", 150 - 20, 130, 0);
+    eq("price-time, last: nothing", A.allocate(150, 100, "pt", false), 0, 0);
+    [10, 500, 1500].forEach(s => eq("  whatever size you show (" + s + ")", A.allocate(150, s, "pt", false), 0, 0));
+    eq("price-time, first: your whole 100", A.allocate(150, 100, "pt", true), 100, 0);
+    eq("pro-rata, showing 100: 37", A.allocate(150, 100, "pr"), 37, 0);
+    eq("  by hand: floor(130 x 100 / 350)", Math.floor(130 * 100 / 350), 37, 0);
+    eq("pro-rata, showing 1,000: 104", A.allocate(150, 1000, "pr"), 104, 0);
+    let mono = true; for (let s = 10; s < 1500; s += 10) if (A.allocate(150, s + 10, "pr") < A.allocate(150, s, "pr")) mono = false;
+    yes("pro-rata fill never falls as displayed size rises", mono);
+    eq("sweep of 1,000, showing 400: filled 400", A.allocate(1000, 400, "pr"), 400, 0);
+    eq("check: quoting 500, a sweep larger than the price fills all 500", A.allocate(1000, 500, "pr"), 500, 0); }
 };
 
 PAGES["capital"] = () => {

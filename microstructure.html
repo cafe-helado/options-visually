@@ -39,6 +39,8 @@
   <a href="#c4"><span>Where liquidity is</span><i></i></a>
   <a href="#c5"><span>Dealer gamma</span><i></i></a>
   <a href="#c6"><span>Pinning</span><i></i></a>
+  <a href="#c7"><span>The day</span><i></i></a>
+  <a href="#c8"><span>Allocation</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -476,6 +478,72 @@
       <button>The underlying's implied volatility fell</button>
     </div>
     <div class="ans"><b>Their inventory changed.</b> The observed mid is fair value plus a position adjustment, and the adjustment is invisible from outside. Treating every quote move as information is how people end up chasing a market that is only trying to go home flat — and it is the reason a single maker's mid is a worse estimate of fair value than the consensus across several.</div>
+  </div>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
+    <h2>Who gets filled: allocation rules</h2>
+    <p class="dek">When an order arrives at a price where several people are bidding, the exchange's allocation rule decides who trades. The rule shapes how everyone quotes.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Four orders rest at the same bid: a 20-lot from a public customer, a 200-lot from market maker A who arrived first, a 50-lot from market maker B, and yours. A seller hits the bid for 150. The figure fills that sell under the two families of rules US option exchanges use, and asks what your displayed size buys you under each.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Your fill against the size you display</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Pro-rata</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Price-time, you last in the queue</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Price-time, you first</span>
+          </span>
+        </div>
+        <canvas id="cvAl" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The book and the order</h4>
+        <div id="ctlAl"></div>
+        <div class="kv" style="margin-top:20px" id="kvAl"></div>
+      </div>
+    </div>
+    <figcaption>Under price-time your fill is decided by when you arrived and showing more size buys nothing. Under pro-rata it is decided by how much you show, and showing more always buys more.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Both rules here fill the public customer first. Many US option exchanges give customer orders that priority at a price, as an overlay on either rule, though not every price-time venue does. That leaves 130 contracts.</p>
+    <p><b>Price-time</b> hands them out in order of arrival. Market maker A was first with 200, so A takes all 130 and you get <b>nothing</b>, whatever size you show. Had you been first, you would get your whole 100. The competition is for queue position, which is why speed matters on these venues.</p>
+    <p><b>Pro-rata</b> splits the 130 in proportion to displayed size among the market makers at the price. With 100 showing you get <b>37</b>; show 1,000 and you get <b>104</b>, though you never wanted 1,000. That is the rule's known side effect: it pays to display more than you mean, so pro-rata books look deeper than they are, and a sweep that clears them can fill quoters for far more than they expected to trade.</p>
+    <p>The real rules sit on top of these two: many venues give a participation entitlement to a designated or lead market maker, some allocate part pro-rata and part by time, auctions run their own allocation, and complex orders trade against a separate book with leg priority. The details differ by exchange and change; read the exchange's rulebook for the venue you trade on. What carries over is the question to ask of any of them: what does this rule pay for, time, size or status?</p>
+  </div>
+
+  <div class="mline">pro-rata fill<sub>i</sub> = &lfloor; Q<sub>left</sub> &times; size<sub>i</sub> &divide; &Sigma; size &rfloor; &nbsp;&nbsp;&nbsp; price-time: fill in arrival order until Q<sub>left</sub> is gone</div>
+  <p class="mread">Reads as: <b>under pro-rata each quoter gets the share of what is left that their size is of the total size at the price, rounded down; under price-time the earliest order fills first.</b> In both, customers at the price go first.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>A seller sweeps for 1,000. <b>Predict</b> your fill under pro-rata if you are showing 400.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cAl" data-patch='{"q":1000,"s":400}' data-focus="cvAl">Sweep of 1,000</button>
+      <button class="act ghost" data-preset="cAl" data-patch='{"q":150,"s":100}' data-focus="cvAl">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">On a pro-rata venue you quote 500 contracts but only want to trade 50. What risk are you running?</p>
+    <div class="opts">
+      <button>None; pro-rata always gives you a fraction of the incoming order</button>
+      <button data-ok="1">A large order that takes out the whole price fills you for most of your 500</button>
+      <button>Losing queue position to faster firms</button>
+      <button>Being filled after customers, which costs edge</button>
+    </div>
+    <div class="ans"><b>A large order fills you for most of it.</b> Pro-rata pays for displayed size on small orders and charges for it on big ones: once the incoming order is larger than the whole price, every quoter is filled in full. Queue position is the price-time concern, and customer priority applies on both.</div>
   </div>
 </section>
 
@@ -985,7 +1053,41 @@ const sInv={aversion:0.25,arrivals:300,edge:0.9,vol:0.30};
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();drawInv();}
+/* ══════════ 08 — allocation rules ══════════ */
+const AL = { cust: 20, a: 200, b: 50 };
+function allocate(q, s, rule, youFirst){
+  let left = Math.max(0, q - AL.cust);
+  if (rule === "pt"){ const order = youFirst ? [["you", s], ["a", AL.a], ["b", AL.b]] : [["a", AL.a], ["b", AL.b], ["you", s]]; const f = {};
+    order.forEach(([n, z]) => { const x = Math.min(z, left); f[n] = x; left -= x; }); return f.you; }
+  const tot = AL.a + AL.b + s; if (left >= tot) return s;
+  return Math.floor(left * s / tot);
+}
+const sAl = { q: 150, s: 100 };
+(function(){
+  sliders(document.getElementById("ctlAl"), [
+    { id: "qA", k: "q", lbl: "Q", name: "Size of the incoming sell", min: 25, max: 1500, step: 25, fmt: v => v.toFixed(0) },
+    { id: "sA", k: "s", lbl: "s", name: "Size you display", min: 10, max: 1500, step: 10, fmt: v => v.toFixed(0) }
+  ], sAl, () => draw(),"cAl");
+  window.drawAl = draw;
+  function draw(){
+    const xs = [], a = [], b = [], c = []; for (let s = 10; s <= 1500; s += 10){ xs.push(s); a.push(allocate(sAl.q, s, "pr")); b.push(allocate(sAl.q, s, "pt", false)); c.push(allocate(sAl.q, s, "pt", true)); }
+    const top = Math.max(10, Math.max.apply(null, a.concat(b, c))) * 1.12;
+    const o = Fig(document.getElementById("cvAl"), { h: 290, x0: 10, x1: 1500, y0: 0, y1: top, pad: { l: 54, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => v.toFixed(0), 6, 5);
+    clip(o, () => { line(o, xs, c, C("--moss"), 2, [5, 4]); line(o, xs, b, C("--verm"), 2.4); line(o, xs, a, C("--blue"), 2.6); });
+    vline(o, sAl.s, C("--ochre"), "you", [2, 4]);
+    document.getElementById("kvAl").innerHTML = kvHTML([
+      ["Customer fills first", Math.min(sAl.q, AL.cust).toFixed(0)],
+      ["Left for market makers", Math.max(0, sAl.q - AL.cust).toFixed(0)],
+      ["Your fill, pro-rata", allocate(sAl.q, sAl.s, "pr").toFixed(0)],
+      ["Your fill, price-time, last", allocate(sAl.q, sAl.s, "pt", false).toFixed(0)],
+      ["Your fill, price-time, first", allocate(sAl.q, sAl.s, "pt", true).toFixed(0)],
+      ["Your fill as share of what you showed, pro-rata", (100 * allocate(sAl.q, sAl.s, "pr") / sAl.s).toFixed(0) + "%"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();drawInv();drawAl();}
 LAB.boot(drawAll);
 
 </script>

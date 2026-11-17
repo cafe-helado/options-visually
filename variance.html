@@ -40,6 +40,7 @@
   <a href="#c5"><span>What it pays</span><i></i></a>
   <a href="#c6"><span>VIX</span><i></i></a>
   <a href="#c7"><span>Where it breaks</span><i></i></a>
+  <a href="#c8"><span>Marking it</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -512,10 +513,74 @@
   </div>
 </section>
 
-<!-- ══════════ QUIZ ══════════ -->
+<!-- ══════════ 08 ══════════ -->
 <section class="chapter" id="c8">
   <div class="chead">
     <div class="cnum">08</div>
+    <h2>Marking it before expiry</h2>
+    <p class="dek">Halfway through its life a variance swap is two things: realized variance already banked, and a new swap on the variance still to come.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">You are long a one-year variance swap struck at 25, with $100,000 of vega notional. Six months have passed and the stock has realized 20. The figure marks the position against the implied volatility for the remaining six months, which is what you would have to strike a new swap at today.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Mark-to-market against the implied vol for the rest of the life</h3>
+          <span class="legend" style="margin:0"><span><i class="swl" style="background:var(--blue)"></i>Position value</span></span>
+        </div>
+        <canvas id="cvMtm" height="260"></canvas>
+        <div class="figtop" style="margin:20px 0 6px"><h3>Implied vol the rest of the life must reach to break even</h3></div>
+        <canvas id="cvMtm2" height="190"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The swap so far</h4>
+        <div id="ctlMtm"></div>
+        <div class="kv" style="margin-top:20px" id="kvMtm"></div>
+      </div>
+    </div>
+    <figcaption>The upper curve is a parabola, because the new swap is on variance. The lower curve climbs ever more steeply as the time left shrinks: a shortfall in realized variance gets harder to make up the less time remains to make it up in.</figcaption>
+  </figure>
+
+  <div class="mline">MTM = N<sub>var</sub> &times; [ (t/T)&middot;&sigma;<sub>realized</sub>&sup2; + (1 &minus; t/T)&middot;K<sub>now</sub>&sup2; &minus; K&sup2; ] &times; DF &nbsp;&nbsp;&nbsp; N<sub>var</sub> = N<sub>vega</sub> / (2K)</div>
+  <p class="mread">Reads as: <b>the variance banked so far, weighted by the time it covered, plus the variance a new swap would lock in for the time left, minus the strike's variance, all times the variance notional and discounted to the payment date.</b> Every volatility here is in points, as in chapter 05.</p>
+
+  <div class="prose">
+    <p>The variance notional is $100,000 divided by twice 25: $2,000 per point squared. Half a year at 20 banks 200; half a year at an implied 25 adds 312.5; together 512.5 against the strike's 625. The shortfall of 112.5 points squared is worth <b>&minus;$225,000</b>, or <b>&minus;$220,545</b> discounted for six months at 4%. The implied vol going forward is exactly the strike, and the position is still deeply under water, because half the variance it was promised did not happen.</p>
+    <p>To get back to zero the remaining six months have to be struck at <b>29.15</b>. With three months left that number is 36.06; with five weeks left it is 51.48. And the position's vega shrinks as the life runs out: halfway through, a point on the remaining implied vol is worth about <b>$50,000</b>, half the notional, because only half the life is still exposed to it.</p>
+    <p>This is how a desk marks the book every night, and it explains two things traders say about variance swaps. A long position that has under-realized is "dead": it needs an implausible vol for the rest of the life. And because realized variance is banked as it happens, a variance swap carries its daily P&amp;L in the realized term even when implied vol does not move, which an option book of the same vega does not.</p>
+  </div>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Let the stock realize 30 for the first half instead. <b>Predict</b> the mark if implied for the rest is still 25.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cMtm" data-patch='{"rv":30,"t":0.5}' data-focus="cvMtm">Realized 30 so far</button>
+      <button class="act ghost" data-preset="cMtm" data-patch='{"rv":20,"t":0.9}' data-focus="cvMtm">Realized 20, ninety percent through</button>
+      <button class="act ghost" data-preset="cMtm" data-patch='{"rv":20,"t":0.5,"kn":25}' data-focus="cvMtm">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Long a one-year variance swap struck at 25, three quarters through its life, realized so far 25, implied for the rest 25. What is it worth?</p>
+    <div class="opts">
+      <button>A loss, from time decay</button>
+      <button data-ok="1">Zero</button>
+      <button>A gain, since realized met the strike</button>
+      <button>It cannot be marked before expiry</button>
+    </div>
+    <div class="ans"><b>Zero.</b> Banked and forward variance both equal the strike's, so the bracket is zero. A variance swap has no time decay of its own; it only has the gap between what has happened, what is now expected, and what was agreed.</div>
+  </div>
+</section>
+
+<!-- ══════════ QUIZ ══════════ -->
+<section class="chapter" id="c9">
+  <div class="chead">
+    <div class="cnum">09</div>
     <h2>Check yourself</h2>
     <p class="dek">Six questions across the page. Each explanation names the chapter to revisit.</p>
   </div>
@@ -1124,7 +1189,45 @@ const s7={lam:1,jump:-0.20,sig:0.20};
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();}
+/* ══════════ 08 — marking a variance swap ══════════ */
+const sMtm = { t: 0.5, rv: 20, kn: 25 };
+const MT = { N: 100000, K: 25, T: 1, r: 0.04 };
+function vsMtm(t, rv, kn){ const vn = MT.N / (2 * MT.K); return vn * ((t / MT.T) * rv * rv + (1 - t / MT.T) * kn * kn - MT.K * MT.K) * Math.exp(-MT.r * (MT.T - t)); }
+function vsBreakeven(t, rv){ const x = (MT.K * MT.K - (t / MT.T) * rv * rv) / (1 - t / MT.T); return x > 0 ? Math.sqrt(x) : 0; }
+function vsVega(t, kn){ return (MT.N / (2 * MT.K)) * (1 - t / MT.T) * 2 * kn * Math.exp(-MT.r * (MT.T - t)); }
+(function(){
+  const m = v => (v < -.5 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  sliders(document.getElementById("ctlMtm"), [
+    { id: "tM", k: "t", lbl: "t", name: "Share of the life elapsed", min: 0.05, max: 0.95, step: 0.01, fmt: v => (v * 100).toFixed(0) + "%" },
+    { id: "rvM", k: "rv", lbl: "σᵣ", name: "Realized so far, vol points", min: 5, max: 60, step: 0.5, fmt: v => v.toFixed(1) },
+    { id: "knM", k: "kn", lbl: "K′", name: "Implied for the rest, vol points", min: 5, max: 60, step: 0.5, fmt: v => v.toFixed(1) }
+  ], sMtm, () => draw(),"cMtm");
+  window.drawMtm = draw;
+  function draw(){
+    const p = sMtm, xs = [], ys = []; for (let k = 5; k <= 60; k += 0.5){ xs.push(k); ys.push(vsMtm(p.t, p.rv, k)); }
+    const lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys);
+    const o = Fig(document.getElementById("cvMtm"), { h: 260, x0: 5, x1: 60, y0: lo * 1.1, y1: hi * 1.1, pad: { l: 70, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => (v < 0 ? "−" : "") + "$" + (Math.abs(v) / 1e6).toFixed(1) + "m", 11, 5);
+    clip(o, () => { line(o, xs, ys, C("--blue"), 2.6); line(o, [5, 60], [0, 0], C("--grey"), 1, [3, 3]); });
+    vline(o, p.kn, C("--ochre"), "now", [2, 4]);
+    const tx = [], ty = []; for (let t = 0.02; t <= 0.96; t += 0.01){ tx.push(t * 100); ty.push(vsBreakeven(t, p.rv)); }
+    const o2 = Fig(document.getElementById("cvMtm2"), { h: 190, x0: 0, x1: 96, y0: 0, y1: Math.min(120, Math.max.apply(null, ty) * 1.08), pad: { l: 70, r: 14, t: 10 } });
+    axes(o2, v => v.toFixed(0) + "%", v => v.toFixed(0), 8, 4);
+    clip(o2, () => { line(o2, tx, ty, C("--verm"), 2.4); line(o2, [0, 96], [MT.K, MT.K], C("--grey"), 1.4, [5, 4]); });
+    vline(o2, p.t * 100, C("--ochre"), "now", [2, 4]);
+    document.getElementById("kvMtm").innerHTML = kvHTML([
+      ["Variance notional", m(MT.N / (2 * MT.K)) + " per pt²"],
+      ["Banked so far, pts² × share", ((p.t) * p.rv * p.rv).toFixed(1)],
+      ["Forward, pts² × share", ((1 - p.t) * p.kn * p.kn).toFixed(1)],
+      ["Strike, pts²", (MT.K * MT.K).toFixed(1)],
+      ["Mark-to-market", m(vsMtm(p.t, p.rv, p.kn))],
+      ["Break-even implied for the rest", vsBreakeven(p.t, p.rv) > 0 ? vsBreakeven(p.t, p.rv).toFixed(2) : "already in the money"],
+      ["Vega left, per point", m(vsVega(p.t, p.kn))]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawMtm();}
 LAB.boot(drawAll);
 
 </script>

@@ -718,5 +718,6 @@ contracts; a 5% fall with vol +5 costs $13,105, lifts the requirement from
 $49,685 to $59,792, and the margin call is at −10.7% (−2.8% at 80%
 utilization, −24.8% at 30%).
 
-Still not built: US listed market structure, dispersion weighting schemes,
-variance-swap mark-to-market, surface fitting and marking.
+Built since as chapters: allocation rules (microstructure ch08), dispersion
+sizing (dispersion ch06), variance-swap marking (variance ch08), surface
+fitting (surface ch07).

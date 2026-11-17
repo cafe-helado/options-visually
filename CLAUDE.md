@@ -185,7 +185,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-All twenty-five pages are built, plus the program, the workbook and the toolkit. What is not done: four topics listed at the end of ROADMAP.md (listed market structure, dispersion weighting, variance-swap mark-to-market, surface fitting), and verify claims for the simulated chapters of microstructure and real-world, which quote random runs. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
+All twenty-five pages are built, plus the program, the workbook and the toolkit. What is not done: verify claims for the simulated chapters of microstructure (03-05) and real-world (01-02), which quote random runs and would need the figures seeded first. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a

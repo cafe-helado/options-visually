@@ -38,7 +38,8 @@
   <a href="#c3"><span>The trade</span><i></i></a>
   <a href="#c4"><span>Why it is rich</span><i></i></a>
   <a href="#c5"><span>Where it breaks</span><i></i></a>
-  <a href="#c6"><span>Check yourself</span><i></i></a>
+  <a href="#c6"><span>Sizing the long leg</span><i></i></a>
+  <a href="#c7"><span>Check yourself</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -408,6 +409,71 @@
 <section class="chapter" id="c6">
   <div class="chead">
     <div class="cnum">06</div>
+    <h2>How big the long leg is decides what else you own</h2>
+    <p class="dek">Every dispersion book has to choose how much single-name variance to buy against the index. The two common answers leave different bets behind.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">Short $1,000 per point squared of index variance at the 24.25 implied from chapter 03, long the twenty names in equal weights. The figure scales every single-name volatility by the same factor, holds realized correlation where you set it, and shows each sizing's P&amp;L.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>P&amp;L when every volatility moves by the same factor</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Theta-weighted</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Vega-weighted</span>
+          </span>
+        </div>
+        <canvas id="cvWt" height="290"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The market</h4>
+        <div id="ctlWt"></div>
+        <div class="kv" style="margin-top:20px" id="kvWt"></div>
+      </div>
+    </div>
+    <figcaption>With realized correlation equal to implied, the blue line lies on zero: the theta-weighted book is a correlation trade and nothing else. The red line is that same trade plus a long position in the level of volatility.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p><b>Theta-weighted</b> sizes the single-name leg so its implied variance equals the index's: 0.359 of a unit of each name per unit of index. If every name realizes its implied, both legs pay the same, and if every vol rises by the same proportion the two legs still move together. What is left is the correlation bet and nothing else, which is the sizing chapter 03 used.</p>
+    <p><b>Vega-weighted</b> sizes it so the vega on each side matches: 0.620. That is 73% more single-name variance, and the extra is a naked long-vol position. If every vol rises by 80% with correlation unchanged it makes <b>$956,000</b>; if every vol falls 40% it loses <b>$273,000</b>. Matching vega does not make a dispersion book vol-neutral, because an index vol point and a single-name vol point are different sizes of move.</p>
+    <p>Neither sizing changes the correlation bet. Realized correlation at 0.60 instead of 0.35, vols unchanged, costs both books the same <b>$362,000</b>, because correlation lives only in the index leg. The choice decides what you hold alongside it. In the crisis case from chapter 05, every vol up 80% and correlation at 0.90, the theta-weighted book loses <b>$2.58 million</b> and the vega-weighted book <b>$1.62 million</b>: the long-vol tilt cushions exactly the scenario that hurts dispersion most, and pays for it by losing whenever vols drift lower.</p>
+  </div>
+
+  <div class="mline">theta-weighted k = &sigma;<sub>I</sub>&sup2; &divide; &Sigma; w<sub>i</sub>&sigma;<sub>i</sub>&sup2; &nbsp;&nbsp;&nbsp; vega-weighted k = &sigma;<sub>I</sub> &divide; &Sigma; w<sub>i</sub>&sigma;<sub>i</sub></div>
+  <p class="mread">Reads as: <b>theta-weighting matches the variance on each side; vega-weighting matches the volatility.</b> Because the index vol is below the average name vol, the second number is always the larger, and the difference is a long position in vol.</p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Set realized correlation to 0.90. <b>Predict</b> whether the two lines cross anywhere.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cWt" data-patch='{"rr":0.9}' data-focus="cvWt">Correlation 0.90</button>
+      <button class="act ghost" data-preset="cWt" data-patch='{"rr":0.15}' data-focus="cvWt">Correlation 0.15</button>
+      <button class="act ghost" data-preset="cWt" data-patch='{"rr":0.35,"m":1.8}' data-focus="cvWt">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">You want a dispersion book whose only exposure is realized against implied correlation. Which sizing?</p>
+    <div class="opts">
+      <button>Vega-weighted, since equal vega means no vol exposure</button>
+      <button data-ok="1">Theta-weighted, since it matches the variance the two legs are paid on</button>
+      <button>Equal notional in each name and the index</button>
+      <button>It makes no difference; correlation exposure is the same either way</button>
+    </div>
+    <div class="ans"><b>Theta-weighted.</b> The correlation exposure is the same either way, which is why the last answer is tempting, but the question asked for the <em>only</em> exposure. Vega-weighting adds a long-vol position, and equal notional adds a much larger one.</div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section class="chapter" id="c7">
+  <div class="chead">
+    <div class="cnum">07</div>
     <h2>Check yourself</h2>
     <p class="dek">Six questions across the page.</p>
   </div>
@@ -873,7 +939,42 @@ const s5={rho:0.25,volMult:1,rhoImp:0.35};
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();}
+/* ══════════ 06 — sizing the long leg ══════════
+   Variance swaps throughout: short one unit of index variance at implied
+   correlation 0.35, long k units of each name in index weights. P&L in
+   dollars per $1,000 per point squared of index variance notional. */
+const RHO_IMP = 0.35;
+const kTheta = () => idxVar(VOLS, RHO_IMP) / wVar(VOLS);
+const kVega = () => Math.sqrt(idxVar(VOLS, RHO_IMP)) / wAvg(VOLS);
+function wtPnl(k, m, rr){ return 1000 * 1e4 * ((idxVar(VOLS, RHO_IMP) - idxVar(scale(VOLS, m), rr)) + k * (wVar(scale(VOLS, m)) - wVar(VOLS))); }
+const sWt = { rr: 0.35, m: 1.8 };
+(function(){
+  const d = v => (v < -500 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  sliders(document.getElementById("ctlWt"), [
+    { id: "rrW", k: "rr", lbl: "ρᵣ", name: "Realized correlation", min: 0, max: 1, step: 0.01, fmt: v => v.toFixed(2) },
+    { id: "mW", k: "m", lbl: "m", name: "Vol multiplier read", min: 0.5, max: 2, step: 0.05, fmt: v => v.toFixed(2) + "×" }
+  ], sWt, () => draw(),"cWt");
+  window.drawWt = draw;
+  function draw(){
+    const xs = [], a = [], b = []; for (let m = 0.5; m <= 2.0001; m += 0.025){ xs.push(m); a.push(wtPnl(kTheta(), m, sWt.rr)); b.push(wtPnl(kVega(), m, sWt.rr)); }
+    const lo = Math.min(-5e5, Math.min.apply(null, a.concat(b))), hi = Math.max(5e5, Math.max.apply(null, a.concat(b)));
+    const o = Fig(document.getElementById("cvWt"), { h: 290, x0: 0.5, x1: 2, y0: lo * 1.1, y1: hi * 1.1, pad: { l: 70, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(1) + "×", v => (v < 0 ? "−" : "") + "$" + (Math.abs(v) / 1e6).toFixed(1) + "m", 6, 5);
+    clip(o, () => { line(o, [0.5, 2], [0, 0], C("--grey"), 1, [3, 3]); line(o, xs, a, C("--blue"), 2.6); line(o, xs, b, C("--verm"), 2.6); });
+    vline(o, sWt.m, C("--ochre"), "read", [2, 4]);
+    document.getElementById("kvWt").innerHTML = kvHTML([
+      ["Index implied", (100 * Math.sqrt(idxVar(VOLS, RHO_IMP))).toFixed(2) + "%"],
+      ["Theta-weighted long leg", kTheta().toFixed(3)],
+      ["Vega-weighted long leg", kVega().toFixed(3)],
+      ["At the multiplier read: theta", d(wtPnl(kTheta(), sWt.m, sWt.rr))],
+      ["  vega", d(wtPnl(kVega(), sWt.m, sWt.rr))],
+      ["Vols unchanged: theta", d(wtPnl(kTheta(), 1, sWt.rr))],
+      ["  vega", d(wtPnl(kVega(), 1, sWt.rr))]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw2();draw3();draw4();draw5();drawWt();}
 LAB.boot(drawAll);
 
 </script>

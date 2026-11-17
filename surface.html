@@ -39,7 +39,8 @@
   <a href="#c4"><span>Term structure</span><i></i></a>
   <a href="#c5"><span>Sticky rules</span><i></i></a>
   <a href="#c6"><span>Bad surfaces</span><i></i></a>
-  <a href="#c7"><span>Drill</span><i></i></a>
+  <a href="#c7"><span>Fitting it</span><i></i></a>
+  <a href="#c8"><span>Drill</span><i></i></a>
 </nav>
 
 <div class="hero">
@@ -423,6 +424,73 @@
 <section class="chapter" id="c7">
   <div class="chead">
     <div class="cnum">07</div>
+    <h2>Fitting the surface you mark to</h2>
+    <p class="dek">Nine quotes, each a little wrong, and a book that needs a vol at every strike in between. How you join the dots decides what is arbitrage-free and where one bad quote ends up.</p>
+  </div>
+
+  <div class="prose">
+    <p class="lead">A three-month chain quotes mid vols at nine strikes from 80 to 120. Each is the true smile plus a few tenths of a point of noise. The figure marks the strikes between them two ways: straight lines from quote to quote, and a smooth curve fitted through all nine with each quote weighted by its vega. Then it lets you make the 110 quote stale.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Nine quotes, two ways to fill the gaps</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--ink)"></i>Quotes</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Fitted curve</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Straight lines</span>
+            <span><i class="swl" style="background:var(--grey)"></i>True smile</span>
+          </span>
+        </div>
+        <canvas id="cvFit" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The quotes</h4>
+        <div id="ctlFit"></div>
+        <div class="kv" style="margin-top:20px" id="kvFit"></div>
+      </div>
+    </div>
+    <figcaption>Straight lines go through every quote and so keep every error; the fitted curve misses each quote a little and so spreads every error a little. Neither is free.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>With clean quotes both methods mark the in-between strikes within about a tenth of a point of the truth. The difference is in the corners. Joining vols with straight lines puts a kink at every quote, and wherever the kink bends the wrong way a tight butterfly priced off those marks comes out <b>negative</b>: here &minus;$0.010 for a half-dollar fly at the 90 strike, with smaller negative ones at 105 and 115. That is a mark that says you can be paid to own something that cannot lose. The fitted curve has no corners, and its tightest butterfly stays positive.</p>
+    <p>Now make the 110 quote six points too low. Straight-line marks absorb the whole error locally: the 112.5 strike marks at 23.34 against a true 26.22, and the fly at 105 goes to &minus;$0.117. The fitted curve smears the error across the chain instead: the 112.5 strike marks at 24.93, but the at-the-money mark also drops <b>0.67</b> points and even the 90 strike moves 0.12, though nothing about those options changed.</p>
+    <p>So a desk does neither naively. It fits a smooth curve with enough flexibility for the real smile and no more, weights each quote by how much it can be trusted (vega, and the width of its market), throws out quotes that sit outside their own bid&ndash;offer from the fit, and checks the result for butterfly and calendar arbitrage before anyone marks to it. The parametrization here, a quadratic in log-moneyness, is the simplest one that works over a narrow range; production surfaces use forms built to stay arbitrage-free in the wings as well, and the choice is a model decision that moves marks, which is why page 11's unexplained P&amp;L is checked against it.</p>
+  </div>
+
+  <div class="mline">fit: minimize &Sigma; vega<sub>i</sub> &times; ( &sigma;<sub>quote,i</sub> &minus; a &minus; b&middot;k<sub>i</sub> &minus; c&middot;k<sub>i</sub>&sup2; )&sup2; &nbsp;&nbsp; k = ln(K/F) &nbsp;&nbsp;&nbsp; no-arbitrage: C(K&minus;h) &minus; 2C(K) + C(K+h) &ge; 0</div>
+  <p class="mread">Reads as: <b>choose the level, slope and curvature that miss the quotes least, counting a miss on a high-vega option as more expensive; then check that every butterfly priced off the result costs something.</b></p>
+
+  <div class="try">
+    <span class="lab">Try this</span>
+    <p>Make the 110 quote stale, then drop it from the fit. <b>Predict</b> how close the fitted marks come back to the truth.</p>
+    <div class="btnrow">
+      <button class="act ghost" data-preset="cFit" data-patch='{"bad":-6,"drop":0}' data-focus="cvFit">110 quote six points low</button>
+      <button class="act ghost" data-preset="cFit" data-patch='{"bad":-6,"drop":1}' data-focus="cvFit">Same, quote excluded</button>
+      <button class="act ghost" data-preset="cFit" data-patch='{"bad":0,"drop":0}' data-focus="cvFit">Reset</button>
+    </div>
+  </div>
+
+  <div class="check">
+    <span class="lab">Check yourself</span>
+    <p class="q">Your risk system marks between listed strikes by joining vols with straight lines. A colleague finds a negative butterfly on the marks. The most likely cause:</p>
+    <div class="opts">
+      <button>A genuine arbitrage in the market</button>
+      <button data-ok="1">A kink the interpolation put at a quote, bending the wrong way</button>
+      <button>A data feed error, which straight-line marks cannot produce on their own</button>
+      <button>Volatility is too high for the strike spacing</button>
+    </div>
+    <div class="ans"><b>A kink from the interpolation.</b> Straight lines in vol produce corners at every quote, and a concave corner prices a tight fly below zero even when every quote is fine. Check the marks before you try to trade the market.</div>
+  </div>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section class="chapter" id="c8">
+  <div class="chead">
+    <div class="cnum">08</div>
     <h2>Surface drill</h2>
     <p class="dek">Forward vol, skew conversion, and the arbitrage checks — under time pressure.</p>
   </div>
@@ -984,7 +1052,47 @@ const s6={atm:.30,beta:-.55,gam:.30,T:.5};
   stats();next();
 })();
 
-function drawAll(){draw1();draw3();draw4();draw5();draw6();}
+/* ══════════ 07 — fitting the surface ══════════ */
+const FT = { S: 100, T: 0.25, atm: 0.30, b: -0.35, c: 0.25, Ks: [80, 85, 90, 95, 100, 105, 110, 115, 120], noise: [0.004, -0.003, 0.002, -0.005, 0.001, 0.003, -0.002, 0.004, -0.003] };
+const ftK = K => Math.log(K / FT.S), ftTrue = K => FT.atm + FT.b * ftK(K) + FT.c * ftK(K) * ftK(K);
+function ftQuotes(bad){ return FT.Ks.map((K, i) => ({ K, v: ftTrue(K) + FT.noise[i] + (K === 110 ? bad : 0) })); }
+function ftFit(q){ const A = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], y = [0, 0, 0];
+  q.forEach(({ K, v }) => { const k = ftK(K), w = bs(FT.S, K, FT.T, v, 0, 0, true).vega, x = [1, k, k * k]; for (let i = 0; i < 3; i++){ y[i] += w * x[i] * v; for (let j = 0; j < 3; j++) A[i][j] += w * x[i] * x[j]; } });
+  const M = A.map((r, i) => r.concat([y[i]]));
+  for (let i = 0; i < 3; i++){ let p = i; for (let r = i + 1; r < 3; r++) if (Math.abs(M[r][i]) > Math.abs(M[p][i])) p = r; const t = M[i]; M[i] = M[p]; M[p] = t;
+    for (let r = 0; r < 3; r++) if (r !== i){ const f = M[r][i] / M[i][i]; for (let c = i; c < 4; c++) M[r][c] -= f * M[i][c]; } }
+  return [M[0][3] / M[0][0], M[1][3] / M[1][1], M[2][3] / M[2][2]]; }
+const ftEval = (p, K) => p[0] + p[1] * ftK(K) + p[2] * ftK(K) * ftK(K);
+function ftLin(q, K){ for (let i = 0; i < q.length - 1; i++) if (K >= q[i].K && K <= q[i + 1].K){ const t = (K - q[i].K) / (q[i + 1].K - q[i].K); return q[i].v * (1 - t) + q[i + 1].v * t; } return NaN; }
+function ftFly(volFn, K, h){ const c = k => bs(FT.S, k, FT.T, volFn(k), 0, 0, true).price; return c(K - h) - 2 * c(K) + c(K + h); }
+function ftMinFly(volFn){ let m = 1e9, at = 0; for (let K = 81; K <= 119; K += 0.5){ const f = ftFly(volFn, K, 0.5); if (f < m){ m = f; at = K; } } return { m, at }; }
+const sFit = { bad: 0, drop: 0 };
+(function(){
+  sliders(document.getElementById("ctlFit"), [
+    { id: "bF", k: "bad", lbl: "e", name: "Error in the 110 quote, vol points", min: -8, max: 8, step: 0.5, fmt: v => (v > 0 ? "+" : "") + v.toFixed(1) },
+    { id: "dF", k: "drop", lbl: "x", name: "Exclude the 110 quote from the fit", min: 0, max: 1, step: 1, fmt: v => v ? "excluded" : "used" }
+  ], sFit, () => draw(),"cFit");
+  window.drawFit = draw;
+  function draw(){
+    const q = ftQuotes(sFit.bad / 100), p = ftFit(sFit.drop ? q.filter(x => x.K !== 110) : q), p0 = ftFit(ftQuotes(0));
+    const o = Fig(document.getElementById("cvFit"), { h: 300, x0: 78, x1: 122, y0: 18, y1: 42, pad: { l: 54, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => v.toFixed(0) + "%", 11, 6);
+    const xs = [], tv = [], fv = [], lv = []; for (let K = 80; K <= 120.001; K += 0.25){ xs.push(K); tv.push(100 * ftTrue(K)); fv.push(100 * ftEval(p, K)); lv.push(100 * ftLin(q, K)); }
+    clip(o, () => { line(o, xs, tv, C("--grey"), 1.6, [5, 4]); line(o, xs, lv, C("--verm"), 1.8); line(o, xs, fv, C("--blue"), 2.6);
+      const g = o.g; g.save(); q.forEach(({ K, v }) => { g.fillStyle = K === 110 && sFit.drop ? C("--grey") : C("--ink"); g.beginPath(); g.arc(o.X(K), o.Y(100 * v), 4, 0, 6.2832); g.fill(); }); g.restore(); });
+    const fl = ftMinFly(K => ftEval(p, K)), ll = ftMinFly(K => ftLin(q, K));
+    document.getElementById("kvFit").innerHTML = kvHTML([
+      ["112.5 strike: true", (100 * ftTrue(112.5)).toFixed(2) + "%"],
+      ["  fitted / straight lines", (100 * ftEval(p, 112.5)).toFixed(2) + " / " + (100 * ftLin(q, 112.5)).toFixed(2)],
+      ["At-the-money mark moved by the bad quote", ((ftEval(p, 100) - ftEval(p0, 100)) * 100 >= 0 ? "+" : "") + ((ftEval(p, 100) - ftEval(p0, 100)) * 100).toFixed(2) + " pts"],
+      ["90 strike mark moved", ((ftEval(p, 90) - ftEval(p0, 90)) * 100).toFixed(2) + " pts"],
+      ["Tightest fly, fitted marks", "$" + fl.m.toFixed(4)],
+      ["Tightest fly, straight lines", (ll.m < 0 ? "−$" : "$") + Math.abs(ll.m).toFixed(4) + " at " + ll.at.toFixed(1)]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();draw3();draw4();draw5();draw6();drawFit();}
 LAB.boot(drawAll);
 
 </script>
