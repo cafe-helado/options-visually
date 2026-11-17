@@ -602,7 +602,7 @@
     <div class="split wide">
       <div>
         <div class="figtop"><h3>Every field for one position</h3></div>
-        <table class="wtab" id="fldTab"></table>
+        <table class="wtab" id="fldTab" style="min-width:0"></table>
       </div>
       <div class="rail panel">
         <h4>The position</h4>
@@ -1337,8 +1337,10 @@ const sFld = { n: 100, S: 250, K: 260, days: 30, vol: 0.30, call: 1 };
       ["Charm", sh(f.CharmDay), "shares per day", "Change in DeltaShares overnight with nothing else moving. Reprice: " + sh(b.CharmDay) + "."],
       ["Break-even move", f.Breakeven.toFixed(2) + "%", "% per day", "The daily move at which gamma P&L equals theta."]
     ];
-    document.getElementById("fldTab").innerHTML = "<tr><th>Field</th><th>Value</th><th>Unit</th><th>What it is</th></tr>" +
-      R.map(r => "<tr><td><b>" + r[0] + "</b></td><td>" + r[1] + "&nbsp;&nbsp;&nbsp;</td><td>" + r[2] + "</td><td>" + r[3] + "</td></tr>").join("");
+    const nw = NARROW();
+    document.getElementById("fldTab").innerHTML = (nw ? "<tr><th>Field</th><th>What it is</th></tr>" : "<tr><th>Field</th><th>Value</th><th>Unit</th><th>What it is</th></tr>") +
+      R.map(r => nw ? "<tr><td><b>" + r[0] + "</b><br>" + r[1] + "<br><span style=\"color:var(--grey)\">" + r[2] + "</span></td><td>" + r[3] + "</td></tr>"
+        : "<tr><td><b>" + r[0] + "</b></td><td>" + r[1] + "&nbsp;&nbsp;&nbsp;</td><td>" + r[2] + "</td><td>" + r[3] + "</td></tr>").join("");
   }
 })();
 

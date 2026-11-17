@@ -308,6 +308,17 @@ pattern (shift section ids, nav links and `cnum` from the highest down);
 preset keys like `"c5"` are slider-group names, not section ids, and do not
 move.
 
+## Checking a page at phone width
+
+Headless Chrome will not size a window below about 485px. To test 375-390px,
+load the page in an `<iframe style="width:390px">` with
+`--allow-file-access-from-files` and measure inside it. Done that way, every
+page shows 8px of overflow from `figure.bleed`, whose `50vw` includes a desktop
+scrollbar; phones overlay their scrollbars, so it does not occur there.
+Equations flagged past the edge sit inside `.mline`'s own scroller. A table
+built in script for a phone needs `style="min-width:0"`, since `.tblwrap table`
+sets 440px.
+
 ## The `line()` trap
 
 `line(o, xs, ys, col, w, dash)` takes **arrays**. Handing it a function is a
