@@ -931,7 +931,7 @@
 
   {t:3,q:"You sell a one-year at-the-money option at 30% implied, hedge daily, and realized volatility for the year comes in at exactly 25%. What did you make?",
    o:["About two dollars — vega times five volatility points","Exactly the difference between the two Black–Scholes prices","Anywhere from −2.61 to +6.12, decided by when the volatility arrived","Nothing — daily hedging cancels the edge"],ok:2,
-   why:"The hedging P&L weights each instant by dollar gamma, S²Γ, which for a near-the-money option grows without limit as expiry approaches. The same 25% realized pays six dollars if it arrives early and loses four if it arrives late. Chapter 07 shows both paths.",
+   why:"The hedging P&L weights each instant by dollar gamma, S²Γ, which for a near-the-money option grows without limit as expiry approaches. The same 25% realized pays about six dollars if it arrives early and loses about two and a half if it arrives late. Chapter 07 shows both paths.",
    fig:{title:"Dollar gamma through the life of an at-the-money option",cap:"This is the weight the P&L puts on each moment. Volatility arriving on the right of this chart costs many times what the same volatility costs on the left.",
      x0:0.01,x1:1,xf:v=>v.toFixed(1)+"y",yf:v=>v.toFixed(0),
      leg:[["S²Γ, time remaining","--blue"]],
