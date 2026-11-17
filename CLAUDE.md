@@ -178,7 +178,7 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-Nothing unbuilt — all twenty-one pages are live, plus the workbook and toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
+Nothing unbuilt — all twenty-one pages are live, plus the program, the workbook and the toolkit. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
@@ -204,6 +204,28 @@ page here and it was the most requested thing missing.
 Still uncovered from that mapping, if more is ever wanted: hedging with options from
 a corporate or portfolio seat (his ch 17), and expiration P&L taught from scratch
 (ch 4), which this series assumes.
+
+## The program page
+
+`program.html` is the third companion and the only page that keeps state. One
+script, in this order: a seedable generator (`seed`, `rnd`) so any drill can be
+replayed; one function per drill returning `{html, choices, ks, numLabel,
+ans:{c,k,n,tol,nothing,nAlways}, template, key, tag, sec}`; the `DRILLS`
+registry (`name: [fn, station, label]`); grading (`isRight`, `gradeOf`); the
+ledger (`L` in localStorage under `ov-program-v1`, Leitner boxes via `boxOf`
+and `dueList`); the `STN` station array; rendering; one delegated click
+handler keyed on `data-act`.
+
+To add a drill: write the function, register it, add its button under "Every
+drill, by station", and add a `verify.js` claim that re-derives its key by a
+different route over a few hundred seeds — expose whatever inputs the claim
+needs as extra fields (`q`) on the returned object. A drill whose key is only
+checked by the formula that produced it is not checked.
+
+Two things specific to this page. Links built in script are written as
+`data-h` and given their `href` after rendering, for the reason given under
+the November audit. And nothing may start a timer at load: `check.js` runs the
+page under node, where a live `setInterval` keeps the process open.
 
 ## Page 19 and the yardstick trap
 

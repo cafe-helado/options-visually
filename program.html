@@ -94,7 +94,7 @@
   <p class="lede">The series, run the way a trading firm runs a trainee class: a short track of ideas in order, a pit where you answer against a clock, and a ledger that decides what you practice next. The pages show you a thing happening. This page finds out whether you can do it.</p>
   <ol>
     <li><b>The track</b> — seven stations. Each one names a page to watch, drills to clear, and one thing to do on a real screen.</li>
-    <li><b>The pit</b> — timed drills with computed answers. Some screens have something to trade. Some have nothing, and saying so is the right answer.</li>
+    <li><b>The pit</b> — thirty-seven timed drills with computed answers, and a ten-rep head-math sprint. Some screens have something to trade. Some have nothing, and saying so is the right answer.</li>
     <li><b>The ledger</b> — every rep is graded and scheduled to come back. It also prints a one-page readiness report.</li>
     <li><b>The edge map</b> — where option edge comes from, one family at a time, and what kills each.</li>
     <li><b>The trade memo</b> — the blanks to fill before any trade, printable.</li>
@@ -121,6 +121,7 @@
   <div class="btnrow" style="margin-bottom:16px">
     <button class="act" data-act="go" data-type="">Deal the next rep</button>
     <button class="act ghost" data-act="go" data-type="spot">Spot the mispricing</button>
+    <button class="act ghost" data-act="go" data-type="sprint">Head-math sprint</button>
   </div>
   <div class="drill" id="pit">
     <div class="pithead"><span class="qn" id="pitGrp">Press deal to start</span><span id="pitTimer"></span></div>
@@ -139,12 +140,13 @@
   <details class="drop" style="margin-top:18px">
     <summary>Every drill, by station</summary>
     <p class="lbl">1 · Payoff</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="payoff">Payoff at expiry</button></div>
-    <p class="lbl">2 · Parity and carry</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="synth">Synthetics</button><button class="act ghost" data-act="go" data-type="headparity">Parity in your head</button><button class="act ghost" data-act="go" data-type="revcon">Conversion rate</button><button class="act ghost" data-act="go" data-type="chain">Chain</button></div>
+    <p class="lbl">2 · Parity and carry</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="synth">Synthetics</button><button class="act ghost" data-act="go" data-type="headparity">Parity in your head</button><button class="act ghost" data-act="go" data-type="revcon">Conversion rate</button><button class="act ghost" data-act="go" data-type="chain">Chain</button><button class="act ghost" data-act="go" data-type="jelly">Jelly roll</button><button class="act ghost" data-act="go" data-type="borrow">Implied borrow</button><button class="act ghost" data-act="go" data-type="earlyex">Early exercise</button><button class="act ghost" data-act="go" data-type="assign">Assignment</button><button class="act ghost" data-act="go" data-type="pin">Pin risk</button><button class="act ghost" data-act="go" data-type="divplay">Dividend play</button></div>
     <p class="lbl">3 · Vol as a price</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="rule16">Rule of 16</button><button class="act ghost" data-act="go" data-type="strad2iv">Straddle to vol</button><button class="act ghost" data-act="go" data-type="tick">A tick in vol</button></div>
-    <p class="lbl">4 · Hedged P&amp;L</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="hedge">Delta hedge</button><button class="act ghost" data-act="go" data-type="gpnl">Hedged P&amp;L</button></div>
+    <p class="lbl">4 · Hedged P&amp;L</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="hedge">Delta hedge</button><button class="act ghost" data-act="go" data-type="gpnl">Hedged P&amp;L</button><button class="act ghost" data-act="go" data-type="sign">Greek signs</button><button class="act ghost" data-act="go" data-type="split">Hedge split</button><button class="act ghost" data-act="go" data-type="bleed">Overnight bleed</button><button class="act ghost" data-act="go" data-type="shadow">Vol moves with spot</button></div>
     <p class="lbl">5 · The surface</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="fwdvar">Forward vol</button><button class="act ghost" data-act="go" data-type="event">Event move</button><button class="act ghost" data-act="go" data-type="corr">Implied correlation</button><button class="act ghost" data-act="go" data-type="structure">Which structure</button><button class="act ghost" data-act="go" data-type="calendar">Term structure</button><button class="act ghost" data-act="go" data-type="fly">Call prices</button></div>
     <p class="lbl">6 · Edge after costs</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="clean">Clean vol</button><button class="act ghost" data-act="go" data-type="fairiv">Fair vol and edge</button><button class="act ghost" data-act="go" data-type="inside">Quote</button><button class="act ghost" data-act="go" data-type="box">Box</button><button class="act ghost" data-act="go" data-type="dissect">Mock pit</button></div>
     <p class="lbl">7 · Sizing</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="kelly">Sizing</button></div>
+    <p class="lbl">Trading games · any time</p><div class="btnrow"><button class="act ghost" data-act="go" data-type="dice">Dice market</button><button class="act ghost" data-act="go" data-type="devig">Overround</button><button class="act ghost" data-act="go" data-type="potodds">Pot odds</button><button class="act ghost" data-act="go" data-type="bayes">Backtest odds</button></div>
   </details>
 </section>
 
@@ -175,9 +177,9 @@
     <p>The last forty reps as log lines, for a study log kept elsewhere:</p>
     <textarea class="io" id="logOut" readonly aria-label="Log lines"></textarea>
     <div class="btnrow"><button class="act ghost" data-act="copy">Copy the lines</button></div>
-    <p style="margin-top:18px">The whole ledger as text. Export, paste it into another browser, and import there. To clear everything, type RESET in the box and press reset.</p>
+    <p style="margin-top:18px">The whole ledger as text. Export, paste it into another browser, and import there. Log lines from a study log can be pasted into the same box and added. To clear everything, type RESET in the box and press reset.</p>
     <textarea class="io" id="jsonBox" aria-label="Ledger as text"></textarea>
-    <div class="btnrow"><button class="act ghost" data-act="export">Export</button><button class="act ghost" data-act="import">Import</button><button class="act ghost" data-act="reset">Reset</button></div>
+    <div class="btnrow"><button class="act ghost" data-act="export">Export</button><button class="act ghost" data-act="import">Import</button><button class="act ghost" data-act="importlog">Add log lines</button><button class="act ghost" data-act="reset">Reset</button></div>
     <div id="ioMsg" role="status"></div>
   </details>
 </section>
@@ -203,6 +205,7 @@
     <dt>Structure</dt><dd>The exercise decision itself, and cleaning up near-the-money positions before expiry.</dd>
     <dt>Other side</dt><dd>Nobody pays you. You stop paying others — and holders who fail to exercise hand the dividend to whoever is short.</dd>
     <dt>What kills it</dt><dd>Assignment is random, so hedge to the expectation and size for the spread. Pin risk dwarfs the intrinsic at stake. The exercise chain itself can fail.</dd>
+    <dt>Drill</dt><dd><button class="act ghost" data-act="go" data-type="earlyex">Early exercise</button> <button class="act ghost" data-act="go" data-type="divplay">Dividend play</button> <button class="act ghost" data-act="go" data-type="pin">Pin risk</button></dd>
     <dt>Read</dt><dd><a href="early-exercise.html" style="color:var(--blue)">Early exercise</a> · <a href="merger.html" style="color:var(--blue)">Mergers</a></dd></dl></details>
   <details class="edge"><summary>3 · Vol level</summary><dl>
     <dt>Mispriced</dt><dd>The whole level of implied vol against what the stock will realize.</dd>
@@ -607,15 +610,156 @@ function dKelly(){
     key: "Net odds " + b.toFixed(3) + ", edge " + (b * p - (1 - p)).toFixed(3) + " a unit, full Kelly " + (f * 100).toFixed(2) + "%. " + (f <= 0 ? "Negative edge: no bet." : "Half Kelly is " + half.toFixed(2) + "%.") };
 }
 
+/* ── more of the desk: carry, exercise, assignment ───────────────────── */
+function dJelly(){
+  const K = pick([50, 100, 410]), d1 = pick([30, 90]), d2 = d1 + pick([90, 180]), r = pick([.035, .04, .045, .05]), dv = pick([0, .5, .74, 1.2]);
+  const T1 = d1 / 365, T2 = d2 / 365, int = K * (Math.exp(-r * T1) - Math.exp(-r * T2)), fair = int - dv;
+  return { html: "<p>Strike <b>" + K + "</b>. The near expiry is <b>" + d1 + "</b> days out, the far one <b>" + d2 + "</b>. Rate <b>" + (r * 100).toFixed(2) + "%</b>, dividends paid between the two expiries worth <b>" + f2(dv) +
+      "</b> today, no borrow. What is the jelly roll worth — long the far synthetic, short the near?</p>", choices: null, ks: null, numLabel: "Fair jelly roll",
+    ans: { c: null, k: null, n: fair, tol: .011 }, q: { K, T1, T2, r, dv },
+    template: "1) Each synthetic is C − P = stock − dividends before its expiry − K·e^(−rT). 2) Far minus near: the stock cancels. 3) What is left is interest on the strike between the two dates, K·(e^(−rT₁) − e^(−rT₂)), minus the dividends paid in between.",
+    tag: "CARRY", sec: 150, key: "Interest on the strike between the dates is " + f2(int) + "; less " + f2(dv) + " of dividends, the roll is worth " + f2(fair) + "." };
+}
+function dBorrow(){
+  const S = pick([20, 50, 80]), K = S, d = pick([90, 180]), T = d / 365, r = pick([.035, .04, .045, .05]), b = pick([.01, .05, .2, .4]);
+  const C = r2(pxo(S, K, T, .6, r, b, true)), P = r2(pxo(S, K, T, .6, r, b, false)), imp = -Math.log((C - P + K * Math.exp(-r * T)) / S) / T;
+  return { html: "<p>Stock <b>" + S + "</b>, strike <b>" + K + "</b>, <b>" + d + "</b> days, rate <b>" + (r * 100).toFixed(2) + "%</b>, no dividends. The call is <b>" + f2(C) + "</b> and the put <b>" + f2(P) +
+      "</b>. What borrow rate do the options imply?</p>", choices: null, ks: null, numLabel: "Implied borrow, % a year",
+    ans: { c: null, k: null, n: imp * 100, tol: Math.max(.3, 1.3 / (S * T)) }, q: { b },
+    template: "1) With borrow, C − P = S·e^(−bT) − K·e^(−rT). 2) So S·e^(−bT) = C − P + K·e^(−rT). 3) Divide by S, take the log, divide by −T. The symptom on a screen: puts rich to calls at every strike.",
+    tag: "CARRY", sec: 150, key: "C − P + K·e^(−rT) = " + f2(C - P + K * Math.exp(-r * T)) + " against a stock of " + S + ": implied borrow " + (imp * 100).toFixed(1) + "% a year." };
+}
+function dEarlyex(){
+  let S, D, tau, v, put, hurdle; const K = 100, r = .045;
+  do { S = pick([105, 112, 120, 140]); D = pick([.3, .8, 1.42, 2.4]); tau = pick([7, 21, 38, 90]); v = r2(uni(.2, .4));
+    put = pxo(S - D, K, tau / 365, v, r, 0, false); hurdle = K * (1 - Math.exp(-r * tau / 365)) + put; } while (Math.abs(D - hurdle) < .04);
+  return { html: "<p>You are short <b>10</b> of the <b>100</b> calls. Stock <b>" + S + "</b>, a dividend of <b>" + f2(D) + "</b> goes ex tomorrow, <b>" + tau + "</b> days remain after that, <b>" + (v * 100).toFixed(0) +
+      "</b> vol, rate <b>4.50%</b>. The 100 put, valued at the ex-dividend stock price, is <b>" + put.toFixed(3) + "</b>. Should you expect to be assigned tonight?</p>",
+    choices: ["Yes — a rational holder exercises", "No — it is worth more alive"], ks: null, numLabel: "The hurdle the dividend must beat",
+    ans: { c: D > hurdle ? 0 : 1, k: null, n: hurdle, tol: .02, nothing: false, nAlways: true }, q: { S, D, tau, v, r, K },
+    template: "Exercising gives up two things: interest on the strike until expiry, K·(1 − e^(−rτ)), and the put you implicitly own. Add them: that is the hurdle. Exercise only if the dividend is bigger.",
+    tag: "ASSIGNMENT", sec: 120, key: "Interest " + (K * (1 - Math.exp(-r * tau / 365))).toFixed(3) + " plus put " + put.toFixed(3) + " is a hurdle of " + hurdle.toFixed(3) + " against a dividend of " + f2(D) + ": " +
+      (D > hurdle ? "exercise, so plan on assignment." : "not worth exercising. If you are assigned anyway, someone gave you the difference.") };
+}
+function dAssign(){
+  const n = pick([10, 20, 50]), p = pick([.2, .4, .6]), mu = n * p * 100, sd = 100 * Math.sqrt(n * p * (1 - p));
+  return { html: "<p>You are short <b>" + n + "</b> calls at a strike the stock is pinning. You expect <b>" + (p * 100).toFixed(0) + "%</b> of open interest to be exercised, each contract independently. " +
+      "You hedge to the " + mu.toFixed(0) + " shares you expect. How wide is one standard deviation around that, in shares?</p>", choices: null, ks: null, numLabel: "One standard deviation, shares",
+    ans: { c: null, k: null, n: sd, tol: 2 }, q: { n, p }, template: "Assignment is a coin flipped once per contract. Standard deviation of the count is √(n·p·(1−p)); × 100 for shares. Hedge to the expectation, size for the spread.",
+    tag: "ASSIGNMENT", sec: 60, key: "100 × √(" + n + " × " + p + " × " + (1 - p).toFixed(1) + ") = " + sd.toFixed(0) + " shares around the " + mu.toFixed(0) + " you expect." };
+}
+function pinRisk(n, v){ return n * 100 * 100 * v / Math.sqrt(252) * Math.sqrt(3); }
+function dPin(){
+  const n = pick([10, 25, 40]), v = pick([.3, .35, .5]), wk = pinRisk(n, v);
+  return { html: "<p>You are short <b>" + n + "</b> of the <b>100</b> calls and the stock settles at <b>100.02</b> on Friday, at <b>" + (v * 100).toFixed(0) + "</b> vol. The intrinsic at stake is $" + (2 * n) +
+      ". If you are assigned and carry the stock over the weekend unhedged, what is one standard deviation of that stock risk in dollars? Count the weekend as three trading days.</p>", choices: null, ks: null,
+    numLabel: "Weekend risk, $ (one sd)", ans: { c: null, k: null, n: wk, tol: wk * .025 }, q: { n, v },
+    template: "1) Shares = contracts × 100. 2) One day's move in dollars = shares × price × vol ÷ √252. 3) Three days: × √3. Compare with the intrinsic you were arguing about.",
+    tag: "ASSIGNMENT", sec: 90, key: "About $" + Math.round(wk).toLocaleString("en-US") + " of weekend risk against $" + (2 * n) + " of intrinsic. That gap is why near-the-money positions get closed before expiry." };
+}
+function poolShare(Q, OI){ return Q / (OI + Q); }
+function dDivplay(){
+  const OI = pick([500, 1000, 4000]), u = pick([.1, .25, .4]), Q = pick([1000, 5000, 10000]), D = pick([.5, 1, 2]), sh = poolShare(Q, OI), mine = u * OI * sh, usd = mine * 100 * D;
+  return { html: "<p>Last day before a <b>$" + f2(D) + "</b> dividend. A deep in-the-money call has <b>" + OI.toLocaleString("en-US") + "</b> contracts of open interest, and <b>" + (u * 100).toFixed(0) +
+      "%</b> of the existing holders will fail to exercise. You and another market maker trade <b>" + Q.toLocaleString("en-US") + "</b> contracts with each other, so you are long and short that many, and you exercise every long. " +
+      "Assignment is random across all shorts. How many dollars of the unexercised dividend do you expect to keep?</p>", choices: null, ks: null, numLabel: "Expected windfall, $",
+    ans: { c: null, k: null, n: usd, tol: Math.max(5, usd * .015) }, q: { OI, u, Q, D },
+    template: "1) Contracts left unexercised = fraction × original open interest. 2) They are spread evenly over every short: yours and the original ones, so your share is Q ÷ (OI + Q). " +
+      "3) Each unassigned short call keeps the dividend: × 100 × D.",
+    tag: "ASSIGNMENT", sec: 150, key: (u * OI).toFixed(0) + " contracts go unexercised. Your " + Q.toLocaleString("en-US") + " shorts are " + (sh * 100).toFixed(1) + "% of all shorts, so you expect " + mine.toFixed(0) +
+      " of them: about $" + Math.round(usd).toLocaleString("en-US") + ". The original writers keep the rest. From any other seat the lesson runs the other way: exercise your own calls and do not be the pool." };
+}
+
+/* ── how a hedged position behaves: signs, splits, time, vol with spot ── */
+const SIGN_S = [["long an 85 put", [[85, 0, 1]]], ["long a 115 call", [[115, 1, 1]]], ["long the 90/100/110 call butterfly", [[90, 1, 1], [100, 1, -2], [110, 1, 1]]],
+  ["short the 100 straddle", [[100, 1, -1], [100, 0, -1]]], ["long the risk reversal — long the 110 call, short the 90 put", [[110, 1, 1], [90, 0, -1]]],
+  ["long the 100/110 call spread", [[100, 1, 1], [110, 1, -1]]], ["long the 90/110 strangle", [[90, 0, 1], [110, 1, 1]]], ["short a 90 put", [[90, 0, -1]]]];
+const SIGN_G = [["delta", "delta"], ["gamma", "gamma"], ["vega", "vega"], ["vanna", "vanna — how your delta changes as vol rises"], ["volga", "volga — how your vega changes as vol rises"]];
+function structGreek(legs, g){ let tot = 0, abs = 0; legs.forEach(l => { const x = bs(100, l[0], .25, .25, .045, 0, !!l[1])[g] * l[2]; tot += x; abs += Math.abs(x); }); return { tot, abs }; }
+function dSign(){
+  let s, g, o, ratio; do { s = pick(SIGN_S); g = pick(SIGN_G); o = structGreek(s[1], g[0]); ratio = Math.abs(o.tot) / (o.abs || 1); } while (ratio > .03 && ratio < .15);
+  const c = ratio <= .03 ? 2 : o.tot > 0 ? 0 : 1;
+  return { html: "<p>Stock <b>100</b>, three months, <b>25</b> vol. You are <b>" + s[0] + "</b>. What is the sign of your " + g[1] + "?</p>", choices: ["Positive", "Negative", "About zero"], ks: null, numLabel: null,
+    ans: { c, k: null, n: null, tol: 0 }, q: { legs: s[1], g: g[0] },
+    template: "Take one leg at a time. Calls have positive delta, puts negative. Every long option is long gamma and long vega. Vanna is positive for an out-of-the-money call and negative for an out-of-the-money put. " +
+      "Volga is positive away from the money and about zero at it. Multiply each by its quantity, then add.",
+    tag: "SIGN", sec: 30, key: "Summed over the legs, " + g[0] + " is " + (c === 2 ? "about zero" : c === 0 ? "positive" : "negative") + " (" + o.tot.toPrecision(3) + " a share)." };
+}
+function dSplit(){
+  const sh = pick([[.55, .28, .17], [.45, .35, .2], [.6, .25, .15]]), G = pick([5000, 10000]), dS = pick([1, 2, -1.5]), i = Math.floor(rnd() * 3), nm = ["A", "B", "C"], aum = [.5, .3, .2];
+  const tot = G * dS, all = sh.map(x => -tot * x);
+  return { html: "<p>Accounts A, B and C hold <b>50/30/20</b> of the assets but <b>" + sh.map(x => Math.round(x * 100)).join("/") + "</b> of the gamma. The book is long gamma: its delta grows by <b>" + G.toLocaleString("en-US") +
+      "</b> shares for each $1 the stock rises. The stock moves <b>" + (dS > 0 ? "+" : "−") + Math.abs(dS) + "</b>. How many shares does account <b>" + nm[i] + "</b> trade to be flat again?</p>", choices: null, ks: null,
+    numLabel: "Shares for account " + nm[i] + " (buy positive, sell negative)", ans: { c: null, k: null, n: all[i], tol: .5 }, q: { all, G, dS, i },
+    template: "1) The book's delta changed by gamma × move. 2) Each account's part of that is its share of the gamma, not of the assets. 3) Long gamma: sell after a rise, buy after a fall.",
+    tag: "SCALE-vs-SHAPE", sec: 75, key: "The book's delta moved by " + (tot > 0 ? "+" : "−") + Math.abs(tot).toLocaleString("en-US") + " shares. Account " + nm[i] + " owns " + Math.round(sh[i] * 100) + "% of the gamma, so it trades " +
+      (all[i] > 0 ? "+" : "−") + Math.abs(all[i]).toLocaleString("en-US") + ". Splitting by assets would have sent it " + (-tot * aum[i] > 0 ? "+" : "−") + Math.abs(tot * aum[i]).toLocaleString("en-US") + " and left it unhedged." };
+}
+function dBleed(){
+  let K, call, long, n, d, v, d0, d1, dd; do { K = pick([85, 90, 95, 105, 110, 115]); call = rnd() < .5; long = rnd() < .5; n = pick([20, 50, 100]); d = pick([5, 10, 20]); v = pick([.25, .35]);
+    d0 = bs(100, K, d / 365, v, .045, 0, call).delta; d1 = bs(100, K, (d - 1) / 365, v, .045, 0, call).delta; dd = (d1 - d0) * 100 * n * (long ? 1 : -1); } while (Math.abs(dd) < 3 || Math.abs(d0) < .08 || Math.abs(d0) > .92);
+  return { html: "<p>You are <b>" + (long ? "long" : "short") + " " + n + "</b> of the <b>" + K + " " + (call ? "calls" : "puts") + "</b> with <b>" + d + "</b> days left, <b>" + (v * 100).toFixed(0) +
+      "</b> vol, hedged flat at last night's close. The stock opens unchanged at <b>100</b>. One day has passed and nothing else. To be flat again, what do you do?</p>",
+    choices: ["Buy stock", "Sell stock"], ks: null, numLabel: null, ans: { c: dd < 0 ? 0 : 1, k: null, n: null, tol: 0 }, q: { K, call, long, d, v, dd },
+    template: "With time passing and nothing else, an out-of-the-money option's delta decays toward zero and an in-the-money one's grows toward one (minus one for a put). " +
+      "Decide whether your option delta grew or shrank, apply your long or short sign, and trade the opposite.",
+    tag: "SIGN", sec: 45, key: "Each option's delta went from " + d0.toFixed(3) + " to " + d1.toFixed(3) + ", so the position's delta moved by " + (dd > 0 ? "+" : "−") + Math.abs(dd).toFixed(0) + " shares overnight. " +
+      (dd < 0 ? "Buy" : "Sell") + " about " + Math.abs(dd).toFixed(0) + " shares. This drift is the bleed; it is why a book that was flat on Friday is not flat on Monday." };
+}
+function dShadow(){
+  let K, call, up, v0 = .25, S1, dv, a, db, ds, rel; const T = 60 / 365;
+  do { K = pick([85, 90, 110, 115]); call = rnd() < .5; up = rnd() < .5; S1 = up ? 105 : 95; dv = up ? -.03 : .04;
+    a = bs(100, K, T, v0, .045, 0, call).delta; db = bs(S1, K, T, v0, .045, 0, call).delta - a; ds = bs(S1, K, T, v0 + dv, .045, 0, call).delta - a; rel = Math.abs(ds) / Math.abs(db);
+  } while ((rel > .9 && rel < 1.1) || db * ds <= 0);
+  return { html: "<p>Stock <b>100</b>, sixty days, <b>25</b> vol. You hold the <b>" + K + " " + (call ? "call" : "put") + "</b>. The stock " + (up ? "rallies to <b>105</b> and vol falls <b>3</b> points" : "drops to <b>95</b> and vol rises <b>4</b> points") +
+      " with it. Repricing at the old vol gives one change in delta. Does the delta really move further than that, or less far?</p>",
+    choices: ["Further than constant vol says", "Less far than constant vol says"], ks: null, numLabel: null, ans: { c: rel > 1 ? 0 : 1, k: null, n: null, tol: 0 }, q: { K, call, S1, dv, T, db, ds },
+    template: "Higher vol pulls every delta toward the middle: an out-of-the-money option's delta gets bigger in size, an in-the-money one's gets smaller. Lower vol does the reverse. " +
+      "Decide which way the vol change pushes this option's delta, then whether that is with the spot move or against it.",
+    tag: "WRONG-GREEK", sec: 60, key: "At constant vol the delta moves by " + sg(db) + "; with the vol change it moves by " + sg(ds) + ". Gamma measured this way, letting vol move as spot moves, is the shadow gamma, and it is the one your hedge actually experiences." };
+}
+
+/* ── trading games: odds, updating, making a market ──────────────────── */
+function dDice(){
+  const n = pick([2, 3, 4]), seen = 1 + Math.floor(rnd() * 6), fair = seen + 3.5 * (n - 1);
+  return { html: "<p>You are making a market on the sum of <b>" + n + "</b> dice. One die is turned over: it is a <b>" + seen + "</b>. Where is fair value now?</p>", choices: null, ks: null, numLabel: "Fair value",
+    ans: { c: null, k: null, n: fair, tol: .01 }, q: { n, seen }, template: "A die is worth 3.5 until you see it. Replace the one you saw with its value and keep 3.5 for each of the rest. Your width should shrink too: one fewer unknown.",
+    tag: "EV-vs-RISK", sec: 20, key: seen + " + 3.5 × " + (n - 1) + " = " + fair + ". Move your mid there and tighten." };
+}
+function dDevig(){
+  const o = pick([[-110, -110], [-150, 130], [-200, 170], [120, -140], [-105, -115]]), p = o.map(x => x > 0 ? 100 / (x + 100) : -x / (-x + 100)), ov = (p[0] + p[1] - 1) * 100, am = x => (x > 0 ? "+" : "−") + Math.abs(x);
+  return { html: "<p>A book quotes one side at <b>" + am(o[0]) + "</b> and the other at <b>" + am(o[1]) + "</b>. How much overround is in the line?</p>", choices: null, ks: null, numLabel: "Overround, %",
+    ans: { c: null, k: null, n: ov, tol: .06 }, q: { o }, template: "1) Turn each price into a probability: −A is A ÷ (A + 100); +A is 100 ÷ (A + 100). 2) Add them. 3) Whatever is above 100% is the book's margin. A bid and an offer on an option are the same thing.",
+    tag: "ODDS", sec: 75, key: (p[0] * 100).toFixed(2) + "% + " + (p[1] * 100).toFixed(2) + "% = " + (100 + ov).toFixed(2) + "%, so the overround is " + ov.toFixed(2) + "%." };
+}
+function dPotodds(){
+  const P = 100, B = pick([33, 50, 75, 100, 150]), e = B / (P + 2 * B) * 100;
+  return { html: "<p>The pot is <b>" + P + "</b> and your opponent bets <b>" + B + "</b>. How often must you win for a call to break even?</p>", choices: null, ks: null, numLabel: "Equity needed, %",
+    ans: { c: null, k: null, n: e, tol: .3 }, q: { P, B }, template: "You risk the bet to win the pot plus the bet. Break-even is risk ÷ (risk + reward) = B ÷ (P + 2B).",
+    tag: "ODDS", sec: 30, key: B + " ÷ (" + P + " + 2 × " + B + ") = " + e.toFixed(1) + "%." };
+}
+function dBayes(){
+  const pr = pick([.01, .05, .2]), pw = .8, fp = pick([.05, .1]), post = pr * pw / (pr * pw + (1 - pr) * fp) * 100;
+  return { html: "<p>Before testing, you give a strategy a <b>" + (pr * 100).toFixed(0) + "%</b> chance of being real. Real ones pass your backtest <b>80%</b> of the time; dead ones pass <b>" + (fp * 100).toFixed(0) +
+      "%</b> of the time. It passed. How likely is it to be real?</p>", choices: null, ks: null, numLabel: "Chance it is real, %", ans: { c: null, k: null, n: post, tol: .4 }, q: { pr, pw, fp },
+    template: "1) Prior odds = p ÷ (1 − p). 2) Likelihood ratio = pass rate if real ÷ pass rate if dead. 3) Posterior odds = the two multiplied. 4) Odds back to a probability: odds ÷ (1 + odds).",
+    tag: "BAYES", sec: 120, key: "Prior odds " + (pr / (1 - pr)).toFixed(4) + " × likelihood ratio " + (pw / fp).toFixed(0) + " = " + (pr / (1 - pr) * pw / fp).toFixed(3) + ", which is " + post.toFixed(1) + "%." + (post < 50 ? " A good backtest on a long shot is still probably wrong." : " The prior did most of the work: start lower and the same backtest proves much less.") };
+}
+
 const DRILLS = {
   payoff: [dPayoff, 1, "Payoff at expiry"], synth: [dSynth, 2, "Synthetics"], headparity: [dHeadParity, 2, "Parity in your head"], revcon: [dRevcon, 2, "Conversion rate"],
-  parity: [dParity, 2, "Chain"], htb: [dHtb, 2, "Chain"], inside: [dInside, 6, "Quote"], box: [dBox, 6, "Box"], dissect: [dDissect, 6, "Mock pit"],
+  parity: [dParity, 2, "Chain"], htb: [dHtb, 2, "Chain"], jelly: [dJelly, 2, "Jelly roll"], borrow: [dBorrow, 2, "Implied borrow"],
+  earlyex: [dEarlyex, 2, "Early exercise"], assign: [dAssign, 2, "Assignment"], pin: [dPin, 2, "Pin risk"], divplay: [dDivplay, 2, "Dividend play"],
+  inside: [dInside, 6, "Quote"], box: [dBox, 6, "Box"], dissect: [dDissect, 6, "Mock pit"],
   rule16: [dRule16, 3, "Rule of 16"], strad2iv: [dStrad2iv, 3, "Straddle to vol"], tick: [dTick, 3, "A tick in vol"],
-  hedge: [dHedge, 4, "Delta hedge"], gpnl: [dGpnl, 4, "Hedged P&L"],
+  hedge: [dHedge, 4, "Delta hedge"], gpnl: [dGpnl, 4, "Hedged P&L"], sign: [dSign, 4, "Greek signs"], split: [dSplit, 4, "Hedge split"],
+  bleed: [dBleed, 4, "Overnight bleed"], shadow: [dShadow, 4, "Vol moves with spot"],
   fwdvar: [dFwdvar, 5, "Forward vol"], event: [dEvent, 5, "Event move"], corr: [dCorr, 5, "Implied correlation"], structure: [dStructure, 5, "Which structure"],
   calendar: [dCalendar, 5, "Term structure"], fly: [dFly, 5, "Call prices"],
-  clean: [dClean, 6, "Clean vol"], fairiv: [dFairiv, 6, "Fair vol and edge"], kelly: [dKelly, 7, "Sizing"]
+  clean: [dClean, 6, "Clean vol"], fairiv: [dFairiv, 6, "Fair vol and edge"], kelly: [dKelly, 7, "Sizing"],
+  dice: [dDice, 0, "Dice market"], devig: [dDevig, 0, "Overround"], potodds: [dPotodds, 0, "Pot odds"], bayes: [dBayes, 0, "Backtest odds"]
 };
+const SPRINT = ["headparity", "strad2iv", "rule16", "hedge"];
 const SPOT = ["parity", "htb", "inside", "box", "fly", "calendar", "dissect"];
 function deal(type){ const D = DRILLS[type], d = D[0](); d.type = type; d.st = D[1]; d.grp = D[2]; return d; }
 
@@ -640,10 +784,11 @@ function gradeOf(d, r, tries, elapsed){
 
 /* ══ the ledger ═══════════════════════════════════════════════════════ */
 const KEY = "ov-program-v1", DAY = 864e5, GAP = [0, 1, 2, 4, 8, 16];
-let L = { reps: [], real: {}, memo: {} };
+const mkL = o => ({ reps: (o && Array.isArray(o.reps)) ? o.reps : [], real: (o && o.real) || {}, memo: (o && o.memo) || {}, sprint: (o && o.sprint) || null });
+let L = mkL(null);
 function store(){ try { if (typeof localStorage !== "undefined") localStorage.setItem(KEY, JSON.stringify(L)); } catch (e) {} }
 function restore(){ try { if (typeof localStorage !== "undefined"){ const s = localStorage.getItem(KEY); if (s){ const o = JSON.parse(s);
-  if (o && Array.isArray(o.reps)) L = { reps: o.reps, real: o.real || {}, memo: o.memo || {} }; } } } catch (e) {} }
+  if (o && Array.isArray(o.reps)) L = mkL(o); } } } catch (e) {} }
 const good = g => g === "A" || g === "B";
 function boxOf(reps, type){ let b = 0, last = 0; reps.forEach(x => { if (x.type === type){ b = good(x.g) ? Math.min(5, b + 1) : 1; last = x.t; } }); return { b, last }; }
 function dueList(reps, now){
@@ -685,12 +830,19 @@ function summary(reps, real, now){
   return { st, passed, ab, tags, streak, n: reps.length, head: { headparity: head("headparity"), strad2iv: head("strad2iv"), rule16: head("rule16") },
     cur: (STN[st.findIndex(x => !x.passed)] || STN[6]).n };
 }
+function parseLog(text){
+  const out = []; String(text).split(/\n/).forEach(ln => { const m = ln.match(/GRADE\s*\|\s*(\d{4}-\d\d-\d\d)\s*\|\s*([a-z0-9-]+)\s*\|\s*([A-Za-z-]+)\s*\|\s*([ABCF])\b/);
+    if (!m) return; const type = m[2].replace(/^spot-/, ""); if (!DRILLS[type]) return;
+    out.push({ t: Date.parse(m[1] + "T12:00:00Z"), type, st: DRILLS[type][1], g: m[4], tag: m[3], sec: 0 }); });
+  return out;
+}
+function betterSprint(a, b){ return !b || a.right > b.right || (a.right === b.right && a.sec < b.sec); }
 function loopLines(reps){ return reps.map(x => "- GRADE | " + new Date(x.t).toISOString().slice(0, 10) + " | " + (SPOT.indexOf(x.type) >= 0 ? "spot-" : "") + x.type + " | " + x.tag + " | " + x.g).join("\n"); }
 
 /* ══ rendering ════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-let cur = null, tries = 0, t0 = 0, tick = null, sel = { c: null };
+let cur = null, tries = 0, t0 = 0, tick = null, sel = { c: null }, sprint = null;
 
 function renderStats(){
   const s = summary(L.reps, L.real, Date.now());
@@ -731,13 +883,14 @@ function renderLedger(){
     '<table class="chain"><tr><th>Station</th><th>Drills</th><th>Real screen</th><th>Status</th></tr>' + STN.map((x, i) => "<tr><td>" + x.n + ". " + x.t + "</td><td>" +
       (s.st[i].drills ? "Cleared" : s.st[i].gates.filter(Boolean).length + " of " + x.gate.length) + "</td><td>" + (s.st[i].real ? "Done" : "—") + "</td><td>" + (s.st[i].passed ? "Passed" : "Open") + "</td></tr>").join("") + "</table>" +
     "<p><b>Last 30 reps at A or B:</b> " + (s.ab == null ? "—" : Math.round(s.ab * 100) + "%") + " · <b>Most common miss:</b> " + (tags[0] || "none") + "</p>" +
-    '<table class="chain"><tr><th>Head math, median of last ten right</th><th>Time</th><th>Clock</th></tr>' + hm("headparity", "Parity at zero carry", 15) + hm("strad2iv", "Straddle to vol", 40) + hm("rule16", "Vol to a daily move", 10) + "</table>";
+    '<table class="chain"><tr><th>Head math, median of last ten right</th><th>Time</th><th>Clock</th></tr>' + hm("headparity", "Parity at zero carry", 15) + hm("strad2iv", "Straddle to vol", 40) + hm("rule16", "Vol to a daily move", 10) + "</table>" +
+    "<p><b>Best head-math sprint:</b> " + (L.sprint ? L.sprint.right + " of 10 in " + L.sprint.sec + " seconds" : "not run yet") + "</p>";
 }
 function renderAll(){ renderStats(); renderTrack(); renderLedger(); }
 
 function showDrill(d){
   cur = d; tries = 0; sel = { c: null }; t0 = Date.now();
-  $("pitGrp").textContent = d.grp; $("pitScreen").innerHTML = d.html;
+  $("pitGrp").textContent = (sprint ? "Sprint · " + (11 - sprint.left) + " of 10 · " : "") + d.grp; $("pitScreen").innerHTML = d.html;
   $("pitChoices").innerHTML = d.choices ? d.choices.map((c, i) => '<button data-act="choose" data-i="' + i + '" aria-pressed="false">' + c + "</button>").join("") : "";
   $("pitChoices").style.display = d.choices ? "" : "none";
   $("pitKwrap").style.display = d.ks ? "" : "none";
@@ -765,10 +918,21 @@ function submit(){
   if (d.numLabel && (needsTrade || !d.choices || d.ans.nAlways) && (r.n == null || !isFinite(r.n))){ $("pitErr").textContent = "Enter a number first."; return; }
   $("pitErr").textContent = ""; tries++;
   const el = Math.round((Date.now() - t0) / 1000), right = isRight(d, r);
-  if (!right && tries === 1){ $("pitOut").innerHTML = '<div class="vd no">Not yet. Work the steps, then answer once more.</div><div class="work">' + d.template + "</div>"; return; }
+  if (!right && tries === 1 && !sprint){ $("pitOut").innerHTML = '<div class="vd no">Not yet. Work the steps, then answer once more.</div><div class="work">' + d.template + "</div>"; return; }
   const res = gradeOf(d, r, tries, el);
   if (tick) clearInterval(tick);
   L.reps.push({ t: Date.now(), type: d.type, st: d.st, g: res.g, tag: res.tag, sec: el }); store();
+  if (sprint){
+    sprint.left--; if (right) sprint.right++;
+    const last = '<div class="vd ' + (right ? "ok" : "no") + '">' + (right ? "Right." : "Missed.") + '</div><div class="work">' + d.key + "</div>";
+    if (sprint.left > 0){ showDrill(deal(pick(SPRINT))); $("pitOut").innerHTML = last; renderAll(); return; }
+    const done = { right: sprint.right, sec: Math.round((Date.now() - sprint.t0) / 1000) }; sprint = null;
+    const best = betterSprint(done, L.sprint); if (best){ L.sprint = done; store(); }
+    $("pitForm").style.display = "none"; $("pitGrp").textContent = "Sprint finished";
+    $("pitOut").innerHTML = last + '<div class="vd ok">' + done.right + " of 10 in " + done.sec + " seconds" + (best ? " — your best" : "") +
+      '</div><div class="btnrow" style="margin-top:16px"><button class="act" data-act="go" data-type="sprint">Run it again</button><button class="act ghost" data-act="go" data-type="">Next due</button></div>';
+    renderAll(); return;
+  }
   $("pitForm").style.display = "none";
   $("pitOut").innerHTML = '<div class="vd ' + (right ? "ok" : "no") + '">Grade ' + res.g + (res.tag !== "OK" ? " · " + res.tag : "") + (res.g === "B" ? " · right, but over the clock" : res.g === "C" ? " · right on the second try" : "") +
     '</div><div class="work">' + d.key + '</div><div class="btnrow" style="margin-top:16px"><button class="act" data-act="go" data-type="' + (SPOT.indexOf(d.type) >= 0 ? (d.grp === "Chain" ? "chain" : d.type) : d.type) +
@@ -785,16 +949,19 @@ function memoText(){
 function onClick(e){
   const b = e.target.closest ? e.target.closest("[data-act]") : null; if (!b) return;
   const a = b.dataset.act;
-  if (a === "go"){ showDrill(deal(nextType(b.dataset.type))); $("pit").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  if (a === "go"){ if (b.dataset.type === "sprint"){ sprint = { left: 10, right: 0, t0: Date.now() }; showDrill(deal(pick(SPRINT))); }
+    else { sprint = null; showDrill(deal(nextType(b.dataset.type))); } $("pit").scrollIntoView({ behavior: "smooth", block: "start" }); }
   else if (a === "choose"){ sel.c = +b.dataset.i; Array.prototype.forEach.call($("pitChoices").querySelectorAll("button"), x => x.setAttribute("aria-pressed", x === b ? "true" : "false")); }
   else if (a === "submit") submit();
   else if (a === "real"){ if (b.checked) L.real[b.dataset.n] = 1; else delete L.real[b.dataset.n]; store(); renderAll(); }
   else if (a === "print"){ if (b.dataset.what === "memo") $("memoOut").innerHTML = memoText(); document.body.dataset.print = b.dataset.what; try { window.print(); } catch (x) {} }
   else if (a === "copy"){ const t = $("logOut"); t.select(); try { document.execCommand("copy"); } catch (x) {} }
   else if (a === "export"){ $("jsonBox").value = JSON.stringify(L); }
-  else if (a === "import"){ try { const o = JSON.parse($("jsonBox").value); if (o && Array.isArray(o.reps)){ L = { reps: o.reps, real: o.real || {}, memo: o.memo || {} }; store(); renderAll(); $("ioMsg").textContent = "Ledger loaded: " + L.reps.length + " reps."; }
+  else if (a === "import"){ try { const o = JSON.parse($("jsonBox").value); if (o && Array.isArray(o.reps)){ L = mkL(o); store(); renderAll(); $("ioMsg").textContent = "Ledger loaded: " + L.reps.length + " reps."; }
       else $("ioMsg").textContent = "That is not a ledger."; } catch (x) { $("ioMsg").textContent = "Could not read that. Paste the exported text exactly."; } }
-  else if (a === "reset"){ if ($("jsonBox").value.trim() === "RESET"){ L = { reps: [], real: {}, memo: {} }; store(); renderAll(); $("ioMsg").textContent = "Ledger cleared."; }
+  else if (a === "importlog"){ const xs = parseLog($("jsonBox").value); if (xs.length){ L.reps = L.reps.concat(xs).sort((x, y) => x.t - y.t); store(); renderAll(); $("ioMsg").textContent = "Added " + xs.length + " reps from log lines."; }
+      else $("ioMsg").textContent = "No log lines found. Each needs the form: - GRADE | 2026-11-16 | kelly | OK | A"; }
+  else if (a === "reset"){ if ($("jsonBox").value.trim() === "RESET"){ L = mkL(null); store(); renderAll(); $("ioMsg").textContent = "Ledger cleared."; }
       else $("ioMsg").textContent = "Type RESET in the box, then press again."; }
 }
 

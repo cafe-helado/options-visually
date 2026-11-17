@@ -1008,7 +1008,7 @@ PAGES["program"] = () => {
   /* The program's drills carry computed keys. Each is re-derived here a
      different way from the one the page uses, over a few hundred deals. */
   const M = load("program.html", ["seed", "deal", "DRILLS", "SPOT", "STN", "gradeOf", "isRight", "boxOf", "dueList",
-    "gateOK", "stationState", "summary", "loopLines", "GAP", "DAY", "FEE"]);
+    "gateOK", "stationState", "summary", "loopLines", "GAP", "DAY", "FEE", "bs", "pinRisk", "poolShare", "parseLog", "betterSprint", "SPRINT"]);
   const N = 400, each = (type, f) => { let bad = 0; for (let i = 1; i <= N; i++) { M.seed(i * 7919); if (!f(M.deal(type))) bad++; } return bad; };
   eq("seven stations", M.STN.length, 7, 0);
   yes("every gate names a real drill", M.STN.every(s => s.gate.every(g => g.every(t => M.DRILLS[t]))));
@@ -1039,6 +1039,44 @@ PAGES["program"] = () => {
   eq("half Kelly is half of full, and zero when the edge is negative", each("kelly", d => Math.abs(d.ans.n - Math.max(0, d.full * 50)) < 1e-9), 0, 0);
   yes("every drill deals without error and carries a key and steps", Object.keys(M.DRILLS).every(t => { for (let i = 1; i <= 60; i++) { M.seed(i * 31 + 5);
     const d = M.deal(t); if (!d.key || !d.template || !(d.sec > 0) || /NaN|undefined/.test(d.key + d.html)) return false; } return true; }));
+
+  /* the second batch: carry, exercise, assignment, hedging behavior, games */
+  eq("thirty-seven drills", Object.keys(M.DRILLS).length, 37, 0);
+  const cp = (S, K, T, v, r) => M.bs(S, K, T, v, r, 0, true).price - M.bs(S, K, T, v, r, 0, false).price;
+  eq("jelly roll: far synthetic minus near, less the dividends between", each("jelly", d => { const q = d.q;
+    return Math.abs(d.ans.n - (cp(77, q.K, q.T2, 0.3, q.r) - cp(77, q.K, q.T1, 0.3, q.r) - q.dv)) < 1e-6; }), 0, 0);
+  eq("implied borrow recovers the borrow the prices were built with", each("borrow", d => Math.abs(d.ans.n / 100 - d.q.b) <= d.ans.tol / 100), 0, 0);
+  eq("early exercise: the hurdle rule agrees with comparing intrinsic to the live call", each("earlyex", d => { const q = d.q;
+    return (d.ans.c === 0) === (q.S - q.K > M.bs(q.S - q.D, q.K, q.tau / 365, q.v, q.r, 0, true).price); }), 0, 0);
+  eq("assignment: sd matches the exact binomial", each("assign", d => { const { n, p } = d.q; let m = 0, v = 0, C = 1;
+    for (let k = 0; k <= n; k++) { const pr = C * Math.pow(p, k) * Math.pow(1 - p, n - k); m += k * pr; v += k * k * pr; C = C * (n - k) / (k + 1); }
+    return Math.abs(d.ans.n - 100 * Math.sqrt(v - m * m)) < 1e-6; }), 0, 0);
+  eq("pin: 10 short calls at 35 vol carry $3,819 of weekend risk", M.pinRisk(10, 0.35), 3819, 1);
+  eq("dividend play: 10,000 written into 1,000 open interest takes 90.9%", M.poolShare(10000, 1000) * 100, 90.9, 0.05);
+  eq("dividend play: your windfall plus the original writers' is the whole unexercised dividend", each("divplay", d => { const q = d.q;
+    return Math.abs(d.ans.n + q.u * q.OI * (q.OI / (q.OI + q.Q)) * 100 * q.D - q.u * q.OI * 100 * q.D) < 1e-6; }), 0, 0);
+  const fd = (legs, g) => { const P = (S, v) => legs.reduce((a, l) => a + l[2] * M.bs(S, l[0], 0.25, v, 0.045, 0, !!l[1]).price, 0), h = 0.01, k = 1e-4;
+    return g === "delta" ? (P(100 + h, 0.25) - P(100 - h, 0.25)) / (2 * h) : g === "gamma" ? (P(100 + h, 0.25) - 2 * P(100, 0.25) + P(100 - h, 0.25)) / (h * h)
+      : g === "vega" ? (P(100, 0.25 + k) - P(100, 0.25 - k)) / (2 * k) : g === "volga" ? (P(100, 0.25 + 1e-3) - 2 * P(100, 0.25) + P(100, 0.25 - 1e-3)) / 1e-6
+      : (P(100 + h, 0.25 + k) - P(100 + h, 0.25 - k) - P(100 - h, 0.25 + k) + P(100 - h, 0.25 - k)) / (4 * h * k); };
+  eq("Greek signs agree with finite differences on the structure's price", each("sign", d => { const x = fd(d.q.legs, d.q.g);
+    return d.ans.c === 2 ? true : (d.ans.c === 0) === (x > 0); }), 0, 0);
+  eq("hedge split: the three accounts' trades add to the book's", each("split", d => Math.abs(d.q.all.reduce((a, x) => a + x, 0) + d.q.G * d.q.dS) < 1e-6 && d.ans.n === d.q.all[d.q.i]), 0, 0);
+  eq("overnight bleed: the repriced drift has the sign of charm", each("bleed", d => { const q = d.q, ch = M.bs(100, q.K, (q.d - 0.5) / 365, q.v, 0.045, 0, q.call).charm * (q.long ? 1 : -1);
+    return (ch > 0) === (q.dd > 0) && (d.ans.c === 0) === (q.dd < 0); }), 0, 0);
+  eq("vol moving with spot: the extra delta has the sign of vanna times the vol change", each("shadow", d => { const q = d.q,
+    va = M.bs(q.S1, q.K, q.T, 0.25 + q.dv / 2, 0.045, 0, q.call).vanna * q.dv; return (va * q.db > 0) === (d.ans.c === 0); }), 0, 0);
+  eq("dice: fair value is the mean over every roll of the hidden dice", each("dice", d => { const { n, seen } = d.q; let tot = 0, cnt = 0;
+    const rec = (k, s) => { if (k === 0) { tot += s; cnt++; return; } for (let f = 1; f <= 6; f++) rec(k - 1, s + f); }; rec(n - 1, seen); return Math.abs(d.ans.n - tot / cnt) < 1e-9; }), 0, 0);
+  eq("overround at −110 both sides is 4.76%", (2 * 110 / 210 - 1) * 100, 4.76, 0.005);
+  eq("pot odds: at the stated equity a call has zero expected value", each("potodds", d => { const { P, B } = d.q, e = d.ans.n / 100; return Math.abs(e * (P + B) - (1 - e) * B) < 1e-9; }), 0, 0);
+  eq("backtest odds: posterior matches counting 100,000 strategies", each("bayes", d => { const { pr, pw, fp } = d.q, real = 1e5 * pr * pw, dead = 1e5 * (1 - pr) * fp;
+    return Math.abs(d.ans.n - 100 * real / (real + dead)) < 1e-9; }), 0, 0);
+  yes("log lines round-trip through the parser", (x => x.length === 2 && x[0].type === "fly" && x[0].g === "A" && x[1].type === "kelly" && x[1].tag === "SIZING")(
+    M.parseLog("- GRADE | 2026-11-16 | spot-fly | OK | A\n- GRADE | 2026-11-16 | kelly | SIZING | F\n- GRADE | 2026-11-16 | nonsense | OK | A\nnot a line")));
+  yes("a sprint is better with more right, then with less time", M.betterSprint({ right: 9, sec: 99 }, { right: 8, sec: 50 }) && M.betterSprint({ right: 9, sec: 80 }, { right: 9, sec: 90 })
+    && !M.betterSprint({ right: 9, sec: 95 }, { right: 9, sec: 90 }) && M.betterSprint({ right: 1, sec: 300 }, null));
+  yes("sprint drills are all real drills", M.SPRINT.every(t => M.DRILLS[t]));
 
   /* grading */
   const num = { ans: { c: null, k: null, n: 250, tol: 1 }, tag: "CARRY", sec: 60 };

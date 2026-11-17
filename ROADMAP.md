@@ -613,7 +613,10 @@ The series run as a trainee class, on the shape trading firms publish for
 their own: theory first, then timed practice, then a desk. Seven stations
 (payoff, parity, vol as a price, hedged P&L, the surface, edge after costs,
 sizing), each naming pages to watch, drills to clear twice running, and one
-real-screen task. Twenty-three drills with computed keys; seven of them are
+real-screen task. Thirty-seven drills with computed keys (carry and exercise:
+jelly roll, implied borrow, early exercise, assignment, pin risk, dividend
+play; hedging behavior: Greek signs, hedge split, overnight bleed, vol moving
+with spot; four trading games), plus a ten-rep head-math sprint. Seven are
 "spot the mispricing" screens (one strike off parity, a hard-to-borrow chain
 that is not an arbitrage, a gap inside the bid-offer, a box against funding,
 a negative butterfly, falling total variance, and a mock-pit pile of fills
