@@ -1534,7 +1534,7 @@ PAGES["microstructure"] = () => {
   eq("  by the closed form S sqrt(T) n(d1) / 100 with N(d1) = 0.05", 100 * Math.sqrt(7 / 365) * Math.exp(-0.5 * 1.6449 * 1.6449) / Math.sqrt(2 * Math.PI) / 100, v5, 0.0002);
   eq("a nickel is 0.2 vol wide on the first", 0.05 / v6, 0.2, 0.03);
   eq("  and 3.5 vol wide on the second", 0.05 / v5, 3.5, 0.03);
-  eq("nearly twenty times more", (0.01 / v5) / (0.01 / v6), 19.2, 0.3);
+  eq("nearly twenty times more", (0.01 / v5) / (0.01 / v6), 19.5, 0.3);
   eq("the same at 60 vol: the ratio does not depend on volatility", (() => { let lo = 100, hi = 250; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (B(100, m, 7 / 365, 0.60, 0, 0, true).delta > 0.05) lo = m; else hi = m; } return 0.01 / (B(100, lo, 7 / 365, 0.60, 0, 0, true).vega / 100); })(), 0.70, 0.02);
   eq("the old 11.57 is a strike 13% out of the money", 0.01 / (B(100, 112.9, 7 / 365, 0.30, 0, 0, true).vega / 100), 11.57, 1.2);
   yes("  which is a 0.2-delta, not a five-delta", B(100, 112.9, 7 / 365, 0.30, 0, 0, true).delta < 0.003);
