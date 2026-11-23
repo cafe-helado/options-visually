@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">&larr; Options, visually</a>
-    <span class="num">No. 20 &middot; Merger Arbitrage</span>
+    <span class="num">No. 15 &middot; Merger Arbitrage</span>
   </div>
 </header>
 
@@ -45,7 +45,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 20</div>
+    <div class="eyebrow">An interactive derivation · No. 15</div>
     <h1>A deal is a price on <em>two</em> futures</h1>
     <p class="sub">A target stock after an announcement is not a company any more. It is a claim on the deal price if the deal closes and on the standalone value if it breaks, financed until somebody decides which.</p>
   </div>
@@ -56,7 +56,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">This page needs <a href="parity.html" style="color:var(--blue)">page 07</a> for carry and conversions, <a href="early-exercise.html" style="color:var(--blue)">page 08</a> for what a cash deal does to the options, and <a href="catalyst.html" style="color:var(--blue)">page 03</a> for event volatility. Everything else is built here.</p>
+  <p class="lede">This page needs <a href="parity.html" style="color:var(--blue)">page 03</a> for carry and conversions, <a href="early-exercise.html" style="color:var(--blue)">page 04</a> for what a cash deal does to the options, and <a href="catalyst.html" style="color:var(--blue)">page 08</a> for event volatility. Everything else is built here.</p>
   <ol>
     <li><b>Chapters 01 and 02 are the whole idea.</b> A spread is a probability and a financing rate wearing one number, and separating them is the job.</li>
     <li><b>Chapter 02 corrects a shortcut.</b> The odds formula most primers teach charges interest in only one of the two outcomes, and the error is several points of probability.</li>
@@ -180,6 +180,8 @@
     </div>
     <figcaption>Notice the two lines agree at a zero rate and peel apart as carry grows. Set the months to zero and they agree everywhere — the shortcut is only wrong about money that takes time to arrive.</figcaption>
   </figure>
+
+  <p class="xlink"><span class="lab">The statistics underneath</span><a href="https://cafe-helado.github.io/stats-trading/odds.html" target="_blank" rel="noopener">Odds, probability and price ↗</a>, in Chance, visually, is the general version of reading a probability out of a price.</p>
 
   <div class="try">
     <span class="lab">Try this</span>
@@ -377,6 +379,52 @@
   <div class="mline">V(node) = [ p · V(close) + (1 − p) · V(next node) ] / (1 + r · t)</div>
   <p class="mread">Reads as: <b>each node is worth the average of where it can go next, discounted for how long getting there takes.</b> Work backwards from the leaves and the whole tree prices itself.</p>
 
+  <div class="prose">
+    <p>Now hold a position through one. A cash offer of $46 for a target worth $32 on its own; you own 10,000 shares at the announcement price. At each milestone the market reprices the deal, and you can hold, sell, or double up. You only learn which branch you are on when it happens.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Sit on the deal</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>The path so far</span>
+            <span><i class="sw" style="background:var(--moss)"></i>Close at $46</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Break to $32</span>
+          </span>
+        </div>
+        <p class="simmsg" id="dlMsg" aria-live="polite"></p>
+        <canvas id="cvDL" height="250"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your position</h4>
+        <div class="btnrow simbtns">
+          <button class="act" id="dlHold">Hold</button>
+          <button class="act ghost" id="dlSell">Sell it all</button>
+          <button class="act ghost" id="dlBuy">Buy 10,000 more</button>
+          <button class="act ghost" id="dlNew">New deal</button>
+          <button class="act ghost" id="dlReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvDL"></div>
+      </div>
+    </div>
+    <figcaption>The target opens at $42.27. With no second request it rises to $44.60 and the first deal closes in month four, for $30,222 on 10,000 shares. A second request would have taken it to $38.56, a settlement back to $42.58, a suit to block down to $35.14. Holding through 500 deals makes money in 85.6% of them and averages $5,083 after financing; the worst loses $128,064. The market prices each branch at odds a little worse than the true ones, and that gap is what pays for the breaks.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>An arbitrageur's year is many small wins and a few large losses, so they size for the loss: the downside to the standalone price, times the chance of a break, against the spread they collect. Each regulatory step moves the odds, and the question at every milestone is whether the new spread pays for the new risk, not whether to defend the old position.</p>
+    <ul>
+      <li>The downside is the standalone value, which moves with the market. Hedge it if you can.</li>
+      <li>Time is a cost: a deal that slips six months pays the same spread over a longer wait.</li>
+      <li>Doubling up after a second request is a bet the market overreacted. Sometimes it did.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> implied odds = (price − standalone) ÷ (offer − standalone), before financing.</p>
+  </aside>
+
+  <p class="xlink"><span class="lab">The statistics underneath</span>Each branch of the tree is an update on news. <a href="https://cafe-helado.github.io/stats-trading/bayes.html" target="_blank" rel="noopener">Updating on evidence ↗</a> in Chance, visually, is the method.</p>
+
   <div class="try">
     <span class="lab">Try this</span>
     <p>Make the second request instant — zero added months — and <b>predict</b> how much of the 32-cent drop survives. Then make the lawsuit a coin flip.</p>
@@ -476,7 +524,7 @@
     <p class="lead">Before a binary event resolves, the stock's distribution is a mixture: a hump around the success price and another around the failure price, weighted by the odds. Every option on the chain is the probability-weighted average of its two conditional prices, and nothing in Black–Scholes' single bell curve can describe that.</p>
     <p>Here is the case that makes it tradeable. A biotech at $20 has a trial readout coming. The market thinks failure takes it to $10; assume success takes it to $26, which together with the $20 price implies 62.5% odds. Your research team thinks a failure is far worse — $5, not $10. You do not need to disagree with the odds to have a trade. You need an option that only pays in the failure hump, below where the market thinks that hump sits.</p>
     <p>The <b>10/5 put spread</b> is that option. On the market's distribution it is worth <b>$0.19</b>; on yours, <b>$1.78</b> — about nine times as much. The 7.5 put is the extreme version: about a fifth of a cent on the market's view and about 94 cents on yours. Strikes below the market's failure price are cheap precisely because the market puts almost no probability there, which is what makes them the right instrument when you disagree about the floor rather than about the odds.</p>
-    <p>The same shape governs options on deal stocks. A target in a <b>cash</b> deal is pinned near the takeout and its day-to-day volatility collapses — chapter 08 of page 08 shows the certain-deal limit, where the calls above the deal price are worth nothing. In a <b>stock</b> deal the target inherits the acquirer's volatility, scaled by the exchange ratio, so its non-catalyst vol stays high. A <b>collar</b> deal sits between: inside the collar band the consideration is fixed in value and the target behaves like a cash deal, outside it the target moves like stock. So the ranking of non-catalyst volatility is stock, then collar, then cash.</p>
+    <p>The same shape governs options on deal stocks. A target in a <b>cash</b> deal is pinned near the takeout and its day-to-day volatility collapses — chapter 08 of page 04 shows the certain-deal limit, where the calls above the deal price are worth nothing. In a <b>stock</b> deal the target inherits the acquirer's volatility, scaled by the exchange ratio, so its non-catalyst vol stays high. A <b>collar</b> deal sits between: inside the collar band the consideration is fixed in value and the target behaves like a cash deal, outside it the target moves like stock. So the ranking of non-catalyst volatility is stock, then collar, then cash.</p>
     <p>And it answers a question that sounds like a riddle: you are short the January 50 calls on a $30 stock — what is the best headline you could wake up to? Not a crash, if you are hedged long the shares. The best headline is <b>an all-cash takeover below $50</b>: the stock jumps, your long-delta hedge makes money, and the calls you are short lose their volatility and can never reach the strike, so they decay toward the value of a topping bid. Every option you are short gets cheaper and every share you hold gets dearer.</p>
   </div>
 
@@ -971,7 +1019,76 @@ const s7={up:26,dn:10,p:0.625,sUp:0.25,sDn:0.45,days:30,view:5};
     Object.assign(s7,{up:5,dn:2,p:2/3,sUp:0.10,sDn:0.45,days:30,view:1.5});SYNC["c7"].sync();draw();});
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();}
+/* ══════════ 05b — sit on the deal ══════════
+   A cash offer of $46 for a target worth $32 on its own. The tree: a second
+   request at month 1 (35%); without one the deal closes at month 4 (97%);
+   with one, a suit to block at month 5 (45%), after which it closes at month
+   14 (35%), or a settlement and a close at month 10 (85%). The market's price
+   at each node is the expected value under odds three points worse than the
+   true ones at every closing branch, discounted at 5% a year to the expected
+   closing date. You start holding 10,000 shares and at each node can hold,
+   sell everything, or buy 10,000 more (20,000 at most). */
+const DL = { offer: 46, stand: 32, r: 0.05, prem: 0.03 };
+/* true closing probability and months to resolution from a node */
+function dlNode(id){ return { A: { pc: 0.65 * 0.97 + 0.35 * (0.55 * 0.85 + 0.45 * 0.35), m: 0, T: 0.65 * 4 + 0.35 * (0.55 * 10 + 0.45 * 14), name: "Announced" },
+  clean: { pc: 0.97, m: 1, T: 4, name: "No second request" }, B: { pc: 0.55 * 0.85 + 0.45 * 0.35, m: 1, T: 0.55 * 10 + 0.45 * 14, name: "Second request" },
+  settle: { pc: 0.85, m: 5, T: 10, name: "Settlement talks" }, suit: { pc: 0.35, m: 5, T: 14, name: "Suit to block" },
+  close: { pc: 1, m: 0, T: 0, name: "Closed" }, brk: { pc: 0, m: 0, T: 0, name: "Broken" } }[id]; }
+function dlPrice(id, mNow){ const n = dlNode(id); if (id === "close") return DL.offer; if (id === "brk") return DL.stand;
+  const pc = Math.max(0, n.pc - DL.prem), yrs = Math.max(0, n.T - mNow) / 12;
+  return (pc * DL.offer + (1 - pc) * DL.stand) * Math.exp(-DL.r * yrs); }
+function dlPath(seed){ return withSeed(3300 + seed, () => { const u = () => Math.random();
+  if (u() >= 0.35) return [["A", 0], ["clean", 1], [u() < 0.97 ? "close" : "brk", 4]];
+  if (u() < 0.45) return [["A", 0], ["B", 1], ["suit", 5], [u() < 0.35 ? "close" : "brk", 14]];
+  return [["A", 0], ["B", 1], ["settle", 5], [u() < 0.85 ? "close" : "brk", 10]]; }); }
+/* holding 10,000 throughout, financed at 5%: P&L per deal */
+function dlHold(seed){ const p = dlPath(seed), S0 = dlPrice("A", 0), end = p[p.length - 1];
+  return 10000 * (dlPrice(end[0], end[1]) - S0 * Math.exp(DL.r * end[1] / 12)); }
+(function(){
+  let seed = 0, path = dlPath(0), step = 0, sh = 10000, cash = -10000 * dlPrice("A", 0), log = [];
+  const reset = () => { path = dlPath(seed); step = 0; sh = 10000; cash = -10000 * dlPrice("A", 0); log = []; };
+  const px = () => dlPrice(path[step][0], path[step][1]);
+  function act(a){ if (step >= path.length - 1) return; const p = px();
+    if (a === "sell" && sh) { cash += sh * p; log.push("sold " + sh.toLocaleString("en-US") + " at $" + p.toFixed(2)); sh = 0; }
+    if (a === "buy" && sh < 20000) { const q = 20000 - sh; cash -= q * p; sh = 20000; log.push("bought " + q.toLocaleString("en-US") + " at $" + p.toFixed(2)); }
+    step++; draw(); }
+  document.getElementById("dlHold").addEventListener("click", () => act("hold"));
+  document.getElementById("dlSell").addEventListener("click", () => act("sell"));
+  document.getElementById("dlBuy").addEventListener("click", () => act("buy"));
+  document.getElementById("dlNew").addEventListener("click", () => { seed++; reset(); draw(); });
+  document.getElementById("dlReset").addEventListener("click", () => { reset(); draw(); });
+  window.drawDL = draw;
+  function draw(){
+    const node = path[step], p = px(), done = step === path.length - 1, months = node[1];
+    const money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    const fin = (cash < 0 ? cash * (Math.exp(DL.r * months / 12) - 1) : 0);
+    const total = cash + sh * p + fin;
+    document.getElementById("dlMsg").textContent = (done ? "Month " + months + ": the deal " + (node[0] === "close" ? "closes at $46." : "breaks; the stock falls to $32.") : "Month " + months + ": " + dlNode(node[0]).name.toLowerCase() + ". The target trades at $" + p.toFixed(2) + ", a spread of $" + (DL.offer - p).toFixed(2) + " to the offer.") +
+      " You hold " + sh.toLocaleString("en-US") + " shares; P&L after financing " + money0(total) + "." + (log.length ? " You " + log.join(", then ") + "." : "");
+    /* the tree, with the path taken so far lit up */
+    const o = Fig(document.getElementById("cvDL"), { h: 250, x0: -0.5, x1: 14.5, y0: 30, y1: 48, pad: { l: 52, r: 14, t: 14 } });
+    axes(o, v => "m" + v.toFixed(0), v => "$" + v.toFixed(0), 7, 4);
+    const g = o.g, N = { A: [0, dlPrice("A", 0)], clean: [1, dlPrice("clean", 1)], B: [1, dlPrice("B", 1)], settle: [5, dlPrice("settle", 5)], suit: [5, dlPrice("suit", 5)] };
+    const ends = [["clean", 4], ["settle", 10], ["suit", 14]];
+    const edges = [["A", "clean"], ["A", "B"], ["B", "settle"], ["B", "suit"]];
+    const on = new Set(path.slice(0, step + 1).map(x => x[0]));
+    g.lineWidth = 1.5;
+    edges.forEach(([a, b]) => { g.strokeStyle = on.has(a) && on.has(b) ? C("--blue") : C("--hair"); g.beginPath(); g.moveTo(o.X(N[a][0]), o.Y(N[a][1])); g.lineTo(o.X(N[b][0]), o.Y(N[b][1])); g.stroke(); });
+    ends.forEach(([a, m]) => { [[DL.offer, "close"], [DL.stand, "brk"]].forEach(([v, k]) => { const lit = on.has(a) && done && path[path.length - 1][0] === k;
+      g.strokeStyle = lit ? (k === "close" ? C("--moss") : C("--verm")) : C("--hair"); g.setLineDash(lit ? [] : [3, 3]); g.beginPath(); g.moveTo(o.X(N[a][0]), o.Y(N[a][1])); g.lineTo(o.X(m), o.Y(v)); g.stroke(); g.setLineDash([]); }); });
+    Object.entries(N).forEach(([k, [m, v]]) => { g.fillStyle = on.has(k) ? C("--blue") : C("--grey"); g.beginPath(); g.arc(o.X(m), o.Y(v), on.has(k) ? 6 : 4, 0, 6.2832); g.fill();
+      g.fillStyle = C("--ink"); g.font = "10px 'IBM Plex Mono', monospace"; g.textAlign = "left"; g.textBaseline = "bottom"; g.fillText(dlNode(k).name + " $" + v.toFixed(2), o.X(m) + 8, o.Y(v) - 4); });
+    clip(o, () => { line(o, [-0.5, 14.5], [DL.offer, DL.offer], C("--moss"), 1, [4, 4], 0.25); line(o, [-0.5, 14.5], [DL.stand, DL.stand], C("--verm"), 1, [4, 4], 0.25); });
+    let a = 0, b = 0, w = 0; const K = 500; for (let k = 0; k < K; k++) { const x = dlHold(1000 + k); a += x; if (x > 0) w++; }
+    document.getElementById("kvDL").innerHTML = kvHTML([
+      ["Month", String(months)], ["Target", "$" + p.toFixed(2)], ["Spread to $46", "$" + (DL.offer - p).toFixed(2)],
+      ["You hold", sh.toLocaleString("en-US") + " shares"], ["P&L after financing", money0(total), total >= 0 ? "moss" : "verm"],
+      ["Holding 10,000 through 500 deals: average", money0(a / K)], ["  deals that made money", Math.round(w / K * 100) + "%"]
+    ]);
+  }
+})();
+
+function drawAll(){drawDL();draw1();draw2();draw3();draw4();draw5();draw6();draw7();}
 LAB.boot(drawAll);
 
 </script>

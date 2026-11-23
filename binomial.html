@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 12 · The Binomial Model</span>
+    <span class="num">No. 02 · The Binomial Model</span>
   </div>
 </header>
 
@@ -46,7 +46,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 12</div>
+    <div class="eyebrow">An interactive derivation · No. 02</div>
     <h1>The price that ignores the <em>odds</em></h1>
     <p class="sub">Ask what a stock is likely to do and you get one number. Ask what it costs to guarantee the payoff and you get another. Only the second one is the option's price — and it does not change when you change the odds.</p>
   </div>
@@ -126,6 +126,45 @@
       <button class="act ghost" data-preset="c1" data-patch='{"u":1.25,"d":0.8}' data-focus="cv1">Widen the outcomes instead</button>
     </div>
   </div>
+
+  <div class="prose">
+    <p>Now solve it with your hands instead of algebra. Set the shares and the borrowing until your portfolio pays what the call pays in both states; the panel reads the tree above, so change the up and down moves there and you will have to solve again. Then a dealer offers you the call below what your portfolio costs. Buy the call, sell your portfolio, and see whether the profit is really free.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Build the replicating portfolio yourself</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--ink)"></i>Option pays (outline)</span>
+            <span><i class="sw" style="background:var(--blue)"></i>Your portfolio pays</span>
+            <span><i class="sw" style="background:var(--moss)"></i>The arbitrage, per state</span>
+          </span>
+        </div>
+        <p class="simmsg" id="repMsg" aria-live="polite"></p>
+        <canvas id="cvR" height="250"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your portfolio</h4>
+        <div id="ctlR"></div>
+        <div class="btnrow simbtns"><button class="act ghost" id="repSolve">Solve it for me</button></div>
+        <div class="kv" style="margin-top:16px" id="kvR"></div>
+      </div>
+    </div>
+    <figcaption>At the defaults the call pays 10 up and 0 down; half a share and 45 of borrowing match it exactly and cost 5. A dealer at 4.20 is then selling 5.00 of payoff for 4.20, and buying from him while selling your portfolio clears 0.80 in both states. Move the shares one notch off and the "arbitrage" pays more in one state and less in the other: it has become a bet.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>This is how a market maker thinks about every option on the screen: not "what is it worth" but "what does it cost me to make the same payoff out of things I can trade". The answer is their price, and a quote away from it is either an arbitrage or a sign their replication is missing something, usually a cost or a borrow.</p>
+    <ul>
+      <li>The hedge ratio comes first; the price is what the hedge costs.</li>
+      <li>Nobody's view of the odds enters. Two traders who disagree about direction agree on the price.</li>
+      <li>"Free money" is only free if the replication is exact. A near-miss is a position.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> before arguing about whether an option is cheap, write down the hedge that makes it cheap.</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -362,10 +401,10 @@
   <div class="prose">
     <p class="lead">If the binomial model merely converged to Black–Scholes it would be a teaching device and nothing more. It survives on real desks because backward induction can answer questions the closed form cannot even express.</p>
     <p>The reason is structural. Black–Scholes gives you a value at expiry and a formula for today, with nothing in between. A tree gives you a value at <em>every node</em> — every combination of price and time the model considers possible — and once you have that, you can apply a rule at each one.</p>
-    <p><b>Early exercise.</b> At every node, compare the continuation value with what exercising would pay and take the larger. That single line converts a European pricer into an American one. On a one-year 100-strike put with spot at 80, 30 volatility and rates at 10%, the European value is <b>16.2413</b> and the American is <b>20.2680</b> — a premium of <b>4.0267</b>, or <b>24.8%</b> of the option's value. <a href="early-exercise.html" style="color:var(--blue)">Page 08</a> is about when that premium exists; this is the machinery that computes it.</p>
+    <p><b>Early exercise.</b> At every node, compare the continuation value with what exercising would pay and take the larger. That single line converts a European pricer into an American one. On a one-year 100-strike put with spot at 80, 30 volatility and rates at 10%, the European value is <b>16.2413</b> and the American is <b>20.2680</b> — a premium of <b>4.0267</b>, or <b>24.8%</b> of the option's value. <a href="early-exercise.html" style="color:var(--blue)">Page 04</a> is about when that premium exists; this is the machinery that computes it.</p>
     <p><b>Discrete dividends.</b> A real stock pays lumps on known dates, not a continuous yield. In a tree you subtract the dividend from the stock price at the nodes where it goes ex. There is no clean way to say that in a closed form.</p>
     <p><b>Barriers and path rules.</b> Anything that depends on where the price has been — knock-outs, triggers, exercise windows — can be enforced node by node.</p>
-    <p>The figure prices both styles on the same lattice and shades the nodes where exercising wins. Raise rates and the shaded region climbs; that region <em>is</em> the exercise boundary from page 08, drawn here as the discrete object the model actually computes rather than as a smooth curve.</p>
+    <p>The figure prices both styles on the same lattice and shades the nodes where exercising wins. Raise rates and the shaded region climbs; that region <em>is</em> the exercise boundary page 04 studies, drawn here as the discrete object the model actually computes rather than as a smooth curve.</p>
     <p>The honest cost: the tree is slower, it converges as a sawtooth, and every extra feature slows it further. Desks use closed forms where they exist and lattices where they do not, which in equities means lattices for most of the book.</p>
   </div>
 
@@ -392,7 +431,7 @@
         <div class="kv" style="margin-top:20px" id="kv5"></div>
       </div>
     </div>
-    <figcaption>The shaded nodes are where the model would exercise, and their upper edge is the exercise boundary drawn as the staircase it really is. Take rates to zero and the shading vanishes entirely for the put — the same result page 08 proves analytically, arrived at here by a machine that was never told about it.</figcaption>
+    <figcaption>The shaded nodes are where the model would exercise, and their upper edge is the exercise boundary drawn as the staircase it really is. Take rates to zero and the shading vanishes entirely for the put — the same result page 04 proves analytically, arrived at here by a machine that was never told about it.</figcaption>
   </figure>
 
   <div class="try">
@@ -414,7 +453,7 @@
       <button>Because the formula assumes zero interest rates</button>
       <button>It can, using put-call parity</button>
     </div>
-    <div class="ans"><b>There is nothing in between.</b> The closed form is a single expression for today's value; the American problem is a free-boundary problem whose answer is a decision rule across the whole price-time plane. The last answer is a common trap: parity is a European relation and does not hold as an equality for American options, which is precisely why page 08's put chapter needs a tree.</div>
+    <div class="ans"><b>There is nothing in between.</b> The closed form is a single expression for today's value; the American problem is a free-boundary problem whose answer is a decision rule across the whole price-time plane. The last answer is a common trap: parity is a European relation and does not hold as an equality for American options, which is precisely why page 04's put chapter needs a tree.</div>
   </div>
 </section>
 
@@ -486,8 +525,8 @@
     <p>The fix is more steps, since the requirement is a bound on <b>dt</b>: keeping each step shorter than <b>(σ/r)²</b> years is sufficient. It is worth checking rather than assuming, because a tree with p outside the unit interval does not crash. It returns a number, and the number is wrong in a way that no amount of eyeballing will reveal.</p>
     <p>Three further limits worth naming.</p>
     <p><b>Convergence is first order and the cost is quadratic.</b> Chapter 03's arithmetic — ten times the steps for one more decimal, at a hundred times the work — is the reason lattices lose to closed forms and to finite-difference schemes wherever those are available.</p>
-    <p><b>The tree's distribution is not the world's.</b> Everything here inherits Black–Scholes' assumption of constant volatility and continuous, jump-free movement. A recombining lattice with fixed u and d cannot represent a volatility smile at all, which is why the model is a pricing engine rather than a description of the market — <a href="surface.html" style="color:var(--blue)">page 02</a> is the correction.</p>
-    <p><b>Discrete dividends break recombination.</b> Subtracting a fixed cash amount at an ex-date means up-then-down no longer lands where down-then-up does, and the tree stops folding. The usual repair is to build the lattice on the dividend-stripped price and add the dividend's present value back, which restores recombination at the cost of an approximation that <a href="early-exercise.html#c3" style="color:var(--blue)">page 08</a> flags in its own derivation.</p>
+    <p><b>The tree's distribution is not the world's.</b> Everything here inherits Black–Scholes' assumption of constant volatility and continuous, jump-free movement. A recombining lattice with fixed u and d cannot represent a volatility smile at all, which is why the model is a pricing engine rather than a description of the market — <a href="surface.html" style="color:var(--blue)">page 07</a> is the correction.</p>
+    <p><b>Discrete dividends break recombination.</b> Subtracting a fixed cash amount at an ex-date means up-then-down no longer lands where down-then-up does, and the tree stops folding. The usual repair is to build the lattice on the dividend-stripped price and add the dividend's present value back, which restores recombination at the cost of an approximation that <a href="early-exercise.html#c3" style="color:var(--blue)">page 04</a> flags in its own derivation.</p>
   </div>
 
   <div class="mline">d &lt; e<sup>r·dt</sup> &lt; u &nbsp;&nbsp;⟺&nbsp;&nbsp; dt &lt; (σ / r)²</div>
@@ -816,7 +855,7 @@ const s1={u:1.10,d:0.90,K:100,pReal:0.50,r:0};
     g.textAlign="right";g.textBaseline="middle";
     g.fillText("S = "+S.toFixed(0),xL-16,yM-8);
     g.font="11px 'IBM Plex Mono', monospace";g.fillStyle=C("--blue");
-    g.fillText("C = "+q.price.toFixed(4),xL-16,yM+10);
+    g.fillText("C = "+q.price.toFixed(NARROW()?2:4),xL-16,yM+10);
     g.textAlign="left";g.fillStyle=C("--ink");g.font="600 12px 'IBM Plex Mono', monospace";
     g.fillText(q.Su.toFixed(2),xR+16,yU-8);
     g.fillText(q.Sd.toFixed(2),xR+16,yD-8);
@@ -1250,7 +1289,69 @@ const s7={v:0.10,r:0.08,T:2};
   window.drawDrill=next;
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
+/* ══════════ 01b — build the replicating portfolio yourself ══════════
+   Reads the tree above (s1), so changing it there changes the problem here.
+   The reader sets shares D and borrowing B; the portfolio pays D*Su - B*e^r
+   up and D*Sd - B*e^r down. A dealer offers the call below its replication
+   cost; buying it and selling the portfolio is riskless only when the
+   portfolio replicates exactly. */
+const sR = { D: 0.20, B: 10, quote: 4.20 };
+function repState(){
+  const S = 100, Su = S * s1.u, Sd = S * s1.d, g = Math.exp(s1.r);
+  const Cu = Math.max(0, Su - s1.K), Cd = Math.max(0, Sd - s1.K);
+  const Dx = (Cu - Cd) / (Su - Sd), Bx = (Dx * Sd - Cd) / g, price = Dx * S - Bx;
+  const Pu = sR.D * Su - sR.B * g, Pd = sR.D * Sd - sR.B * g, cost = sR.D * S - sR.B;
+  /* buy the call at the quote, sell (short) your portfolio for its cost */
+  const today = cost - sR.quote, netU = Cu - Pu, netD = Cd - Pd;
+  return { S, Su, Sd, Cu, Cd, Dx, Bx, price, Pu, Pd, cost, today, netU, netD, g };
+}
+(function(){
+  sliders(document.getElementById("ctlR"), [
+    { id: "DR", k: "D", lbl: "Δ", name: "Shares you buy", min: 0, max: 1, step: 0.05, fmt: v => v.toFixed(2) },
+    { id: "BR", k: "B", lbl: "B", name: "Cash you borrow", min: -20, max: 100, step: 1, fmt: v => v.toFixed(0) },
+    { id: "QR", k: "quote", lbl: "q", name: "Dealer's offer for the call", min: 0, max: 12, step: 0.1, fmt: v => v.toFixed(2) }
+  ], sR, () => draw(),"cR");
+  window.drawR = draw;
+  document.getElementById("repSolve").addEventListener("click", () => {
+    const q = repState(); preset("cR", { D: Math.round(q.Dx / 0.05) * 0.05, B: Math.round(q.Bx) }, "cvR", true); });
+  function draw(){
+    const q = repState(), match = Math.abs(q.Pu - q.Cu) < 0.051 && Math.abs(q.Pd - q.Cd) < 0.051;
+    const vals = [q.Cu, q.Cd, q.Pu, q.Pd, q.netU + q.today, q.netD + q.today, 0];
+    const lo = Math.min(...vals) - 2, hi = Math.max(...vals) + 3;
+    const o = Fig(document.getElementById("cvR"), { h: 250, x0: 0, x1: 2, y0: lo, y1: hi, pad: { l: 52, r: 14, t: 14, b: 26 } });
+    axes(o, () => "", v => v.toFixed(0), 2, 4);
+    const g = o.g, bw = Math.min(46, o.pw / 9);
+    const bar = (x, v, col, alpha, outline) => { const y0 = o.Y(0), y1 = o.Y(v), X = o.X(x);
+      if (outline) { g.strokeStyle = col; g.lineWidth = 2; g.setLineDash([4, 3]); g.strokeRect(X - bw / 2, Math.min(y0, y1), bw, Math.max(1, Math.abs(y1 - y0))); g.setLineDash([]); }
+      else { g.fillStyle = col; g.globalAlpha = alpha; g.fillRect(X - bw / 2, Math.min(y0, y1), bw, Math.max(1, Math.abs(y1 - y0))); g.globalAlpha = 1; } };
+    [[0.5, q.Cu, q.Pu, q.netU, "Up to " + q.Su.toFixed(0)], [1.5, q.Cd, q.Pd, q.netD, "Down to " + q.Sd.toFixed(0)]].forEach(([x, c, p, net, lab]) => {
+      bar(x - 0.28, p, C("--blue"), 0.75);
+      bar(x - 0.28, c, C("--ink"), 1, true);
+      bar(x + 0.28, net + q.today, Math.abs(net) < 0.051 ? C("--moss") : C("--verm"), 0.8);
+      g.fillStyle = C("--grey"); g.font = "10px 'IBM Plex Mono', monospace"; g.textAlign = "center"; g.textBaseline = "top";
+      g.fillText(lab, o.X(x), o.P.t + o.ph + 7);
+      g.fillStyle = C("--ink"); g.textBaseline = "bottom";
+      g.fillText("option " + c.toFixed(2) + " · yours " + p.toFixed(2), o.X(x - 0.28), Math.min(o.Y(c), o.Y(p)) - 4);
+      g.fillStyle = Math.abs(net) < 0.051 ? C("--moss") : C("--verm");
+      g.fillText("arb " + (net + q.today >= 0 ? "+" : "") + (net + q.today).toFixed(2), o.X(x + 0.28), Math.min(o.Y(0), o.Y(net + q.today)) - 4);
+    });
+    const msg = document.getElementById("repMsg");
+    msg.textContent = match
+      ? "Matched in both states. Your portfolio costs " + q.cost.toFixed(2) + " today, which is the call's price. Against the dealer's " + sR.quote.toFixed(2) + ", buying the call and selling the portfolio " + (q.today >= 0 ? "locks in " : "loses ") + Math.abs(q.today).toFixed(2) + " whichever way the stock goes."
+      : "Not matched: your portfolio pays " + q.Pu.toFixed(2) + " up and " + q.Pd.toFixed(2) + " down against the option's " + q.Cu.toFixed(2) + " and " + q.Cd.toFixed(2) + ". The trade against the dealer would carry risk; the red bars are what it pays in each state.";
+    document.getElementById("kvR").innerHTML = kvHTML([
+      ["Your portfolio costs today", q.cost.toFixed(2)],
+      ["Replication cost (the price)", q.price.toFixed(4), "blue"],
+      ["Up state: option / yours", q.Cu.toFixed(2) + " / " + q.Pu.toFixed(2)],
+      ["Down state: option / yours", q.Cd.toFixed(2) + " / " + q.Pd.toFixed(2)],
+      ["Dealer's offer", sR.quote.toFixed(2)],
+      ["Arb, up state", (q.netU + q.today >= 0 ? "+" : "") + (q.netU + q.today).toFixed(2), Math.abs(q.netU) < 0.051 ? "moss" : "verm"],
+      ["Arb, down state", (q.netD + q.today >= 0 ? "+" : "") + (q.netD + q.today).toFixed(2), Math.abs(q.netD) < 0.051 ? "moss" : "verm"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();drawR();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
 LAB.boot(drawAll);
 
 </script>

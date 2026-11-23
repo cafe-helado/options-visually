@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 02 · The Surface</span>
+    <span class="num">No. 07 · The Surface</span>
   </div>
 </header>
 
@@ -46,7 +46,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 02</div>
+    <div class="eyebrow">An interactive derivation · No. 07</div>
     <h1>The shape of what we <em>don't</em> believe</h1>
     <p class="sub">Black–Scholes takes one volatility. The market quotes a different one for every strike and every expiry. That disagreement is not a defect in the model — it is a picture of the distribution the market actually has in mind, and you can read it directly.</p>
   </div>
@@ -252,7 +252,7 @@
       <button>Persistent stochastic volatility with negative correlation</button>
       <button>Nothing — all surfaces do this</button>
     </div>
-    <div class="ans"><b>Event risk.</b> A jump's lopsidedness does not survive aggregation: over a long horizon many jumps sum toward a normal, so the skewness they add falls like 1/√T and their effect on the shape fades with maturity. (A single scheduled event is the stronger version — its variance is fixed outright, which is page 03.) Persistent skew into the long end points at a regime property instead. This distinction has a direct trade behind it, which is <a href="index.html" style="color:var(--blue)">page 03's</a> subject: if the front-month skew is event-driven you can strip out the event and price what is left.</div>
+    <div class="ans"><b>Event risk.</b> A jump's lopsidedness does not survive aggregation: over a long horizon many jumps sum toward a normal, so the skewness they add falls like 1/√T and their effect on the shape fades with maturity. (A single scheduled event is the stronger version — its variance is fixed outright, which is page 03.) Persistent skew into the long end points at a regime property instead. This distinction has a direct trade behind it, which is <a href="index.html" style="color:var(--blue)">page 08's</a> subject: if the front-month skew is event-driven you can strip out the event and price what is left.</div>
   </div>
 </section>
 
@@ -293,6 +293,47 @@
     </div>
     <figcaption>Push the front-month vol up and watch the forward vol between the first two expiries fall faster than the quoted curve suggests — and eventually go imaginary. The quoted curve can look merely steep while the forward it implies is already impossible.</figcaption>
   </figure>
+  <div class="prose">
+    <p>Put the two axes together and you have the object a volatility desk actually marks every morning: a surface, implied vol over strike and expiry. Below is one, drawn in three dimensions; drag it to turn it. The dots are this morning's market, each with its bid and offer. Fit the surface to them with four dials, the way a trader fits a parameterized surface before the open. Quotes your surface passes inside their spread turn green. If you ever see red cells, you have drawn something impossible: total variance falling as time goes on.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Mark the surface</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--moss)"></i>Quote your surface fits</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Quote it misses, or calendar arbitrage</span>
+          </span>
+        </div>
+        <p class="simmsg" id="mkMsg" aria-live="polite"></p>
+        <canvas id="cvMK" height="360" aria-label="A three-dimensional implied volatility surface; drag to rotate"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your marks</h4>
+        <div id="ctlMK"></div>
+        <div class="btnrow simbtns">
+          <button class="act ghost" id="mkShow">Show the market's fit</button>
+          <button class="act ghost" id="mkNew">New morning</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvMK"></div>
+      </div>
+    </div>
+    <figcaption>On the first morning the dials start 4.06 vol points away and fit 8 of the 35 quotes. The market's own four parameters fit 34 of them, off by 0.38 points, which is the noise in the quotes themselves: four numbers really can carry thirty-five. Push the one-month vol to 45% with the two-year at 15% and seven cells turn red, because a term structure that steep makes some longer option worth less than a shorter one.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>Nobody on a desk marks thirty-five vols by hand. They mark a handful of parameters, at-the-money level and slope across expiries, skew and curvature, and let the model fill the rest. Their view lives in those parameters: "front vol is rich", "skew is too steep in the back". Their risk is quoted in them too, which is why a surface is a trading object and not a picture.</p>
+    <ul>
+      <li>Fit the liquid middle tightly; the wings have wide spreads and few trades, so they inherit the fit rather than drive it.</li>
+      <li>A mark outside the market's bid-ask is an invitation for someone to trade against your book.</li>
+      <li>Arbitrage checks run before anything else. A surface with a calendar or butterfly violation is wrong, whatever it fits.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> if a parameter moves and nothing on the screen changed, the fit is overfitting the noise.</p>
+  </aside>
+
   <div class="try">
     <span class="lab">Try this</span>
     <p>Invert the term structure — front above back — and <b>predict</b> what that implies about the market's view of the near term.</p>
@@ -321,7 +362,7 @@
     <p class="mread">Reads as: <b>the direct effect, plus what the moving smile does to you through vega.</b> That second term is vanna's territory — page 01 built it, and this is where it earns its keep.</p>
     <p>The sign is not obvious and matters. With a downward-sloping equity skew, a rise in spot means a fixed strike now sits at lower moneyness on the shifted curve, so its implied vol goes <em>up</em>. Higher vol means a higher call price, which is extra positive delta. On a 100-strike, six-month call at 30 vol with a −0.35 skew, the difference is about <b>0.097 of delta</b> — roughly 10 shares per contract, or a thousand shares on a hundred lots, from nothing but a choice of convention.</p>
     <p>Neither rule is correct. They are descriptions of surface behavior that hold in different regimes — <span class="term" data-t="Sticky strike" data-def="The assumption that each strike's implied volatility stays put as spot moves. The alternative, sticky delta, holds volatility fixed by moneyness instead — and the two give different deltas from identical prices.">sticky strike</span> in quiet drifting markets, sticky delta in trending ones — and desks pick one, mark against it, and monitor the error. The one indefensible position is not knowing which one your risk system assumes.</p>
-    <p>There is a third regime this chapter does not draw, in which at-the-money vol falls by <em>more</em> than the skew slope as spot rises and the correction changes sign. <a href="dynamics.html">Page 22</a> puts all three on one dial and shows what each does to a hedged book.</p>
+    <p>There is a third regime this chapter does not draw, in which at-the-money vol falls by <em>more</em> than the skew slope as spot rises and the correction changes sign. <a href="dynamics.html">Page 21</a> puts all three on one dial and shows what each does to a hedged book.</p>
   </div>
 
   <figure class="bleed">
@@ -458,7 +499,7 @@
   <div class="prose">
     <p>With clean quotes both methods mark the in-between strikes within about a tenth of a point of the truth. The difference is in the corners. Joining vols with straight lines puts a kink at every quote, and wherever the kink bends the wrong way a tight butterfly priced off those marks comes out <b>negative</b>: here &minus;$0.010 for a half-dollar fly at the 90 strike, with smaller negative ones at 105 and 115. That is a mark that says you can be paid to own something that cannot lose. The fitted curve has no corners, and its tightest butterfly stays positive.</p>
     <p>Now make the 110 quote six points too low. Straight-line marks absorb the whole error locally: the 112.5 strike marks at 23.34 against a true 26.22, and the fly at 105 goes to &minus;$0.117. The fitted curve smears the error across the chain instead: the 112.5 strike marks at 24.93, but the at-the-money mark also drops <b>0.67</b> points and even the 90 strike moves 0.12, though nothing about those options changed.</p>
-    <p>So a desk does neither naively. It fits a smooth curve with enough flexibility for the real smile and no more, weights each quote by how much it can be trusted (vega, and the width of its market), throws out quotes that sit outside their own bid&ndash;offer from the fit, and checks the result for butterfly and calendar arbitrage before anyone marks to it. The parametrization here, a quadratic in log-moneyness, is the simplest one that works over a narrow range; production surfaces use forms built to stay arbitrage-free in the wings as well, and the choice is a model decision that moves marks, which is why page 11's unexplained P&amp;L is checked against it.</p>
+    <p>So a desk does neither naively. It fits a smooth curve with enough flexibility for the real smile and no more, weights each quote by how much it can be trusted (vega, and the width of its market), throws out quotes that sit outside their own bid&ndash;offer from the fit, and checks the result for butterfly and calendar arbitrage before anyone marks to it. The parametrization here, a quadratic in log-moneyness, is the simplest one that works over a narrow range; production surfaces use forms built to stay arbitrage-free in the wings as well, and the choice is a model decision that moves marks, which is why page 23's unexplained P&amp;L is checked against it.</p>
   </div>
 
   <div class="mline">fit: minimize &Sigma; vega<sub>i</sub> &times; ( &sigma;<sub>quote,i</sub> &minus; a &minus; b&middot;k<sub>i</sub> &minus; c&middot;k<sub>i</sub>&sup2; )&sup2; &nbsp;&nbsp; k = ln(K/F) &nbsp;&nbsp;&nbsp; no-arbitrage: C(K&minus;h) &minus; 2C(K) + C(K+h) &ge; 0</div>
@@ -825,10 +866,18 @@ const s3={T:.25,lam:1.0,muJ:-.12,delJ:.12,sig:.20};
     const Ts=[],sj=[],sm=[];
     for(let i=0;i<26;i++){const t=.04+2.96*i/25;Ts.push(t);
       const [a,b]=skewAt(t);sj.push(a);sm.push(b);}
+    /* log scale: the jump skew starts about twenty times the stochastic-vol
+       skew, so on a linear axis the blue curve was a flat line at the bottom.
+       On a log axis both show, and the test the chapter is about — how fast
+       each decays — becomes a difference in slope. */
+    const L=a=>a.map(v=>Math.log10(Math.max(0.01,Math.abs(v))));
+    const lj=L(sj),lm=L(sm);
     const o2=Fig(document.getElementById("cvDecay"),{h:220,x0:0,x1:3,
-      y0:Math.min(0,...sj,...sm),y1:Math.max(...sj,...sm)*1.1,pad:{l:58}});
-    axes(o2,v=>v.toFixed(1)+"y",v=>v.toFixed(1),5,4);
-    clip(o2,()=>{line(o2,Ts,sm,C("--blue"),2);line(o2,Ts,sj,C("--verm"),2.2);});
+      y0:Math.floor(Math.min(...lj,...lm)*2)/2,y1:Math.ceil(Math.max(...lj,...lm)*2)/2+.05,pad:{l:58}});
+    axes(o2,v=>v.toFixed(1)+"y",v=>{const x=Math.pow(10,v);return x>=1?x.toFixed(0):x.toFixed(x>=.1?1:2);},5,4);
+    clip(o2,()=>{line(o2,Ts,lm,C("--blue"),2);line(o2,Ts,lj,C("--verm"),2.2);});
+    o2.g.fillStyle=C("--grey");o2.g.font="9.5px 'IBM Plex Mono', monospace";o2.g.textAlign="right";o2.g.textBaseline="top";
+    o2.g.fillText("skew, vol points · log scale",o2.P.l+o2.pw-4,o2.P.t+2);
     vline(o2,T,C("--ochre"),"shown");
     const [a,b]=skewAt(T);
     document.getElementById("kv3").innerHTML=kvHTML([
@@ -1092,7 +1141,101 @@ const sFit = { bad: 0, drop: 0 };
   }
 })();
 
-function drawAll(){draw1();draw3();draw4();draw5();draw6();drawFit();}
+/* ══════════ 04b — mark the surface ══════════
+   A four-parameter surface: at-the-money vol slides from the front value a0
+   (one month) to the long value aL (two years) in square-root time; skew b is
+   the slope per unit log-moneyness at three months and decays as 1/sqrt(T);
+   curvature c is constant. Each morning's market is the same family with
+   hidden parameters, quoted at 7 strikes x 5 expiries with noise and a
+   bid-ask that widens in the wings. The reader fits by dial; the figure is
+   drawn in 3D and rotated by dragging. Calendar arbitrage: total variance
+   sigma^2 T must rise with T at every strike; cells where it falls go red. */
+const sM = { a0: 0.30, aL: 0.24, b: -0.10, c: 0.30, morning: 0 };
+const MK = { Ks: [70, 80, 90, 100, 110, 120, 130], Ts: [1 / 12, 0.25, 0.5, 1, 2], yaw: -0.65, pitch: 0.42 };
+function mkVol(p, K, T){ const x = Math.log(K / 100), w = (Math.sqrt(T) - Math.sqrt(1 / 12)) / (Math.sqrt(2) - Math.sqrt(1 / 12));
+  return Math.max(0.02, p.a0 + (p.aL - p.a0) * w + p.b * Math.sqrt(0.25 / T) * x + p.c * x * x); }
+function mkMarket(n){ return withSeed(9100 + n, () => {
+  const t = { a0: 0.22 + 0.2 * Math.random(), aL: 0.18 + 0.12 * Math.random(), b: -0.05 - 0.25 * Math.random(), c: 0.1 + 0.6 * Math.random() };
+  if (Math.random() < 0.25) t.aL = t.a0 + 0.04 + 0.06 * Math.random(); /* an upward-sloping term structure some mornings */
+  const quotes = [];
+  MK.Ts.forEach(T => MK.Ks.forEach(K => { const x = Math.abs(Math.log(K / 100)), mid = mkVol(t, K, T) + 0.004 * gauss();
+    const half = 0.004 + 0.03 * x + 0.004 / Math.sqrt(T * 12); quotes.push({ K, T, mid, half }); }));
+  return { t, quotes };
+}); }
+function mkFit(p, m){ let se = 0, inside = 0;
+  m.quotes.forEach(q => { const v = mkVol(p, q.K, q.T), d = v - q.mid; se += d * d; if (Math.abs(d) <= q.half) inside++; });
+  return { rms: Math.sqrt(se / m.quotes.length), inside, n: m.quotes.length }; }
+function mkCalArb(p){ const bad = []; for (let i = 0; i < MK.Ks.length; i++) for (let j = 1; j < MK.Ts.length; j++) {
+  const K = MK.Ks[i], w1 = mkVol(p, K, MK.Ts[j - 1]) ** 2 * MK.Ts[j - 1], w2 = mkVol(p, K, MK.Ts[j]) ** 2 * MK.Ts[j]; if (w2 < w1) bad.push([i, j]); } return bad; }
+(function(){
+  let mkt = mkMarket(0);
+  const cv = document.getElementById("cvMK");
+  sliders(document.getElementById("ctlMK"), [
+    { id: "a0M", k: "a0", lbl: "σ₁", name: "One-month at-the-money vol", min: 0.10, max: 0.60, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" },
+    { id: "aLM", k: "aL", lbl: "σ₂₄", name: "Two-year at-the-money vol", min: 0.10, max: 0.60, step: 0.005, fmt: v => (v * 100).toFixed(1) + "%" },
+    { id: "bM", k: "b", lbl: "β", name: "Skew at three months", min: -0.5, max: 0.1, step: 0.005, fmt: v => v.toFixed(3) },
+    { id: "cM", k: "c", lbl: "γ", name: "Curvature", min: 0, max: 1.2, step: 0.01, fmt: v => v.toFixed(2) }
+  ], sM, () => draw(),"cMK");
+  window.drawMK = draw;
+  document.getElementById("mkNew").addEventListener("click", () => { sM.morning++; mkt = mkMarket(sM.morning); draw(); });
+  document.getElementById("mkShow").addEventListener("click", () => {
+    const t = mkt.t, r = (v, s) => Math.round(v / s) * s; preset("cMK", { a0: r(t.a0, 0.005), aL: r(t.aL, 0.005), b: r(t.b, 0.005), c: r(t.c, 0.01) }, "cvMK", true); });
+  /* drag to rotate */
+  let drag = null;
+  cv.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, yaw: MK.yaw, pitch: MK.pitch }; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove", e => { if (!drag) return; MK.yaw = drag.yaw + (e.clientX - drag.x) * 0.008;
+    MK.pitch = Math.max(0.08, Math.min(1.2, drag.pitch + (e.clientY - drag.y) * 0.006)); draw(); });
+  const end = () => drag = null; cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+  cv.style.touchAction = "none"; cv.style.cursor = "grab";
+  function draw(){
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth || 600, H = cvh(360);
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + "px";
+    const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    const vMax = 0.7, cy = Math.cos(MK.yaw), sy = Math.sin(MK.yaw), cp = Math.cos(MK.pitch), sp = Math.sin(MK.pitch), sc = Math.min(W, H * 1.7) * 0.38;
+    /* world: x = log-moneyness scaled, y = sqrt-time scaled, z = vol */
+    const P = (K, T, v) => { const x = Math.log(K / 100) / Math.log(1.3), y = (Math.sqrt(T) / Math.sqrt(2)) * 2 - 1, z = v / vMax * 1.3 - 0.4;
+      const X = x * cy - y * sy, Y = x * sy + y * cy; return [W / 2 + X * sc, H * 0.58 - (z * cp - Y * sp) * sc, Y]; };
+    const Kg = [], Tg = []; for (let i = 0; i <= 24; i++) Kg.push(70 * Math.pow(130 / 70, i / 24)); for (let j = 0; j <= 16; j++) Tg.push(Math.pow(Math.sqrt(1 / 12) + (Math.sqrt(2) - Math.sqrt(1 / 12)) * j / 16, 2));
+    const bad = new Set(mkCalArb(sM).map(([i, j]) => i + "," + j));
+    /* floor grid and axes */
+    g.strokeStyle = C("--hair"); g.lineWidth = 1;
+    [[70, 1 / 12, 130, 1 / 12], [70, 2, 130, 2], [70, 1 / 12, 70, 2], [130, 1 / 12, 130, 2]].forEach(([k1, t1, k2, t2]) => { const a = P(k1, t1, 0), b = P(k2, t2, 0); g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke(); });
+    g.fillStyle = C("--grey"); g.font = "10px 'IBM Plex Mono', monospace"; g.textAlign = "center";
+    const inside = (x, t) => Math.max(10, Math.min(W - 10 - ((g.measureText(t) || {}).width || 12) / 2, x));
+    [70, 100, 130].forEach(K => { const a = P(K, 1 / 12, 0); g.fillText(String(K), inside(a[0], String(K)), Math.min(H - 4, a[1] + 14)); });
+    [[1 / 12, "1m"], [0.5, "6m"], [2, "2y"]].forEach(([T, l]) => { const a = P(130, T, 0); g.fillText(l, inside(a[0] + 16, l), Math.min(H - 4, a[1] + 4)); });
+    /* surface cells, painted back to front, shaded by vol */
+    const cells = [];
+    for (let i = 0; i < Kg.length - 1; i++) for (let j = 0; j < Tg.length - 1; j++) {
+      const q = [[Kg[i], Tg[j]], [Kg[i + 1], Tg[j]], [Kg[i + 1], Tg[j + 1]], [Kg[i], Tg[j + 1]]].map(([K, T]) => P(K, T, mkVol(sM, K, T)));
+      cells.push({ q, d: q.reduce((a, b) => a + b[2], 0), v: mkVol(sM, (Kg[i] + Kg[i + 1]) / 2, (Tg[j] + Tg[j + 1]) / 2), i, j });
+    }
+    cells.sort((a, b) => b.d - a.d);
+    const isBad = c => { const ki = MK.Ks.findIndex(K => K >= Kg[c.i]), tj = MK.Ts.findIndex(T => T >= Tg[c.j]); return bad.has(Math.max(0, ki) + "," + Math.max(1, tj)); };
+    cells.forEach(c => { const t = Math.min(1, Math.max(0, (c.v - 0.1) / 0.5));
+      g.fillStyle = isBad(c) ? "rgba(229,67,44,.55)" : `rgba(${Math.round(31 + 180 * t)},${Math.round(76 + 40 * (1 - t))},${Math.round(232 - 150 * t)},.30)`;
+      g.strokeStyle = "rgba(20,24,26,.10)"; g.beginPath(); g.moveTo(c.q[0][0], c.q[0][1]); c.q.slice(1).forEach(p => g.lineTo(p[0], p[1])); g.closePath(); g.fill(); g.stroke(); });
+    /* the quotes: a vertical bid-ask bar and a dot, green inside your surface's reach */
+    mkt.quotes.forEach(qq => { const v = mkVol(sM, qq.K, qq.T), ok = Math.abs(v - qq.mid) <= qq.half;
+      const a = P(qq.K, qq.T, qq.mid - qq.half), b = P(qq.K, qq.T, qq.mid + qq.half), m = P(qq.K, qq.T, qq.mid), s = P(qq.K, qq.T, v);
+      g.strokeStyle = ok ? C("--moss") : C("--verm"); g.lineWidth = 2; g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke();
+      g.strokeStyle = "rgba(20,24,26,.35)"; g.lineWidth = 1; g.setLineDash([2, 2]); g.beginPath(); g.moveTo(m[0], m[1]); g.lineTo(s[0], s[1]); g.stroke(); g.setLineDash([]);
+      g.fillStyle = ok ? C("--moss") : C("--verm"); g.beginPath(); g.arc(m[0], m[1], 3, 0, 6.2832); g.fill(); });
+    g.fillStyle = C("--grey"); g.textAlign = "left"; g.fillText("drag to rotate", 8, 14);
+    const f = mkFit(sM, mkt), nb = mkCalArb(sM).length;
+    document.getElementById("mkMsg").textContent = "Morning " + (sM.morning + 1) + ". " + f.inside + " of " + f.n + " quotes inside your surface; error " + (f.rms * 100).toFixed(2) + " vol points" +
+      (nb ? ". " + nb + " calendar-arbitrage cells: total variance falls with time there, which no real surface can do." : ". No calendar arbitrage.");
+    document.getElementById("kvMK").innerHTML = kvHTML([
+      ["Quotes inside the spread", f.inside + " of " + f.n, f.inside >= f.n * 0.8 ? "moss" : "grey"],
+      ["Fit error", (f.rms * 100).toFixed(2) + " vol pts"],
+      ["Calendar arbitrage", nb ? nb + " cells" : "none", nb ? "verm" : "moss"],
+      ["Your 90–110 skew at 3m", ((mkVol(sM, 90, 0.25) - mkVol(sM, 110, 0.25)) * 100).toFixed(2) + " pts"],
+      ["Market's", ((mkVol(mkt.t, 90, 0.25) - mkVol(mkt.t, 110, 0.25)) * 100).toFixed(2) + " pts"]
+    ]);
+  }
+})();
+
+function drawAll(){drawMK();draw1();draw3();draw4();draw5();draw6();drawFit();}
 LAB.boot(drawAll);
 
 </script>

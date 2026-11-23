@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 03 · Catalyst and Noise</span>
+    <span class="num">No. 08 · Catalyst and Noise</span>
   </div>
 </header>
 
@@ -45,7 +45,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 03</div>
+    <div class="eyebrow">An interactive derivation · No. 08</div>
     <h1>One number holding <em>two</em> things</h1>
     <p class="sub">An implied volatility quoted into an earnings date is a blend of ordinary daily drift and one scheduled shock. They obey different rules and they are worth separating — and because variance adds, separating them takes one equation.</p>
   </div>
@@ -56,7 +56,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">This page assumes <a href="black-scholes.html" style="color:var(--blue)">page 01</a> for implied vol and the greeks, and leans on <a href="surface.html" style="color:var(--blue)">page 02</a>'s term-structure chapter — particularly the fact that you subtract total variances rather than averaging volatilities.</p>
+  <p class="lede">This page assumes <a href="black-scholes.html" style="color:var(--blue)">page 01</a> for implied vol and the greeks, and leans on <a href="surface.html" style="color:var(--blue)">page 07</a>'s term-structure chapter — particularly the fact that you subtract total variances rather than averaging volatilities.</p>
   <ol>
     <li><b>One equation carries the page.</b> σ²T = σ<sub>diff</sub>²T + J². Everything else is applying it or checking where it fails.</li>
     <li><b>Chapter 03 is the payoff.</b> A term structure that looks arbitrary becomes flat once one number is removed from it.</li>
@@ -365,6 +365,49 @@
     </div>
   </div>
 
+
+  <div class="prose">
+    <p>Knowing the shape is one thing; living through it is another. Trade a season of reports. Each round is a company reporting tomorrow, its straddle priced off the implied move, and the one clue a desk actually uses: how big this company's last four prints were compared with what was implied going in. Buy, sell or pass ten straddles, then watch the print and the vol crush.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Trade the print</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>The move the straddle prices</span>
+            <span><i class="swl" style="background:var(--ochre)"></i>Breakevens</span>
+            <span><i class="swl" style="background:var(--moss)"></i>The print</span>
+          </span>
+        </div>
+        <p class="simmsg" id="prMsg" aria-live="polite"></p>
+        <canvas id="cvPR" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your straddles</h4>
+        <div class="btnrow simbtns">
+          <button class="act" id="prBuy">Buy 10</button>
+          <button class="act" id="prSell">Sell 10</button>
+          <button class="act ghost" id="prPass">Pass</button>
+          <button class="act ghost" id="prNext">Next report</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvPR"></div>
+      </div>
+    </div>
+    <figcaption>The first report prices a 10.8% move; the stock moves half a percent and ten long straddles lose $4,729 to the vol crush. Over 2,000 reports, buying every straddle wins only 30.8% of the time and still comes out close to even, $58 a report: the big prints pay for the many small ones. Buying when the last four prints averaged more than 1.2 times implied and selling when they averaged under 0.8 makes $694 a report and wins 63% of its trades.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>An event-vol trader does not ask whether the stock will move; it will. They ask whether it will move more than the straddle says, and the best evidence is this company's own history of prints against what was implied. A long straddle into earnings is a bet that loses most nights and is sized so the nights it wins pay for the rest.</p>
+    <ul>
+      <li>Compare implied moves with realized ones company by company; the ratio is sticky.</li>
+      <li>The vol crush is certain; the move is not. Long straddles pay for the crush every time.</li>
+      <li>Short straddles win most prints and lose big on the few that gap. Size them for the gap.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> the implied move ≈ straddle ÷ spot; buy it only when this name's prints have run above it.</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -1000,7 +1043,63 @@ const s6={sd:.25,Jmkt:.06,Jyou:.04};
   stats();next();
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();}
+/* ══════════ 05b — trade the print ══════════
+   Each round is a company reporting tomorrow: an implied event move Jimp, 25%
+   diffusive vol, 30 days to expiry, so the straddle costs straddle() at the
+   pre-print vol as in chapter 05. The company's prints really run at
+   ratio x Jimp, a hidden number centred on one (the market is fair on
+   average). The only clue is what a desk would look at: the last four prints,
+   each as a multiple of what was implied going in. The reader buys, sells or
+   passes 10 straddles; the print lands, vol falls back to 25%, and the
+   straddle is marked the next morning. */
+const PR = { n: 0, pick: null, total: 0, wins: 0, done: 0, N: 10 };
+function printRound(n){ return withSeed(4400 + n, () => {
+  const Jimp = 0.03 + 0.09 * Math.random(), ratio = Math.exp(0.35 * gauss() - 0.35 * 0.35 / 2), sd = 0.25, days = 30;
+  const hist = []; for (let i = 0; i < 4; i++) hist.push(+(ratio * Math.abs(gauss()) / Math.sqrt(2 / Math.PI)).toFixed(2));
+  const z = gauss(), T = days / 365, ivPre = Math.sqrt((sd * sd * T + Jimp * Jimp) / T), cost = straddle(100, 100, T, ivPre);
+  const Jr = Jimp * ratio, S1 = 100 * Math.exp(Jr * z - 0.5 * Jr * Jr), mark = straddle(S1, 100, (days - 1) / 365, sd);
+  return { Jimp, ratio, hist, cost, S1, mark, move: S1 / 100 - 1 };
+}); }
+const printPnL = (r, pick) => (pick === "buy" ? 1 : pick === "sell" ? -1 : 0) * (r.mark - r.cost) * 100 * PR.N;
+(function(){
+  let r = printRound(0);
+  const msg = document.getElementById("prMsg"), money0 = v => (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  function pick(p){ if (PR.pick) return; PR.pick = p; const v = printPnL(r, p); PR.total += v; if (p !== "pass") { PR.done++; if (v > 0) PR.wins++; } draw(); }
+  document.getElementById("prBuy").addEventListener("click", () => pick("buy"));
+  document.getElementById("prSell").addEventListener("click", () => pick("sell"));
+  document.getElementById("prPass").addEventListener("click", () => pick("pass"));
+  document.getElementById("prNext").addEventListener("click", () => { PR.n++; PR.pick = null; r = printRound(PR.n); draw(); });
+  window.drawPR = draw;
+  function draw(){
+    const be = r.cost / 100;
+    msg.textContent = !PR.pick
+      ? "Report " + (PR.n + 1) + ". The straddle costs $" + r.cost.toFixed(2) + ", pricing a " + (r.Jimp * 100).toFixed(1) + "% move. Its last four prints moved " + r.hist.map(h => h.toFixed(2) + "×").join(", ") + " what was implied. Buy, sell or pass ten straddles."
+      : "The stock " + (r.move < 0 ? "falls " : "rises ") + Math.abs(r.move * 100).toFixed(1) + "%. The straddle is worth $" + r.mark.toFixed(2) + " the next morning against $" + r.cost.toFixed(2) + " paid. " +
+        (PR.pick === "pass" ? "You passed." : "Your " + (PR.pick === "buy" ? "long" : "short") + " straddles " + (printPnL(r, PR.pick) >= 0 ? "make " : "lose ") + money0(Math.abs(printPnL(r, PR.pick))) + ".") +
+        " This company's prints really run at " + r.ratio.toFixed(2) + "× implied.";
+    /* the move the straddle is priced for, its breakevens, and where the print landed */
+    const J = r.Jimp, xs = [], ys = [], lim = Math.max(0.25, 3.2 * J, Math.abs(r.move) * 1.2);
+    for (let i = 0; i <= 160; i++) { const x = -lim + 2 * lim * i / 160; xs.push(x * 100); ys.push(npdf(x / J) / J); }
+    const o = Fig(document.getElementById("cvPR"), { h: 230, x0: -lim * 100, x1: lim * 100, y0: 0, y1: Math.max(...ys) * 1.15, pad: { l: 30, r: 14, t: 14 } });
+    axes(o, v => (v > 0 ? "+" : "") + v.toFixed(0) + "%", () => "", 6, 3);
+    const g = o.g;
+    clip(o, () => { g.fillStyle = C("--blue"); g.globalAlpha = 0.12; g.beginPath(); g.moveTo(o.X(xs[0]), o.Y(0));
+      xs.forEach((x, i) => g.lineTo(o.X(x), o.Y(ys[i]))); g.lineTo(o.X(xs[xs.length - 1]), o.Y(0)); g.closePath(); g.fill(); g.globalAlpha = 1;
+      line(o, xs, ys, C("--blue"), 2); });
+    vline(o, -be * 100, C("--ochre"), "breakeven"); vline(o, be * 100, C("--ochre"), "breakeven");
+    if (PR.pick) vline(o, r.move * 100, r.mark > r.cost ? C("--moss") : C("--verm"), "the print", [1, 0]);
+    document.getElementById("kvPR").innerHTML = kvHTML([
+      ["Report", String(PR.n + 1)],
+      ["Straddle cost", "$" + r.cost.toFixed(2)],
+      ["Move needed to break even", "±" + (be * 100).toFixed(1) + "%"],
+      ["This report", PR.pick ? money0(printPnL(r, PR.pick)) : "—"],
+      ["Trades won", PR.done ? PR.wins + " of " + PR.done : "—"],
+      ["Running total", money0(PR.total), PR.total >= 0 ? "moss" : "verm"]
+    ]);
+  }
+})();
+
+function drawAll(){drawPR();draw1();draw2();draw3();draw4();draw5();draw6();}
 LAB.boot(drawAll);
 
 </script>

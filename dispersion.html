@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 10 · Dispersion and Correlation</span>
+    <span class="num">No. 12 · Dispersion and Correlation</span>
   </div>
 </header>
 
@@ -45,7 +45,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 10</div>
+    <div class="eyebrow">An interactive derivation · No. 12</div>
     <h1>Correlation, whether you <em>meant</em> to or not</h1>
     <p class="sub">Twenty stocks averaging 39% volatility, bundled into an index, produce an index that can be anything from 9% to 39% depending on one number nobody quotes directly. Trade the index against its own members and that number is the only thing you own.</p>
   </div>
@@ -56,7 +56,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">This page needs the smile vocabulary from <a href="surface.html" style="color:var(--blue)">page 02</a> and the variance machinery from <a href="variance.html" style="color:var(--blue)">page 09</a> — dispersion is almost always traded in variance rather than volatility, for reasons chapter 03 makes concrete.</p>
+  <p class="lede">This page needs the smile vocabulary from <a href="surface.html" style="color:var(--blue)">page 07</a> and the variance machinery from <a href="variance.html" style="color:var(--blue)">page 11</a> — dispersion is almost always traded in variance rather than volatility, for reasons chapter 03 makes concrete.</p>
   <ol>
     <li><b>Chapter 01 is one line of algebra</b> and the rest of the page is consequences. Index variance is a weighted double sum, and the off-diagonal terms all carry a correlation.</li>
     <li><b>Implied correlation is not quoted; it is inferred.</b> Chapter 02 backs it out of an index price, which means it inherits every assumption in that inversion.</li>
@@ -121,6 +121,8 @@
     <figcaption>Notice the shape of the top curve: it rises steeply out of zero and then flattens. That curvature is why correlation is hard to trade — the same move in ρ is worth several times more index volatility at the bottom of the range than at the top, so a position that is comfortably sized at ρ = 0.6 is not comfortably sized at ρ = 0.2.</figcaption>
   </figure>
 
+  <p class="xlink"><span class="lab">The statistics underneath</span><a href="https://cafe-helado.github.io/stats-trading/corr.html" target="_blank" rel="noopener">Two things moving together ↗</a>, in Chance, visually, builds correlation from paired draws.</p>
+
   <div class="try">
     <span class="lab">Try this</span>
     <p>Set correlation to exactly 1 and compare the index volatility with the average single-name volatility in the readout. <b>Predict</b> whether they are close or identical.</p>
@@ -169,7 +171,7 @@
   <div class="prose">
     <p class="lead">There is no correlation screen. What exists is an index option market and twenty single-name option markets, and the bridge between them is chapter 01's identity read from right to left. Fix every σ<sub>i</sub> at its implied volatility, fix σ<sub>I</sub> at the index's implied volatility, and there is exactly one ρ that makes the equation true. That number is <b><span class="term" data-t="Implied correlation" data-def="The single average correlation that makes the index formula reproduce the quoted index volatility. Inferred rather than observed, so it inherits every choice made in the inversion.">implied correlation</span></b>, and it is the closest thing the market has to a price for co-movement.</p>
     <p>The mapping is steep, which is the first practical thing to know. On our basket, an index quoted at <b>20%</b> implies <b>0.220</b>; at <b>25%</b> it implies <b>0.375</b>; at <b>28%</b> it implies <b>0.485</b>. Three volatility points of index move a correlation estimate by more than a tenth, so a stale index mark or a mismatched snapshot time produces a correlation number that is badly wrong while looking perfectly plausible.</p>
-    <p>The second thing to know is that the inversion inherits every choice you made on the way in. Which expiry? Which strike — at-the-money volatility, or the variance strike from <a href="variance.html#c5" style="color:var(--blue)">page 09</a>, which carries a skew premium? Do you use all five hundred names or the top fifty as a proxy? Each answer produces a different implied correlation from the same market, and they do not agree to two decimal places. A quoted implied correlation without its recipe is not a number.</p>
+    <p>The second thing to know is that the inversion inherits every choice you made on the way in. Which expiry? Which strike — at-the-money volatility, or the variance strike from <a href="variance.html#c5" style="color:var(--blue)">page 11</a>, which carries a skew premium? Do you use all five hundred names or the top fifty as a proxy? Each answer produces a different implied correlation from the same market, and they do not agree to two decimal places. A quoted implied correlation without its recipe is not a number.</p>
     <p>The lower panel splits index variance into the part that survives no matter what — the diagonal — and the part that correlation controls. On a twenty-name basket the diagonal is small: at ρ = 0.3 it supplies about a tenth of index variance, and the rest is the correlation term. That is the mechanical reason index volatility is so sensitive to a parameter nobody observes.</p>
   </div>
 
@@ -233,7 +235,7 @@
     <p class="lead">Dispersion is the trade that expresses chapter 01 directly. Sell variance on the index, buy variance on each of its members in matched size, and hold both to expiry. If the names move around a lot but independently, the components pay and the index does not, and you win. If everything moves together, the index pays more than the components and you lose.</p>
     <p>The reason it is traded in <b>variance</b> rather than volatility is chapter 01's identity, which is exactly linear in variance and a mess in volatility. Buy each component's variance in proportion to its index weight, scaled so the long leg's total variance equals the index's at the correlation you sold, and the position's P&amp;L reduces to the difference between implied and realized correlation, multiplied by the size of the off-diagonal sum. That is a clean exposure. Try the same thing with volatility swaps or straddles and the relationship is approximate and drifts with spot.</p>
     <p>The figure runs it. With implied correlation at <b>0.35</b> — an index implied of <b>24.25%</b> against those components — the P&amp;L line crosses zero at realized correlation of exactly 0.35 and is a straight line either side. Realized correlation of <b>0.15</b> and the short index leg wins comfortably; realized <b>0.60</b> and it loses a quarter more than it made in the good case — 0.25 of correlation against 0.20, on a straight line — and the line keeps going.</p>
-    <p>Three practical things the figure cannot show. Trading twenty single-name variance swaps means twenty bid–offers against one, so the entry cost is asymmetric and the trade needs a decent gap between implied and expected realized just to break even. Weights drift, so a matched basket stops being matched. And the components have their own wing problems from <a href="variance.html#c4" style="color:var(--blue)">page 09 chapter 04</a> — single-name variance is exactly the product whose replication is most fragile, and you are long twenty of them.</p>
+    <p>Three practical things the figure cannot show. Trading twenty single-name variance swaps means twenty bid–offers against one, so the entry cost is asymmetric and the trade needs a decent gap between implied and expected realized just to break even. Weights drift, so a matched basket stops being matched. And the components have their own wing problems from <a href="variance.html#c4" style="color:var(--blue)">page 11 chapter 04</a> — single-name variance is exactly the product whose replication is most fragile, and you are long twenty of them.</p>
   </div>
 
   <div class="mline">P&amp;L ∝ (ρ<sub>imp</sub> − ρ<sub>realized</sub>) · Σ<sub>i≠j</sub> w<sub>i</sub>w<sub>j</sub>σ<sub>i</sub>σ<sub>j</sub></div>
@@ -273,6 +275,51 @@
     </div>
   </div>
 
+  <div class="prose">
+    <p>Run the book for a quarter. You are long $1,000 per variance point on each of ten stocks and short $10,000 per point on the index, sold at the implied correlation on the slider. Step through the days and watch the bottom panel: the correlation the market actually delivers, against the one you sold. Something happens on day 41.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Run a dispersion book</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Book P&amp;L</span>
+            <span><i class="swl" style="background:var(--ink)"></i>Realized correlation so far</span>
+            <span><i class="sw" style="background:var(--ochre)"></i>Sold at</span>
+          </span>
+        </div>
+        <p class="simmsg" id="dbMsg" aria-live="polite"></p>
+        <canvas id="cvDB" height="230"></canvas>
+        <canvas id="cvDB2" height="130"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your book</h4>
+        <div id="ctlDB"></div>
+        <div class="btnrow simbtns">
+          <button class="act" id="dbNext">Next day</button>
+          <button class="act ghost" id="dbWeek">Next week</button>
+          <button class="act ghost" id="dbPlay">Play to expiry</button>
+          <button class="act ghost" id="dbReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvDB"></div>
+      </div>
+    </div>
+    <figcaption>Sold at 0.5, the book makes $607,000 over forty calm days in which stocks move on their own news. Then a twelve-day sell-off drives correlation to 0.9, everything falls together, and $455,000 of it is gone; the book ends the quarter $172,000 up. Sold at 0.4, close to what the calm market delivers, it makes $93,000 before the sell-off and finishes $638,000 down. The premium in implied correlation is what pays for the days it goes to one.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A dispersion trader is short correlation and knows exactly when it will hurt: in a sell-off, when every stock becomes the same trade. The edge is that index options are persistently expensive relative to their parts, because everyone who needs portfolio insurance buys the index. The risk is that the insurance is needed, all at once.</p>
+    <ul>
+      <li>Sell correlation only at a level that has already paid for the last crash.</li>
+      <li>Weight the long legs carefully: vega-neutral, theta-neutral and correlation-neutral are three different books (chapter 06).</li>
+      <li>The worst days for dispersion are the best days for the people who bought index puts from you.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> the book's daily edge is roughly proportional to implied minus realized correlation, times the variance of the stocks.</p>
+  </aside>
+
   <div class="check">
     <span class="lab">Check yourself</span>
     <p class="q">You are short index variance and long component variance. The market crashes: every single-name volatility triples. What happened to your P&amp;L?</p>
@@ -295,7 +342,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">Implied correlation has historically sat above subsequently realized correlation more often than not. That is a claim about a persistent premium, and a persistent premium needs a persistent reason, not a story about sentiment. The reason here is flow, and it is the same argument <a href="structures.html#c5" style="color:var(--blue)">page 04's bridge chapter</a> makes about the surface generally: durable one-way demand shows up as a price.</p>
+    <p class="lead">Implied correlation has historically sat above subsequently realized correlation more often than not. That is a claim about a persistent premium, and a persistent premium needs a persistent reason, not a story about sentiment. The reason here is flow, and it is the same argument <a href="structures.html#c5" style="color:var(--blue)">page 09's bridge chapter</a> makes about the surface generally: durable one-way demand shows up as a price.</p>
     <p>The two flows push in opposite directions on the two legs of the same trade.</p>
     <p><b>Index volatility is bid.</b> Institutions hedging equity portfolios buy index puts, because one index hedge is cheaper and simpler to administer than five hundred single-name hedges, and because a mandate usually specifies portfolio-level protection. That demand is structural, price-insensitive within limits, and one-directional. It lifts index implied volatility.</p>
     <p><b>Single-name volatility is offered.</b> Overwriting programs, structured-product issuance and yield-enhancement mandates all sell single-name volatility — calls in the first case, mostly downside puts embedded in notes in the second. That supply is also structural and one-directional, and it depresses single-name implied volatility.</p>
@@ -352,7 +399,7 @@
     <p>Watch what that does to the two legs. Measured from the 0.35 correlation the trade was sold at, the short index variance leg loses <b>3,896</b> variance units. The long component leg, sized to be variance-neutral at inception and supposed to be the hedge, gains only <b>1,318</b>. Net, the book is down <b>2,579</b> — and every unit of that is the correlation move, magnified by the square of the volatility multiplier. The trade is not volatility-neutral in a crash because it was never a volatility trade — the legs only cancel while correlation is where you left it.</p>
     <p>Two more failure modes worth naming, both of which turn a bad outcome into an unmanageable one.</p>
     <p><b>The average is not the matrix.</b> A single ρ cannot distinguish a market that has become uniformly more correlated from one that has split into two blocks. Books hedged on average correlation carry the difference as an unhedged residual, and it is largest in stress, when the correlation structure is changing shape rather than just level.</p>
-    <p><b>Liquidity leaves both legs at once.</b> Single-name variance is the product from <a href="variance.html#c7" style="color:var(--blue)">page 09 chapter 07</a> whose replication depends on a put wing that gaps and widens in a crash. Twenty of those, against one index position, is a lot of fragility concentrated in one direction.</p>
+    <p><b>Liquidity leaves both legs at once.</b> Single-name variance is the product from <a href="variance.html#c7" style="color:var(--blue)">page 11 chapter 07</a> whose replication depends on a put wing that gaps and widens in a crash. Twenty of those, against one index position, is a lot of fragility concentrated in one direction.</p>
     <p>And the arithmetic check from chapter 02 becomes a live risk control here. Because index volatility can never exceed the weighted average of its components, an index quoted at <b>39.5%</b> against components averaging <b>39.10%</b> implies a correlation of <b>1.0217</b> — which is impossible, and therefore evidence that a mark is stale, a proxy basket is wrong, or something is genuinely dislocated. It is one line of arithmetic and it is worth running every day.</p>
   </div>
 
@@ -528,7 +575,7 @@
       <button>Because volatility swaps are not listed</button>
       <button>Because variance has no vega</button>
     </div>
-    <div class="ans"><b>The algebra is linear in variance and not in volatility.</b> This is the practical reason page 09 comes before this one — dispersion is the clearest application of why the square is the tradeable object.</div>
+    <div class="ans"><b>The algebra is linear in variance and not in volatility.</b> This is the practical reason page 11 comes before this one — dispersion is the clearest application of why the square is the tradeable object.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
@@ -974,7 +1021,71 @@ const sWt = { rr: 0.35, m: 1.8 };
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();drawWt();}
+/* ══════════ 03b — run a dispersion book ══════════
+   Ten equally weighted stocks, each implied at 30 vol; the index is implied
+   at 30 vol with implied correlation rhoI, so its variance strike is
+   900 x (rhoI + (1 - rhoI) / 10). The book is long $1,000 per variance point
+   on each stock and short $10,000 per point on the index, accruing daily
+   over 63 days: (252 x r^2 x 10^4 - strike) / 63 per leg. Returns come from a
+   one-factor model: 40 calm days at realized correlation 0.4 and 30 vol, twelve
+   crash days at 0.9 and 45 vol with the market falling, then 11 days at 0.55. */
+const sDB = { rhoI: 0.5 };
+const DBK = { n: 10, T: 63, Nc: 1000, sig: 0.30 };
+function dbReturns(){ return withSeed(7700, () => { const out = [];
+  for (let d = 1; d <= DBK.T; d++) { const [rho, vol, mu] = d <= 40 ? [0.4, 0.30, 0] : d <= 52 ? [0.9, 0.45, -0.006] : [0.55, 0.30, 0.001];
+    const f = gauss(), s = vol / Math.sqrt(252), r = [];
+    for (let i = 0; i < DBK.n; i++) r.push(mu + s * (Math.sqrt(rho) * f + Math.sqrt(1 - rho) * gauss()));
+    out.push(r); } return out; }); }
+function dbRun(rhoI){ const R = dbReturns(), Kc = 900, KI = 900 * (rhoI + (1 - rhoI) / DBK.n), NI = DBK.Nc * DBK.n;
+  let cum = 0; const pnl = [0], rc = [], corr = [];
+  R.forEach(r => { const rI = r.reduce((a, b) => a + b, 0) / DBK.n;
+    const c = r.reduce((a, x) => a + DBK.Nc * (252 * x * x * 1e4 - Kc) / DBK.T, 0) - NI * (252 * rI * rI * 1e4 - KI) / DBK.T;
+    cum += c; pnl.push(cum); });
+  /* realized correlation so far, from the variance ratio */
+  let sv = 0, si = 0; const rho = [null];
+  R.forEach(r => { const rI = r.reduce((a, b) => a + b, 0) / DBK.n; sv += r.reduce((a, x) => a + x * x, 0) / DBK.n; si += rI * rI;
+    rho.push(Math.max(-0.1, Math.min(1, (si / sv - 1 / DBK.n) / (1 - 1 / DBK.n)))); });
+  return { pnl, rho, final: cum };
+}
+(function(){
+  let day = 0;
+  sliders(document.getElementById("ctlDB"), [
+    { id: "rDB", k: "rhoI", lbl: "ρᵢ", name: "Implied correlation you sold at", min: 0.2, max: 0.8, step: 0.05, fmt: v => v.toFixed(2) }
+  ], sDB, () => draw(),"cDB");
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", () => { fn(); draw(); });
+  on("dbNext", () => { day = Math.min(DBK.T, day + 1); });
+  on("dbWeek", () => { day = Math.min(DBK.T, day + 5); });
+  on("dbPlay", () => { day = DBK.T; });
+  on("dbReset", () => { day = 0; });
+  window.drawDB = draw;
+  function draw(){
+    const run = dbRun(sDB.rhoI), xs = [], pn = [], rh = []; for (let d = 0; d <= day; d++) { xs.push(d); pn.push(run.pnl[d]); rh.push(d ? run.rho[d] : sDB.rhoI); }
+    const money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    const phase = day === 0 ? "Day 0. Long single-stock variance, short index variance, sold at " + sDB.rhoI.toFixed(2) + " implied correlation." :
+      day <= 40 ? "Day " + day + ": a calm market. Stocks move on their own news and the index is quieter than its parts." :
+      day <= 52 ? "Day " + day + ": the sell-off. Everything moves together, and the index is as volatile as its parts." : "Day " + day + ": things settle, at a correlation in between.";
+    document.getElementById("dbMsg").textContent = phase + " Book P&L " + money0(run.pnl[day]) + ".";
+    const all = run.pnl.slice(0, day + 1), m = Math.max(5e4, ...all.map(Math.abs)) * 1.2;
+    const o = Fig(document.getElementById("cvDB"), { h: 230, x0: 0, x1: DBK.T, y0: -m, y1: m, pad: { l: 66, r: 14, t: 14 } });
+    axes(o, v => "day " + v.toFixed(0), v => (v < 0 ? "−$" : "$") + (Math.abs(v) / 1000).toFixed(0) + "k", 6, 4);
+    clip(o, () => line(o, xs, pn, C("--blue"), 2.8));
+    if (day > 40) vline(o, 40, C("--verm"), "sell-off");
+    const b = Fig(document.getElementById("cvDB2"), { h: 130, x0: 0, x1: DBK.T, y0: 0, y1: 1, pad: { l: 66, r: 14, t: 10 } });
+    axes(b, v => "day " + v.toFixed(0), v => v.toFixed(1), 6, 2);
+    clip(b, () => { line(b, [0, DBK.T], [sDB.rhoI, sDB.rhoI], C("--ochre"), 1.4, [5, 4]); if (day) line(b, xs.slice(1), rh.slice(1), C("--ink"), 2); });
+    b.g.fillStyle = C("--ochre"); b.g.font = "9.5px 'IBM Plex Mono', monospace"; b.g.textAlign = "right"; b.g.textBaseline = "bottom";
+    b.g.fillText("sold at " + sDB.rhoI.toFixed(2), b.P.l + b.pw - 4, b.Y(sDB.rhoI) - 2);
+    document.getElementById("kvDB").innerHTML = kvHTML([
+      ["Day", day + " of " + DBK.T],
+      ["Realized correlation so far", day ? run.rho[day].toFixed(2) : "—"],
+      ["Book P&L", money0(run.pnl[day]), run.pnl[day] >= 0 ? "moss" : "verm"],
+      ["At day 40, before the sell-off", day >= 40 ? money0(run.pnl[40]) : "—"],
+      ["At expiry", day === DBK.T ? money0(run.final) : "—"]
+    ]);
+  }
+})();
+
+function drawAll(){drawDB();draw1();draw2();draw3();draw4();draw5();drawWt();}
 LAB.boot(drawAll);
 
 </script>

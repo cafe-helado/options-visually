@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 14 · Spreading</span>
+    <span class="num">No. 10 · Spreading</span>
   </div>
 </header>
 
@@ -46,7 +46,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 14</div>
+    <div class="eyebrow">An interactive derivation · No. 10</div>
     <h1>Nobody trades <em>one</em> option</h1>
     <p class="sub">Five structures, all bullish, all sized to exactly the same delta. Which one makes the most money changes hands four times as the stock moves — and there is no version of "the right one" that survives contact with the outcome.</p>
   </div>
@@ -57,7 +57,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede"><a href="structures.html" style="color:var(--blue)">Page 04</a> catalogued structures and showed what each one <em>is</em>. This page is about choosing between them — the question a trader actually faces, which is not "what does a call spread look like" but "I am bullish; now what do I put on".</p>
+  <p class="lede"><a href="structures.html" style="color:var(--blue)">Page 09</a> catalogued structures and showed what each one <em>is</em>. This page is about choosing between them — the question a trader actually faces, which is not "what does a call spread look like" but "I am bullish; now what do I put on".</p>
   <ol>
     <li><b>Chapter 01 answers the question the series has dodged.</b> Why bother with two legs? Because one leg carries views you did not mean to take, and the spread cancels them.</li>
     <li><b>Chapter 03 is the page.</b> Five bullish structures at identical delta. The lead changes hands four times across the outcome range, and the differences run to tens of thousands of dollars on the same nominal exposure.</li>
@@ -91,7 +91,7 @@
     <p>Buy the 105 call at <b>3.9341</b>. You are now long <b>0.194</b> of vega per point — so if implied volatility drops five points overnight with the stock unchanged, the option is worth <b>2.9419</b> and you have lost <b>25.2%</b> of your money having been exactly right about nothing happening yet.</p>
     <p>Now sell the 115 call against it. The package costs <b>2.5151</b> and carries <b>0.0568</b> of vega — <b>71% less</b>. The same five-point volatility drop costs <b>13.9%</b> instead of 25.2%. You have kept most of the directional exposure and thrown away most of the exposure you did not want.</p>
     <p>That is the entire argument for spreading, and it generalizes. Every additional leg is an opportunity to cancel a sensitivity you are not being paid to hold. A calendar cancels direction and keeps term structure. A butterfly cancels direction and most of the vega and keeps the distribution's shape. A risk reversal cancels most of the volatility level and keeps skew.</p>
-    <p>Two things you give up, and they are real. The spread <b>caps the upside</b> — above 115 the short call gives back everything the long call earns. And it doubles the transaction costs, which <a href="microstructure.html#c1" style="color:var(--blue)">page 05</a> priced: two spreads crossed instead of one, on options whose spreads are wide in volatility terms.</p>
+    <p>Two things you give up, and they are real. The spread <b>caps the upside</b> — above 115 the short call gives back everything the long call earns. And it doubles the transaction costs, which <a href="microstructure.html#c1" style="color:var(--blue)">page 14</a> prices: two spreads crossed instead of one, on options whose spreads are wide in volatility terms.</p>
     <p>So spreading is not free and it is not automatically better. It is a way of paying, in upside and in commission, to stop being exposed to things you have no view on. Whether that is worth it is the subject of the rest of the page.</p>
   </div>
 
@@ -201,7 +201,7 @@
       <button>Time decay works against credit spreads, not for them</button>
       <button>Credit spreads have unlimited risk</button>
     </div>
-    <div class="ans"><b>They are describing the same position twice.</b> The bull put spread and the bull call spread on the same strikes are one trade — if one has favorable decay so does the other, because they are identical. What genuinely differs is margin treatment, assignment risk on the short leg (<a href="early-exercise.html" style="color:var(--blue)">page 08</a>) and the eleven cents of interest. Those are worth choosing on; the payoff diagram is not.</div>
+    <div class="ans"><b>They are describing the same position twice.</b> The bull put spread and the bull call spread on the same strikes are one trade — if one has favorable decay so does the other, because they are identical. What genuinely differs is margin treatment, assignment risk on the short leg (<a href="early-exercise.html" style="color:var(--blue)">page 04</a>) and the eleven cents of interest. Those are worth choosing on; the payoff diagram is not.</div>
 
   <details class="derive">
     <summary>Derivation — why the credit and the debit are one trade</summary>
@@ -214,7 +214,7 @@
       <p class="mread">Reads as: <b>the call spread you buy equals the put spread you sell, plus the discounted width.</b> Rearranged: debit paid plus credit received equals the width discounted, always.</p>
       <p>That is the whole result. The two positions are not similar and they are not close relatives — they differ by a fixed amount of money that does not depend on the stock, on the volatility, or on anything you have a view about. Which is why their P&amp;L profiles in the figure above sit parallel across every terminal price rather than crossing anywhere.</p>
       <p>It also explains the number. The gap is the width minus the discounted width, W·(1 − e<sup>−rT</sup>), which is simply the interest on the width over the life of the trade. At three months and four-and-a-half percent on a ten-wide spread that is about eleven cents. Nobody chooses a strategy for eleven cents; they choose it because one version arrives as a credit, and a credit feels like income.</p>
-      <p><b>Where it breaks.</b> Parity is a European statement. On American options the short leg can be assigned before expiry, and the two versions are then assigned in different circumstances — the put spread on a sell-off, the call spread on a rally into a dividend — so their <em>operational</em> risk genuinely differs even though their theoretical value does not (<a href="early-exercise.html" style="color:var(--blue)">page 08</a>). A hard-to-borrow underlying adds a q term to parity and the gap stops being plain interest (<a href="parity.html" style="color:var(--blue)">page 07</a>). And margin treatment often differs between the two, which is the one real reason to prefer a particular version — and it has nothing to do with premium selling.</p>
+      <p><b>Where it breaks.</b> Parity is a European statement. On American options the short leg can be assigned before expiry, and the two versions are then assigned in different circumstances — the put spread on a sell-off, the call spread on a rally into a dividend — so their <em>operational</em> risk genuinely differs even though their theoretical value does not (<a href="early-exercise.html" style="color:var(--blue)">page 04</a>). A hard-to-borrow underlying adds a q term to parity and the gap stops being plain interest (<a href="parity.html" style="color:var(--blue)">page 03</a>). And margin treatment often differs between the two, which is the one real reason to prefer a particular version — and it has nothing to do with premium selling.</p>
     </div>
   </details>
   </div>
@@ -274,6 +274,42 @@
     </div>
   </div>
 
+  <div class="prose">
+    <p>The chart above is every outcome at once. Trading is one outcome at a time. Pick a structure, then play futures: in every one of them the stock really does drift up 15% a year, so your bullish view is right. All six structures are sized to the same 100 deltas and bought at the same implied vol, and after each future you see what each one made.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Live with your choice</h3></div>
+        <p class="simmsg" id="lvMsg" aria-live="polite"></p>
+        <canvas id="cvLV" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your structure</h4>
+        <div class="btnrow lvpick" id="lvPick"><button class="act ghost" data-i="0">long stock</button><button class="act ghost" data-i="1">long call</button><button class="act ghost" data-i="2">call spread</button><button class="act ghost" data-i="3">short put</button><button class="act ghost" data-i="4">risk reversal</button><button class="act ghost" data-i="5">1×2 ratio</button></div>
+        <div class="btnrow simbtns">
+          <button class="act" id="lvOne">Play one future</button>
+          <button class="act ghost" id="lvMany">Play 200</button>
+          <button class="act ghost" id="lvReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvLV"></div>
+      </div>
+    </div>
+    <figcaption>In the first future the stock finishes at $130.52: the long call makes $5,128 and the 1×2 ratio loses $23,637. Over 200 futures in which the view is right, the short put is the best structure 34% of the time, the ratio 28% and the long call 24%, and stock and the call spread never come first. Yet the ratio, best in more than a quarter of futures, averages a loss of $992, because the big rallies run straight through its short strikes; the long call averages the most, $308. Being right about direction does not choose the structure for you.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>Traders pick structures from a distribution, not a target. "Bullish" is not a view until it says how far, how fast, and how wrong you can afford to be. The structure that is most often best is rarely the one with the best average, and the one with the best average is rarely the one that survives the worst future.</p>
+    <ul>
+      <li>Short premium wins often and small; long premium wins rarely and big. Check which one your account can sit through.</li>
+      <li>A structure that is best in the most futures can still be the worst trade, if its bad futures are bad enough.</li>
+      <li>Size every alternative to the same delta before comparing them, or the comparison is just leverage.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> write down the move you expect and the move that would hurt, then pick the structure that wins the first and survives the second.</p>
+  </aside>
+
   <div class="check">
     <span class="lab">Check yourself</span>
     <p class="q">All five structures start with 100 deltas. What does that tell you about their risk?</p>
@@ -283,7 +319,7 @@
       <button>They have the same risk at expiry but not before</button>
       <button>The one with the lowest cost has the lowest risk</button>
     </div>
-    <div class="ans"><b>Almost nothing.</b> Matching delta matches the first derivative at one point — which is exactly <a href="book.html#c3" style="color:var(--blue)">page 11's</a> lesson about how fast a local approximation stops describing a position. These five agree on the first penny of movement and disagree by tens of thousands of dollars on the outcome.</div>
+    <div class="ans"><b>Almost nothing.</b> Matching delta matches the first derivative at one point — which is exactly <a href="book.html#c3" style="color:var(--blue)">page 23's</a> lesson about how fast a local approximation stops describing a position. These five agree on the first penny of movement and disagree by tens of thousands of dollars on the outcome.</div>
   </div>
 </section>
 
@@ -328,6 +364,8 @@
     <figcaption>Read the bars as "how much of something else am I buying per unit of the thing I wanted". The ratio spread's bars leave the chart, which is the visual version of the sentence: it is not a directional trade.</figcaption>
   </figure>
 
+  <p class="xlink"><span class="lab">Practise it</span><a href="https://cafe-helado.github.io/Option-Breakeven-Drill/" target="_blank" rel="noopener">Breakeven Drill ↗</a>: read breakevens, maximum profit and maximum loss off hedged and unhedged structures, against the clock.</p>
+
   <div class="check">
     <span class="lab">Check yourself</span>
     <p class="q">Two structures both have 100 deltas. One has +669 of gamma cash and one has −4,160. What are you really choosing between?</p>
@@ -337,7 +375,7 @@
       <button>A cheap version and an expensive version</button>
       <button>A short-dated and a long-dated version</button>
     </div>
-    <div class="ans"><b>You are choosing a volatility view.</b> The shared delta is the smallest thing these two have in common. This is the same trap <a href="structures.html#c1" style="color:var(--blue)">page 04</a> describes from the other end: a structure has a payoff description and an exposure description, and the exposure description is the one that determines what happens to you between now and expiry.</div>
+    <div class="ans"><b>You are choosing a volatility view.</b> The shared delta is the smallest thing these two have in common. This is the same trap <a href="structures.html#c1" style="color:var(--blue)">page 09</a> describes from the other end: a structure has a payoff description and an exposure description, and the exposure description is the one that determines what happens to you between now and expiry.</div>
   </div>
 </section>
 
@@ -354,7 +392,7 @@
     <p>The number that matters is where it crosses back through zero on the way down: <b>123.904</b>. Above that the position loses money, and it keeps losing without limit, because you are net short one call.</p>
     <p>That single fact makes the ratio a fundamentally different animal from everything else on this page. A vertical's worst case is its debit. A ratio's worst case is unbounded and is realized precisely when your directional view was <em>most</em> right. It is the only structure here that punishes you for being too correct.</p>
     <p>Turn it around and you get a <b><span class="term" data-t="Backspread" data-def="More bought than sold — the mirror of a ratio. Limited risk, and it needs a large move to pay.">backspread</span></b>: sell one near option, buy two further out. Now the payoff is a valley — you lose in the middle and win big at the edges, with limited risk. Backspreads are long volatility with a directional tilt; ratios are short volatility with a directional tilt.</p>
-    <p>The reason ratios get traded despite the tail is that the tent covers the region where the stock usually ends up, and the premium collected pays for the middle. That is a real edge and it is also the exact shape of a strategy that works repeatedly and then removes a year of profit in a week. <a href="catalyst.html#c5" style="color:var(--blue)">Page 03's</a> earnings-straddle chapter is the same distributional shape seen from the other side: high win rate, negative tail, and a mean that hides both.</p>
+    <p>The reason ratios get traded despite the tail is that the tent covers the region where the stock usually ends up, and the premium collected pays for the middle. That is a real edge and it is also the exact shape of a strategy that works repeatedly and then removes a year of profit in a week. <a href="catalyst.html#c5" style="color:var(--blue)">Page 08's</a> earnings-straddle chapter is the same distributional shape seen from the other side: high win rate, negative tail, and a mean that hides both.</p>
     <p>The figure lets you drag the ratio and the strikes so you can watch the upper breakeven move. Two things to notice: widening the gap between strikes raises the peak and moves the breakeven further away, and raising the ratio from 1×2 to 1×3 does the opposite in a hurry.</p>
   </div>
 
@@ -481,7 +519,7 @@
     <p><b>How wrong can you afford to be?</b> The long call's maximum loss is its premium. The short put's is many times that. The ratio's is unbounded. These are not refinements of one another; they are different businesses, and position sizing has to be done on the worst case rather than on the delta.</p>
     <p><b>What is your volatility view?</b> Chapter 04 showed that structures matched on delta run gamma from +669 to −4,160. If you have no volatility view, the honest choice is the structure with the least of it — and that is usually a spread rather than an outright.</p>
     <p><b>When do you need to be right?</b> Theta runs from −8.30 a day to +7.57 across the same five structures. A long option needs the move to arrive before the premium decays; a short-premium structure needs the move <em>not</em> to arrive, and is happy to wait.</p>
-    <p>The figure puts those together as a scenario grid — outcome across, volatility change down, best structure in each cell. It is the same instrument as <a href="book.html#c2" style="color:var(--blue)">page 11's</a> scenario matrix, applied to a choice rather than to a book, and it has the same lesson: the answer lives in the corners, and no single number on the entry ticket predicts it.</p>
+    <p>The figure puts those together as a scenario grid — outcome across, volatility change down, best structure in each cell. It is the same instrument as <a href="book.html#c2" style="color:var(--blue)">page 23's</a> scenario matrix, applied to a choice rather than to a book, and it has the same lesson: the answer lives in the corners, and no single number on the entry ticket predicts it.</p>
     <p>The honest summary of this page is that "which spread should I use" is underdetermined until you have said something about magnitude, timing, volatility and tolerance. Most bad structure choices are not errors of arithmetic. They are answers to a question that was never fully asked.</p>
   </div>
 
@@ -637,12 +675,14 @@
     </div>
     <div class="ans"><b>A bounded worst case.</b> Both positions want the stock to sit still; only one of them can remove a year of profit in a week. The butterfly also carries far less vega, because its long wings offset the short body — which is the part the payoff diagram does not show.</div>
   </div>
+  <p class="xlink"><span class="lab">Practise it</span>More reps on breakevens and maximum loss in the <a href="https://cafe-helado.github.io/Option-Breakeven-Drill/" target="_blank" rel="noopener">Breakeven Drill ↗</a>, including delta-hedged versions.</p>
+
 </section>
 
 </main>
 
 <footer>
-  <p class="n">Every structure on this page is priced on a flat volatility surface, which is the one assumption that most changes the answers. A real skew makes the short put richer and the risk reversal cheaper than shown here, and it moves the ranking in chapter 03 — <a href="surface.html" style="color:var(--blue)">page 02</a> is the correction and it is not a small one. Transaction costs are excluded from every payoff, and a multi-leg structure crosses a spread on every leg, which <a href="microstructure.html" style="color:var(--blue)">page 05</a> prices at up to eleven volatility points on a short-dated wing. Margin treatment differs by structure and by account type and frequently decides the choice before any of this arithmetic does. And every short option carries the assignment risk of <a href="early-exercise.html" style="color:var(--blue)">page 08</a>, which no payoff diagram shows.</p>
+  <p class="n">Every structure on this page is priced on a flat volatility surface, which is the one assumption that most changes the answers. A real skew makes the short put richer and the risk reversal cheaper than shown here, and it moves the ranking in chapter 03 — <a href="surface.html" style="color:var(--blue)">page 07</a> is the correction and it is not a small one. Transaction costs are excluded from every payoff, and a multi-leg structure crosses a spread on every leg, which <a href="microstructure.html" style="color:var(--blue)">page 14</a> prices at up to eleven volatility points on a short-dated wing. Margin treatment differs by structure and by account type and frequently decides the choice before any of this arithmetic does. And every short option carries the assignment risk of <a href="early-exercise.html" style="color:var(--blue)">page 04</a>, which no payoff diagram shows.</p>
 </footer>
 
 <script src="assets/lab.js"></script>
@@ -932,7 +972,7 @@ function buildFive(st){
     for(const t of [80,90,100,110,120,130])
       g.fillText(String(t),L+((t-75)/60)*gw,54);
     g.textAlign="right";g.fillStyle=C("--ink");
-    g.fillText(flips+" changes of leader",W-Rp,54);
+    g.fillText(flips+" changes of leader",W-Rp,2);
 
     const rows=S.map((s,i)=>{
       const gk=structGreeks(s.legs,S0,T0,s3.v,R0);
@@ -1251,7 +1291,58 @@ const s7={v:0.28};
   window.drawDrill=next;
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
+/* ══════════ 03b — live with your choice ══════════
+   The six structures above, each sized to 100 deltas (sizedFive), bought at
+   implied vol s3.v. The reader picks one; then futures are drawn for the
+   stock at expiry with a real drift of +15% a year and realized vol equal to
+   implied, so the bullish view is right on average. Each future shows every
+   structure's P&L at expiry; 200 futures show how often each was the best
+   and what each made on average. */
+const LV = { pick: 1, k: 0, hist: [] };
+const lvCost = l => l.reduce((a, x) => a + x.n * (x.t === "s" ? S0 : bs(S0, x.K, T0, s3.v, R0, 0, x.t === "c").price), 0);
+const lvPay = (l, S) => l.reduce((a, x) => a + x.n * (x.t === "s" ? S : x.t === "c" ? Math.max(0, S - x.K) : Math.max(0, x.K - S)), 0);
+function lvFuture(k){ return withSeed(5100 + k, () => S0 * Math.exp((0.15 - 0.5 * s3.v * s3.v) * T0 + s3.v * Math.sqrt(T0) * gauss())); }
+function lvPnL(ST){ return sizedFive().map(f => f.mult * (lvPay(f.legs, ST) - lvCost(f.legs) * Math.exp(R0 * T0))); }
+function lvMany(n){ const best = NAMES.map(() => 0), sum = NAMES.map(() => 0);
+  for (let k = 0; k < n; k++) { const p = lvPnL(lvFuture(k)); let b = 0; p.forEach((v, i) => { sum[i] += v; if (v > p[b]) b = i; }); best[b]++; }
+  return { best, avg: sum.map(v => v / n) }; }
+(function(){
+  const msg = document.getElementById("lvMsg");
+  document.querySelectorAll("#lvPick button").forEach(b => b.addEventListener("click", () => { LV.pick = +b.dataset.i; draw(); }));
+  document.getElementById("lvOne").addEventListener("click", () => { LV.hist.push(lvFuture(LV.k)); LV.k++; draw(); });
+  document.getElementById("lvMany").addEventListener("click", () => { for (let i = 0; i < 200; i++) { LV.hist.push(lvFuture(LV.k)); LV.k++; } draw(); });
+  document.getElementById("lvReset").addEventListener("click", () => { LV.hist = []; LV.k = 0; draw(); });
+  window.drawLV = draw;
+  function draw(){
+    document.querySelectorAll("#lvPick button").forEach(b => b.classList.toggle("on", +b.dataset.i === LV.pick));
+    const money0 = v => (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+    const last = LV.hist.length ? LV.hist[LV.hist.length - 1] : null, p = last ? lvPnL(last) : NAMES.map(() => 0);
+    const best = NAMES.map(() => 0), sum = NAMES.map(() => 0);
+    LV.hist.forEach(ST => { const q = lvPnL(ST); let b = 0; q.forEach((v, i) => { sum[i] += v; if (v > q[b]) b = i; }); best[b]++; });
+    const n = LV.hist.length;
+    msg.textContent = !n ? "You are bullish, and you are right: the stock really drifts up 15% a year. Pick a structure, then play futures to expiry."
+      : "Future " + n + ": the stock finishes at $" + last.toFixed(2) + ". Your " + NAMES[LV.pick] + " " + (p[LV.pick] >= 0 ? "makes " : "loses ") + money0(Math.abs(p[LV.pick])) + "; the best structure this time was the " + NAMES[p.indexOf(Math.max(...p))] + ".";
+    const m = Math.max(500, ...p.map(Math.abs)) * 1.2;
+    const o = Fig(document.getElementById("cvLV"), { h: 230, x0: 0, x1: NAMES.length, y0: -m, y1: m, pad: { l: 60, r: 14, t: 14, b: 30 } });
+    axes(o, () => "", v => (v < 0 ? "−$" : "$") + Math.abs(v).toFixed(0), 2, 4);
+    const g = o.g, bw = Math.min(56, o.pw / NAMES.length * 0.6), cols = COLS();
+    p.forEach((v, i) => { const X = o.X(i + 0.5);
+      g.fillStyle = cols[i]; g.globalAlpha = i === LV.pick ? 0.95 : 0.35; g.fillRect(X - bw / 2, Math.min(o.Y(0), o.Y(v)), bw, Math.abs(o.Y(v) - o.Y(0))); g.globalAlpha = 1;
+      if (i === LV.pick) { g.strokeStyle = C("--ink"); g.lineWidth = 2; g.strokeRect(X - bw / 2 - 2, Math.min(o.Y(0), o.Y(v)) - 2, bw + 4, Math.abs(o.Y(v) - o.Y(0)) + 4); }
+      g.fillStyle = C("--grey"); g.font = "10px 'IBM Plex Mono', monospace"; g.textAlign = "center"; g.textBaseline = "top";
+      g.fillText(NARROW() ? ["stock", "call", "spread", "put", "RR", "1×2"][i] : NAMES[i], X, o.P.t + o.ph + 6);
+      if (n) { g.textBaseline = "bottom"; g.fillStyle = C("--ink"); g.fillText("best " + Math.round(best[i] / n * 100) + "%", X, o.P.t + 12); } });
+    document.getElementById("kvLV").innerHTML = kvHTML([
+      ["Futures played", String(n)],
+      ["Your structure", NAMES[LV.pick], "blue"],
+      ["Its average P&L", n ? money0(sum[LV.pick] / n) : "—"],
+      ["Times it was the best", n ? best[LV.pick] + " of " + n : "—"],
+      ["Most often best", n ? NAMES[best.indexOf(Math.max(...best))] : "—"]
+    ]);
+  }
+})();
+
+function drawAll(){drawLV();draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
 LAB.boot(drawAll);
 
 </script>

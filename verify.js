@@ -12,8 +12,8 @@
 
    Every assertion here exists because a number was wrong. The audit that
    produced this file found: an exceedance probability stated backwards on
-   page 03, stale implied-density figures on page 02, a benchmark number on
-   page 06 quoted from a single random draw, and a correlation on page 09
+   page 08, stale implied-density figures on page 07, a benchmark number on
+   page 13 quoted from a single random draw, and a correlation on page 11
    that only holds at a hedge count the figure does not open on.
 
        node verify.js            every page that has claims recorded
@@ -163,6 +163,14 @@ PAGES["surface"] = () => {
     eq("  the 90 strike moves 0.12", 100 * (F.ftEval(p0, 90) - F.ftEval(p6, 90)), 0.12, 0.006);
     yes("  fitted marks still have no negative fly", F.ftMinFly(K => F.ftEval(p6, K)).m > 0);
     yes("dropping the quote restores the fit to within 0.3 pts everywhere", [80, 90, 100, 110, 120].every(K => Math.abs(F.ftEval(pd, K) - F.ftTrue(K)) < 0.003)); }
+  /* chapter 04b, mark the surface */
+  const MKm = load("surface.html", ["mkMarket", "mkFit", "mkCalArb", "sM"]);
+  { const m = MKm.mkMarket(0), f0 = MKm.mkFit(MKm.sM, m), ft = MKm.mkFit(m.t, m);
+    eq("mark the surface: the dials start 4.06 points away", f0.rms * 100, 4.06, 0.006);
+    eq("  fitting 8 of 35 quotes", f0.inside, 8, 0); eq("  of 35", f0.n, 35, 0);
+    eq("  the market's parameters fit 34", ft.inside, 34, 0); eq("  off by 0.38 points", ft.rms * 100, 0.38, 0.006);
+    eq("  45% front over 15% two-year: seven arbitrage cells", MKm.mkCalArb({ a0: 0.45, aL: 0.15, b: MKm.sM.b, c: MKm.sM.c }).length, 7, 0);
+    eq("  the default dials have none", MKm.mkCalArb(MKm.sM).length, 0, 0); }
 };
 
 PAGES["catalyst"] = () => {
@@ -202,6 +210,19 @@ PAGES["catalyst"] = () => {
   eq("fair price: win rate 33%", r1.win, 32.8, 0.8);
   eq("at 1.5x implied the win rate is 52%", run(1.5).win, 51.6, 1.2);
   eq("at half implied you win 5%", run(0.5).win, 5.2, 0.8);
+  /* chapter 05b, trade the print */
+  const PRm = load("catalyst.html", ["printRound", "printPnL"]);
+  { const r0 = PRm.printRound(0);
+    eq("print 1 prices a 10.8% move", r0.Jimp * 100, 10.8, 0.05);
+    eq("  the stock moves half a percent", Math.abs(r0.move) * 100, 0.5, 0.06);
+    eq("  ten long straddles lose $4,729", PRm.printPnL(r0, "buy"), -4729, 1);
+    let w = 0, t = 0, ht = 0, hw = 0, hn = 0; const N = 2000;
+    for (let n = 0; n < N; n++) { const r = PRm.printRound(n), L = PRm.printPnL(r, "buy"); t += L; if (L > 0) w++;
+      const m = r.hist.reduce((a, b) => a + b, 0) / 4, pk = m > 1.2 ? "buy" : m < 0.8 ? "sell" : "pass", v = PRm.printPnL(r, pk); ht += v; if (pk !== "pass") { hn++; if (v > 0) hw++; } }
+    eq("  2,000 reports: buying every one wins 30.8%", w / N * 100, 30.8, 0.06);
+    eq("  and averages $58", t / N, 58, 1);
+    eq("  the history rule makes $694 a report", ht / N, 694, 1);
+    eq("  winning 63% of its trades", hw / hn * 100, 63, 0.5); }
 };
 
 PAGES["variance-short-convexity"] = () => {
@@ -257,6 +278,15 @@ PAGES["execution"] = () => {
     eq("at 50%: -0.40 (prose said -0.41, one simulated draw)", -0.50 * X.s5.edge, -0.40, 1e-12);
     let s = 0; const n = 200000; for (let k = 0; k < n; k++) s += (Math.random() < 0.5 ? -0.8 : 0);
     eq("  and a seeded 200,000-draw run agrees", s / n, -0.40, 0.01); }
+  /* chapter 02b, work the order */
+  const EXm = load("execution.html", ["exStats", "exTWAP", "exNow", "exCost", "exMids"]);
+  { const n = EXm.exStats(EXm.exNow(), 400), t = EXm.exStats(EXm.exTWAP(), 400), f = EXm.exStats([50000, 40000, 30000, 25000, 20000, 15000, 12000, 8000], 400), m0 = EXm.exMids(0);
+    eq("work the order: all at once costs 60 bp", n.mean, 60, 1e-9); eq("  every time", n.sd, 0, 1e-6);
+    eq("  evenly: 1.9 bp on average", t.mean, 1.9, 0.06); eq("  swinging by 65.5", t.sd, 65.5, 0.06);
+    eq("  day 1: the even schedule pays 93", EXm.exCost(EXm.exTWAP(), m0).bp, 93, 0.5);
+    yes("  because the stock drifts up all day", m0[7] > m0[0] + 0.9);
+    eq("  front-loaded: 4.8", f.mean, 4.8, 0.06); eq("  swinging by 47.3", f.sd, 47.3, 0.06);
+    eq("  lens: a quarter of a slot's volume costs about 19 bp", 75 * 0.25, 18.75, 1e-12); }
 };
 
 PAGES["early-exercise"] = () => {
@@ -294,6 +324,15 @@ PAGES["early-exercise"] = () => {
     yes("  however deep", M.exSide(Object.assign({}, h, { m: 40 }), false).net < 0);
     const z = Object.assign({}, d, { D: 0, r: 0 });
     yes("zero rates, no dividend, easy borrow: neither is exercised", M.exSide(z, true).net < 0 && M.exSide(z, false).net < 0); }
+  /* chapter 05b, the other side of the screen */
+  const NGm = load("early-exercise.html", ["nightRound", "nightScore"]);
+  { const rd = NGm.nightRound(0), clear = rd.rows.filter(x => x.edge > 0).map(x => x.K);
+    yes("ex-date 1: the five strikes from 85 to 105 clear", clear.join(",") === "85,90,95,100,105");
+    const buy = {}; clear.forEach(K => buy[K] = true);
+    const s0 = NGm.nightScore(rd, {}), s1 = NGm.nightScore(rd, buy);
+    eq("  doing nothing costs $28,677", s0.none, -28677, 1);
+    eq("  buying those five back costs $1,065", s1.mine, -1065, 1);
+    eq("  which is perfect hindsight this morning", s1.mine - s1.best, 0, 1e-6); }
 };
 
 PAGES["variance"] = () => {
@@ -376,6 +415,16 @@ PAGES["variance"] = () => {
     eq("vega halfway about $50,000 a point", W.vsVega(0.5, 25), 50000, 1100);
     eq("  by bumping the mark", W.vsMtm(0.5, 20, 25.5) - W.vsMtm(0.5, 20, 24.5), W.vsVega(0.5, 25), 1);
     eq("check: all at 25, three quarters through, worth zero", W.vsMtm(0.75, 25, 25), 0, 1e-9); }
+  /* chapter 08b, short variance through a crash */
+  const VSm = load("variance.html", ["vsReset", "vsMark", "VS"]);
+  { VSm.vsReset(); const m = d => VSm.vsMark(d);
+    eq("short variance: every variance point is $2,500", VSm.VS.Nv, 2500, 0);
+    eq("  day 29 realized 13.5", m(29).rv, 13.5, 0.05);
+    eq("  short variance up $250,000", m(29).short, 250000, 500); eq("  vol swap up $268,000", m(29).volShort, 268000, 500);
+    eq("  the gap: variance -$1.61m", m(30).short / 1e6, -1.61, 0.006); eq("  vol swap -$1.23m", m(30).volShort / 1e6, -1.23, 0.006);
+    eq("  day 40: -$1.81m", m(40).short / 1e6, -1.81, 0.006);
+    eq("  expiry: realized 31.0", m(63).rv, 31.0, 0.05); eq("  variance -$1.41m", m(63).short / 1e6, -1.41, 0.006); eq("  vol swap -$1.10m", m(63).volShort / 1e6, -1.10, 0.006);
+    eq("  lens rule at expiry, by hand", -100000 * (m(63).rv ** 2 - 400) / 40, m(63).short, 1); }
 };
 
 PAGES["questions"] = () => {
@@ -518,6 +567,7 @@ PAGES["questions"] = () => {
   yes("the exact answer is always accepted", Q.every(q => Math.abs(q.a - q.a) <= q.tol));
   yes("an answer well outside the band is always rejected",
     Q.every(q => Math.abs((q.a + Math.max(q.tol * 10, 1)) - q.a) > q.tol));
+  eq("lens: sqrt(1/365) is about 1/19", 1 / Math.sqrt(1 / 365), 19.1, 0.05);
 };
 
 PAGES["screen"] = () => {
@@ -627,6 +677,14 @@ PAGES["screen"] = () => {
     /* forward error lands by delta: the IV error ratio matches the delta ratio */
     const dc = Math.abs(B(F.S, 115, F.T, w.v, F.r, 0.06, true).delta), dp = Math.abs(B(F.S, 115, F.T, w.v, F.r, 0.06, false).delta);
     yes("in-the-money put carries more delta than the out-of-the-money call", dp > 3 * dc); }
+  /* chapter 02b, find one sigma */
+  const SCm = load("screen.html", ["scanChain"]);
+  { const c = SCm.scanChain(0);
+    eq("scan 1: a $90.21 stock", c.S, 90.21, 1e-9); eq("  45 days", c.days, 45, 0); eq("  43.4% vol", c.iv * 100, 43.4, 0.05); eq("  every $2.50", c.step, 2.5, 0);
+    eq("  one sigma $13.75", c.sig, 13.75, 0.006); eq("  five and a half strikes", c.sig / c.step, 5.5, 0.06); eq("  the 105 call", c.best, 105, 0);
+    let ok = 0; for (let n = 0; n < 200; n++) { const d = SCm.scanChain(n); if (d.S + d.sig <= d.Ks[d.Ks.length - 1]) ok++; }
+    eq("  every chain lists the answer", ok, 200, 0);
+    eq("  lens: sqrt(30/365) is 0.29", Math.sqrt(30 / 365), 0.29, 0.005); eq("  and annual vol / 16 is the daily move", Math.sqrt(256), 16, 0); }
 };
 
 /* ── run ─────────────────────────────────────────────────────────────── */
@@ -770,6 +828,13 @@ PAGES["rulers"] = () => {
   yes("the exact answer is always accepted", Q.every(q => Math.abs(q.a - q.a) <= q.tol));
   yes("an answer well outside the band is rejected",
     Q.every(q => Math.abs((q.a + Math.max(q.tol * 10, 1)) - q.a) > q.tol));
+  /* chapter 04b, trade it on fat tails */
+  const RTm = load("rulers.html", ["rtBatch", "breachT"]);
+  { eq("fat-tail trading: buyer wins 41.9% near normal", RTm.breachT(30) * 100, 41.9, 0.05);
+    eq("  37.4% at four degrees of freedom", RTm.breachT(4) * 100, 37.4, 0.05); eq("  35.1% at three", RTm.breachT(3) * 100, 35.1, 0.05);
+    const w = v => -Math.max(...RTm.rtBatch(v, 4000, 0)) * 1000;
+    eq("  seller's worst in 4,000: $3,017 near normal", w(30), -3017, 1); eq("  $15,270 at four", w(4), -15270, 1);
+    const b = RTm.rtBatch(4, 4000, 0); yes("  the average is close to zero", Math.abs(b.reduce((a, c) => a + c, 0) / 4000) < 0.02); }
 };
 
 
@@ -950,6 +1015,12 @@ PAGES["atlas"] = () => {
   yes("the exact answer is always accepted", Q.every(q => Math.abs(q.a - q.a) <= q.tol));
   yes("an answer well outside the band is rejected",
     Q.every(q => Math.abs((q.a + Math.max(q.tol * 10, 1)) - q.a) > q.tol));
+  /* chapter 01b, reach the quadrant */
+  const QDm = load("atlas.html", ["qdLeg", "qdBook"]);
+  { const a = QDm.qdLeg(30), b = QDm.qdLeg(90), k = QDm.qdBook(3, -2);
+    eq("quadrant: 90-day vega per gamma is exactly 3x the 30-day", (b.v / b.g) / (a.v / a.g), 3, 1e-9);
+    eq("  +3 near, -2 far: gamma +$1,712", k.g, 1712, 0.5); eq("  vega -$10.46", k.v, -10.46, 0.006); eq("  theta -$21.11 a day", k.th, -21.11, 0.006);
+    yes("  no single expiry reaches the quadrant", [-10, -5, -1, 1, 5, 10].every(n => { const x = QDm.qdBook(n, 0), y = QDm.qdBook(0, n); return !(x.g > 0 && x.v < 0) && !(y.g > 0 && y.v < 0); })); }
 };
 
 /* ── claims added by the November 2026 logic audit. Each one guards a
@@ -1000,6 +1071,18 @@ PAGES["black-scholes"] = () => {
     eq("forward 101.26", 100 * Math.exp(0.05 * 0.25), 101.26, 0.006);
     yes("  struck there the rule is within 2%", Math.abs(0.4 * 100 * Math.exp(-0.05 * 0.25) * 0.30 * 0.5 / B(100, 101.26, 0.25, 0.30, 0.05, 0, true).price - 1) < 0.02 ||
       Math.abs(6 / B(100, 101.26, 0.25, 0.30, 0.05, 0, true).price - 1) < 0.02); }
+  /* chapter 06, hedge it yourself */
+  const HGm = load("black-scholes.html", ["hgRun", "hgVal"]);
+  eq("hedge game: the call sells for $229", HGm.hgVal(100, 0), 229, 0.5);
+  eq("  daily hedger, realized 20%: +$2", HGm.hgRun("daily", 0.20, 0).final, 2, 0.5);
+  eq("  realized 10%: +$144", HGm.hgRun("daily", 0.10, 0).final, 144, 0.5);
+  eq("  realized 30%: -$157", HGm.hgRun("daily", 0.30, 0).final, -157, 0.5);
+  yes("  the never-rehedged book finishes ahead on the first path", HGm.hgRun("never", 0.20, 0).final > HGm.hgRun("daily", 0.20, 0).final);
+  { const st = pol => { let a = 0, b = 0; for (let k = 0; k < 500; k++) { const f = HGm.hgRun(pol, 0.20, k).final; a += f; b += f * f; } return [a / 500, Math.sqrt(b / 500 - (a / 500) ** 2)]; };
+    const D = st("daily"), N = st("never");
+    yes("  over 500 paths both average close to zero", Math.abs(D[0]) < 10 && Math.abs(N[0]) < 20);
+    eq("  daily spread $33", D[1], 33, 0.5); eq("  never-rehedged spread $168", N[1], 168, 0.5); }
+  eq("lens: break-even daily move S x sigma / sqrt(365) = $1.05", 100 * 0.20 / Math.sqrt(365), 1.05, 0.005);
 };
 
 PAGES["structures"] = () => {
@@ -1045,6 +1128,14 @@ PAGES["structures"] = () => {
   eq("…no gamma", box.gamma, 0, 1e-9);
   eq("…and costs the width discounted", box.price, 10 * Math.exp(-FG.MKT.r * FG.MKT.days / 365), 1e-6);
   eq("a conversion has no delta", cv.delta, 0, 1e-9);
+  /* chapter 07b, build it for the client */
+  const SBm = load("structures.html", ["REQ", "sameStructure", "payOf"]);
+  { yes("client builder: seven requests", SBm.REQ.length === 7);
+    yes("  every request matches its own answer", SBm.REQ.every(r => SBm.sameStructure(r[1], r[1])));
+    yes("  a butterfly of puts is accepted for the call butterfly", SBm.sameStructure([["P", 1, 90], ["P", -2, 100], ["P", 1, 110]], SBm.REQ[2][1]));
+    yes("  a collar: long stock, long put, short call", SBm.sameStructure([["S", 1], ["P", 1, 90], ["C", -1, 115]], SBm.REQ[0][1]));
+    yes("  a call spread is not accepted for the risk reversal", !SBm.sameStructure([["C", 1, 100], ["C", -1, 110]], SBm.REQ[6][1]));
+    eq("  the condor's worst case is $5 a share", -Math.min(...[70, 85, 90, 100, 110, 115, 130].map(S => SBm.payOf(SBm.REQ[3][1], S))), 5, 1e-12); }
 };
 
 PAGES["dispersion"] = () => {
@@ -1092,6 +1183,14 @@ PAGES["dispersion"] = () => {
     eq("  identical", Z.wtPnl(Z.kVega(), 1, 0.6), Z.wtPnl(Z.kTheta(), 1, 0.6), 1e-6);
     eq("crisis: theta-weighted -$2.58m", Z.wtPnl(Z.kTheta(), 1.8, 0.9) / 1e6, -2.58, 0.006);
     eq("  vega-weighted -$1.62m", Z.wtPnl(Z.kVega(), 1.8, 0.9) / 1e6, -1.62, 0.006); }
+  /* chapter 03b, run a dispersion book */
+  const DBm = load("dispersion.html", ["dbRun"]);
+  { const a = DBm.dbRun(0.5), b = DBm.dbRun(0.4);
+    eq("dispersion at 0.5: +$607,000 by day 40", a.pnl[40], 607000, 1000);
+    eq("  the sell-off takes $455,000", a.pnl[40] - a.pnl[52], 455000, 1000);
+    eq("  ends +$172,000", a.final, 172000, 1000);
+    yes("  correlation in the sell-off runs at 0.9 (realized so far rises past 0.6)", b.rho[52] > 0.6 && b.rho[40] < 0.4);
+    eq("at 0.4: +$93,000 before", b.pnl[40], 93000, 1000); eq("  ends -$638,000", b.final, -638000, 1000); }
 };
 
 PAGES["spreading"] = () => {
@@ -1136,6 +1235,15 @@ PAGES["spreading"] = () => {
     eq("  the payoff is zero there", P.structPayoff(rt, 115 + 10 - px(rt)) - px(rt), 0, 1e-9);
     eq("short straddle receives 11.06", px([{ t: "c", K: 100, n: 1 }, { t: "p", K: 100, n: 1 }]), 11.06, 0.006);
     eq("long 90/100/110 fly costs 2.72", px([{ t: "c", K: 90, n: 1 }, { t: "c", K: 100, n: -2 }, { t: "c", K: 110, n: 1 }]), 2.72, 0.006); }
+  /* chapter 03b, live with your choice */
+  const LVm = load("spreading.html", ["lvMany", "lvFuture", "lvPnL"]);
+  { const f0 = LVm.lvFuture(0), p0 = LVm.lvPnL(f0), r = LVm.lvMany(200);
+    eq("future 1: stock finishes at $130.52", f0, 130.52, 0.006);
+    eq("  long call makes $5,128", p0[1], 5128, 1); eq("  1x2 ratio loses $23,637", p0[5], -23637, 1);
+    eq("200 futures: short put best 34%", r.best[3] / 2, 34, 0); eq("  ratio 28%", r.best[5] / 2, 27.5, 0); eq("  long call 24%", r.best[1] / 2, 24, 0);
+    yes("  stock and the call spread never best", r.best[0] === 0 && r.best[2] === 0);
+    eq("  ratio averages -$992", r.avg[5], -992, 1); eq("  long call averages $308", r.avg[1], 308, 1);
+    yes("  the long call has the best average", r.avg.every(a => a <= r.avg[1])); }
 };
 
 PAGES["merger"] = () => {
@@ -1177,6 +1285,15 @@ PAGES["merger"] = () => {
   eq("…on yours $1.78", M.mixPut(10, st, 5) - M.mixPut(5, st, 5), 1.779, 0.002);
   eq("7.5 put about a fifth of a cent on the market's view", M.mixPut(7.5, st, 10), 0.0019, 0.0003);
   eq("…about 94 cents on yours", M.mixPut(7.5, st, 5), 0.938, 0.003);
+  /* chapter 05b, sit on the deal */
+  const DLm = load("merger.html", ["dlHold", "dlPrice", "dlPath"]);
+  { const P = DLm.dlPrice;
+    eq("deal: opens at $42.27", P("A", 0), 42.27, 0.006); eq("  no second request $44.60", P("clean", 1), 44.60, 0.006);
+    eq("  second request $38.56", P("B", 1), 38.56, 0.006); eq("  settlement $42.58", P("settle", 5), 42.58, 0.006); eq("  suit $35.14", P("suit", 5), 35.14, 0.006);
+    yes("  the first deal closes cleanly", JSON.stringify(DLm.dlPath(0).map(x => x[0])) === JSON.stringify(["A", "clean", "close"]));
+    eq("  for $30,222", DLm.dlHold(0), 30222, 1);
+    let a = 0, w = 0, mn = 0; for (let k = 0; k < 500; k++) { const x = DLm.dlHold(1000 + k); a += x; if (x > 0) w++; mn = Math.min(mn, x); }
+    eq("  500 deals: 85.6% make money", w / 5, 85.6, 1e-9); eq("  average $5,083", a / 500, 5083, 1); eq("  worst -$128,064", mn, -128064, 1); }
 };
 
 PAGES["workbook"] = () => {
@@ -1193,41 +1310,41 @@ PAGES["workbook"] = () => {
   yes("every written answer carries a real explanation", all.every(([, p]) => p.f || (p.ans && p.ans.length > 60)));
   const A = id => all.find(x => x[0] === id)[1].f();
   eq("01.1 appendix call 6.5831", A("01.1"), 6.583084, 1e-5);
-  eq("03.1 strip recovers 25.0%", A("03.1"), 0.25, 2e-4);
-  eq("03.2 …and a 6.0% event", A("03.2"), 0.06, 2e-4);
-  eq("04.2 zero-cost call strike 113", A("04.2"), 113, 0);
-  eq("06.1 halving proportional costs doubles N*", A("06.1"), 256, 0);
-  eq("06.2 fixed-ticket model: +59%", A("06.2") / 128, 1.5874, 1e-4);
-  eq("07.2 revcon example implies 2.965%", A("07.2") * 100, 2.9647, 1e-3);
-  eq("08.1 interest floor 1.4888", A("08.1"), 1.4888, 1e-4);
-  eq("08.2 assignment sd 346 shares", A("08.2"), 346.4, 0.1);
-  eq("09.1 var swap at 30: +$550,000", A("09.1"), 550000, 0);
-  eq("10.1 implied correlation 0.359", A("10.1"), 0.3586, 1e-4);
-  eq("12.1 one-step call is 10", A("12.1"), 10, 1e-12);
-  eq("14.1 put spread pays 6.229", A("14.1"), 6.2290, 1e-3);
-  eq("14.2 ratio breakeven 123.904", A("14.2"), 123.904, 1e-3);
+  eq("04.1 strip recovers 25.0%", A("08.1"), 0.25, 2e-4);
+  eq("04.2 …and a 6.0% event", A("08.2"), 0.06, 2e-4);
+  eq("11.2 zero-cost call strike 113", A("09.2"), 113, 0);
+  eq("05.1 halving proportional costs doubles N*", A("13.1"), 256, 0);
+  eq("05.2 fixed-ticket model: +59%", A("13.2") / 128, 1.5874, 1e-4);
+  eq("08.2 revcon example implies 2.965%", A("03.2") * 100, 2.9647, 1e-3);
+  eq("09.1 interest floor 1.4888", A("04.1"), 1.4888, 1e-4);
+  eq("09.2 assignment sd 346 shares", A("04.2"), 346.4, 0.1);
+  eq("23.1 var swap at 30: +$550,000", A("11.1"), 550000, 0);
+  eq("02.1 implied correlation 0.359", A("12.1"), 0.3586, 1e-4);
+  eq("07.1 one-step call is 10", A("02.1"), 10, 1e-12);
+  eq("12.1 put spread pays 6.229", A("10.1"), 6.2290, 1e-3);
+  eq("12.2 ratio breakeven 123.904", A("10.2"), 123.904, 1e-3);
   eq("18.2 breach rate 42.5%", A("18.2") * 100, 42.49, 0.01);
   eq("19.1 breakeven 1.5703%", A("19.1") * 100, 1.5703, 1e-4);
-  eq("20.1 odds with carry 80%", A("20.1"), 0.80, 1e-12);
-  eq("20.2 special dividend: $4.20", A("20.2"), 4.20, 1e-12);
-  { const e = W.find(x => x.n === "22");
-    eq("22.1 hidden-delta hedge is $160,000", e.p[0].f(), 160000, 1e-6);
-    eq("22.2 weighted vega is -$45,000", e.p[1].f(), -45000, 1e-6);
-    eq("22.3 two-day vol by summing two correlated returns", e.p[2].f(), 0.20 * Math.sqrt((1 + 1 + 2 * 0.2) / 2), 1e-12);
-    eq("22.4 break-even vol move is 0.60 points", e.p[3].f(), 0.60, 1e-12); }
+  eq("20.1 odds with carry 80%", A("15.1"), 0.80, 1e-12);
+  eq("20.2 special dividend: $4.20", A("15.2"), 4.20, 1e-12);
+  { const e = W.find(x => x.n === "21");
+    eq("16.1 hidden-delta hedge is $160,000", e.p[0].f(), 160000, 1e-6);
+    eq("16.2 weighted vega is -$45,000", e.p[1].f(), -45000, 1e-6);
+    eq("16.3 two-day vol by summing two correlated returns", e.p[2].f(), 0.20 * Math.sqrt((1 + 1 + 2 * 0.2) / 2), 1e-12);
+    eq("16.4 break-even vol move is 0.60 points", e.p[3].f(), 0.60, 1e-12); }
   { const P = n => W.find(x => x.n === n).p;
-    yes("sections run 01 to 24 in order", W.map(x => +x.n).every((n, i) => n === i + 1));
-    eq("21.1 put-writing year is +4.5%", P("21")[0].f(), 0.045, 1e-12);
-    eq("21.3 tail hedge nets -11% over eight years", P("21")[2].f(), -0.11, 1e-12);
-    eq("23.1 carry 3.38%", P("23")[0].f() * 100, 3.38, 0.006);
-    eq("23.3 implied dividend about $0.59", P("23")[2].f(), 0.59, 0.006);
-    eq("23.4 conversions lose $46,000", P("23")[3].f(), -46000, 1e-6);
-    eq("24.1 premium 27.9%", P("24")[0].f() * 100, 27.9, 0.06);
-    eq("24.2 carry about -$6.90", P("24")[1].f(), -6.9, 0.03);
-    eq("24.3 edge about $16.20", P("24")[2].f(), 16.2, 0.06);
-    eq("24.4 break-even 32.6%", P("24")[3].f() * 100, 32.6, 0.06);
-    eq("25.1 return on capital 8.1%", P("25")[0].f() * 100, 8.1, 0.06);
-    eq("25.2 contracts at 50% utilization", P("25")[1].f(), 57, 0); }
+    yes("sections run 01 to 25 in order", W.map(x => +x.n).every((n, i) => n === i + 1));
+    eq("25.1 put-writing year is +4.5%", P("16")[0].f(), 0.045, 1e-12);
+    eq("25.3 tail hedge nets -11% over eight years", P("16")[2].f(), -0.11, 1e-12);
+    eq("13.1 carry 3.38%", P("06")[0].f() * 100, 3.38, 0.006);
+    eq("13.3 implied dividend about $0.59", P("06")[2].f(), 0.59, 0.006);
+    eq("13.4 conversions lose $46,000", P("06")[3].f(), -46000, 1e-6);
+    eq("21.1 premium 27.9%", P("22")[0].f() * 100, 27.9, 0.06);
+    eq("21.2 carry about -$6.90", P("22")[1].f(), -6.9, 0.03);
+    eq("21.3 edge about $16.20", P("22")[2].f(), 16.2, 0.06);
+    eq("21.4 break-even 32.6%", P("22")[3].f() * 100, 32.6, 0.06);
+    eq("22.1 return on capital 8.1%", P("24")[0].f() * 100, 8.1, 0.06);
+    eq("22.2 contracts at 50% utilization", P("24")[1].f(), 57, 0); }
 };
 
 PAGES["tools"] = () => {
@@ -1357,6 +1474,13 @@ PAGES["dynamics"] = () => {
   eq("05 simulated weekly vs exact", 100 * sm[1], 16 * Math.sqrt(M.varRatio(5, .15)), 0.35);
   eq("05 simulated monthly vs exact", 100 * sm[2], 16 * Math.sqrt(M.varRatio(21, .15)), 0.6);
 
+  /* chapter 01b, hedge under the wrong rule */
+  const RWm = load("dynamics.html", ["rwRound", "rwBook"]);
+  { const r0 = RWm.rwRound(0);
+    yes("round 1: the market moves sticky delta", r0.R === 0); eq("  spot to $104.09", r0.S[20], 104.09, 0.006);
+    eq("  true-delta hedge +$810", RWm.rwBook(r0, 0)[20], 810, 1); eq("  as if sticky strike +$1,226", RWm.rwBook(r0, 1)[20], 1226, 1); eq("  as if local-vol-like +$1,637", RWm.rwBook(r0, 2)[20], 1637, 1);
+    const g = [0, 0, 0], c = [0, 0, 0]; for (let n = 0; n < 300; n++) { const r = RWm.rwRound(n), t = RWm.rwBook(r, r.R)[20]; for (let k = 0; k < 3; k++) { const d = Math.abs(k - r.R); g[d] += Math.abs(RWm.rwBook(r, k)[20] - t); c[d]++; } }
+    eq("  300 rounds: one notch off, $758 from the right hedge", g[1] / c[1], 758, 1); eq("  two notches, $1,619", g[2] / c[2], 1619, 1); }
 };
 
 PAGES["book"] = () => {
@@ -1445,6 +1569,12 @@ PAGES["book"] = () => {
     const sh = M.fields(Object.assign({}, M.sFld, { n: -100 }));
     yes("short flips every field", sh.DollarGammaPct === -f.DollarGammaPct && sh.Vega === -f.Vega && sh.ThetaDay === -f.ThetaDay);
     eq("check: half of 200,000 x 9 / 100 = 9,000", 0.5 * 200000 * 9 / 100, 9000, 0); }
+  /* chapter 06b, get the book inside its limits */
+  const LMm = load("book.html", ["lmBest", "lmBook"]);
+  { const b = LMm.lmBest(), bk = LMm.lmBook(b.q), nv = LMm.lmBook({ stk: -18, f: 0, b: -3, rr: 0 });
+    eq("limits: the cheap fix sells 18,000 shares", b.q.stk, -18, 0); eq("  buys four lots of 30-day straddles", b.q.f, 4, 0); eq("  sells three of 90-day", b.q.b, -3, 0);
+    eq("  for $7,180", b.cost, 7180, 0); yes("  and every limit is met", bk.all);
+    eq("  the back-vega-only fix: gamma -$460,000", nv.gamma, -460000, 500); eq("  from -$300,000", LMm.lmBook({ stk: 0, f: 0, b: 0, rr: 0 }).gamma, -300000, 0); }
 };
 
 PAGES["carry"] = () => {
@@ -1502,6 +1632,18 @@ PAGES["carry"] = () => {
     eq("  about a cent per dollar of strike", sl, 0.0107, 0.0006);
     yes("  and the second difference is zero", Math.abs(j1(80) - 2 * j1(100) + j1(120)) < 1e-12);
     eq("  the gap to the interest line is the PV of the dividend and borrow", 100 * intr - j1(100), Math.exp(-M.CAR.r * E[4]) * M.fwd(E[4], p) - Math.exp(-M.CAR.r * E[5]) * M.fwd(E[5], p), 1e-9); }
+  /* chapter 02b, trade the roll */
+  const RLm = load("carry.html", ["rollRound", "rollPnL", "rollEdge"]);
+  { const r0 = RLm.rollRound(0);
+    eq("roll round 1: market prices an 18% chance of a cut", r0.pMkt * 100, 18, 0.5);
+    eq("  the roll implies $0.658", r0.implied, 0.658, 1e-9);
+    yes("  of a $0.80 suspension, and the board pays it", r0.D0 === 0.8 && r0.cutTo === 0 && !r0.cut);
+    eq("  a bought roll makes $710", RLm.rollPnL(r0, "buy"), 710, 0.5);
+    let a = 0, b = 0, c = 0; for (let n = 0; n < 2000; n++) { const r = RLm.rollRound(n), e = RLm.rollEdge(r);
+      a += RLm.rollPnL(r, e > 0.005 ? "buy" : e < -0.005 ? "sell" : "pass"); b += RLm.rollPnL(r, "buy"); c += RLm.rollPnL(r, "sell"); }
+    eq("  2,000 rounds: always buying loses about $35", b / 2000, -35, 3);
+    eq("  always selling makes about $35", c / 2000, 35, 3);
+    eq("  trading the edge averages $331", a / 2000, 331, 3); }
 };
 
 PAGES["converts"] = () => {
@@ -1561,6 +1703,12 @@ PAGES["converts"] = () => {
   eq("  the right side is unchanged", M.hedgedCb(80, 0.35, 0.03, 0.3, M.linkSpread(0.3, 10)), M.hedgedCb(80, 0.35, 0.03, 0.3, 0), 1e-12);
   eq("break-even 1.8bp per 1%", M.breakevenLink(80, 0.35, 0.03, -0.3), 1.8, 0.03);
   yes("delta shrinks as the stock falls", M.cbDelta(56, 0.35) < M.cbDelta(80, 0.35));
+  /* chapter 03b, run the arbitrage through a sell-off */
+  const CXm = load("converts.html", ["cxRun", "cxPath", "cxSpread"]);
+  { const S = CXm.cxPath(), n = CXm.cxRun(0), f = CXm.cxRun(1), late = CXm.cxRun(d => d > 15 ? 1 : 0);
+    eq("sell-off: stock $79.50 by day 20", S[20], 79.50, 0.006); eq("  spread 5.05%", CXm.cxSpread(S[20]) * 100, 5.05, 0.006);
+    eq("  unprotected: -$374 by day 10", n[10], -374, 1); eq("  -$6,928 by day 20", n[20], -6928, 1); eq("  -$7,038 at the end", n[30], -7038, 1);
+    eq("  protected from day 1: +$33", f[30], 33, 1); eq("  protection from day 16: -$3,887", late[30], -3887, 1); }
 };
 
 PAGES["parity"] = () => {
@@ -1603,6 +1751,19 @@ PAGES["parity"] = () => {
     eq("4%, six months: 4bp", Math.abs(g(180).rev), 4, 0.05);
     eq("4%, a year: 8bp", Math.abs(g(365).rev), 8, 0.25);
     yes("opposite directions: revcon simple below true, jelly simple above", g(180).rev < 0 && g(180).jr > 0); }
+  /* chapter 06b, the quote board */
+  const BDm = load("parity.html", ["boardScreen", "boardValue"]);
+  { const cnt = { pass: 0, conversion: 0, reversal: 0 };
+    for (let n = 0; n < 200; n++) cnt[BDm.boardValue(BDm.boardScreen(n)).best]++;
+    yes("quote board: most screens should be passed", cnt.pass > 100);
+    yes("  and both trades come up", cnt.conversion > 20 && cnt.reversal > 15);
+    let flat = 0; for (let n = 0; n < 20; n++) { const m = BDm.boardScreen(n);
+      const leg = x => (x - m.stock.ask) + (Math.max(0, m.K - x) - m.put.ask) - (Math.max(0, x - m.K) - m.call.bid);
+      flat = Math.max(flat, Math.abs(leg(m.K * 0.6) - leg(m.K * 1.4))); }
+    eq("  the conversion's legs sum to a flat line", flat, 0, 1e-9);
+    let htbKill = 0; for (let n = 0; n < 200; n++) { const m = BDm.boardScreen(n), v = BDm.boardValue(m);
+      const noFee = v.rev + 100 * m.stock.bid * m.fee * m.T; if (m.htb && noFee > 0.5 && v.rev <= 0.5) htbKill++; }
+    yes("  some reversals look free until the borrow fee", htbKill >= 1); }
 };
 
 PAGES["binomial"] = () => {
@@ -1633,6 +1794,16 @@ PAGES["binomial"] = () => {
   eq("p = 1.5388 at 5 vol, 10% rates, one year", M.crrParams(0.05, 0.10, 1).p, 1.5388, 0.00006);
   eq("one-step example: p = 0.5 at zero rates", (1 - 0.9) / (1.1 - 0.9), 0.5, 1e-12);
   yes("step limit is (sigma/r)^2", Math.abs(M.stepLimit(0.10, 0.08) - Math.pow(0.10 / 0.08, 2)) < 1e-9);
+  /* chapter 01b, replicate by hand */
+  const R = load("binomial.html", ["repState", "sR", "s1"]);
+  Object.assign(R.sR, { D: 0.5, B: 45, quote: 4.20 });
+  const rq = R.repState();
+  eq("replicate: half a share and 45 borrowed cost 5", rq.cost, 5, 1e-12);
+  eq("  pays 10 up", rq.Pu, 10, 1e-12); eq("  and 0 down", rq.Pd, 0, 1e-12);
+  eq("  against a dealer at 4.20: +0.80 up", rq.netU + rq.today, 0.80, 1e-9);
+  eq("  and +0.80 down", rq.netD + rq.today, 0.80, 1e-9);
+  Object.assign(R.sR, { D: 0.55 }); const rn = R.repState();
+  yes("  one notch off, the states differ: a bet", Math.abs((rn.netU + rn.today) - (rn.netD + rn.today)) > 0.5);
 };
 
 PAGES["forwards"] = () => {
@@ -1666,6 +1837,17 @@ PAGES["forwards"] = () => {
   eq("F=200: below intrinsic by 7.5506", 100 - e(200, true), 7.5506, 0.00006);
   eq("at the money, call and put premiums are equal", am(100, true) - e(100, true), am(100, false) - e(100, false), 1e-9);
   eq("  0.2205", am(100, true) - e(100, true), 0.2205, 0.01);
+  /* chapter 03b, hedge a portfolio with futures */
+  const FHm = load("forwards.html", ["fhStats", "fhRight", "fhRun"]);
+  eq("futures hedge: beta-matched is 115 contracts", FHm.fhRight(1.15), 115, 0);
+  eq("  rule of thumb by hand", 1.15 * 25e6 / 250000, 115, 1e-9);
+  yes("  first market: the index falls", FHm.fhRun(0, 1.15, 0).idx < 5000);
+  eq("  dollar-matched loses $479,000", FHm.fhRun(100, 1.15, 0).final, -479000, 1000);
+  eq("  beta-matched loses $61,000", FHm.fhRun(115, 1.15, 0).final, -61000, 1000);
+  eq("  unhedged loses $3.27m", FHm.fhRun(0, 1.15, 0).final / 1e6, -3.27, 0.006);
+  eq("  300 markets: unhedged spread $2.28m", FHm.fhStats(0, 1.15, 300).sd / 1e6, 2.28, 0.006);
+  eq("  dollar-matched $722,000", FHm.fhStats(100, 1.15, 300).sd, 722000, 1000);
+  eq("  beta-matched $672,000", FHm.fhStats(115, 1.15, 300).sd, 672000, 1000);
 };
 
 PAGES["real-world"] = () => {
@@ -1713,6 +1895,14 @@ PAGES["real-world"] = () => {
     eq("sqrt 32 = 5.66", Math.sqrt(32), 5.66, 0.006);
     const imp = [0, 1, 3, 4].map(k => { H.__rows.length = 0; global.seed2(k); return parseFloat(H.__rows.filter(x => x[0] === "  improvement")[1][1]); });
     yes("jumps cap the improvement below 2.1x on four more runs", imp.every(x => x < 2.1)); }
+  /* chapter 01b, break one assumption at a time */
+  const BRm = load("real-world.html", ["brStats"]);
+  { const S = sw => BRm.brStats(sw), b = S({});
+    eq("ledger: intact, spread 5.8% of premium", b.sd * 100, 5.8, 0.06);
+    eq("  daily hedging 15.2%", S({ daily: 1 }).sd * 100, 15.2, 0.06); eq("  switching vol 8.9%", S({ svol: 1 }).sd * 100, 8.9, 0.06);
+    eq("  fat tails 11.4%", S({ fat: 1 }).sd * 100, 11.4, 0.06); eq("  costs move the mean -11.9%", S({ cost: 1 }).m * 100, -11.9, 0.06);
+    const j = S({ jump: 1 }); eq("  jumps 43.1%", j.sd * 100, 43.1, 0.06); yes("  worst jump path loses about three times the premium", j.worst < -2.9 && j.worst > -3.2);
+    eq("  all five 49.3%", S({ daily: 1, cost: 1, jump: 1, svol: 1, fat: 1 }).sd * 100, 49.3, 0.06); }
 };
 
 PAGES["microstructure"] = () => {
@@ -1767,6 +1957,16 @@ PAGES["microstructure"] = () => {
     eq("  short gamma 3.9%", r("Within 50¢, short Γ"), 3.9, 0.06);
     const runs = [1, 2, 3, 4, 5, 6, 7].map(k => { P.__rows.length = 0; global.seed5(k); return [r("Long gamma"), r("Short gamma"), r("Unhedged |S−K|")]; });
     yes("the ordering holds on seven more runs", runs.every(([l, s, u]) => l < u && u < s)); }
+  /* chapter 03b, make the market */
+  const QMm = load("microstructure.html", ["qmMany", "qmRun"]);
+  { const st = (hs, k) => { let a = 0, b = 0; for (let s = 0; s < 300; s++) { const p = QMm.qmRun(hs, k, s).pnl; a += p; b += p * p; } return [a / 300, Math.sqrt(b / 300 - (a / 300) ** 2)]; };
+    eq("quoting: one cent loses $61", QMm.qmMany(0.01, 0, 300), -61, 0.5);
+    eq("  twelve cents averages $514", QMm.qmMany(0.12, 0, 300), 514, 0.5);
+    yes("  twelve is the best width tried", [0.01, 0.03, 0.05, 0.08, 0.15, 0.2].every(hs => QMm.qmMany(hs, 0, 300) < QMm.qmMany(0.12, 0, 300)));
+    let i1 = 0, i12 = 0; for (let s = 0; s < 300; s++) { const a = QMm.qmRun(0.01, 0, s), b = QMm.qmRun(0.12, 0, s); i1 += a.inf / a.fills; i12 += b.fills ? b.inf / b.fills : 0; }
+    eq("  informed share at one cent 22.6%", i1 / 3, 22.6, 0.06); eq("  at twelve 3.0%", i12 / 3, 3.0, 0.06);
+    const a = st(0.12, 0), b = st(0.12, 0.01);
+    eq("  skew: average $514 to $441", b[0], 441, 0.5); eq("  swing $329 to $145", a[1], 329, 0.5); eq("  (with skew)", b[1], 145, 0.5); }
 };
 
 PAGES["capital"] = () => {
@@ -1805,6 +2005,16 @@ PAGES["capital"] = () => {
   eq("80%: 91 contracts", M.stress(hi, 0).N, 91, 0); eq("  call at -2.8%", M.callPoint(hi) * 100, -2.8, 0.06);
   eq("30%: 34 contracts", M.stress(lo, 0).N, 34, 0); eq("  survives to -24.8%", M.callPoint(lo) * 100, -24.8, 0.06);
   eq("a 2.8% monthly fall happens about one month in three", M.ncdf(Math.log(1 - 0.028) / (0.30 * Math.sqrt(30 / 365))) * 100, 37, 1);
+  /* the sell-off simulator, first path, held without acting */
+  const R = load("capital.html", ["simRun", "PATH0"]);
+  let S = 100; const Sd = R.PATH0.map(r => (S *= 1 + r / 100));
+  eq("path: gaps 6% on day 9 to $87.68", Sd[8], 87.68, 0.006);
+  eq("  ends at $96.22, above the strike", Sd[19], 96.22, 0.006);
+  const r3 = R.simRun(0.3, 0), r5 = R.simRun(0.5, 0), r8 = R.simRun(0.8, 0), c5 = R.simRun(0.5, 0, [5, 6]);
+  eq("30%: never called", r3.calls, 0, 0); eq("  ends up $2,943", r3.equity - 100000, 2943, 1);
+  eq("50%: first called on day 9", r5.firstCall, 9, 0); eq("  ends down $6,168", r5.equity - 100000, -6168, 1);
+  eq("80%: first called on day 4", r8.firstCall, 4, 0); eq("  six calls", r8.calls, 6, 0); eq("  ends down $25,365", r8.equity - 100000, -25365, 1);
+  eq("50%, a quarter bought back on days 5 and 6: never called", c5.calls, 0, 0); eq("  ends down $1,874", c5.equity - 100000, -1874, 1);
 };
 
 PAGES["program"] = () => {
@@ -1941,6 +2151,12 @@ PAGES["playbook"] = () => {
     yes("the symmetric shape has no skew", Math.abs(M.shapeSkew("sym")) < 1e-6);
     yes("put-writing is drawn short, tail hedging long", M.PBSHAPE["Systematic put-writing"] === "short" && M.PBSHAPE["Tail-risk hedging"] === "long");
     yes("the SVG is a path, not empty", M.shapeSvg("short").indexOf("<path") > 0); }
+  /* chapter 03b, run the fund */
+  const FDm = load("playbook.html", ["fdRun"]);
+  { const r = (s, l) => FDm.fdRun(s, l);
+    eq("fund 1x: index $38.80", r(0, 1).final, 38.8, 0.05); eq("  tail-hedged $45.80", r(2, 1).final, 45.8, 0.05); eq("  put-writing $1.90", r(1, 1).final, 1.9, 0.05);
+    eq("2x: index closed in year 28", Math.ceil(r(0, 2).closed / 12), 28, 0); eq("  tail-hedged $924", r(2, 2).final, 924, 0.5);
+    yes("3x: all three closed within seven years", [0, 1, 2].every(s => r(s, 3).closed !== null && r(s, 3).closed <= 84)); }
 };
 
 const only = process.argv[2];

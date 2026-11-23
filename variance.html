@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 09 · Variance and the Log Contract</span>
+    <span class="num">No. 11 · Variance and the Log Contract</span>
   </div>
 </header>
 
@@ -46,7 +46,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 09</div>
+    <div class="eyebrow">An interactive derivation · No. 11</div>
     <h1>Only one of them is <em>tradeable</em></h1>
     <p class="sub">Variance can be manufactured out of a fixed basket of options bought today and never touched again. Volatility — its own square root — cannot. Everything difficult about this subject descends from that one asymmetry.</p>
   </div>
@@ -57,7 +57,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">This page needs <a href="black-scholes.html#c6" style="color:var(--blue)">page 01's replication chapter</a> and the smile vocabulary from <a href="surface.html" style="color:var(--blue)">page 02</a>. It adds one genuinely new piece of machinery: static replication, where a payoff is built once from options and then left alone.</p>
+  <p class="lede">This page needs <a href="black-scholes.html#c6" style="color:var(--blue)">page 01's replication chapter</a> and the smile vocabulary from <a href="surface.html" style="color:var(--blue)">page 07</a>. It adds one genuinely new piece of machinery: static replication, where a payoff is built once from options and then left alone.</p>
   <ol>
     <li><b>Chapter 02 is the load-bearing one.</b> Delta-hedge one particular contract and your profit <em>is</em> the realized variance — not approximately, not on average, but on every path.</li>
     <li><b>Chapter 04 is the one that will surprise you.</b> Cut the strike range to 92%–108% and a 25% variance swap prices at 17.4%. The wings you would never bother quoting are a third of the contract.</li>
@@ -230,7 +230,7 @@
 
   <div class="prose">
     <p class="lead">The log payoff is a curve, and the only curves you can buy are made of options. Any twice-differentiable payoff can be written exactly as a fixed portfolio of calls and puts, with each strike weighted by the payoff's second derivative there. For the log contract that second derivative is <b>(2/T)/K²</b> — so the weight on the option struck at K is proportional to <b>1/K²</b>, and that is where the famous weighting comes from. It is not a convention or an approximation. It is the curvature of a logarithm.</p>
-    <p>What makes this different from every other hedge in the series is that it is <b>static</b>. You buy the strip once, at inception, and you do not rebalance it. Page 01's replication needed continuous attention and still left a residual; page 06 charged you for that attention. Here the options portfolio is fixed at the start and the only ongoing work is the delta hedge, which is the part that does the measuring.</p>
+    <p>What makes this different from every other hedge in the series is that it is <b>static</b>. You buy the strip once, at inception, and you do not rebalance it. Page 01's replication needed continuous attention and still left a residual; page 13 puts a price on that attention. Here the options portfolio is fixed at the start and the only ongoing work is the delta hedge, which is the part that does the measuring.</p>
     <p>The figure builds the strip in front of you. Start with a handful of strikes and the assembled payoff is a jagged approximation with visible corners; add strikes and the corners round off onto the smooth log curve. In numbers, on a chain running from 40% to 250% of the forward against a true 25% volatility: strikes every <b>$40</b> recover <b>22.35%</b>, every <b>$10</b> recover <b>25.02%</b>, and every <b>$2.50</b> recover <b>25.00%</b>. Twenty-one strikes is already enough to be within two basis points.</p>
     <p>That convergence is fast and it is the reassuring half of the story. The alarming half is the next chapter, because none of those numbers survive if you shorten the <em>range</em> rather than the spacing.</p>
   </div>
@@ -563,6 +563,48 @@
       <button class="act ghost" data-preset="cMtm" data-patch='{"rv":20,"t":0.5,"kn":25}' data-focus="cvMtm">Reset</button>
     </div>
   </div>
+
+  <div class="prose">
+    <p>Now hold one through a bad quarter. You sold a 63-day variance swap at 20 vol on $100,000 of vega notional, which makes every variance point worth $2,500. Step through the days: each one moves realized variance and the market's implied vol for what is left, and the swap is marked on both. Somewhere in here the stock gaps. You can buy the swap back at the mark whenever you like. A vol swap of the same size runs alongside for comparison.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Short variance through a crash</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--verm)"></i>Short variance swap, marked</span>
+            <span><i class="sw" style="background:var(--grey)"></i>Short vol swap, same vega</span>
+          </span>
+        </div>
+        <p class="simmsg" id="vsMsg" aria-live="polite"></p>
+        <canvas id="cvVS" height="260"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your swap</h4>
+        <div class="btnrow simbtns">
+          <button class="act" id="vsNext">Next day</button>
+          <button class="act ghost" id="vsCover">Buy it back now</button>
+          <button class="act ghost" id="vsPlay">Play to expiry</button>
+          <button class="act ghost" id="vsReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvVS"></div>
+      </div>
+    </div>
+    <figcaption>For 29 quiet days realized vol runs at 13.5 and the short swap is up $250,000, a little less than the vol swap's $268,000. Then the stock gaps 9%. The variance swap is marked at a loss of $1.61 million the same evening, against $1.23 million for the vol swap, reaches $1.81 million on day 40, and expires down $1.41 million with realized at 31.0; the vol swap ends down $1.10 million. Short variance earns less when it is quiet and loses more when it is not. That is what the square does.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>Selling variance is selling insurance with an uncapped payout: the premium is the gap between implied and the realized vol of quiet markets, and the claims arrive in the few days that are not quiet. Desks that sell it watch the convexity, the extra loss variance carries over vol in a large move, more than the carry, and buy it back or cap it before the gap rather than after.</p>
+    <ul>
+      <li>One gap day can carry a whole quarter's realized variance. Variance is dominated by its largest observations.</li>
+      <li>The mark moves twice in a crash: realized jumps, and implied for the remaining days jumps with it.</li>
+      <li>Capped variance swaps exist because the dealers on the other side know exactly this.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> a short variance swap's loss in a move is about vega notional × (realized² − strike²) ÷ (2 × strike), and it grows with the square.</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -1227,7 +1269,58 @@ function vsVega(t, kn){ return (MT.N / (2 * MT.K)) * (1 - t / MT.T) * 2 * kn * M
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawMtm();}
+/* ══════════ 08b — short variance through a crash ══════════
+   Sold a 63-day variance swap at 20 vol, $100,000 vega notional, so
+   variance notional = 100,000 / (2 x 20) = $2,500 per variance point. Daily
+   returns run at 16% vol until a 9% gap down on day 30, then at 38% for ten
+   days, then 22%. The mark before expiry is variance notional x [(t/T) x
+   realized variance so far + (1 - t/T) x implied variance for the rest - 400];
+   implied for the rest jumps to 34 after the gap and decays back toward 22.
+   A vol swap of the same vega notional runs alongside, marked the same way
+   in vol rather than variance. The reader can cover at the mark. */
+const VS = { T: 63, K: 20, vega: 100000, day: 0, covered: null, path: null, msg: "" };
+VS.Nv = VS.vega / (2 * VS.K);
+function vsPath(){ return withSeed(6300, () => { const r = [];
+  for (let d = 1; d <= VS.T; d++) { const v = d < 30 ? 0.16 : d === 30 ? null : d <= 40 ? 0.38 : 0.22;
+    r.push(v === null ? Math.log(0.91) : v / Math.sqrt(252) * gauss()); } return r; }); }
+const vsImp = d => d < 30 ? 20 : 22 + 12 * Math.exp(-(d - 30) / 12);
+function vsMark(d){ const r = VS.path.slice(0, d), rv2 = d ? r.reduce((a, x) => a + x * x, 0) * 252 / d * 1e4 : 0, w = d / VS.T;
+  const varMark = VS.Nv * (w * rv2 + (1 - w) * vsImp(d) ** 2 - VS.K * VS.K);
+  const volMark = VS.vega * (Math.sqrt(w * rv2 + (1 - w) * vsImp(d) ** 2) - VS.K);
+  return { rv: Math.sqrt(rv2), short: -varMark, volShort: -volMark }; }
+function vsReset(){ VS.path = vsPath(); VS.day = 0; VS.covered = null; VS.msg = "Day 0. You are short a 63-day variance swap at 20 vol, $100,000 vega notional: every variance point is $2,500. The stock has been quiet."; }
+function vsStep(){ if (VS.day >= VS.T) return; VS.day++; const m = vsMark(VS.day), r = VS.path[VS.day - 1];
+  VS.msg = "Day " + VS.day + ": the stock " + (r < 0 ? "falls " : "rises ") + Math.abs((Math.exp(r) - 1) * 100).toFixed(2) + "%. Realized so far " + m.rv.toFixed(1) + " vol; implied for the rest " + vsImp(VS.day).toFixed(1) + ". Short variance is marked at " + (m.short >= 0 ? "+$" : "−$") + Math.abs(Math.round(m.short)).toLocaleString("en-US") + "." + (VS.day === VS.T ? " Expiry." : ""); }
+(function(){
+  vsReset();
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", () => { fn(); draw(); });
+  on("vsNext", vsStep);
+  on("vsPlay", () => { while (VS.day < VS.T) vsStep(); });
+  on("vsCover", () => { if (VS.covered === null) { VS.covered = VS.day; VS.msg = "You buy the swap back on day " + VS.day + " at the mark: " + (vsMark(VS.day).short >= 0 ? "+$" : "−$") + Math.abs(Math.round(vsMark(VS.day).short)).toLocaleString("en-US") + ", locked."; } });
+  on("vsReset", vsReset);
+  window.drawVS = draw;
+  function draw(){
+    document.getElementById("vsMsg").textContent = VS.msg;
+    const xs = [], vv = [], vo = []; for (let d = 0; d <= VS.day; d++) { const m = vsMark(d); xs.push(d); vv.push(m.short); vo.push(m.volShort); }
+    const lo = Math.min(-2e5, ...vv, ...vo) * 1.12, hi = Math.max(1e5, ...vv, ...vo) * 1.2;
+    const o = Fig(document.getElementById("cvVS"), { h: 260, x0: 0, x1: VS.T, y0: lo, y1: hi, pad: { l: 66, r: 14, t: 14 } });
+    axes(o, v => "day " + v.toFixed(0), v => (v < 0 ? "−$" : "$") + (Math.abs(v) / 1000).toFixed(0) + "k", 6, 4);
+    clip(o, () => { line(o, xs, vo, C("--grey"), 1.8, [5, 4]); line(o, xs, vv, C("--verm"), 2.8); });
+    if (VS.day >= 30) vline(o, 30, C("--ink"), "the gap");
+    if (VS.covered !== null) vline(o, VS.covered, C("--moss"), "you covered");
+    const m = vsMark(VS.day), money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    document.getElementById("kvVS").innerHTML = kvHTML([
+      ["Day", VS.day + " of " + VS.T],
+      ["Realized vol so far", m.rv.toFixed(1)],
+      ["Implied for the rest", vsImp(VS.day).toFixed(1)],
+      ["Short variance, marked", money0(m.short), "verm"],
+      ["Short vol swap, same vega", money0(m.volShort)],
+      ["Covered at", VS.covered === null ? "not covered" : "day " + VS.covered + ", " + money0(vsMark(VS.covered).short), "moss"]
+    ]);
+  }
+})();
+
+function drawAll(){drawVS();draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawMtm();}
 LAB.boot(drawAll);
 
 </script>

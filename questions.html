@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 16 · Questions</span>
+    <span class="num">No. 25 · Questions</span>
   </div>
 </header>
 
@@ -46,7 +46,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 16</div>
+    <div class="eyebrow">An interactive derivation · No. 25</div>
     <h1>The questions they <em>ask</em> you</h1>
     <p class="sub">Forty questions on a ladder, from ones with a single right answer to ones with no formula at all — and six of them worked at full length. Each is a trap built around a plausible wrong answer, and each resolves in a figure you can move.</p>
   </div>
@@ -208,7 +208,7 @@
       <button data-ok="1">About zero. Both legs are certain, so the package is a fixed future payment: its exposure is to interest rates, not to the stock</button>
       <button>Negative, because the short leg dominates</button>
     </div>
-    <div class="ans"><b>Zero delta, and a rho equal to the bond's.</b> Once both legs are certain the spread stops being an option position at all. It is 6 × e<sup>−rT</sup> of pure discounting: vega zero, gamma zero, and the only thing that moves it is the rate. This is the instrument <a href="parity.html" style="color:var(--blue)">page 07</a> builds out of conversions, arrived at from the other end.</div>
+    <div class="ans"><b>Zero delta, and a rho equal to the bond's.</b> Once both legs are certain the spread stops being an option position at all. It is 6 × e<sup>−rT</sup> of pure discounting: vega zero, gamma zero, and the only thing that moves it is the rate. This is the instrument <a href="parity.html" style="color:var(--blue)">page 03</a> builds out of conversions, arrived at from the other end.</div>
   </div>
 
   <details class="derive">
@@ -221,7 +221,7 @@
       <div class="mline">0 ≤ V₀ ≤ W · e<sup>−rT</sup></div>
       <p class="mread">Reads as: <b>the discounted width is a hard ceiling, not an approximation.</b> A price above it would be an arbitrage: sell the spread, buy the bond, keep the difference and let both expire.</p>
       <p>How fast the price approaches that ceiling is governed by the chance of finishing between the strikes. At a spot of 130 the risk-neutral probability of ending below 106 is 11.9%, and that residual is what the remaining fifty-odd cents pays for.</p>
-      <p><b>Where it breaks.</b> On an American spread the short leg can be assigned early, which caps you at the width rather than the discounted width and can hand you the shortfall as a real loss. A hard-to-borrow underlying moves the ceiling again, because the relevant discount is no longer the plain financing rate — <a href="early-exercise.html" style="color:var(--blue)">page 08</a> prices the assignment side and <a href="parity.html" style="color:var(--blue)">page 07</a> the borrow side. And on a futures spread the whole discussion inverts, because there the option itself is discounted rather than the underlying: <a href="forwards.html" style="color:var(--blue)">page 13</a>.</p>
+      <p><b>Where it breaks.</b> On an American spread the short leg can be assigned early, which caps you at the width rather than the discounted width and can hand you the shortfall as a real loss. A hard-to-borrow underlying moves the ceiling again, because the relevant discount is no longer the plain financing rate — <a href="early-exercise.html" style="color:var(--blue)">page 04</a> prices the assignment side and <a href="parity.html" style="color:var(--blue)">page 03</a> the borrow side. And on a futures spread the whole discussion inverts, because there the option itself is discounted rather than the underlying: <a href="forwards.html" style="color:var(--blue)">page 05</a>.</p>
     </div>
   </details>
 </section>
@@ -287,7 +287,7 @@
       <button data-ok="1">Neither — they are the same volatility. Twice the price for four times the tenor is exactly √4, so the curve is flat</button>
       <button>You cannot tell without knowing the strike</button>
     </div>
-    <div class="ans"><b>Identical.</b> Dividing each price by √T gives the same number, which is what "the term structure is flat" means in premium terms. The reflex you want is to normalize by √T before any comparison — it turns a table of prices that looks like a slope into one that is flat, and vice versa. <a href="catalyst.html" style="color:var(--blue)">Page 03</a> uses exactly this to strip an earnings date out of a term structure.</div>
+    <div class="ans"><b>Identical.</b> Dividing each price by √T gives the same number, which is what "the term structure is flat" means in premium terms. The reflex you want is to normalize by √T before any comparison — it turns a table of prices that looks like a slope into one that is flat, and vice versa. <a href="catalyst.html" style="color:var(--blue)">Page 08</a> uses exactly this to strip an earnings date out of a term structure.</div>
   </div>
 
   <details class="derive">
@@ -298,7 +298,7 @@
       <p class="mread">Reads as: <b>an at-the-money option costs about forty percent of the stock, times the volatility, times the square root of the time.</b></p>
       <p>It comes from expanding N(d₁) − N(−d₁) about zero. With K = S and r = 0 we have d₁ = σ√T/2, and for small x, 2N(x) − 1 ≈ 2φ(0)x = 0.798x. Substituting gives C ≈ S · 0.798 · σ√T / 2 ≈ 0.399 · S · σ√T.</p>
       <p>At 25% volatility and one year the approximation reads 9.97 against a true 9.95 — an error of 0.3%. It degrades as σ√T grows, because the linearization of N is only good near zero.</p>
-      <p><b>Where it breaks.</b> The formula assumes zero rates and no dividends, and at long tenors that assumption costs more than the linearization does. Use it to sanity-check a screen, never to quote. And the √T law itself is an assumption about independence: a stock with a scheduled event does not obey it, which is the subject of <a href="catalyst.html" style="color:var(--blue)">page 03</a>, and a stock with jumps obeys it for volatility but not for the shape of the distribution, which is <a href="real-world.html" style="color:var(--blue)">page 15</a>.</p>
+      <p><b>Where it breaks.</b> The formula assumes zero rates and no dividends, and at long tenors that assumption costs more than the linearization does. Use it to sanity-check a screen, never to quote. And the √T law itself is an assumption about independence: a stock with a scheduled event does not obey it, which is the subject of <a href="catalyst.html" style="color:var(--blue)">page 08</a>, and a stock with jumps obeys it for volatility but not for the shape of the distribution, which is <a href="real-world.html" style="color:var(--blue)">page 20</a>.</p>
     </div>
   </details>
 </section>
@@ -343,7 +343,7 @@
 
   <div class="prose">
     <p>Now the part the question is really testing: what you pay for it. Nothing here is free, and the bill arrives as <span class="term" data-t="Theta" data-def="The value an option loses per day purely from time passing, holding everything else fixed. It is the rent on gamma, and it is charged whether or not the stock moves.">theta</span>. The package bleeds 0.157 a day against the far option's 0.019 — eight and a half times the decay. And that is only the opening rate: theta accelerates, so a month in which the stock does not move at all costs <b>9.58</b>, against the 1.68 you were paid. The stock has to travel about 3.5% by the front expiry just to break even.</p>
-    <p>And the concentration cuts both ways. The gamma advantage is enormous at the strike and gone six points away, because a one-month option that has moved is barely an option any more. That shape is what makes <a href="microstructure.html" style="color:var(--blue)">page 05</a>'s dealer gamma so violent near expiry, and it is why the honest description of this trade is not "long gamma, short vega" but "long gamma <em>here</em>, short vega everywhere, paying rent for the privilege."</p>
+    <p>And the concentration cuts both ways. The gamma advantage is enormous at the strike and gone six points away, because a one-month option that has moved is barely an option any more. That shape is what makes <a href="microstructure.html" style="color:var(--blue)">page 14</a>'s dealer gamma so violent near expiry, and it is why the honest description of this trade is not "long gamma, short vega" but "long gamma <em>here</em>, short vega everywhere, paying rent for the privilege."</p>
   </div>
 
   <div class="try">
@@ -365,7 +365,7 @@
       <button>Buy a straddle and sell a strangle</button>
       <button>Sell the package above, which loses money both ways</button>
     </div>
-    <div class="ans"><b>Sell the front, buy the back — a long calendar.</b> You collect the front's rapid decay and own the back's vega. The risk is a large move soon, which is precisely the exposure the reversed package was buying. Both trades are bets on the <em>shape</em> of the term structure rather than its level, which makes them the natural companion to <a href="catalyst.html" style="color:var(--blue)">page 03</a>.</div>
+    <div class="ans"><b>Sell the front, buy the back — a long calendar.</b> You collect the front's rapid decay and own the back's vega. The risk is a large move soon, which is precisely the exposure the reversed package was buying. Both trades are bets on the <em>shape</em> of the term structure rather than its level, which makes them the natural companion to <a href="catalyst.html" style="color:var(--blue)">page 08</a>.</div>
   </div>
 </section>
 
@@ -408,7 +408,7 @@
 
   <div class="prose">
     <p>The discipline generalizes past parity. Whenever a no-arbitrage relationship appears broken there are exactly three possibilities, in this order of likelihood. <b>One:</b> a parameter you assumed is wrong — a borrow rate, a dividend, a settlement convention. <b>Two:</b> the prices are not simultaneously tradeable — a stale mid, or your size is a hundred lots and the market is ten. <b>Three:</b> it is real, in which case it will be gone before you can click. Assume the first until you have eliminated it.</p>
-    <p>And the reverse reading is worth more than the arbitrage would have been. Because the relationship holds by construction, the option market becomes a borrow-rate screen: a name whose parity-implied borrow climbs from forty basis points to nine percent is telling you that shorting it has become expensive, usually before the stock-loan desk gets around to saying so. <a href="parity.html" style="color:var(--blue)">Page 07</a> builds the machinery; this is what it is for.</p>
+    <p>And the reverse reading is worth more than the arbitrage would have been. Because the relationship holds by construction, the option market becomes a borrow-rate screen: a name whose parity-implied borrow climbs from forty basis points to nine percent is telling you that shorting it has become expensive, usually before the stock-loan desk gets around to saying so. <a href="parity.html" style="color:var(--blue)">Page 03</a> builds the machinery; this is what it is for.</p>
   </div>
 
   <div class="try">
@@ -430,7 +430,7 @@
       <button>Assume the model is wrong</button>
       <button>Conclude that parity does not hold for at-the-money options</button>
     </div>
-    <div class="ans"><b>Check the spreads first.</b> Forty-eight cents sounds like a lot until you notice the options are thirty cents wide each: crossing both, plus the stock's spread, can consume the entire gap — and you would be executing against a mid that nobody will trade. <a href="microstructure.html" style="color:var(--blue)">Page 05</a> is about exactly this difference between a price and a quote, and it is the second thing to eliminate, not the last.</div>
+    <div class="ans"><b>Check the spreads first.</b> Forty-eight cents sounds like a lot until you notice the options are thirty cents wide each: crossing both, plus the stock's spread, can consume the entire gap — and you would be executing against a mid that nobody will trade. <a href="microstructure.html" style="color:var(--blue)">Page 14</a> is about exactly this difference between a price and a quote, and it is the second thing to eliminate, not the last.</div>
   </div>
 </section>
 
@@ -474,7 +474,7 @@
 
   <div class="prose">
     <p>The follow-up is where most people come apart. <em>One of the twenty names halves its volatility, from 40 to 20. What does that do to the index?</em> The instinct is that a name going quiet should calm the index noticeably. It moves it from 25.00% to <b>24.39%</b> — six-tenths of a point — because the name is a twentieth of the weight and it enters through a variance rather than through a level. To move the index a full point you need the whole basket to change, and that is exactly what makes index volatility a correlation instrument rather than a volatility one.</p>
-    <p>Which is the trade: sell the index straddle, buy the twenty single-name straddles, delta-hedge everything, and your P&amp;L is almost free of the volatility level and almost purely a bet on realized correlation. <a href="dispersion.html" style="color:var(--blue)">Page 10</a> runs it, and adds the part that matters — correlation is bounded at one, and it gets there on the day you can least afford it.</p>
+    <p>Which is the trade: sell the index straddle, buy the twenty single-name straddles, delta-hedge everything, and your P&amp;L is almost free of the volatility level and almost purely a bet on realized correlation. <a href="dispersion.html" style="color:var(--blue)">Page 12</a> runs it, and adds the part that matters — correlation is bounded at one, and it gets there on the day you can least afford it.</p>
   </div>
 
   <div class="try">
@@ -541,7 +541,7 @@
 
   <div class="prose">
     <p>Read the integral and the result stops being surprising. The weight on each moment is S²Γ, the <span class="term" data-t="Dollar gamma" data-def="S²Γ — the money-denominated convexity of a position. It is the weight the hedging P&amp;L puts on each instant, and it peaks at the strike as expiry approaches.">dollar gamma</span>, which for a near-the-money option grows without bound as time runs out. Volatility in the final six weeks is charged against a gamma several times larger than volatility in the first six. A year that is quiet then wild is a completely different trade from a year that is wild then quiet, and the summary statistic — 25% realized — is blind to both.</p>
-    <p>This is the correction to the sentence everyone learns first, that selling options when implied exceeds realized is profitable. It is profitable <em>in expectation, averaged over paths</em>. On any one path the spread around that expectation is enormous, and it is not noise: it is a systematic function of where in the option's life the movement showed up. Which is why a desk measures a short-volatility book in dollar gamma rather than vega, and why <a href="variance.html" style="color:var(--blue)">page 09</a>'s variance swap exists at all — it is the contract engineered to strip this weighting out and pay realized variance flat.</p>
+    <p>This is the correction to the sentence everyone learns first, that selling options when implied exceeds realized is profitable. It is profitable <em>in expectation, averaged over paths</em>. On any one path the spread around that expectation is enormous, and it is not noise: it is a systematic function of where in the option's life the movement showed up. Which is why a desk measures a short-volatility book in dollar gamma rather than vega, and why <a href="variance.html" style="color:var(--blue)">page 11</a>'s variance swap exists at all — it is the contract engineered to strip this weighting out and pay realized variance flat.</p>
   </div>
 
   <div class="try">
@@ -576,7 +576,7 @@
       <div class="mline">dΠ = ½ S² Γ ( σ<sub>imp</sub>² − σ<sub>real</sub>² ) dt</div>
       <p class="mread">Reads as: <b>each instant pays the variance difference, weighted by dollar gamma.</b> Integrate over the life and you have the formula above.</p>
       <p>The weight is the whole story. Two paths with the same integrated realized variance but different placement of that variance relative to the Γ profile produce different integrals — in the figure, nearly nine dollars of difference on an option sold for twelve.</p>
-      <p><b>Where it breaks.</b> The derivation assumes continuous hedging and no jumps, so that (dS)² is genuinely σ²S²dt. Hedge daily and you add the rebalancing error <a href="black-scholes.html" style="color:var(--blue)">page 01</a> measures; add a jump and (dS)² stops scaling with dt at all, which is <a href="real-world.html" style="color:var(--blue)">page 15</a>'s finding that more frequent hedging stops helping. Transaction costs subtract at every rebalance, and <a href="execution.html" style="color:var(--blue)">page 06</a> shows they put a floor under how finely you can hedge in the first place.</p>
+      <p><b>Where it breaks.</b> The derivation assumes continuous hedging and no jumps, so that (dS)² is genuinely σ²S²dt. Hedge daily and you add the rebalancing error <a href="black-scholes.html" style="color:var(--blue)">page 01</a> measures; add a jump and (dS)² stops scaling with dt at all, which is <a href="real-world.html" style="color:var(--blue)">page 20</a>'s finding that more frequent hedging stops helping. Transaction costs subtract at every rebalance, and <a href="execution.html" style="color:var(--blue)">page 13</a> shows they put a floor under how finely you can hedge in the first place.</p>
     </div>
   </details>
 </section>
@@ -708,12 +708,25 @@
     </div>
     <div class="ans"><b>A nine-point range on an option sold for twelve.</b> The hedging P&amp;L is the variance difference weighted by S²Γ at every instant, so volatility arriving in the final weeks — when a near-the-money option's dollar gamma is at its largest — is charged at a completely different rate from volatility arriving in the first month. Realized volatility for the year is blind to this, which is why it is the wrong summary statistic.</div>
   </div>
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>Interviewers on a desk care less about the number than about how you get to it. They want to hear the structure first (what is this position, which greek drives it, which direction), then a rough size, then the exact answer if there is time. A right answer reached silently scores below a slightly wrong one reasoned out loud.</p>
+    <ul>
+      <li>Say the sign before the size. Most wrong answers are direction errors that sound fluent.</li>
+      <li>Round to numbers you can multiply in your head, then correct: √(1/365) ≈ 1/19, vol ÷ 16 ≈ a daily move.</li>
+      <li>Name the assumption you are making, and what would change if it broke.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> structure, sign, rough size, exact number, in that order, out loud.</p>
+  </aside>
+
+  <p class="xlink"><span class="lab">More practice</span><a href="https://cafe-helado.github.io/PutCall-Parity-Game/" target="_blank" rel="noopener">Parity Drill ↗</a>, <a href="https://cafe-helado.github.io/Option-Breakeven-Drill/" target="_blank" rel="noopener">Breakeven Drill ↗</a>, and the <a href="https://cafe-helado.github.io/stats-trading/practice.html" target="_blank" rel="noopener">Chance, visually practice set ↗</a> for the probability questions interviews also ask.</p>
+
 </section>
 
 </main>
 
 <footer>
-  <p class="n">Every figure here prices on a flat volatility surface with continuous rates and no transaction costs, which makes the answers clean and three of them optimistic. A real skew changes the correlation arithmetic of chapter 06, because index and component implieds get read at different moneyness — <a href="dispersion.html" style="color:var(--blue)">page 10</a> handles it properly. Chapter 07's paths are hedged daily and frictionlessly; <a href="execution.html" style="color:var(--blue)">page 06</a> prices the rebalancing and <a href="real-world.html" style="color:var(--blue)">page 15</a> adds the jumps that break the argument entirely. And the bounds in chapters 02 and 05 assume European exercise: on American options the short leg can be assigned at any moment, which <a href="early-exercise.html" style="color:var(--blue)">page 08</a> prices, and which turns several of these ceilings into things you can be forced through.</p>
+  <p class="n">Every figure here prices on a flat volatility surface with continuous rates and no transaction costs, which makes the answers clean and three of them optimistic. A real skew changes the correlation arithmetic of chapter 06, because index and component implieds get read at different moneyness — <a href="dispersion.html" style="color:var(--blue)">page 12</a> handles it properly. Chapter 07's paths are hedged daily and frictionlessly; <a href="execution.html" style="color:var(--blue)">page 13</a> prices the rebalancing and <a href="real-world.html" style="color:var(--blue)">page 20</a> adds the jumps that break the argument entirely. And the bounds in chapters 02 and 05 assume European exercise: on American options the short leg can be assigned at any moment, which <a href="early-exercise.html" style="color:var(--blue)">page 04</a> prices, and which turns several of these ceilings into things you can be forced through.</p>
 </footer>
 
 <script src="assets/lab.js"></script>
@@ -902,7 +915,7 @@
 
   {t:2,q:"Two identical calls on a stock that pays no dividend, one American and one European. Which is worth more?",
    o:["The American \u2014 the extra right must be worth something","The same, to within lattice noise. The right to exercise a call early is never used","The European, because it cannot be assigned","The American, but only while it is in the money"],ok:1,
-   why:"Identical. Exercising a call early throws away the interest on the strike and the insurance below it, so it is never optimal without a dividend \u2014 page 08 prices that right at 1.85\u00d710\u207b\u00b9\u00b3. The put is the opposite: the American is strictly dearer, by 0.07 at the 80 strike, 0.52 at the 100 and 2.00 at the 120, because the strike you receive on exercise starts earning interest immediately.",
+   why:"Identical. Exercising a call early throws away the interest on the strike and the insurance below it, so it is never optimal without a dividend \u2014 page 04 prices that right at 1.85\u00d710\u207b\u00b9\u00b3. The put is the opposite: the American is strictly dearer, by 0.07 at the 80 strike, 0.52 at the 100 and 2.00 at the 120, because the strike you receive on exercise starts earning interest immediately.",
    fig:{title:"Time value \u2014 price minus immediate-exercise value \u2014 for the call and the put",cap:"The call\u2019s time value never goes negative, so exercising early never pays. The put\u2019s does, and the depth of that dip is what an American put\u2019s early exercise recovers.",
      x0:40,x1:160,xf:v=>v.toFixed(0),yf:v=>v.toFixed(1),
      leg:[["Call time value","--blue"],["Put time value","--verm"]],
@@ -980,7 +993,7 @@
 
   {t:1,q:"Can a European option ever cost more than its American twin?",
    o:["Yes, a deep in-the-money European put","No. The American option has every right the European one has, plus one, so it can never be worth less","Yes, before a large dividend","Only for calls on futures"],ok:1,
-   why:"An extra right cannot have negative value: you can always choose not to use it. The reverse gap, American well above European, does happen — a deep put at high rates (the European one can sit below intrinsic, 35.36 against 40 at spot 60 here), a deep call before a large dividend, puts on hard-to-borrow names. Page 08 prices all three.",
+   why:"An extra right cannot have negative value: you can always choose not to use it. The reverse gap, American well above European, does happen — a deep put at high rates (the European one can sit below intrinsic, 35.36 against 40 at spot 60 here), a deep call before a large dividend, puts on hard-to-borrow names. Page 04 prices all three.",
    fig:{title:"A deep European put against its intrinsic value",cap:"The European put dips under intrinsic. The American one cannot, because it can always be exercised for intrinsic — which is exactly why it is worth more.",
      x0:40,x1:110,xf:v=>v.toFixed(0),yf:v=>v.toFixed(0),
      leg:[["European put","--blue"],["Intrinsic","--grey"],["American floor","--moss"]],
@@ -989,7 +1002,7 @@
 
   {t:1,q:"Earnings are in a week. The at-the-money straddle is 20 bid, 25 offer in vol. Tomorrow, with no news, where do you expect the vol quote?",
    o:["Lower — a day of decay has passed","Higher. The event's variance is fixed, and it is now spread over one day fewer","The same, since nothing happened","Lower, because the event is a day closer"],ok:1,
-   why:"Quoted vol is the square root of total variance over time. The diffusive part shrinks with the days, the event part does not, so dividing the fixed lump by a smaller T raises the number. With 18% diffusive and a 3% event, a week out quotes 28.2% and a day later 29.5% — the option is cheaper in dollars and dearer in vol. Page 03 is this arithmetic.",
+   why:"Quoted vol is the square root of total variance over time. The diffusive part shrinks with the days, the event part does not, so dividing the fixed lump by a smaller T raises the number. With 18% diffusive and a 3% event, a week out quotes 28.2% and a day later 29.5% — the option is cheaper in dollars and dearer in vol. Page 08 is this arithmetic.",
    fig:{title:"Quoted vol into an event, against days left",cap:"The quote climbs as the event approaches even though nothing has changed. The day after the print it falls back to the diffusive line.",
      x0:1,x1:14,xf:v=>v.toFixed(0)+"d",yf:v=>(v*100).toFixed(0)+"%",
      leg:[["Quoted vol","--blue"],["Diffusive vol","--grey"]],
@@ -998,7 +1011,7 @@
 
   {t:1,q:"When should you exercise an American call early?",
    o:["Whenever it is deep in the money","Just before an ex-dividend date, when the dividend exceeds the call's time value — the put plus the interest on the strike","Never; calls are never exercised early","When implied volatility falls"],ok:1,
-   why:"Exercising throws away time value, which is exactly the put plus K(1 − e⁻ʳᵗ). Only a dividend can pay for that, and only on the last day before the ex-date. Puts run the other way: exercise when the interest you earn on receiving the strike early beats the call and dividends you give up — deep in the money, high rates. Page 08 is the whole of it.",
+   why:"Exercising throws away time value, which is exactly the put plus K(1 − e⁻ʳᵗ). Only a dividend can pay for that, and only on the last day before the ex-date. Puts run the other way: exercise when the interest you earn on receiving the strike early beats the call and dividends you give up — deep in the money, high rates. Page 04 is the whole of it.",
    fig:{title:"A call's time value against spot, with a $1.50 dividend",cap:"The blue hurdle falls toward the interest floor as the call goes deeper. Where it drops below the dividend, exercising into the ex-date wins.",
      x0:90,x1:150,xf:v=>v.toFixed(0),yf:v=>v.toFixed(2),
      leg:[["Time value: put + interest","--blue"],["Dividend","--verm"],["Interest floor","--grey"]],
@@ -1044,7 +1057,7 @@
 
   {t:2,q:"The stock is $30 and you are short the January 50 calls, delta-hedged with long stock. What is the best headline you could wake up to?",
    o:["The company files for bankruptcy","An all-cash takeover at $40","A stock-for-stock merger at a 30% premium","An earnings beat"],ok:1,
-   why:"A cash deal below your strike does everything you want at once: the stock jumps, so your long-stock hedge makes money; the deliverable becomes fixed cash, so the calls lose their volatility and can never reach 50. Bankruptcy also kills the calls but wrecks the hedge. A stock deal leaves the deliverable volatile. Page 20 prices what is left — the chance of a topping bid.",
+   why:"A cash deal below your strike does everything you want at once: the stock jumps, so your long-stock hedge makes money; the deliverable becomes fixed cash, so the calls lose their volatility and can never reach 50. Bankruptcy also kills the calls but wrecks the hedge. A stock deal leaves the deliverable volatile. Page 15 prices what is left — the chance of a topping bid.",
    fig:{title:"The 50 call at spot 40, as the stock's volatility collapses",cap:"A cash deal is a volatility crash to near zero. At 45 vol this call is worth 3.39; as vol goes to zero it goes to nothing, because 40 can never become 50.",
      x0:0.02,x1:0.6,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(2),
      leg:[["50 call at spot 40","--blue"]],
@@ -1071,7 +1084,7 @@
 
   {t:3,q:"A counterparty buys calls from you in names that go up the next day 90% of the time. Should you keep trading with them?",
    o:["Yes — they are simply bullish, and you are paid the spread","Not at the same price. Flow that is right that often is informed: measure your markouts against them and widen, size down, or stop","Yes, as long as you delta-hedge","It does not matter; adverse selection averages out"],ok:1,
-   why:"A 90% next-day hit rate is information, and every fill they give you is a fill you did not want. Delta-hedging does not help — you hedge after the price has moved. The tool is markout analysis: what your P&L on their trades looks like a minute, an hour and a day later. Page 05's quoting simulation is this from the market maker's side.",
+   why:"A 90% next-day hit rate is information, and every fill they give you is a fill you did not want. Delta-hedging does not help — you hedge after the price has moved. The tool is markout analysis: what your P&L on their trades looks like a minute, an hour and a day later. Page 14's quoting simulation is this from the market maker's side.",
    fig:{title:"Expected markout per trade, against the counterparty's hit rate",cap:"At a coin flip the flow costs you nothing; at 90% you lose eight-tenths of a typical move on every trade before the spread.",
      x0:0.5,x1:1,xf:v=>(v*100).toFixed(0)+"%",yf:v=>v.toFixed(1),
      leg:[["Loss in typical moves","--verm"]],
@@ -1095,28 +1108,28 @@
 
   {t:3,q:"Why might an options desk find itself converting far more names than it reverses?",
    o:["Conversions are always more profitable","A conversion holds the stock and lends cash, needing no borrow; a reversal is short stock, pays a borrow fee and carries recall risk — expensive exactly on event and deal names","Regulation forbids reversals","Because puts are cheaper than calls"],ok:1,
-   why:"The two trades are mirror images in the identity and not in the plumbing. The reverser must borrow shares, and on names with deal or event risk the borrow is expensive, volatile and recallable. A desk long the stock already, as merger arbitrage often is, also finds conversions natural: they add puts under shares it holds. Page 07 chapter 09 is where the risk sits.",
+   why:"The two trades are mirror images in the identity and not in the plumbing. The reverser must borrow shares, and on names with deal or event risk the borrow is expensive, volatile and recallable. A desk long the stock already, as merger arbitrage often is, also finds conversions natural: they add puts under shares it holds. Page 03 chapter 09 is where the risk sits.",
    fig:{title:"A reverser's all-in cost against the borrow fee",cap:"The converter's return is the implied rate; the reverser pays the implied rate plus the borrow. On hard-to-borrow names the gap is the whole trade.",
      x0:0,x1:0.10,xf:v=>(v*100).toFixed(0)+"%",yf:v=>(v*100).toFixed(1)+"%",
      leg:[["Reverser's cost","--verm"],["Converter's rate","--moss"]],
      f:[b=>0.045+b,()=>0.045],col:["--verm","--moss"],dash:[null,[5,5]]}},
   {t:3,q:"Your book is gamma-neutral and long vega, and risk wants the vega cut. A colleague suggests selling one-month straddles against it. What does that do?",
    o:["Cuts the vega cleanly \u2014 a straddle is the purest short-vega trade","Cuts a little vega and leaves you heavily short gamma. Sell the long-dated options the vega came from instead","Adds vega, because short-dated options have negative vega","Nothing to gamma, since straddles are delta-neutral"],ok:1,
-   why:"Vega per unit of gamma grows in proportion to time: about 2.1 for a one-month at-the-money option at 25 vol and 25 for a one-year, twelve times as much. To remove a given amount of vega with one-month options you take on twelve times the gamma that the same vega in one-years would cost you, and the book stops being gamma-neutral. Vega that came from the back of the curve has to leave by the back of the curve. Whether the one-month even moves with the tenor you are long is a second problem: page 22 chapter 03.",
+   why:"Vega per unit of gamma grows in proportion to time: about 2.1 for a one-month at-the-money option at 25 vol and 25 for a one-year, twelve times as much. To remove a given amount of vega with one-month options you take on twelve times the gamma that the same vega in one-years would cost you, and the book stops being gamma-neutral. Vega that came from the back of the curve has to leave by the back of the curve. Whether the one-month even moves with the tenor you are long is a second problem: page 21 chapter 03.",
    fig:{title:"Vega bought per unit of gamma, by expiry",cap:"A straight line through the origin. Short-dated options are a gamma instrument that happens to have some vega; long-dated ones are the reverse.",
      x0:1,x1:24,xf:v=>v.toFixed(0)+"m",yf:v=>v.toFixed(0),
      leg:[["Vega per point \u00f7 gamma","--blue"]],
      f:[m=>{const g=bs(S0,100,m/12,V,R,0,true);return g.vega/100/g.gamma;}],col:["--blue"],dash:[null],marks:[[1,"--verm","1m"],[12,"--moss","12m"]]}},
   {t:3,q:"You buy a straddle into earnings, unhedged. Your forecast of the size of the move is exactly right, and it is the same as the market's. How often do you lose money?",
    o:["Half the time \u2014 a fair bet is a coin flip","About 58% of the time","Never; the forecast was right","About 32% of the time \u2014 whenever the move is inside one standard deviation"],ok:1,
-   why:"A fairly priced straddle costs the average absolute move, which is 0.80 standard deviations. Most moves are smaller than the average one \u2014 a normal variable lands inside 0.80 sigma 57.5% of the time \u2014 and the few large ones pay for the rest. Being right about volatility buys you a fair bet with a losing hit rate, so what is left to manage is the sizing and the patience, not the forecast. Page 03 has the same number from the other side.",
+   why:"A fairly priced straddle costs the average absolute move, which is 0.80 standard deviations. Most moves are smaller than the average one \u2014 a normal variable lands inside 0.80 sigma 57.5% of the time \u2014 and the few large ones pay for the rest. Being right about volatility buys you a fair bet with a losing hit rate, so what is left to manage is the sizing and the patience, not the forecast. Page 08 has the same number from the other side.",
    fig:{title:"Where the move lands, in standard deviations",cap:"Everything left of the red line is a losing straddle. The area is 57.5%; the long right tail is where the money is made back.",
      x0:0,x1:3,xf:v=>v.toFixed(1),yf:v=>v.toFixed(1),
      leg:[["Density of the absolute move","--blue"]],
      f:[x=>2*npdf(x)],col:["--blue"],dash:[null],marks:[[Math.sqrt(2/Math.PI),"--verm","cost"]]}},
   {t:3,q:"You are short gamma and the stock has been realizing more than you sold. Should you hedge more often or less often?",
    o:["More often, always \u2014 tighter hedging always loses less","Less often, always \u2014 every hedge crosses a spread","It depends on whether the moves trend or reverse: tighter in a trend, wider in chop, and costs set the limit either way","It makes no difference to the expected result"],ok:2,
-   why:"A hedger pays or earns the volatility measured at their own hedging interval. When returns trend, volatility sampled at longer intervals is higher than at short ones, so a short-gamma book that lets deltas run pays the larger number: hedge tighter. When returns reverse, the long-interval number is lower, and waiting lets moves cancel before you pay for them. With a daily autocorrelation of +0.15 the weekly figure is 13% above the daily; at \u22120.15 it is 11% below. Frequency is neutral only on a random walk. Page 22 chapter 05.",
+   why:"A hedger pays or earns the volatility measured at their own hedging interval. When returns trend, volatility sampled at longer intervals is higher than at short ones, so a short-gamma book that lets deltas run pays the larger number: hedge tighter. When returns reverse, the long-interval number is lower, and waiting lets moves cancel before you pay for them. With a daily autocorrelation of +0.15 the weekly figure is 13% above the daily; at \u22120.15 it is 11% below. Frequency is neutral only on a random walk. Page 21 chapter 05.",
    fig:{title:"Volatility you pay, relative to daily, by hedging interval",cap:"Above one, waiting costs a short-gamma book; below one, waiting helps. The sign of the autocorrelation decides which line you are on.",
      x0:1,x1:21,xf:v=>v.toFixed(0)+"d",yf:v=>v.toFixed(2),
      leg:[["Trending, \u03c6 = +0.15","--verm"],["Reversing, \u03c6 = \u22120.15","--moss"]],
@@ -1289,9 +1302,10 @@ const s4={Tn:0.0833,Tf:1,sig:0.25,r:0.04};
     const xs=[],pk=[],fr=[];
     for(let S=80;S<=125;S+=0.5){xs.push(S);
       pk.push(ratio*near(S).gamma-far(S).gamma);fr.push(far(S).gamma);}
-    const hi=Math.max.apply(null,pk)*1.10;
+    /* the hedged gamma goes negative in the wings; a floor at zero hid that */
+    const hi=Math.max.apply(null,pk)*1.10,lo=Math.min(0,Math.min.apply(null,pk)*1.15);
     const o=Fig(document.getElementById("cv4"),
-      {h:310,x0:80,x1:125,y0:0,y1:hi,pad:{l:58,r:14,t:14}});
+      {h:310,x0:80,x1:125,y0:lo,y1:hi,pad:{l:58,r:14,t:14}});
     axes(o,v=>v.toFixed(0),v=>v.toFixed(3),5,4);
     clip(o,()=>{line(o,xs,fr,C("--grey"),1.6);line(o,xs,pk,C("--blue"),2.2);});
     vline(o,K,C("--ochre"),"K");

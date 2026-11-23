@@ -88,7 +88,7 @@
 
   <div class="prose">
     <p class="lead">Open any chain and the first instinct is to read it like a table — find the strike you care about, read its row, move on. That is the slow way, and it is the way that misses everything.</p>
-    <p><a href="surface.html" style="color:var(--blue)">Page 02</a> established that the second derivative of call price across strikes is the risk-neutral density. Which means the column you are looking at <em>is</em> a distribution, drawn in a coordinate system nobody would have chosen. Every skill on this page is a way of undoing that coordinate system fast enough to be useful.</p>
+    <p><a href="surface.html" style="color:var(--blue)">Page 07</a> established that the second derivative of call price across strikes is the risk-neutral density. Which means the column you are looking at <em>is</em> a distribution, drawn in a coordinate system nobody would have chosen. Every skill on this page is a way of undoing that coordinate system fast enough to be useful.</p>
     <p>Three conversions do almost all of it. Turn dollars into sigmas, so strikes on a $30 stock and a $600 stock are comparable. Turn prices into deltas, so moneyness is comparable across expiries. And turn the IV column into a shape rather than a list of numbers — a slope and a curvature, which is what your eye is good at and what arithmetic is slow at.</p>
   </div>
 
@@ -171,6 +171,38 @@
     </div>
     <figcaption>Notice how fast this falls at the short end. Below the red line there is not even one strike inside the expected move, and a spread built there is quantized far more coarsely than its price suggests.</figcaption>
   </figure>
+
+  <div class="prose">
+    <p>Now do it at the speed the job wants. Each rep puts a different chain in front of you, any price from $20 to $500, any expiry, any vol. Click the call strike one standard deviation above spot. The rule is the one above, S × σ × √T, done in your head; the clock is running.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Find one sigma, against the clock</h3></div>
+        <p class="simmsg" id="scMsg" aria-live="polite"></p>
+        <canvas id="cvSC" height="200"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The chain</h4>
+        <table class="wtab sctab" id="scTab" style="min-width:0"></table>
+        <div class="btnrow simbtns"><button class="act" id="scNext">Next chain</button></div>
+        <div class="kv" style="margin-top:16px" id="kvSC"></div>
+      </div>
+    </div>
+    <figcaption>The first chain is a $90.21 stock with 45 days to run at 43.4% vol, listed every $2.50: one sigma is $13.75, five and a half strikes, and the answer is the 105 call. The next chain may put one sigma less than a strike away. The tick marks under the curve are the listed strikes; the distance between them means nothing until it is measured in sigmas.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>Before anything else on a chain, a trader converts the strikes into sigmas, because every other judgement, cheap or rich, near or far, hedge or not, depends on it. The arithmetic is done in the head in a few seconds, with round numbers, and checked against the deltas on the screen.</p>
+    <ul>
+      <li>Daily sigma ≈ annual vol ÷ 16, so a 32-vol stock moves about 2% a day.</li>
+      <li>The roughly 16-delta call sits near one sigma out; the screen gives you a free check.</li>
+      <li>Scale by √T: four times the time is twice the move.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> one sigma to expiry ≈ price × vol × √(days ÷ 365); for 30 days, √(30/365) ≈ 0.29.</p>
+  </aside>
 
   <div class="try">
     <span class="lab">Try this</span>
@@ -266,7 +298,7 @@
   <div class="prose">
     <p class="lead">A chain prints a lot of columns and they are not equally trustworthy. The one that misleads most is the one that looks most authoritative.</p>
     <p><b>Implied volatility</b> is computed from a price, and the screen has at least two prices. Take a 105 call on a $100 stock, thirty days out, genuinely worth <b>1.662</b> at 30 volatility. Quote it two cents wide and the implied volatility runs from <b>29.90%</b> to <b>30.10%</b> — a fifth of a point, fine. Quote it <b>ten cents</b> wide, which is unremarkable on a single name, and the band is <b>29.51% to 30.49%</b>: a <b>0.98 volatility point</b> range, and the column shows you one number from inside it. Twenty cents wide and it is nearly two points.</p>
-    <p>So the practical rule is that an IV column is only as precise as the spread it was computed from, and comparing two names' implieds to a decimal place is usually comparing their liquidity. <a href="microstructure.html" style="color:var(--blue)">Page 05</a> takes this much further — on a short-dated wing a single tick can be eleven volatility points.</p>
+    <p>So the practical rule is that an IV column is only as precise as the spread it was computed from, and comparing two names' implieds to a decimal place is usually comparing their liquidity. <a href="microstructure.html" style="color:var(--blue)">Page 14</a> takes this much further — on a short-dated wing a single tick can be eleven volatility points.</p>
     <p><b>Volume and open interest</b> answer different questions and get confused constantly. Volume is what traded today; open interest is what is still outstanding. A strike with enormous volume and no open interest was traded and closed — somebody was in and out. Enormous open interest and no volume is a position somebody is sitting on, and it is the one that matters for pinning.</p>
     <p><b>The mid</b> is not a price. It is the average of two prices, one of which you can hit and one of which you can lift, and on a wide market it is a number nobody will trade. Every apparent edge under about half a spread is an artifact of quoting the mid.</p>
   </div>
@@ -318,7 +350,7 @@
     <p class="lead">Scan the IV column downward. If the numbers fall as the strike rises, the column is skewed, and how fast they fall is how skewed. On the example chain here — thirty days, 28% at the money — the 90 strike shows <b>32.10%</b> and the 110 shows <b>24.99%</b>, so the column drops seven volatility points across four strikes.</p>
     <p>The standard way to compress that into one number is the <span class="term" data-t="Risk reversal" data-def="The 25-delta put's implied volatility minus the 25-delta call's. A single number for how much more the downside costs than the upside, and the way skew is quoted between desks.">risk reversal</span>: the 25-delta put's implied minus the 25-delta call's. On this surface it is <b>3.77 points</b> at thirty days, <b>6.47</b> at ninety and <b>12.29</b> at a year, because a skew defined in log-moneyness reaches further out as the strikes spread.</p>
     <p>Points are the wrong unit for comparing names, or one name across regimes. Seven points of skew on a 28-vol stock and seven points on a 70-vol stock are not the same steepness. Divide instead: the 90 strike's 32.10% over the 100 strike's 28.12% is 1.142, so the downside trades at a <b>14.2% premium</b>, and the 110 strike at an 11.1% discount. That ratio is <span class="term" data-t="Normalized skew" data-def="Wing implied vol divided by at-the-money implied vol, minus one. It measures skew as a percentage of the vol level, so that names and regimes with different vol can be compared.">normalized skew</span>, and it is the one to rank on. Read it against three things before calling it steep: the vol level, since wing vols move less than at-the-money vol and the ratio therefore compresses when vol is high and stretches when it is low; the name's own history; and what the rest of the market is doing that day.</p>
-    <p>Now scan across expiries instead, at the money. A flat term structure is a stock with nothing scheduled. A front month standing well above the back is the screen telling you a <em>date</em> exists — and the size of the step says what the market has priced for it. With a 28% baseline and one event worth a 7% move, the quoted at-the-money runs <b>82.1%</b> at three days, <b>57.8%</b> at a week, <b>37.2%</b> at a month and <b>29.7%</b> at six months. The event has not moved; its share of the remaining variance has. <a href="catalyst.html" style="color:var(--blue)">Page 03</a> is that arithmetic in full.</p>
+    <p>Now scan across expiries instead, at the money. A flat term structure is a stock with nothing scheduled. A front month standing well above the back is the screen telling you a <em>date</em> exists — and the size of the step says what the market has priced for it. With a 28% baseline and one event worth a 7% move, the quoted at-the-money runs <b>82.1%</b> at three days, <b>57.8%</b> at a week, <b>37.2%</b> at a month and <b>29.7%</b> at six months. The event has not moved; its share of the remaining variance has. <a href="catalyst.html" style="color:var(--blue)">Page 08</a> is that arithmetic in full.</p>
   </div>
 
   <figure class="bleed">
@@ -629,7 +661,7 @@
 </main>
 
 <footer>
-  <p class="n">Every chain on this page is generated from a smooth parametric surface, which makes it cleaner than any real screen. A real chain has strikes with no market at all, implieds computed from stale mids, and a spot that has moved since the last print — and the wings, where this page's arithmetic is least reliable, are exactly where those problems are worst. The sigma conversion in chapter 02 uses the at-the-money implied for every strike, which is a deliberate simplification: on a skewed surface each strike has its own volatility, and the correct distance uses that one. It changes the numbers in the wings by a fair amount and changes none of the judgements. And every implied volatility here is derived from a mid, which <a href="microstructure.html" style="color:var(--blue)">page 05</a> argues is not a price at all.</p>
+  <p class="n">Every chain on this page is generated from a smooth parametric surface, which makes it cleaner than any real screen. A real chain has strikes with no market at all, implieds computed from stale mids, and a spot that has moved since the last print — and the wings, where this page's arithmetic is least reliable, are exactly where those problems are worst. The sigma conversion in chapter 02 uses the at-the-money implied for every strike, which is a deliberate simplification: on a skewed surface each strike has its own volatility, and the correct distance uses that one. It changes the numbers in the wings by a fair amount and changes none of the judgements. And every implied volatility here is derived from a mid, which <a href="microstructure.html" style="color:var(--blue)">page 14</a> argues is not a price at all.</p>
 </footer>
 
 <script src="assets/lab.js"></script>
@@ -1165,7 +1197,58 @@ const sF = { q: 0.06, q0: 0 };
   }
 })();
 
-function drawAll(){
+/* ══════════ 02b — find one sigma, against the clock ══════════
+   A seeded chain: a stock between $20 and $500, an expiry of 7 to 90 days,
+   an at-the-money vol of 15% to 80%, strikes at the spacing a chain of that
+   price would list. One standard deviation of the move to expiry is
+   S x sigma x sqrt(days / 365). The reader clicks the call strike nearest
+   spot plus one sigma; within one listed strike counts. Ten reps, timed. */
+const SC = { n: 0, picked: null, t0: 0, times: [], right: 0, done: 0 };
+function scanChain(n){ return withSeed(2200 + n, () => {
+  const S = Math.round(20 * Math.pow(25, Math.random()) * 100) / 100, days = [7, 14, 21, 30, 45, 60, 90][Math.floor(Math.random() * 7)];
+  const iv = 0.15 + 0.65 * Math.random(), sig = S * iv * Math.sqrt(days / 365);
+  /* listed spacing grows with the price, and with the expected move, as real chains do */
+  const step = [0.5, 1, 2.5, 5, 10, 25, 50].find(x => x >= (S < 25 ? 0.5 : S < 60 ? 1 : S < 150 ? 2.5 : S < 300 ? 5 : 10) && sig / x <= 8) || 50;
+  const atm = Math.round(S / step) * step, Ks = [];
+  for (let i = -4; i <= 12; i++) Ks.push(+(atm + i * step).toFixed(2));
+  const target = S + sig, best = Ks.reduce((a, k) => Math.abs(k - target) < Math.abs(a - target) ? k : a, Ks[0]);
+  return { S, days, iv, step, sig, Ks, best }; }); }
+(function(){
+  let c = scanChain(0); SC.t0 = performance.now();
+  const tab = document.getElementById("scTab"), msg = document.getElementById("scMsg");
+  function pick(K){ if (SC.picked !== null) return; SC.picked = K; const dt = (performance.now() - SC.t0) / 1000; SC.times.push(dt); SC.done++;
+    if (Math.abs(K - c.best) <= c.step + 1e-9) SC.right++; draw(); }
+  document.getElementById("scNext").addEventListener("click", () => { SC.n++; SC.picked = null; c = scanChain(SC.n); SC.t0 = performance.now(); draw(); });
+  tab.addEventListener("click", e => { const r = e.target.closest("tr[data-k]"); if (r) pick(+r.dataset.k); });
+  window.drawSC = draw;
+  function draw(){
+    const T = c.days / 365;
+    tab.innerHTML = "<tr><th>Strike</th><th>Call IV</th><th>Delta</th></tr>" + c.Ks.slice().reverse().map(K => {
+      const v = c.iv + (100 - K / c.S * 100) / 100 * 0.1, b = bs(c.S, K, T, v, 0.04, 0, true);
+      const cls = SC.picked === null ? "" : K === c.best ? "scbest" : K === SC.picked ? "scwrong" : "";
+      return `<tr data-k="${K}" class="${cls}"><td>${K.toFixed(K % 1 ? 2 : 0)}</td><td>${(v * 100).toFixed(1)}</td><td>${b.delta.toFixed(2)}</td></tr>`; }).join("");
+    const ok = SC.picked !== null && Math.abs(SC.picked - c.best) <= c.step + 1e-9;
+    msg.textContent = SC.picked === null
+      ? "Rep " + (SC.n + 1) + ". Stock $" + c.S.toFixed(2) + ", " + c.days + " days, at-the-money vol " + (c.iv * 100).toFixed(1) + "%. Click the call strike one standard deviation above spot."
+      : (ok ? "Right. " : "Not quite. ") + "One sigma is $" + c.S.toFixed(2) + " × " + (c.iv * 100).toFixed(1) + "% × √(" + c.days + "/365) = $" + c.sig.toFixed(2) + ", so the strike nearest $" + (c.S + c.sig).toFixed(2) + " is " + c.best + ". You took " + SC.times[SC.times.length - 1].toFixed(1) + " seconds.";
+    const lo = c.S - 3.2 * c.sig, hi = c.S + 3.2 * c.sig, xs = [], ys = [];
+    for (let i = 0; i <= 160; i++) { const x = lo + (hi - lo) * i / 160; xs.push(x); ys.push(npdf((x - c.S) / c.sig)); }
+    const o = Fig(document.getElementById("cvSC"), { h: 200, x0: lo, x1: hi, y0: 0, y1: 0.46, pad: { l: 20, r: 14, t: 14 } });
+    axes(o, v => "$" + v.toFixed(c.S < 50 ? 1 : 0), () => "", 6, 2);
+    clip(o, () => line(o, xs, ys, C("--blue"), 2));
+    vline(o, c.S, C("--grey"), "spot");
+    if (SC.picked !== null) { vline(o, c.S + c.sig, C("--moss"), "+1σ"); vline(o, SC.picked, ok ? C("--moss") : C("--verm"), "your strike", [1, 0]); }
+    const g = o.g; g.strokeStyle = C("--hair"); c.Ks.forEach(K => { if (K < lo || K > hi) return; g.beginPath(); g.moveTo(o.X(K), o.P.t + o.ph - 6); g.lineTo(o.X(K), o.P.t + o.ph); g.stroke(); });
+    const avg = SC.times.length ? SC.times.reduce((a, b) => a + b, 0) / SC.times.length : 0;
+    document.getElementById("kvSC").innerHTML = kvHTML([
+      ["Reps", String(SC.done)], ["Right, within a strike", SC.done ? SC.right + " of " + SC.done : "—", SC.done && SC.right / SC.done >= 0.8 ? "moss" : "grey"],
+      ["Average time", SC.done ? avg.toFixed(1) + " s" : "—", avg && avg <= 5 ? "moss" : "grey"],
+      ["Strike spacing on this chain", "$" + c.step], ["One sigma, in strikes", SC.picked === null ? "?" : (c.sig / c.step).toFixed(1)]
+    ]);
+  }
+})();
+
+function drawAll(){drawSC();
   drawHero();draw1();draw2();draw3();draw4();draw5();drawFwd();draw6();drawDrill();
 }
 LAB.boot(drawAll);

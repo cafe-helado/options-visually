@@ -42,26 +42,26 @@ script, compute the numbers, then write the sentence. Doing this caught:
 - a claim about vol-time equivalence wrong by a factor of nine (page 01)
 - a sign convention backwards on charm — it is `+∂θ/∂S`, not minus (page 01)
 - three wrong worked examples in a source document, where the spreadsheet it
-  disagreed with was right (page 07)
+  disagreed with was right (page 03)
 - a jade lizard that was not a jade lizard, because the credit did not cover the
-  spread width — which became a whole chapter (page 04)
+  spread width — which became a whole chapter (page 09)
 - a benchmark demonstration where both algorithms agreed, defeating the point,
-  until the case was re-derived (page 06)
+  until the case was re-derived (page 13)
 - an interest floor quoted as $1.47 when it is $1.49, caught by a harness that
   recomputes every number in the prose from the code that ships
-- an exceedance probability stated backwards on page 03 — the prose said the stock
+- an exceedance probability stated backwards on page 08 — the prose said the stock
   beats the straddle-implied move 58% of the time, the figure two inches away
   computed 42%, and 58% was the probability of staying *inside* it
-- a benchmark number on page 06 quoted as 1.47 from a single random draw, on a
-  figure that redraws its path every load and returns anywhere from 0.9 to 2.1 (page 08)
+- a benchmark number on page 13 quoted as 1.47 from a single random draw, on a
+  figure that redraws its path every load and returns anywhere from 0.9 to 2.1 (page 04)
 - a variance swap payoff coded in decimals when vega notional is dollars per
   volatility *point* — a clean 100x error that surfaced only because the prose
-  carried independently computed numbers to check against (page 09)
-- four stale figures on pages 02, 06 and 09 found when the thin pages got
+  carried independently computed numbers to check against (page 11)
+- four stale figures on pages 07, 13 and 11 found when the thin pages got
   claims: a jump skew of 8.46 where the page computes 8.24, a variance strike of
   30.44 where it is 30.40, a "half-yearly" jump that gave the once-in-two-years
   number, and a post-fill drift quoted from one random draw
-- a tick on page 05 quoted as 11.57 vol points on a "seven-day five-delta"; a
+- a tick on page 14 quoted as 11.57 vol points on a "seven-day five-delta"; a
   five-delta weekly is 0.70 at any volatility, and 11.57 belongs to a 0.2-delta.
   It had stood since the page was written because the page had no claims
 - a breach rate on page 18 quoted from a 400k-draw simulation when the page
@@ -144,6 +144,43 @@ and table wrapping.
 Colors: `--blue` primary · `--verm` risk/counterpoint · `--moss` positive/proof ·
 `--ochre` markers · `--grey` secondary · `--ink` text.
 
+### What every figure gets for free (November 2026)
+
+`Fig` records what a draw puts on the canvas (`o.series` from `line()`, `o.marks`
+from `vline()`, the axis formatters), and the engine uses that record:
+
+- **Hover readout.** A hairline at the pointer and every curve's value there, in
+  its own color, formatted with the axis's own formatter. Draw curves with
+  `line()` (not raw canvas paths) and they are readable.
+- **Draggable markers.** A `vline()` drawn at *exactly* a slider's current value,
+  inside the same `<figure>`, can be dragged along the axis and moves that
+  slider. So draw spot, strike or the current expiry with
+  `vline(o, state.S, …)` — the state value itself, not a rounded copy.
+- **Coincident curves are dashed automatically.** A curve that lands on an
+  earlier solid one is drawn dashed, so an identity shows both colors.
+- **Edge tick labels are pulled inside the canvas; `vline` labels step down**
+  until they clear each other.
+- **Preset buttons glide** (`preset(key, patch, focus, true)`; the teaching layer
+  passes it when nothing is clicked straight after). Slow redraws jump.
+
+Two components: `aside.lens` ("Trader's lens": a paragraph on how a desk thinks
+about the idea, three bullets, and a `p.rule` rule of thumb) and `p.simmsg`
+(a one-line narration above a day-by-day simulation). Every number in a lens
+or a simulation caption goes through `verify.js` like any other prose.
+
+**The learning rule for figures.** Put the reader in a realistic seat — run the
+account into a sell-off, hedge the book through a day, quote as a market
+maker — so the conclusion falls out of what they do. Page 24's sell-off
+simulator is the pattern: a path the reader cannot see ahead, one decision per
+step, consequences that lock in, and a caption that quotes the verified
+outcome at each setting.
+
+### Page order
+
+Pages are numbered by the reading route on `index.html` (seven ideas, then
+practice). The order was chosen so that a sentence like "page NN showed" points
+back, never forward; check that when adding a page or a cross-reference.
+
 ## Offline, and installing to a phone
 
 The series is a PWA. `sw.js` precaches all twenty-five pages, the three companions and the engine on
@@ -185,13 +222,13 @@ grid columns with an inline `style=` (media queries cannot override without
 
 ## What is left
 
-All twenty-five pages are built, plus the program, the workbook and the toolkit. Every page now has verify claims. Simulated figures open on a seeded run via `withSeed(seed, fn)` in `lab.js` (a "new run" button passes the next seed), and their prose quotes that opening run. Page 04 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. Pages 12-15 were added after mapping
+All twenty-five pages are built, plus the program, the workbook and the toolkit. Every page now has verify claims. Simulated figures open on a seeded run via `withSeed(seed, fn)` in `lab.js` (a "new run" button passes the next seed), and their prose quotes that opening run. Page 09 now ends with a field guide of 23 structures (why traded, how it wins, pitfalls, how to actually win), data-driven from the `FG` array and repriced from chapter 01's market. The binomial, forwards, spreading and real-world pages (now 02, 05, 10 and 20) were added after mapping
 the series against Natenberg's *Option Volatility and Pricing* table of contents,
 which is a good source of gaps: it found the binomial model (his ch 5 and 19),
 forwards and futures options (1, 2, 3, 22), spreading as a *decision* rather than a
 catalogue (10-13), and models-versus-reality (23) all missing.
 
-Page 16 is a different kind of page and worth understanding before adding another.
+Page 25 is a different kind of page and worth understanding before adding another.
 It teaches nothing new — it re-asks the other fifteen subjects in the shape a question
 comes in, on a difficulty ladder, because recognizing gamma and *answering* "you are
 long a 25-delta call and the stock rallies five percent, are you longer?" are
@@ -255,7 +292,7 @@ once synchronously before animating. And a zero-crossing reported off a
 0.05 scan grid lands up to a step late, which is how the prose came to say
 91.45 while the panel said 91.50; bisect inside the bracket instead.
 
-## Page 22 and the claim that was almost true
+## Page 21 and the claim that was almost true
 
 `dynamics.html` runs on one dial, R: ATM vol moves R × skew per unit of
 log-spot (0 sticky delta, 1 sticky strike, 2 local-vol-like). `volAt`,
@@ -267,7 +304,7 @@ because theta is fixed while the gamma and spot–vol terms scale with
 movement. The sentence now says so. A claim of invariance needs a claim per
 slider, not one.
 
-## Page 23, and seeding the harness
+## Page 06, and seeding the harness
 
 `carry.html` is one model: `fwd(T,p)` is the stock less escrowed dividends,
 grown at the rate and shrunk by a decaying borrow fee. Everything else
@@ -283,7 +320,7 @@ sample does not support. Thirteen seeds passed when this was added.
 the comma. Written as `, "key")` the group is invisible and every preset
 button for it is reported as unregistered.
 
-## Page 24, and the P&L chapter on page 11
+## Page 22, and the P&L chapter on page 23
 
 `converts.html` prices a convertible as `bondFloor(s)` plus `CB.cr` calls.
 That decomposition is for seeing three behaviors, not for marking a book,
@@ -307,6 +344,46 @@ legs by hand as a third route. Insert new chapters with the `renum` helper
 pattern (shift section ids, nav links and `cnum` from the highest down);
 preset keys like `"c5"` are slider-group names, not section ids, and do not
 move.
+
+## The tutor
+
+Every page with chapters has an "Ask the tutor" button and a small "ask" on
+each figure (`tutorLauncher` in `lab.js`). Nothing loads until the first
+click; then `assets/tutor.js` imports the vendored SDK
+(`assets/vendor/anthropic-sdk-1.6.0.mjs`, see the README there) and opens a
+panel that calls Claude from the reader's browser.
+
+**Safe on a public host because nothing secret is in it.** The reader pastes
+their own API key; it lives in sessionStorage (localStorage only if they
+tick "remember") and goes only to api.anthropic.com. `check.js` refuses any
+file in the repo containing a string shaped like a key. Model output is
+escaped before a few markdown marks are re-applied, so it can never inject
+HTML. The four tools run in the page and validate every input:
+`compute_bs` (the engine's `bs()`), `read_chapter` and `search_series` (the
+site's own packs), and `set_figure` (calls `preset()`, values clamped to the
+slider's range and step).
+
+**Context is built once, not per question.** `node mktutor.js` turns each
+page into `tutor/<page>.json` — chapters as plain text, equations with their
+readings, check questions with answers, glossary terms, figure titles, and
+the page's `verify.js` claim labels as "verified figures" — plus
+`tutor/index.json` for search. Commit the packs. `check.js` fails when a
+page has changed since its pack was built, so **after editing a page, run
+`node mktutor.js` before committing.**
+
+**Cost.** Each request is: tools, the fixed `SYSTEM` prompt (identical on
+every page), the page outline (chapter titles and deks, figure controls,
+verified figures — a few thousand tokens), a cache breakpoint, then the
+conversation with top-level auto-caching. Chapter text is fetched by the
+model only when needed, 1,100 words at a time. Live state (chapter in view,
+slider values, readouts) rides in the new user turn, after the cache. Low
+effort, `max_tokens` 2048, at most four tool rounds, a fresh thread after
+ten turns, a local cache of first-question answers, and a monthly cap the
+reader sets. Every reply prints its cost. Keep anything that varies out of
+`SYSTEM` and `outline()`, or every question pays full price.
+
+`window.LABAPI` exposes `SYNC`, `preset` and `bs` to the module; `SYNC`
+entries now carry `specs` and `host` so the tutor can name and move figures.
 
 ## Checking a page at phone width
 

@@ -6,13 +6,13 @@ Open any file directly in a browser and it runs.
 ```
 index.html            series landing page
 black-scholes.html    No. 01 — The Price of Uncertainty
-surface.html          No. 02 — The Shape of What We Don't Believe
-catalyst.html         No. 03 — One Number Holding Two Things
-structures.html       No. 04 — The Same Trade, Read Twice
-microstructure.html   No. 05 — Every Price Has Someone Behind It
-execution.html        No. 06 — The Hedge That Costs Something
-parity.html           No. 07 — Two Ways to Own the Same Thing
-early-exercise.html   No. 08 — A Decision Worth Exactly Nothing
+surface.html          No. 07 — The Shape of What We Don't Believe
+catalyst.html         No. 08 — One Number Holding Two Things
+structures.html       No. 09 — The Same Trade, Read Twice
+microstructure.html   No. 14 — Every Price Has Someone Behind It
+execution.html        No. 13 — The Hedge That Costs Something
+parity.html           No. 03 — Two Ways to Own the Same Thing
+early-exercise.html   No. 04 — A Decision Worth Exactly Nothing
 template.html         copy this to start a new page
 assets/
   lab.css             design system: tokens, typography, every component

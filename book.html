@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 11 · The Book</span>
+    <span class="num">No. 23 · The Book</span>
   </div>
 </header>
 
@@ -48,7 +48,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 11</div>
+    <div class="eyebrow">An interactive derivation · No. 23</div>
     <h1>The sum of the <em>parts</em></h1>
     <p class="sub">Ten pages have priced one option at a time. A book is a portfolio, its risk is not the sum of its positions, and the number that looks safest on the report — a net vega near zero — is frequently the one hiding the most.</p>
   </div>
@@ -59,7 +59,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">This is the capstone and it assumes the series. The greeks come from <a href="black-scholes.html#c5" style="color:var(--blue)">page 01</a>, the term structure from <a href="surface.html" style="color:var(--blue)">page 02</a>, and the hedging-cost trade-off from <a href="execution.html#c1" style="color:var(--blue)">page 06</a>. Nothing new is derived here; everything is aggregated, which turns out to be the hard part.</p>
+  <p class="lede">This is the capstone and it assumes the series. The greeks come from <a href="black-scholes.html#c5" style="color:var(--blue)">page 01</a>, the term structure from <a href="surface.html" style="color:var(--blue)">page 07</a>, and the hedging-cost trade-off from <a href="execution.html#c1" style="color:var(--blue)">page 13</a>. Nothing new is derived here; everything is aggregated, which turns out to be the hard part.</p>
   <ol>
     <li><b>Chapter 02 is the figure risk managers actually look at.</b> Not a greek report — a grid of full repricings, with the greek estimate beside it so you can see where the estimate fails.</li>
     <li><b>Chapter 03 puts a number on "fails".</b> At a 1% move the greeks are wrong by 0.7%. At 20% they are wrong by 58%.</li>
@@ -93,7 +93,7 @@
     <p><b>Dollar delta adds</b>, on one underlying, without qualification. Multiply delta by the contract multiplier, by the position size, and by spot, and you have a number of dollars that moves one-for-one with a percentage change in the stock. Our four-position book carries a share delta of <b>557</b> — about <b>$57,000</b> of exposure — assembled from legs of −2,496, +1,430, +709 and +914 shares.</p>
     <p><b>Gamma cash adds</b>, once expressed as dollars of delta gained per 1% move. Our book's is <b>$2,042</b> per percent, and it is worth noticing how it got there: the short front-month 100 calls contribute <b>−$18,002</b> and the long 110 calls <b>+$20,033</b>. Two large opposing numbers netting to something small is the normal condition of an options book, and it is precisely the condition under which a net figure stops describing the risk.</p>
     <p><b>Vega adds arithmetically and lies.</b> You can total it — ours is <b>$417</b> per volatility point — but the total presumes every volatility moves together, which is the one thing volatilities reliably do not do. Chapter 04 takes this apart.</p>
-    <p>And two things do not add at all. <b>Gamma across different underlyings</b> is not additive in any useful sense, because a 1% move in one name is not the same event as a 1% move in another; you need a covariance structure, which is <a href="dispersion.html" style="color:var(--blue)">page 10's</a> subject. <b>Greeks across dates</b> are not comparable either — a one-week gamma and a one-year gamma are different animals wearing the same label.</p>
+    <p>And two things do not add at all. <b>Gamma across different underlyings</b> is not additive in any useful sense, because a 1% move in one name is not the same event as a 1% move in another; you need a covariance structure, which is <a href="dispersion.html" style="color:var(--blue)">page 12's</a> subject. <b>Greeks across dates</b> are not comparable either — a one-week gamma and a one-year gamma are different animals wearing the same label.</p>
   </div>
 
   <div class="mline">$Δ = Δ × multiplier × contracts × S &nbsp;&nbsp;&nbsp; Γ<sub>cash</sub> = Γ × multiplier × contracts × S² × 1%</div>
@@ -141,7 +141,7 @@
       <button>That the legs should be equal in size</button>
       <button>That gamma cash is the wrong measure</button>
     </div>
-    <div class="ans"><b>The offset is local.</b> Each leg's gamma is a hill centered on its own strike — the same fact that made page 09's log contract necessary — so a book flat by netting at 102 can be substantially long or short gamma at 95 or 115. This is exactly why chapter 02 exists: a single netted number describes one point, and a matrix describes the neighborhood.</div>
+    <div class="ans"><b>The offset is local.</b> Each leg's gamma is a hill centered on its own strike — the same fact that made page 11's log contract necessary — so a book flat by netting at 102 can be substantially long or short gamma at 95 or 115. This is exactly why chapter 02 exists: a single netted number describes one point, and a matrix describes the neighborhood.</div>
   </div>
 </section>
 
@@ -289,8 +289,8 @@
     <p>Our book's vega breaks into <b>+99</b> in the front two months, <b>−495</b> in the two-to-six month bucket, and <b>+813</b> beyond six months, netting to <b>+417</b>. That net is a true arithmetic total and it describes almost nothing, because the book is really a term-structure position — short the belly, long the wings of the calendar — wearing the disguise of a modest long-vol book.</p>
     <p>Watch what that does. A genuine parallel move of +2 volatility points makes <b>$863</b>, close to the naive net-vega prediction of $834. But a front-up-ten, back-down-one-and-a-half twist makes <b>$864</b>; a front-down-six, back-up-five twist makes <b>$1,238</b>; and a front-up-twelve, back-down-three twist makes <b>$743</b>. Same book, same net vega, and a spread of nearly <b>67%</b> between the outcomes — with nothing that a single number could have distinguished.</p>
     <p>Which is why real risk systems bucket. The convention is a set of tenor buckets with vega reported in each, and the discipline is that limits are set per bucket rather than on the total. A desk that is flat on net vega and running plus-and-minus a thousand in adjacent buckets is not flat; it has a term-structure position that nobody has approved.</p>
-    <p>The same argument applies twice more, and for the same reason. Bucket by <b>strike</b> as well as by tenor, because a book long wings and short the body has zero net vega and a large skew position. And remember from <a href="surface.html#c5" style="color:var(--blue)">page 02</a> that the delta you are bucketing is itself model-dependent — sticky-strike and sticky-delta conventions produce different vega attributions from identical prices.</p>
-    <p>Bucketing shows where the vega is. It does not say how to add the buckets, and the answer depends on how much each tenor moves when the front does: <a href="dynamics.html#c3">page 22, chapter 03</a>.</p>
+    <p>The same argument applies twice more, and for the same reason. Bucket by <b>strike</b> as well as by tenor, because a book long wings and short the body has zero net vega and a large skew position. And remember from <a href="surface.html#c5" style="color:var(--blue)">page 07</a> that the delta you are bucketing is itself model-dependent — sticky-strike and sticky-delta conventions produce different vega attributions from identical prices.</p>
+    <p>Bucketing shows where the vega is. It does not say how to add the buckets, and the answer depends on how much each tenor moves when the front does: <a href="dynamics.html#c3">page 21, chapter 03</a>.</p>
   </div>
 
   <figure class="bleed">
@@ -380,7 +380,7 @@
   <p class="mread">Reads as: <b>before adding, multiply each name's gamma cash by its beta squared.</b> Squared, because beta scales the move and gamma P&amp;L goes with the move squared. Here 1,000,000 &times; 0.25 &minus; 500,000 &times; 4 = &minus;$1,750,000 per 1% of index.</p>
 
   <div class="prose">
-    <p>That number answers one question: what happens when the market moves and everything follows it. It is silent on the days a name moves alone, and for those the original gammas are the right ones, name by name. A book can be short index-equivalent gamma and still make money most days from single-stock noise, which is a dispersion position whether or not anyone called it one. Page 10 is that trade taken on purpose.</p>
+    <p>That number answers one question: what happens when the market moves and everything follows it. It is silent on the days a name moves alone, and for those the original gammas are the right ones, name by name. A book can be short index-equivalent gamma and still make money most days from single-stock noise, which is a dispersion position whether or not anyone called it one. Page 12 is that trade taken on purpose.</p>
     <p>Beta is an assumption. It is estimated from history, it drifts, and in a selloff betas of defensive names tend to rise toward one, which makes the frown here an understatement of the bad case rather than an overstatement.</p>
   </div>
 
@@ -420,7 +420,7 @@
     <p>They come in layers, and the layers exist because each one fails differently.</p>
     <p><b>Greek limits</b> — maximum dollar delta, gamma cash, <span class="term" data-t="Bucketed" data-def="Grouped by expiry (or by strike) rather than summed into one number. A net vega of zero across buckets of +1,000 and −1,000 is a term-structure position nobody approved.">bucketed</span> vega. Cheap to compute, easy to monitor continuously, and subject to exactly the failure of chapter 03: they describe the book near today's spot and say nothing about the corners. A book can sit inside every greek limit and still be carrying a scenario loss nobody has authorised.</p>
     <p><b>Scenario limits</b> — the worst cell of the matrix must be better than some number. This is the one that actually binds, because it is computed from full repricings and therefore does not degrade with move size. Its weakness is that it only covers the scenarios in the grid.</p>
-    <p><b>Stress limits</b> — named historical or hypothetical events, deliberately chosen because they hurt rather than because they are likely, and usually including a correlation-goes-to-one case for the reasons on <a href="dispersion.html#c5" style="color:var(--blue)">page 10</a>.</p>
+    <p><b>Stress limits</b> — named historical or hypothetical events, deliberately chosen because they hurt rather than because they are likely, and usually including a correlation-goes-to-one case for the reasons on <a href="dispersion.html#c5" style="color:var(--blue)">page 12</a>.</p>
     <p>The figure makes the first layer's weakness concrete. Adjust the position sizes until every greek sits inside its limit, then look at the worst cell of the matrix. It is entirely possible — and on this book, easy — to be green on every greek and red on the scenario, because the greeks are measuring the middle of the grid and the limit that matters lives in a corner.</p>
     <p>One more thing worth saying plainly, because it is where limits are most often misunderstood. A limit breach is not a prediction that you will lose the money. It is a statement that the position has grown past the size at which the firm is willing to find out. The correct response is to reduce, not to argue about the probability.</p>
   </div>
@@ -445,6 +445,41 @@
     </div>
     <figcaption>Scale the book up and watch which bar turns first. Every bar grows in proportion — scaling a book scales every repricing too — so what differs is where each one starts. The scenario bar starts higher relative to its limit than the greek bars do, because the scenario loss contains the convexity the greeks are missing, and so it breaches first while every greek is still green. That gap in starting level is the entire argument for having both kinds of limit.</figcaption>
   </figure>
+
+  <div class="prose">
+    <p>Now sit in the morning meeting with a book that is over its limits on all four lines: too long delta, too short gamma, short front vega and long back vega. You have four hedges, each with a bid-offer to pay. Get every line inside its limit and spend as little as you can doing it. The catch is the whole lesson: every hedge moves more than one line.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Get the book inside its limits</h3></div>
+        <p class="simmsg" id="lmMsg" aria-live="polite"></p>
+        <canvas id="cvLM" height="250"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Trade lots</h4>
+        <div id="lmCtl" class="lmctl"></div>
+        <div class="btnrow simbtns">
+          <button class="act ghost" id="lmShow">Show the cheapest fix</button>
+          <button class="act ghost" id="lmReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvLM"></div>
+      </div>
+    </div>
+    <figcaption>The tempting first move, selling 90-day straddles to fix the back vega, takes three lots and makes gamma worse: with the stock sold to fix delta, gamma falls from −$300,000 to −$460,000 per 1% move, because the straddles you sold were long gamma too. The fix is to buy gamma where it is cheap in vega, at the front. The cheapest book inside every limit sells 18,000 shares, buys four lots of 30-day straddles and sells three of 90-day, for $7,180 of spread.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A risk manager does not hedge greeks one at a time; every instrument is a vector of greeks, and the job is to find the cheapest combination that lands inside every limit. Traders who hedge line by line overpay, and often fix one breach by creating another.</p>
+    <ul>
+      <li>Front options are the cheap source of gamma; back options are the cheap source of vega.</li>
+      <li>Fix delta last, with stock or futures: it is the cheapest greek to move and every option trade changes it.</li>
+      <li>A limit that keeps breaching is telling you the book's real position, not asking for a hedge.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> hedge the greek that is most expensive to move first, and the cheapest one last.</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -1344,7 +1379,63 @@ const sFld = { n: 100, S: 250, K: 260, days: 30, vol: 0.30, call: 1 };
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();drawIdx();draw5();draw6();drawPnl();drawFld();}
+/* ══════════ 06b — get the book inside its limits ══════════
+   The morning risk report: a book at spot $100, 30 vol, with dollar delta
+   +$1.8m, dollar gamma -$300k per 1% move, front (30-day) vega -$12k a point
+   and back (90-day) vega +$15k a point. Limits: |delta| <= $250k, gamma >=
+   -$100k, |front vega| and |back vega| <= $5k. Hedges, per lot: 1,000 shares
+   (1 cent a share), 100 at-the-money straddles at 30 or 90 days, or 100
+   one-by-one 25-delta risk reversals at 30 days (long call, short put), each
+   option paying 5 cents a share of half-spread. The reader trades lots up or
+   down; the readout reprices the book with bs(). */
+const LM = { q: { stk: 0, f: 0, b: 0, rr: 0 } };
+const LMB = { delta: 1.8e6, gamma: -3.0e5, vf: -1.2e4, vb: 1.5e4 };
+const LMLIM = { delta: 2.5e5, gamma: -1.0e5, vf: 5e3, vb: 5e3 };
+function lmLeg(kind){ const S = 100, v = 0.30;
+  if (kind === "stk") return { delta: 1000 * S, gamma: 0, vf: 0, vb: 0, cost: 1000 * 0.01 };
+  const T = kind === "b" ? 90 / 365 : 30 / 365, n = 100 * 100;
+  if (kind === "rr") { const kc = 100 * Math.exp(0.674 * v * Math.sqrt(T)), kp = 100 * Math.exp(-0.674 * v * Math.sqrt(T)), c = bs(S, kc, T, v, 0, 0, true), p = bs(S, kp, T, v, 0, 0, false);
+    return { delta: n * (c.delta - p.delta) * S, gamma: n * (c.gamma - p.gamma) * S * S / 100, vf: n * (c.vega - p.vega) / 100, vb: 0, cost: 2 * n * 0.05 }; }
+  const c = bs(S, 100, T, v, 0, 0, true), p = bs(S, 100, T, v, 0, 0, false), vg = n * (c.vega + p.vega) / 100;
+  return { delta: n * (c.delta + p.delta) * S, gamma: n * (c.gamma + p.gamma) * S * S / 100, vf: kind === "f" ? vg : 0, vb: kind === "b" ? vg : 0, cost: 2 * n * 0.05 }; }
+function lmBook(q){ const out = Object.assign({}, LMB), legs = { stk: lmLeg("stk"), f: lmLeg("f"), b: lmLeg("b"), rr: lmLeg("rr") }; let cost = 0;
+  for (const k in q) { ["delta", "gamma", "vf", "vb"].forEach(g => out[g] += q[k] * legs[k][g]); cost += Math.abs(q[k]) * legs[k].cost; }
+  out.cost = cost; out.ok = { delta: Math.abs(out.delta) <= LMLIM.delta, gamma: out.gamma >= LMLIM.gamma, vf: Math.abs(out.vf) <= LMLIM.vf, vb: Math.abs(out.vb) <= LMLIM.vb };
+  out.all = Object.values(out.ok).every(Boolean); return out; }
+/* the cheapest book inside the limits, by search over small lot counts (for verify.js and "show me") */
+function lmBest(){ let best = null;
+  for (let f = 0; f <= 10; f++) for (let b = -8; b <= 0; b++) for (let rr = -3; rr <= 3; rr++) {
+    const pre = lmBook({ stk: 0, f, b, rr }), stk = Math.round(-pre.delta / lmLeg("stk").delta), bk = lmBook({ stk, f, b, rr });
+    if (bk.all && (!best || bk.cost < best.cost)) best = { q: { stk, f, b, rr }, cost: bk.cost }; }
+  return best; }
+(function(){
+  const host = document.getElementById("lmCtl"), NM = { stk: "1,000 shares", f: "100 straddles, 30 days", b: "100 straddles, 90 days", rr: "100 risk reversals, 30 days" };
+  host.innerHTML = Object.keys(NM).map(k => `<div class="lmrow"><span>${NM[k]}</span><button class="act ghost" data-k="${k}" data-d="-1" aria-label="Sell one lot">−</button><b id="lmq_${k}">0</b><button class="act ghost" data-k="${k}" data-d="1" aria-label="Buy one lot">+</button></div>`).join("");
+  host.addEventListener("click", e => { const b = e.target.closest("button[data-k]"); if (!b) return; const k = b.dataset.k, s = k === "stk" ? 2 : 1; LM.q[k] += (+b.dataset.d) * s; draw(); });
+  document.getElementById("lmShow").addEventListener("click", () => { const b = lmBest(); if (b) LM.q = Object.assign({}, b.q); draw(); });
+  document.getElementById("lmReset").addEventListener("click", () => { LM.q = { stk: 0, f: 0, b: 0, rr: 0 }; draw(); });
+  window.drawLM = draw;
+  function draw(){
+    Object.keys(LM.q).forEach(k => document.getElementById("lmq_" + k).textContent = (LM.q[k] > 0 ? "+" : "") + LM.q[k]);
+    const bk = lmBook(LM.q), money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    const G = [["Dollar delta", "delta", LMLIM.delta, true], ["Gamma per 1%", "gamma", LMLIM.gamma, false], ["Front vega", "vf", LMLIM.vf, true], ["Back vega", "vb", LMLIM.vb, true]];
+    const o = Fig(document.getElementById("cvLM"), { h: 250, x0: -3.2, x1: 3.2, y0: 0, y1: 4, pad: { l: 120, r: 14, t: 10, b: 22 } });
+    const g = o.g;
+    G.forEach(([name, k, lim, sym], i) => { const y = o.Y(3.5 - i), v = bk[k] / Math.abs(lim), ok = bk.ok[k], bh = 16;
+      g.fillStyle = C("--moss"); g.globalAlpha = 0.12; g.fillRect(o.X(sym ? -1 : -1), y - bh, o.X(sym ? 1 : 3.2) - o.X(-1), bh * 2); g.globalAlpha = 1;
+      g.fillStyle = ok ? C("--moss") : C("--verm"); const xv = Math.max(-3.2, Math.min(3.2, v)); g.fillRect(Math.min(o.X(0), o.X(xv)), y - bh / 2, Math.abs(o.X(xv) - o.X(0)), bh);
+      g.fillStyle = C("--ink"); g.font = "10.5px 'IBM Plex Mono', monospace"; g.textAlign = "right"; g.textBaseline = "middle"; g.fillText(name, o.P.l - 10, y - 6);
+      g.fillStyle = C("--grey"); g.fillText(money0(bk[k]), o.P.l - 10, y + 8); });
+    g.strokeStyle = C("--ink"); g.globalAlpha = 0.4; g.beginPath(); g.moveTo(o.X(0), o.P.t); g.lineTo(o.X(0), o.P.t + o.ph); g.stroke(); g.globalAlpha = 1;
+    g.fillStyle = C("--grey"); g.font = "9.5px 'IBM Plex Mono', monospace"; g.textAlign = "center"; g.textBaseline = "top"; g.fillText(NARROW() ? "green: inside the limit" : "green band: inside the limit (scaled to each limit)", o.P.l + o.pw / 2, o.P.t + o.ph + 6);
+    const breaches = G.filter(([, k]) => !bk.ok[k]).map(([n]) => n.toLowerCase());
+    document.getElementById("lmMsg").textContent = bk.all ? "Inside every limit, for " + money0(bk.cost) + " of spread. The cheapest way in costs " + money0(lmBest().cost) + "." :
+      "Over the limit on " + breaches.join(", ") + ". Trade until every bar sits in its green band, spending as little spread as you can.";
+    document.getElementById("kvLM").innerHTML = kvHTML([["Spread paid", money0(bk.cost)], ["Limits met", Object.values(bk.ok).filter(Boolean).length + " of 4", bk.all ? "moss" : "verm"]]);
+  }
+})();
+
+function drawAll(){drawLM();draw1();draw2();draw3();draw4();drawIdx();draw5();draw6();drawPnl();drawFld();}
 LAB.boot(drawAll);
 
 </script>

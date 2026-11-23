@@ -47,7 +47,7 @@
   <div class="heroInner">
     <div class="eyebrow">An interactive derivation · No. 19</div>
     <h1>Every structure, on <em>every</em> axis</h1>
-    <p class="sub">Page 04 reduced a structure to five bars at one point in space. This is the atlas underneath that: what each greek actually looks like across spot and time, which of them are secretly the same number, and what any of it is worth to a desk that hedges its delta away.</p>
+    <p class="sub">Page 09 reduced a structure to five bars at one point in space. This is the atlas underneath that: what each greek actually looks like across spot and time, which of them are secretly the same number, and what any of it is worth to a desk that hedges its delta away.</p>
   </div>
   <div class="scrollcue">Scroll ↓</div>
 </div>
@@ -56,7 +56,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede"><a href="structures.html">Page 04</a>'s fingerprint is a snapshot — one spot, one expiry, five bars. It is the right first tool and it hides three things that decide whether a trade works. This page is those three things.</p>
+  <p class="lede"><a href="structures.html">Page 09</a>'s fingerprint is a snapshot — one spot, one expiry, five bars. It is the right first tool and it hides three things that decide whether a trade works. This page is those three things.</p>
   <ol>
     <li><b>Chapter 01 is the one that reorganizes everything.</b> At a flat volatility, <b>theta and gamma are the same number</b> in different units, always. <b>Vega joins them</b> whenever every leg shares an expiry. So a single-expiry structure has four independent axes, not seven, and no amount of strike selection will make it long gamma and short vega.</li>
     <li><b>Chapter 03 is why a bar chart is not enough.</b> A butterfly's gamma is negative at the money and <em>positive</em> in the wings — it changes sign at spot <b>91.45</b> on the example here. A single number for "gamma" describes one point and misleads everywhere else.</li>
@@ -98,11 +98,10 @@
     <div class="split wide">
       <div>
         <div class="figtop">
-          <h3>The two ratios, across strikes and across expiries</h3>
+          <h3>Each greek against its gamma-built twin</h3>
           <span class="legend" style="margin:0">
-            <span><i class="swl" style="background:var(--verm)"></i>theta ÷ (−½ΓS²σ²)</span>
-            <span><i class="swl" style="background:var(--blue)"></i>vega ÷ (ΓS²σT)</span>
-            <span><i class="swl" style="background:var(--ochre)"></i>one</span>
+            <span><i class="swl" style="background:var(--verm)"></i>theta, and ½ΓS²σ² dashed</span>
+            <span><i class="swl" style="background:var(--blue)"></i>vega, and ΓS²σT dashed</span>
           </span>
         </div>
         <canvas id="cv1" height="310"></canvas>
@@ -113,11 +112,49 @@
         <div class="kv" style="margin-top:20px" id="kv1"></div>
       </div>
     </div>
-    <figcaption>Both ratios sit exactly on one at every strike. Switch the axis to expiry and the theta line stays flat while the vega line does not — that gap is a calendar.</figcaption>
+    <figcaption>Across strikes each dashed twin lies exactly on its greek: theta and vega are both gamma, priced. Switch the sweep to expiries and theta stays glued to its twin while vega peels away from the one built at this expiry — that gap is a calendar, and the only handle a strike choice cannot give you.</figcaption>
   </figure>
 
   <div class="mline">θ = −½ · Γ · S² · σ²          ν = Γ · S² · σ · T          (r = q = 0)</div>
   <p class="mread">Reads as: <b>theta is gamma priced in time, and vega is gamma priced in time and expiry.</b> The missing T on the left is why theta never separates from gamma, and the T on the right is the only handle you have.</p>
+
+  <div class="prose">
+    <p>Here is what that identity costs a client who asks for the wrong thing. They want a book that is long gamma and short vega: paid when the stock moves, paid when implied falls. Every structure at one expiry carries the same vega per unit of gamma, so every one lies on a single line through the middle of the plane below. Trade straddles at two expiries and try to put your book in the green corner.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Reach the quadrant</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--blue)"></i>30-day line</span>
+            <span><i class="sw" style="background:var(--ochre)"></i>90-day line</span>
+            <span><i class="sw" style="background:var(--moss)"></i>Long gamma, short vega</span>
+          </span>
+        </div>
+        <p class="simmsg" id="qdMsg" aria-live="polite"></p>
+        <canvas id="cvQD" height="300"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your book</h4>
+        <div id="ctlQD"></div>
+        <div class="kv" style="margin-top:16px" id="kvQD"></div>
+      </div>
+    </div>
+    <figcaption>The two dashed lines are every structure that can be built at 30 days and at 90 days. The 90-day line carries exactly three times the vega per unit of gamma, because the ratio is proportional to time. On either line alone, no number of straddles leaves the line. Buy three 30-day straddles and sell two 90-day ones and the book is long $1,712 of gamma per 1% move and short $10.46 of vega, at a cost of $21.11 a day in theta: a reverse calendar, the only door into that corner.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>Vol traders think of gamma and vega as one exposure at a given expiry, and of the term structure as the only way to separate them. "Long gamma, short vega" is a calendar trade, a view that near-dated realized volatility will beat the implied that far-dated options pay for. The theta it costs is the price of that view.</p>
+    <ul>
+      <li>At one expiry, choosing strikes changes how much gamma you have, never its exchange rate with vega.</li>
+      <li>Front options are gamma; back options are vega. Calendars trade one against the other.</li>
+      <li>Theta tracks gamma, so a long-gamma book always pays rent, whatever the vega.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> vega per unit of gamma scales with time to expiry; three times the days, three times the ratio.</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -319,7 +356,7 @@
     <p>So at a flat volatility, a straddle, a strangle, a butterfly, a condor, a ratio, a calendar and a diagonal <b>all break even on exactly the same 1.5703% move</b>. Not approximately — identically, to every decimal, because the structure-dependent term divided out.</p>
     <p>That is worth sitting with, because it kills a whole family of intuitions. A structure cannot make a hedged position "cheaper to carry" or "easier to break even on." What a structure decides is <em>where across spot</em> your gamma is concentrated and <em>what sign</em> it has there. The breakeven per unit of gamma is fixed by the vol you paid.</p>
     <p><b>And then skew breaks it.</b> Mark each strike at its own implied volatility and theta stops tracking gamma, because each leg's theta carries its own <b>σ<sub>i</sub>²</b>. On a downward skew of 40 basis points of vol per point of strike, the breakevens separate: a straddle still needs <b>1.5703%</b>, but a <b>put spread</b> needs only <b>1.1185%</b>, a <b>risk reversal</b> <b>1.3277%</b>, and a <b>butterfly</b> needs <b>1.5957%</b> — slightly more.</p>
-    <p>Every one of those gaps is a structure that is short the expensive strikes and long the cheap ones, or the reverse. That difference is the only thing that makes one hedged structure genuinely better carry than another, and it is a statement about the surface rather than about the shape. Which is <a href="surface.html">page 02</a>'s point arriving with a number attached.</p>
+    <p>Every one of those gaps is a structure that is short the expensive strikes and long the cheap ones, or the reverse. That difference is the only thing that makes one hedged structure genuinely better carry than another, and it is a statement about the surface rather than about the shape. Which is <a href="surface.html">page 07</a>'s point arriving with a number attached.</p>
   </div>
 
   <figure class="bleed">
@@ -348,7 +385,7 @@
     <span class="lab">Where this comes from</span>
     <p>Over one day a delta-hedged position earns <b>½·Γ·(ΔS)²</b> from the move and pays <b>θ/365</b> in carry. Breaking even means <b>½·Γ·(ΔS)² = −θ/365</b>, so <b>ΔS = √(−2θ / (365·Γ))</b>.</p>
     <p>With <b>θ = −½ΓS²σ²</b> that becomes <b>ΔS = √(ΓS²σ²/(365Γ)) = S·σ/√365</b>, and as a percentage of spot it is just <b>σ/√365</b>. Gamma appears in both the numerator and the denominator and leaves. Nothing about strikes, weights or expiries survives the cancellation, which is why the answer is the same for every structure.</p>
-    <p><b>Where it breaks:</b> the cancellation needs one volatility. With a surface, <b>θ = −½S²·Σ Γ<sub>i</sub>σ<sub>i</sub>²</b> while gamma is <b>Σ Γ<sub>i</sub></b>, and the two no longer differ by a constant — the breakeven becomes a gamma-weighted average of the leg volatilities rather than a single number. It also assumes continuous hedging and a second-order expansion: on a genuine jump the (ΔS)² term understates a long-gamma position's gain and understates a short one's loss, which is <a href="real-world.html">page 15</a>'s subject. And it uses σ√(1/365) as the daily move, which prices calendar days; a desk hedging on trading days should use √(1/252) and gets 1.890% instead.</p>
+    <p><b>Where it breaks:</b> the cancellation needs one volatility. With a surface, <b>θ = −½S²·Σ Γ<sub>i</sub>σ<sub>i</sub>²</b> while gamma is <b>Σ Γ<sub>i</sub></b>, and the two no longer differ by a constant — the breakeven becomes a gamma-weighted average of the leg volatilities rather than a single number. It also assumes continuous hedging and a second-order expansion: on a genuine jump the (ΔS)² term understates a long-gamma position's gain and understates a short one's loss, which is <a href="real-world.html">page 20</a>'s subject. And it uses σ√(1/365) as the daily move, which prices calendar days; a desk hedging on trading days should use √(1/252) and gets 1.890% instead.</p>
   </div>
 
   <div class="check">
@@ -546,7 +583,7 @@
 </main>
 
 <footer>
-  <p class="n">Every identity here assumes zero rates and no dividends, which is where θ = −½ΓS²σ² comes from; with rates the theta picks up a term in rK·e^(−rT)·N(d₂) and the collinearity with gamma becomes approximate rather than exact, though at present short rates and one-month expiries the error is well under a percent. The breakeven derivation is a second-order expansion and assumes continuous delta hedging: a real desk hedges discretely, which adds the variance <a href="execution.html">page 06</a> measures, and a genuine jump breaks the (ΔS)² term entirely. The daily move uses calendar days, σ/√365; a desk that hedges only on trading days should use σ/√252 and gets 1.890% rather than 1.570% for the same 30 vol, and the two conventions are mixed constantly. The skew used in chapter 05 is a linear 40 basis points of vol per point of strike, which is a caricature of a real surface — actual skew is convex and steepens into expiry, so the separations shown are the right sign and roughly the right size rather than a quotation. The atlas normalizes against a one-lot ATM straddle at one spot and one expiry; every entry moves the moment any of those change, which is chapters 03 and 04. And the fund figures assume a hundred-share contract with no financing, borrow or margin cost, all of which a real desk pays and none of which appear in any greek.</p>
+  <p class="n">Every identity here assumes zero rates and no dividends, which is where θ = −½ΓS²σ² comes from; with rates the theta picks up a term in rK·e^(−rT)·N(d₂) and the collinearity with gamma becomes approximate rather than exact, though at present short rates and one-month expiries the error is well under a percent. The breakeven derivation is a second-order expansion and assumes continuous delta hedging: a real desk hedges discretely, which adds the variance <a href="execution.html">page 13</a> measures, and a genuine jump breaks the (ΔS)² term entirely. The daily move uses calendar days, σ/√365; a desk that hedges only on trading days should use σ/√252 and gets 1.890% rather than 1.570% for the same 30 vol, and the two conventions are mixed constantly. The skew used in chapter 05 is a linear 40 basis points of vol per point of strike, which is a caricature of a real surface — actual skew is convex and steepens into expiry, so the separations shown are the right sign and roughly the right size rather than a quotation. The atlas normalizes against a one-lot ATM straddle at one spot and one expiry; every entry moves the moment any of those change, which is chapters 03 and 04. And the fund figures assume a hundred-share contract with no financing, borrow or margin cost, all of which a real desk pays and none of which appear in any greek.</p>
 </footer>
 
 <script src="assets/lab.js"></script>
@@ -745,29 +782,44 @@ const s1 = { mode: 0, vol: 30, days: 30 };
       fmt: v => v.toFixed(0) + "%" },
     { id: "c1", k: "days", lbl: "T", name: "Days to expiry", min: 5, max: 365, step: 5,
       fmt: v => v.toFixed(0) + "d" }
-  ], s1, () => draw(), "c1");
+  ], s1, () => draw(),"c1");
   window.draw1 = draw;
   function draw() {
     const V = s1.vol / 100, T = s1.days / 365, S = BASE.S;
     const byStrike = s1.mode < 0.5;
+    /* Each greek drawn solid, its gamma-built twin dashed on top, each pair
+       scaled to its own peak so the shapes can be compared. Across strikes
+       both pairs coincide. Across expiries theta stays glued to its twin and
+       vega peels away, because the twin holds T at the current expiry — that
+       gap is the calendar. The ratios themselves are in the readout. */
+    const x0 = byStrike ? 75 : 5, x1 = byStrike ? 130 : 365, n = 240;
+    const xs = [], th = [], thG = [], vg = [], vgG = [];
+    for (let i = 0; i <= n; i++) {
+      const x = x0 + (x1 - x0) * i / n, k = byStrike ? x : 100, t = byStrike ? T : x / 365;
+      const b = bs(S, k, t, V, 0, 0, true);
+      xs.push(x); th.push(-b.theta); thG.push(0.5 * b.gamma * S * S * V * V);
+      vg.push(b.vega); vgG.push(b.gamma * S * S * V * T);
+    }
+    const mt = Math.max(...th), mv = Math.max(...vg);
+    /* theta's pair peaks at 1, vega's at 0.6, so the two pairs sit apart;
+       the units differ, so only the shapes are meant to be compared */
+    const nm = (a, m, k = 1) => a.map(v => k * v / m);
+    const top = Math.max(1.12, ...nm(vgG, mv, 0.6).map(v => v * 1.04));
     const o = Fig(document.getElementById("cv1"),
-      { h: 320, x0: byStrike ? 75 : 5, x1: byStrike ? 130 : 365,
-        y0: 0.4, y1: 1.6, pad: { l: 62, r: 14, t: 14 } });
-    axes(o, x => byStrike ? x.toFixed(0) : x.toFixed(0) + "d", y => y.toFixed(2), 6, 5);
-    /* both ratios, measured on a single call */
-    curve(o, x => {
-      const k = byStrike ? x : 100, t = byStrike ? T : x / 365;
-      const b = bs(S, k, t, V, 0, 0, true);
-      return thetaRatio(b, S, V);
-    }, C("--verm"), 2.6);
-    curve(o, x => {
-      const k = byStrike ? x : 100, t = byStrike ? T : x / 365;
-      const b = bs(S, k, t, V, 0, 0, true);
-      /* measured against the CURRENT expiry T, which is the point: fix T and
-         the ratio is one; sweep T and it walks away */
-      return vegaRatio(b, S, V, T);
-    }, C("--blue"), 2.0, [6, 4]);
-    hline(o, 1, C("--ochre"), "one");
+      { h: 320, x0, x1, y0: 0, y1: Math.min(top, 3), pad: { l: 50, r: 14, t: 14 } });
+    axes(o, x => byStrike ? x.toFixed(0) : x.toFixed(0) + "d", () => "", 6, 4);
+    clip(o, () => {
+      line(o, xs, nm(th, mt), C("--verm"), 4, null, 0.55);
+      line(o, xs, nm(thG, mt), C("--verm"), 1.6, [5, 4]);
+      line(o, xs, nm(vg, mv, 0.6), C("--blue"), 4, null, 0.55);
+      line(o, xs, nm(vgG, mv, 0.6), C("--blue"), 1.6, [5, 4]);
+    });
+    const g = o.g; g.font = "10px 'IBM Plex Mono', monospace"; g.textBaseline = "bottom";
+    const at = (arr, k, col, txt) => { let i = arr.indexOf(Math.max(...arr)); i = Math.min(Math.max(i, 20), n - 20);
+      g.fillStyle = col; g.textAlign = "center"; g.fillText(txt, o.X(xs[i]), o.Y(k * arr[i] / Math.max(...arr)) - 6); };
+    at(th, 1, C("--verm"), "theta");
+    at(vg, 0.6, C("--blue"), "vega");
+    vline(o, byStrike ? 100 : s1.days, C("--ochre"), byStrike ? "spot" : "this expiry");
     const cal = greeksOf(STRUCTS.find(x => x.n === "Calendar").legs, S, T, BASE.T2, flatVol(V));
     const strd = yardstick(S, T, V);
     document.getElementById("kv1").innerHTML = kvHTML([
@@ -795,7 +847,7 @@ const s2 = { axis: 1, vol: 30, days: 30 };
       fmt: v => v.toFixed(0) + "%" },
     { id: "c2", k: "days", lbl: "T", name: "Days to the near expiry", min: 5, max: 120, step: 5,
       fmt: v => v.toFixed(0) + "d" }
-  ], s2, () => draw(), "c2");
+  ], s2, () => draw(),"c2");
   window.draw2 = draw;
   window.__atlas = (S, T1, T2, V) => STRUCTS.map(st => {
     const n = normalized(st, S, T1, T2, V);
@@ -863,7 +915,7 @@ const s3 = { which: 5, axis: 1, vol: 30, days: 30 };
       fmt: v => v.toFixed(0) + "%" },
     { id: "d3", k: "days", lbl: "T", name: "Days to expiry", min: 2, max: 120, step: 1,
       fmt: v => v.toFixed(0) + "d" }
-  ], s3, () => draw(), "c3");
+  ], s3, () => draw(),"c3");
   window.draw3 = draw;
   window.__profile = (name, key, S, T, V) => {
     const st = STRUCTS.find(x => x.n === name);
@@ -937,7 +989,7 @@ const s4 = { which: 0, axis: 1, vol: 30 };
       fmt: v => AXNAME[AXES[Math.round(v)]] },
     { id: "c4", k: "vol", lbl: "σ", name: "Volatility", min: 8, max: 90, step: 1,
       fmt: v => v.toFixed(0) + "%" }
-  ], s4, () => draw(), "c4");
+  ], s4, () => draw(),"c4");
   window.draw4 = draw;
   window.__atTime = (name, key, days, S, V) => {
     const st = STRUCTS.find(x => x.n === name);
@@ -951,7 +1003,9 @@ const s4 = { which: 0, axis: 1, vol: 30 };
     let lo = 0, hi = 0;
     DAYS.forEach(([d]) => {
       for (let s = 78; s <= 124; s += 0.5) {
-        const v = normalized(st, s, d / 365, BASE.T2, V)[key];
+        /* the same pinned 30-day yardstick the curves are drawn with, or the
+           range never sees the one-day peak and the curves run off the top */
+        const v = normalized(st, s, d / 365, BASE.T2, V, null, 30 / 365)[key];
         if (isFinite(v)) { if (v < lo) lo = v; if (v > hi) hi = v; }
       }
     });
@@ -990,7 +1044,7 @@ const s5 = { skew: 0.4, vol: 30, days: 30 };
       fmt: v => v.toFixed(0) + "%" },
     { id: "c5", k: "days", lbl: "T", name: "Days to expiry", min: 5, max: 120, step: 5,
       fmt: v => v.toFixed(0) + "d" }
-  ], s5, () => draw(), "c5");
+  ], s5, () => draw(),"c5");
   window.draw5 = draw;
   window.__breakeven = (name, S, T, V, slope) => {
     const st = STRUCTS.find(x => x.n === name);
@@ -1063,7 +1117,7 @@ const s6 = { ds: 1, dvol: 0, target: 100, days: 30, vol: 30 };
       fmt: v => "$" + v.toFixed(0) + "k" },
     { id: "d6", k: "days", lbl: "T", name: "Days to expiry", min: 5, max: 180, step: 5,
       fmt: v => v.toFixed(0) + "d" }
-  ], s6, () => draw(), "c6");
+  ], s6, () => draw(),"c6");
   window.draw6 = draw;
   window.__fund = (target, days, V) =>
     fundSize(yardstick(BASE.S, days / 365, V), target, BASE.MULT);
@@ -1238,7 +1292,60 @@ const s6 = { ds: 1, dvol: 0, target: 100, days: 30, vol: 30 };
   };
 })();
 
+/* ══════════ 01b — reach the quadrant ══════════
+   The client wants a book that is long gamma and short vega. Every option at
+   one expiry has the same ratio of vega to gamma (chapter 01), so every
+   structure at that expiry lies on one line through the origin of the
+   gamma-vega plane. The reader trades at-the-money straddles at 30 and 90
+   days (spot 100, 30 vol); the book is the sum of the two lines' points.
+   Gamma is dollars of delta gained per 1% move (Gamma x S^2 per straddle on
+   100 shares); vega in dollars per vol point. */
+const sQD = { n30: 0, n90: 0 };
+function qdLeg(days){ const T = days / 365, c = bs(100, 100, T, 0.30, 0, 0, true), p = bs(100, 100, T, 0.30, 0, 0, false);
+  return { g: 100 * (c.gamma + p.gamma) * 100 * 100 / 100, v: 100 * (c.vega + p.vega) / 100, th: 100 * (c.theta + p.theta) / 365 }; }
+function qdBook(n30, n90){ const a = qdLeg(30), b = qdLeg(90); return { g: n30 * a.g + n90 * b.g, v: n30 * a.v + n90 * b.v, th: n30 * a.th + n90 * b.th }; }
+(function(){
+  sliders(document.getElementById("ctlQD"), [
+    { id: "a30", k: "n30", lbl: "30d", name: "30-day straddles (negative sells)", min: -10, max: 10, step: 1, fmt: v => (v > 0 ? "+" : "") + v.toFixed(0) },
+    { id: "a90", k: "n90", lbl: "90d", name: "90-day straddles (negative sells)", min: -10, max: 10, step: 1, fmt: v => (v > 0 ? "+" : "") + v.toFixed(0) }
+  ], sQD, () => draw(),"cQD");
+  window.drawQD = draw;
+  function draw(){
+    const a = qdLeg(30), b = qdLeg(90), bk = qdBook(sQD.n30, sQD.n90), gx = 10 * Math.max(a.g, b.g) * 1.1, vy = 10 * Math.max(a.v, b.v) * 1.1;
+    const won = bk.g > 1e-9 && bk.v < -1e-9;
+    const o = Fig(document.getElementById("cvQD"), { h: 300, x0: -gx, x1: gx, y0: -vy, y1: vy, pad: { l: 60, r: 14, t: 14 } });
+    axes(o, v => (v < 0 ? "−$" : "$") + Math.abs(v).toFixed(0), v => (v < 0 ? "−$" : "$") + Math.abs(v).toFixed(0), 6, 4);
+    const g = o.g;
+    g.fillStyle = C("--moss"); g.globalAlpha = won ? 0.18 : 0.08; g.fillRect(o.X(0), o.Y(0), o.X(gx) - o.X(0), o.Y(-vy) - o.Y(0)); g.globalAlpha = 1;
+    g.fillStyle = C("--moss"); g.font = "10.5px 'IBM Plex Mono', monospace"; g.textAlign = "right"; g.textBaseline = "bottom";
+    g.fillText("long gamma, short vega", o.X(gx) - 6, o.Y(-vy) - 6);
+    clip(o, () => { line(o, [-10 * a.g, 10 * a.g], [-10 * a.v, 10 * a.v], C("--blue"), 1.6, [6, 4]); line(o, [-10 * b.g, 10 * b.g], [-10 * b.v, 10 * b.v], C("--ochre"), 1.6, [6, 4]); });
+    /* label each line near its end, kept inside the plot */
+    /* the shallower line is labelled below itself, the steeper one above, so neither label sits on a line */
+    const lab = (t, x, y, col, below) => { const w = (g.measureText(t) || {}).width || t.length * 6; g.fillStyle = col; g.textAlign = "left"; g.textBaseline = below ? "top" : "bottom";
+      g.fillText(t, Math.max(o.P.l + 4, Math.min(o.P.l + o.pw - w - 4, o.X(x) + 8)), Math.max(o.P.t + 12, Math.min(o.P.t + o.ph - 14, o.Y(y) + (below ? 8 : -8)))); };
+    lab(NARROW() ? "30-day line" : "every 30-day structure", 6 * a.g, 6 * a.v, C("--blue"), true);
+    lab(NARROW() ? "90-day line" : "every 90-day structure", 3 * b.g, 3 * b.v, C("--ochre"), false);
+    /* the book as two arrows, head to tail, and its point */
+    const p1 = [sQD.n30 * a.g, sQD.n30 * a.v];
+    g.lineWidth = 2; g.strokeStyle = C("--blue"); g.beginPath(); g.moveTo(o.X(0), o.Y(0)); g.lineTo(o.X(p1[0]), o.Y(p1[1])); g.stroke();
+    g.strokeStyle = C("--ochre"); g.beginPath(); g.moveTo(o.X(p1[0]), o.Y(p1[1])); g.lineTo(o.X(bk.g), o.Y(bk.v)); g.stroke();
+    g.fillStyle = won ? C("--moss") : C("--ink"); g.beginPath(); g.arc(o.X(bk.g), o.Y(bk.v), 6, 0, 6.2832); g.fill();
+    document.getElementById("qdMsg").textContent = won
+      ? "Long gamma and short vega: you bought the near expiry and sold the far one. That is a reverse calendar, and it is the only way there."
+      : (sQD.n30 === 0 || sQD.n90 === 0) && (sQD.n30 || sQD.n90) ? "One expiry only: the book slides along that expiry's line, and the line never enters the green quadrant. Use both."
+      : "Get the dot into the green quadrant: long gamma, short vega.";
+    const m0 = v => (v < 0 ? "−$" : "$") + Math.abs(v).toFixed(0);
+    document.getElementById("kvQD").innerHTML = kvHTML([
+      ["Book gamma, $ of delta per 1% move", m0(bk.g), bk.g > 0 ? "moss" : "verm"], ["Book vega, per vol point", m0(bk.v), bk.v < 0 ? "moss" : "verm"],
+      ["Book theta, per day", m0(bk.th)],
+      ["Vega per unit gamma, 30-day", (a.v / a.g).toFixed(2)], ["Vega per unit gamma, 90-day", (b.v / b.g).toFixed(2)]
+    ]);
+  }
+})();
+
 function drawAll() {
+  drawQD();
   drawHero(); draw1(); draw2(); draw3(); draw4(); draw5(); draw6(); drawDrill();
 }
 LAB.boot(drawAll);

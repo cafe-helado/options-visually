@@ -37,7 +37,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">&larr; Options, visually</a>
-    <span class="num">No. 21 &middot; The Playbook</span>
+    <span class="num">No. 16 &middot; The Playbook</span>
   </div>
 </header>
 
@@ -52,7 +52,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">Page 04 is about structures — the legs. This page is about strategies: what pensions, hedge funds, dealers and retail traders actually run, why each one gets paid, and how each one blows up. It leans on almost every page in the series, and each strategy links to the pages that explain its machinery.</p>
+  <p class="lede">Page 09 is about structures — the legs. This page is about strategies: what pensions, hedge funds, dealers and retail traders actually run, why each one gets paid, and how each one blows up. It leans on almost every page in the series, and each strategy links to the pages that explain its machinery.</p>
   <ol>
     <li><b>Chapter 01 is the one idea.</b> Every options strategy is paid for bearing a risk somebody else wants gone, and that shows up as a <em>shape</em> of returns, not just a level.</li>
     <li><b>Chapter 02 is the playbook.</b> Fifteen strategies, filterable by who runs them, each with why it pays, how it is run, how it loses and what it takes to win.</li>
@@ -100,6 +100,8 @@
   <div class="mline">premium earned ≈ (implied variance − realized variance) × exposure, paid in small pieces, lost in large ones</div>
   <p class="mread">Reads as: <b>the seller of insurance earns the gap between what the market charges for volatility and what it delivers — but collects it steadily and pays it back in lumps.</b> The buyer has the mirror image.</p>
 
+  <p class="xlink"><span class="lab">The statistics underneath</span>A strategy that wins 93% of months and has a skewness of −9 is a tail problem. <a href="https://cafe-helado.github.io/stats-trading/tails.html" target="_blank" rel="noopener">The tails ↗</a>, in Chance, visually.</p>
+
   <div class="try">
     <span class="lab">Try this</span>
     <p>Take the variance risk premium to zero and <b>predict</b> what happens to put-writing. Then make crashes three times as frequent.</p>
@@ -132,7 +134,7 @@
   </div>
 
   <div class="prose">
-    <p class="lead">Read each strategy in the same order: why it gets paid, how it is run, how it loses, and what the people who survive it do differently. The pattern repeats. Strategies that sell insurance — put-writing, overwriting, short volatility, dispersion, structured-product issuance — earn steadily and lose in crises, all at once. Strategies that buy it — tail hedging, long volatility — bleed and pay off rarely. Strategies that sell a service — market making, financing — earn a spread and lose to informed flow or plumbing. The edge in all of them comes from the five sources in page 04's field guide; the strategy is just how it is packaged.</p>
+    <p class="lead">Read each strategy in the same order: why it gets paid, how it is run, how it loses, and what the people who survive it do differently. The pattern repeats. Strategies that sell insurance — put-writing, overwriting, short volatility, dispersion, structured-product issuance — earn steadily and lose in crises, all at once. Strategies that buy it — tail hedging, long volatility — bleed and pay off rarely. Strategies that sell a service — market making, financing — earn a spread and lose to informed flow or plumbing. The edge in all of them comes from the five sources in page 09's field guide; the strategy is just how it is packaged.</p>
   </div>
 
   <div class="chips" role="group" aria-label="Filter by who runs it" id="pbChips"></div>
@@ -147,7 +149,7 @@
       <button>Because they are run by the same funds</button>
       <button>Because regulators restrict them at the same time</button>
     </div>
-    <div class="ans"><b>Same risk, different wrappers.</b> Each is paid a premium for bearing crash risk, so a crash collects on all of them together. A book that holds several of them is more concentrated than its strategy list suggests — <a href="book.html" style="color:var(--blue)">page 11</a>'s stress limits exist for exactly this.</div>
+    <div class="ans"><b>Same risk, different wrappers.</b> Each is paid a premium for bearing crash risk, so a crash collects on all of them together. A book that holds several of them is more concentrated than its strategy list suggests — <a href="book.html" style="color:var(--blue)">page 23</a>'s stress limits exist for exactly this.</div>
   </div>
 </section>
 
@@ -163,9 +165,47 @@
     <p class="lead">Four questions sort the playbook for any individual or institution.</p>
     <p><b>Which way does your tail point?</b> If a crash would end your business, you should be buying insurance, not selling it, even though insurance loses money on average. If you can survive a crash and hold through it — a pension with a long horizon, a fund with locked-up capital — you may be the natural seller, and you are paid for it.</p>
     <p><b>Can you measure the edge?</b> Every strategy here has a measurable premium: implied versus realized, implied versus realized correlation, the event move versus history, the roll yield, the spread net of markouts. If you cannot state yours as a number and track it, you are running the risk without knowing whether you are being paid for it.</p>
-    <p><b>What does it cost to run?</b> Execution, hedging frequency, financing and borrow can consume a premium that looked generous on paper (<a href="execution.html" style="color:var(--blue)">page 06</a>). The strategies that look best in backtests are often the ones with the most hidden trading.</p>
+    <p><b>What does it cost to run?</b> Execution, hedging frequency, financing and borrow can consume a premium that looked generous on paper (<a href="execution.html" style="color:var(--blue)">page 13</a>). The strategies that look best in backtests are often the ones with the most hidden trading.</p>
     <p><b>How big?</b> The same strategy is prudent at one size and ruinous at three times it. Size to the worst plausible month, and use a fraction of Kelly when the edge is an estimate (<a href="tools.html" style="color:var(--blue)">toolkit</a>). Most famous options blow-ups were sound strategies at the wrong size.</p>
   </div>
+
+  <div class="prose">
+    <p>Choosing is easier to understand from the inside. Run a fund on chapter 01's thirty years: pick a strategy and a leverage, and advance a year at a time. The rule is the one real funds live under: fall 50% from your high and your investors leave.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Run the fund</h3></div>
+        <p class="simmsg" id="fdMsg" aria-live="polite"></p>
+        <canvas id="cvFD" height="250"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your fund</h4>
+        <div class="btnrow lvpick" id="fdPick"><button class="act ghost" data-i="0">Index</button><button class="act ghost" data-i="1">Put-writing</button><button class="act ghost" data-i="2">Tail-hedged</button></div>
+        <div id="ctlFD"></div>
+        <div class="btnrow simbtns">
+          <button class="act" id="fdYear">Next year</button>
+          <button class="act ghost" id="fdFive">Five years</button>
+          <button class="act ghost" id="fdAll">All thirty</button>
+          <button class="act ghost" id="fdReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvFD"></div>
+      </div>
+    </div>
+    <figcaption>Unlevered, a dollar in the index becomes $38.80 over thirty years and the tail-hedged index $45.80; put-writing becomes $1.90, because in this model it earns only the premium and the cash securing it earns nothing. At twice the leverage the index fund is closed in year 28, after a crash month lands near its peak, while the tail-hedged fund grows to $924. At three times, all three are closed within seven years. The strategy decides the shape of the returns; the leverage decides whether you survive them.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A portfolio manager chooses a strategy and then lives inside its worst month, because that month, not the average, sets how much leverage the fund can carry and whether its investors stay. A strategy with a smooth record and a fat left tail is safe only at the leverage its worst month allows.</p>
+    <ul>
+      <li>Size from the worst plausible month, then halve it; the plausible month is never the worst one.</li>
+      <li>Insurance that costs carry in quiet years can be what lets a fund use leverage at all.</li>
+      <li>A drawdown is also a redemption problem: investors leave at the bottom, when the strategy most needs the capital.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> the leverage a strategy can carry is roughly the drawdown you can survive divided by its worst month.</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -280,8 +320,8 @@ const PB=[
   win:"Buy convexity when it is cheap — flat skew, low implied — and monetize after it pays rather than holding for a bigger move. Measure it at the portfolio level, where the crash payoff funds rebalancing.",pg:[["real-world.html","15"]]},
  {n:"Delta-hedged volatility arbitrage",who:"fund",harvest:"Mispricing between implied and the volatility that will actually be realized, name by name.",
   how:"Forecast realized vol (vol cones, GARCH, event calendars), buy options whose implied is below the forecast and sell those above, delta-hedge daily, and size by vega.",
-  lose:"Forecasts are noisy; the P&L depends on when volatility arrives as much as how much (page 16); transaction costs and gap risk eat the edge.",
-  win:"Diversify across many names so path noise averages out, hedge on a rule (page 06), and keep the edge large relative to costs.",pg:[["black-scholes.html","01"],["questions.html","16"]]},
+  lose:"Forecasts are noisy; the P&L depends on when volatility arrives as much as how much (page 25); transaction costs and gap risk eat the edge.",
+  win:"Diversify across many names so path noise averages out, hedge on a rule (page 13), and keep the edge large relative to costs.",pg:[["black-scholes.html","01"],["questions.html","16"]]},
  {n:"Dispersion and correlation trading",who:"fund",harvest:"The implied-correlation premium: index options are bid by hedgers, single-name options offered by overwriters and structured products, so implied correlation sits above realized.",
   how:"Sell index variance or straddles, buy the components', sized so the volatility level cancels. Banks' exotics desks and hedge funds run it, often with variance swaps.",
   lose:"Correlation goes to one in crashes, exactly when the position is largest; twenty single-name legs carry twenty bid–offers and wing-liquidity problems.",
@@ -292,12 +332,12 @@ const PB=[
   win:"Judge by expectation over dozens of events, not hit rate; size short-event trades to the worst historical move; trade the event, not the diffusive vol, by using calendars.",pg:[["catalyst.html","03"]]},
  {n:"Skew and term-structure relative value",who:"fund",harvest:"One part of the surface priced wrongly against another — downside too steep, front month too high, forward vol implausible.",
   how:"Risk reversals and put spreads for skew; calendars and forward-vol trades for term structure; all hedged to isolate the shape from the level.",
-  lose:"Shapes can stay 'wrong' for a long time because flow keeps them there (page 04, chapter 06); the hedges between strikes and expiries are imperfect.",
+  lose:"Shapes can stay 'wrong' for a long time because flow keeps them there (page 09, chapter 06); the hedges between strikes and expiries are imperfect.",
   win:"Understand who is creating the shape before betting against it; trade it when the shape is extreme against its own history.",pg:[["surface.html","02"],["structures.html","04"]]},
  {n:"VIX futures and volatility products",who:"retail",harvest:"Contango: VIX futures usually trade above spot VIX and roll down toward it, so a short position collects the roll and a long one pays it.",
   how:"Short VIX futures or short-vol exchange-traded products to harvest roll; long VIX calls or futures as crash hedges. Retail traders hold large positions in both directions through ETPs.",
   lose:"Long-VIX ETPs decay toward zero over time. Short-vol products can be wiped out in a day: in February 2018 VIX more than doubled in a single session, and the largest short-vol note lost over 90% of its value overnight and was terminated.",
-  win:"Short roll only with position sizes that survive a doubling of VIX overnight; long VIX only as a short-dated, deliberately-timed hedge. Remember VIX is a variance strike (page 09), not an asset.",pg:[["variance.html","09"]]},
+  win:"Short roll only with position sizes that survive a doubling of VIX overnight; long VIX only as a short-dated, deliberately-timed hedge. Remember VIX is a variance strike (page 11), not an asset.",pg:[["variance.html","09"]]},
  {n:"Market making and gamma scalping",who:"dealer",harvest:"The bid–offer, net of adverse selection and hedging costs; long-gamma dealers also scalp realized movement.",
   how:"Quote two-sided markets across chains, skew quotes to manage inventory, delta-hedge continuously, and warehouse the residual vega and gamma.",
   lose:"Informed flow picks off stale quotes; inventory piles up on one side in a trending market; short-gamma inventory into a gap.",
@@ -317,7 +357,7 @@ const PB=[
  {n:"Convertible arbitrage",who:"fund",harvest:"Cheap volatility embedded in convertible bonds, which issuers often sell below fair value to raise capital.",
   how:"Buy the convertible, short the stock against its delta, and earn the bond's coupon plus the gamma from rehedging. One of the oldest hedge fund strategies.",
   lose:"Credit spreads widening, borrow recalls on the stock short, and forced deleveraging when many funds run the same trade at once.",
-  win:"Buy embedded vol well below implied on listed options, hedge credit separately, and keep leverage low enough to survive a crowded exit. Page 24 runs the numbers.",pg:[["black-scholes.html","01"]]},
+  win:"Buy embedded vol well below implied on listed options, hedge credit separately, and keep leverage low enough to survive a crowded exit. Page 22 runs the numbers.",pg:[["black-scholes.html","01"]]},
  {n:"Short-dated (0DTE) options trading",who:"retail",harvest:"For buyers, cheap convexity on an intraday move; for sellers, intraday theta. Same-day options are now a large share of index option volume.",
   how:"Buying or selling options that expire the same day, usually on index products, often in spreads.",
   lose:"Gamma is enormous at expiry (page 19): small moves swing positions violently, and sellers can lose many days of income in an hour.",
@@ -361,7 +401,53 @@ let PBSEL="all";
   }
 })();
 
-function drawAll(){draw1();draw2();}
+/* ══════════ 03b — run the fund ══════════
+   Chapter 01's 30-year market (simulate(s1), the same seed), one strategy at
+   a time, with leverage: each month the fund earns leverage x the strategy's
+   monthly return. If it ever falls 50% below its high, investors leave and the
+   fund is closed at that level. The reader advances a year at a time. */
+const sFD = { lev: 1, strat: 1 };
+const FDN = ["the index", "put-writing", "tail-hedged index"];
+function fdRun(strat, lev){ const sim = simulate(s1), rs = [sim.idx, sim.pw, sim.th][strat];
+  let w = 1, peak = 1, closed = null; const curve = [1];
+  for (let m = 0; m < rs.length; m++) { if (closed === null) { w *= Math.max(0, 1 + lev * rs[m]); peak = Math.max(peak, w); if (w <= 0.5 * peak) closed = m + 1; } curve.push(w); }
+  return { curve, final: w, closed, cagr: closed === null ? Math.pow(w, 12 / rs.length) - 1 : null }; }
+(function(){
+  let year = 0;
+  sliders(document.getElementById("ctlFD"), [
+    { id: "lFD", k: "lev", lbl: "×", name: "Leverage", min: 1, max: 4, step: 0.5, fmt: v => v.toFixed(1) + "×" }
+  ], sFD, () => { year = 0; draw(); },"cFD");
+  document.querySelectorAll("#fdPick button").forEach(b => b.addEventListener("click", () => { sFD.strat = +b.dataset.i; year = 0; draw(); }));
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", () => { fn(); draw(); });
+  on("fdYear", () => { year = Math.min(30, year + 1); });
+  on("fdFive", () => { year = Math.min(30, year + 5); });
+  on("fdAll", () => { year = 30; });
+  on("fdReset", () => { year = 0; });
+  window.drawFD = draw;
+  function draw(){
+    document.querySelectorAll("#fdPick button").forEach(b => b.classList.toggle("on", +b.dataset.i === sFD.strat));
+    const R = fdRun(sFD.strat, sFD.lev), m = year * 12, xs = [], ys = [];
+    for (let i = 0; i <= m; i++) { xs.push(i / 12); ys.push(Math.log10(Math.max(1e-3, R.curve[i]))); }
+    const closedNow = R.closed !== null && R.closed <= m;
+    document.getElementById("fdMsg").textContent = year === 0 ? "You run " + FDN[sFD.strat] + " at " + sFD.lev.toFixed(1) + "× leverage with $1 of investors' money. Advance a year at a time."
+      : closedNow ? "Month " + R.closed + ": the fund falls 50% below its high and the investors leave. It closed at $" + R.curve[R.closed].toFixed(2) + " for every dollar it started with."
+      : "Year " + year + ": the fund is worth $" + R.curve[m].toFixed(2) + " for every dollar, " + ((R.curve[m] / Math.max(...R.curve.slice(0, m + 1)) - 1) * 100).toFixed(0) + "% from its high.";
+    const top = Math.max(1, ...ys) + 0.2, bot = Math.min(-0.4, ...ys) - 0.1;
+    const o = Fig(document.getElementById("cvFD"), { h: 250, x0: 0, x1: 30, y0: bot, y1: top, pad: { l: 52, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0) + "y", v => { const x = Math.pow(10, v); return x >= 10 ? x.toFixed(0) + "×" : x.toFixed(x >= 1 ? 1 : 2) + "×"; }, 6, 4);
+    clip(o, () => line(o, xs, ys, closedNow ? C("--verm") : C("--blue"), 2.4));
+    if (closedNow) vline(o, R.closed / 12, C("--verm"),"closed");
+    const row = (s, l) => { const r = fdRun(s, l); return r.closed !== null ? "closed in year " + Math.ceil(r.closed / 12) : "$" + r.final.toFixed(1) + " (" + (r.cagr * 100).toFixed(1) + "% a year)"; };
+    document.getElementById("kvFD").innerHTML = kvHTML([
+      ["Your fund after 30 years", year === 30 ? row(sFD.strat, sFD.lev) : "—", "blue"],
+      ["Index at this leverage", row(0, sFD.lev)],
+      ["Put-writing at this leverage", row(1, sFD.lev)],
+      ["Tail-hedged at this leverage", row(2, sFD.lev)]
+    ]);
+  }
+})();
+
+function drawAll(){drawFD();draw1();draw2();}
 LAB.boot(drawAll);
 
 </script>

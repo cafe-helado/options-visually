@@ -186,5 +186,36 @@ files.forEach(f => {
   if (p.length) { console.log("\n✗ " + f); p.forEach(x => console.log("    " + x)); }
   else console.log("✓ " + f);
 });
+/* ── the tutor: two whole-repo checks ──────────────────────────────────
+   1. Nothing that looks like an API key, anywhere. The site is public on
+      GitHub Pages; the tutor is bring-your-own-key and the repo must never
+      hold one, not even in a test file.
+   2. Every tutor pack matches the page it was built from. Packs are built
+      by mktutor.js and committed; a page edited without rebuilding would
+      have the tutor quoting the old text. */
+if (!args.length) {
+  const tp = [];
+  const walk = d => fs.readdirSync(d, { withFileTypes: true }).forEach(e => {
+    if ([".git", "node_modules", "dist"].includes(e.name)) return;
+    const p = path.join(d, e.name);
+    if (e.isDirectory()) return walk(p);
+    if (!/\.(html|js|mjs|json|md|css|py|txt|webmanifest|yml|yaml)$/.test(e.name)) return;
+    const s = fs.readFileSync(p, "utf8");
+    const m = s.match(/sk-ant-[A-Za-z0-9_-]{20,}/);
+    if (m) tp.push(path.relative(ROOT, p) + ": contains something shaped like an Anthropic API key (" + m[0].slice(0, 12) + "…)");
+  });
+  walk(ROOT);
+  const crypto = require("crypto"), TD = path.join(ROOT, "tutor");
+  const pagesWithChapters = files.filter(f => /<section class="chapter/.test(fs.readFileSync(path.join(ROOT, f), "utf8")));
+  for (const f of pagesWithChapters) {
+    const pj = path.join(TD, f.replace(/\.html$/, ".json"));
+    if (!fs.existsSync(pj)) { tp.push("tutor pack missing for " + f + " — run node mktutor.js"); continue; }
+    const src = crypto.createHash("sha256").update(fs.readFileSync(path.join(ROOT, f), "utf8")).digest("hex").slice(0, 16);
+    if (JSON.parse(fs.readFileSync(pj, "utf8")).src !== src) tp.push("tutor pack for " + f + " is out of date — run node mktutor.js");
+  }
+  if (tp.length) { console.log("\n✗ tutor"); tp.forEach(x => console.log("    " + x)); }
+  else console.log("✓ tutor (no keys in the repo, " + pagesWithChapters.length + " packs current)");
+  total += tp.length;
+}
 console.log("\n" + (total ? total + " problem(s) found" : "all pages pass"));
 process.exit(total ? 1 : 0);

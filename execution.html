@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 06 · Executing the Hedge</span>
+    <span class="num">No. 13 · Executing the Hedge</span>
   </div>
 </header>
 
@@ -44,7 +44,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 06</div>
+    <div class="eyebrow">An interactive derivation · No. 13</div>
     <h1>The hedge that <em>costs</em> something</h1>
     <p class="sub">Page 01 proved an option can be replicated and never charged you for a single trade. Put the bill back in and "hedge continuously" stops being a theorem and becomes a corner solution that is wrong in practice.</p>
   </div>
@@ -193,6 +193,53 @@
     </div>
     <figcaption>The same shape as chapter 01, arising for the same reason: a certain cost that grows with urgency against an uncertain one that grows with patience. Recognizing that these are one problem in two costumes is most of what execution theory has to offer.</figcaption>
   </figure>
+  <div class="prose">
+    <p>Now be the trader working the order. You need to buy 200,000 shares of a $50 stock today to finish a hedge, and the day is cut into eight slots that each trade about 250,000 shares. Buy a lot at once and you push the price up as you go; buy slowly and the price is free to wander away from you. Choose each slot's size and see the fills. Two shadow traders work the same day: one buys everything in the first slot, one buys an even eighth every slot.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Work the order yourself</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--ink)"></i>The stock</span>
+            <span><i class="sw" style="background:var(--blue)"></i>Your fills, sized by quantity</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Impact paid over the mid</span>
+          </span>
+        </div>
+        <p class="simmsg" id="exMsg" aria-live="polite"></p>
+        <canvas id="cvEX" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>This slot</h4>
+        <div class="btnrow simbtns">
+          <button class="act ghost" id="ex0">Nothing</button>
+          <button class="act" id="ex8">An eighth</button>
+          <button class="act" id="ex4">A quarter</button>
+          <button class="act ghost" id="exAll">All the rest</button>
+        </div>
+        <div class="btnrow simbtns">
+          <button class="act ghost" id="exNew">New day</button>
+          <button class="act ghost" id="exReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvEX"></div>
+      </div>
+    </div>
+    <figcaption>Buying everything at the open costs 60 basis points of impact every time. Spreading it evenly costs 1.9 on average over 400 days, but the result swings by 65.5 either way, because the stock moves while you wait; on the first day it drifts up all afternoon and the even schedule pays 93. A schedule that buys more early and less late lands between, at 4.8 with a swing of 47.3. There is no schedule that removes both costs. You choose which one to carry.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>An execution trader is scored against the arrival price, so every slice is a choice between a cost they can see (impact, now) and a cost they cannot (the price moving while they wait). How fast to trade depends on how much that second cost worries the desk: a hedge that must be done today is traded faster than an order with a week to run.</p>
+    <ul>
+      <li>Impact grows with your share of the volume; keep participation in the single digits when you can.</li>
+      <li>Urgency means front-loading: pay a little more impact to carry less timing risk.</li>
+      <li>The benchmark decides what "good" looks like; chapter 04 is that argument.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> impact here is 75 basis points times your share of a slot's volume; a quarter of the volume costs about 19.</p>
+  </aside>
+
   <div class="try">
     <span class="lab">Try this</span>
     <p>Push the impact coefficient to its maximum and <b>predict</b> which way the optimal trajectory tilts — front-loaded, back-loaded, or flat — before you look.</p>
@@ -310,7 +357,7 @@
     <p class="lead">A dark pool matches without displaying quotes, typically at the midpoint. The appeal is obvious: no spread paid, no information leaked by showing an order. The problem is subtler and it is about <em>who chooses to trade with you</em>.</p>
     <p>When you rest passively, you do not decide when you get filled — your counterparty does. Uninformed flow crosses at random. <b>Informed flow crosses when it is right</b>, which is to say just before the price moves against you. So your fills are not a random sample of moments; they are selected toward the bad ones.</p>
     <p>The simulation makes the bias legible. With no informed flow, the average price move immediately after your fills is <b>+0.00</b> — no bias, as it should be. Raise the informed share to 25% and the average post-fill move is <b>−0.20</b>; at 50% it is <b>−0.40</b>. Both are simply the informed share times their 0.8 edge; the simulation lands within a few hundredths of that on any draw. You are not being unlucky. You are being selected.</p>
-    <p>This is the mirror of the market-maker's problem: page 05 of this series looks at the same phenomenon from the quoting side, where the defense is widening. Here, resting passively, the defenses are different — minimum quantity constraints to avoid being pinged by small informed orders, venue selection based on measured post-fill drift, and simply accepting that a mid fill in size is sometimes a warning rather than a win.</p>
+    <p>This is the mirror of the market-maker's problem: page 14 of this series looks at the same phenomenon from the quoting side, where the defense is widening. Here, resting passively, the defenses are different — minimum quantity constraints to avoid being pinged by small informed orders, venue selection based on measured post-fill drift, and simply accepting that a mid fill in size is sometimes a warning rather than a win.</p>
     <p>The number worth carrying: <b>saving half a spread is not worth it if the post-fill drift exceeds half a spread</b>, and whether it does is an empirical question about the venue, measurable from your own fills.</p>
   </div>
 
@@ -511,7 +558,7 @@
       <button>Because they execute more slowly</button>
       <button>Because they are reported late</button>
     </div>
-    <div class="ans"><b>You get filled when someone wants to trade with you.</b> That is the same adverse-selection argument as page 05's market-making simulation, viewed from the other side of the quote.</div>
+    <div class="ans"><b>You get filled when someone wants to trade with you.</b> That is the same adverse-selection argument as page 14's market-making simulation, viewed from the other side of the quote.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
@@ -870,7 +917,63 @@ const s6={cost:5,demand:1.2,days:120};
   }
 })();
 
-function drawAll(){draw1();draw2();draw4();draw5();draw6();}
+/* ══════════ 02b — work the order yourself ══════════
+   Buy 200,000 shares of a $50 stock over a day split into eight slots, each
+   trading 250,000 shares of market volume. Buying q shares in a slot pays a
+   temporary impact of 75 bp x (q / 250,000) over that slot's mid. The mid
+   follows a random walk at 1.2% daily vol (0.42% a slot), the same for every
+   policy. Cost is implementation shortfall: average price paid against the
+   arrival price, in dollars and basis points. Shadows: everything in the first
+   slot, and an even eighth per slot (TWAP). */
+const EX = { Q: 200000, slots: 8, V: 250000, S0: 50, k: 0.0075, vol: 0.012, seed: 0 };
+function exMids(seed){ return withSeed(3900 + seed, () => { const m = [EX.S0];
+  for (let i = 1; i < EX.slots; i++) m.push(m[i - 1] * (1 + EX.vol / Math.sqrt(EX.slots) * gauss())); return m; }); }
+const exFill = (mid, q) => mid * (1 + EX.k * q / EX.V);
+function exCost(sched, mids){ let paid = 0, q = 0; sched.forEach((s, i) => { if (s > 0) { paid += s * exFill(mids[i], s); q += s; } });
+  const avg = q ? paid / q : EX.S0; return { avg, usd: (avg - EX.S0) * q, bp: (avg / EX.S0 - 1) * 1e4 }; }
+const exTWAP = () => Array(EX.slots).fill(EX.Q / EX.slots), exNow = () => [EX.Q].concat(Array(EX.slots - 1).fill(0));
+function exStats(sched, n){ let a = 0, b = 0; for (let k = 0; k < n; k++) { const c = exCost(sched, exMids(1000 + k)).bp; a += c; b += c * c; }
+  return { mean: a / n, sd: Math.sqrt(Math.max(0, b / n - (a / n) ** 2)) }; }
+(function(){
+  let slot = 0, mine = [];
+  const reset = () => { slot = 0; mine = []; }, msg = document.getElementById("exMsg");
+  function buy(frac){ if (slot >= EX.slots) return; const left = EX.Q - mine.reduce((a, b) => a + b, 0);
+    const q = slot === EX.slots - 1 ? left : Math.min(left, frac === "all" ? left : Math.round(EX.Q * frac)); mine.push(q); slot++; draw(); }
+  document.getElementById("ex0").addEventListener("click", () => buy(0));
+  document.getElementById("ex8").addEventListener("click", () => buy(1 / 8));
+  document.getElementById("ex4").addEventListener("click", () => buy(1 / 4));
+  document.getElementById("exAll").addEventListener("click", () => buy("all"));
+  document.getElementById("exNew").addEventListener("click", () => { EX.seed++; reset(); draw(); });
+  document.getElementById("exReset").addEventListener("click", () => { reset(); draw(); });
+  window.drawEX = draw;
+  function draw(){
+    const mids = exMids(EX.seed), done = mine.reduce((a, b) => a + b, 0), money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    const sMine = mine.concat(Array(EX.slots - mine.length).fill(0));
+    msg.textContent = slot < EX.slots
+      ? "Slot " + (slot + 1) + " of " + EX.slots + ". The stock is at $" + mids[slot].toFixed(2) + " (arrival $50.00). You have bought " + done.toLocaleString("en-US") + " of 200,000. How much now?"
+      : "Done. Your average price was $" + exCost(sMine, mids).avg.toFixed(3) + ", a shortfall of " + exCost(sMine, mids).bp.toFixed(1) + " bp. All at once: " + exCost(exNow(), mids).bp.toFixed(1) + " bp; evenly through the day: " + exCost(exTWAP(), mids).bp.toFixed(1) + " bp.";
+    const seen = mids.slice(0, Math.min(EX.slots, slot + 1)), xs = seen.map((_, i) => i + 0.5);
+    const lo = Math.min(49.4, ...seen) - 0.1, hi = Math.max(50.6, ...seen, ...mine.map((q, i) => exFill(mids[i], q))) + 0.1;
+    const o = Fig(document.getElementById("cvEX"), { h: 230, x0: 0, x1: EX.slots, y0: lo, y1: hi, pad: { l: 58, r: 14, t: 14 } });
+    axes(o, v => "slot " + v.toFixed(0), v => "$" + v.toFixed(2), 8, 4);
+    const g = o.g;
+    clip(o, () => { line(o, [0, EX.slots], [EX.S0, EX.S0], C("--grey"), 1, [4, 4]); line(o, xs, seen, C("--ink"), 2); });
+    mine.forEach((q, i) => { if (!q) return; const p = exFill(mids[i], q), r = 3 + 9 * Math.sqrt(q / EX.Q);
+      g.fillStyle = C("--blue"); g.globalAlpha = 0.75; g.beginPath(); g.arc(o.X(i + 0.5), o.Y(p), r, 0, 6.2832); g.fill(); g.globalAlpha = 1;
+      g.strokeStyle = C("--verm"); g.beginPath(); g.moveTo(o.X(i + 0.5), o.Y(mids[i])); g.lineTo(o.X(i + 0.5), o.Y(p)); g.stroke(); });
+    g.fillStyle = C("--grey"); g.font = "9.5px 'IBM Plex Mono', monospace"; g.textAlign = "right"; g.textBaseline = "bottom"; g.fillText("arrival $50.00", o.P.l + o.pw - 4, o.Y(EX.S0) - 2);
+    const sY = exStats(sMine, 400), sN = exStats(exNow(), 400), sT = exStats(exTWAP(), 400);
+    document.getElementById("kvEX").innerHTML = kvHTML([
+      ["Bought", done.toLocaleString("en-US") + " of 200,000"],
+      ["Your shortfall today", slot ? exCost(sMine.slice(0), mids).bp.toFixed(1) + " bp, " + money0(exCost(sMine, mids).usd) : "—", "blue"],
+      ["All at once, 400 days", sN.mean.toFixed(1) + " bp ± " + sN.sd.toFixed(1)],
+      ["Evenly, 400 days", sT.mean.toFixed(1) + " bp ± " + sT.sd.toFixed(1)],
+      ["Your pattern, 400 days", slot === EX.slots ? sY.mean.toFixed(1) + " bp ± " + sY.sd.toFixed(1) : "finish the day"]
+    ]);
+  }
+})();
+
+function drawAll(){drawEX();draw1();draw2();draw4();draw5();draw6();}
 LAB.boot(drawAll);
 
 </script>

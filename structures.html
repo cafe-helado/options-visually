@@ -38,7 +38,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 04 · The Structure Zoo</span>
+    <span class="num">No. 09 · The Structure Zoo</span>
   </div>
 </header>
 
@@ -56,7 +56,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 04</div>
+    <div class="eyebrow">An interactive derivation · No. 09</div>
     <h1>The same trade, read <em>twice</em></h1>
     <p class="sub">A pension buys a payoff. A volatility fund buys an exposure. They can be on opposite sides of one ticket, describing it in vocabularies that share no words — and both be right.</p>
   </div>
@@ -67,7 +67,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">This page needs <a href="black-scholes.html" style="color:var(--blue)">page 01</a> for the greeks and <a href="surface.html" style="color:var(--blue)">page 02</a> for skew and term structure, since half the fingerprint axes are surface exposures.</p>
+  <p class="lede">This page needs <a href="black-scholes.html" style="color:var(--blue)">page 01</a> for the greeks and <a href="surface.html" style="color:var(--blue)">page 07</a> for skew and term structure, since half the fingerprint axes are surface exposures.</p>
   <ol>
     <li><b>Every structure appears twice.</b> Once as a shape you could draw for a client, once as a bar chart of what it is actually long and short.</li>
     <li><b>Chapter 03 is the argument.</b> Two trades with different names, different clients and opposite signs turn out to be one instrument.</li>
@@ -120,6 +120,7 @@
             <span><i class="swl" style="background:var(--moss)"></i>Gamma</span>
             <span><i class="swl" style="background:var(--ochre)"></i>Vega</span>
             <span><i class="swl" style="background:var(--verm)"></i>Theta</span>
+            <span style="color:var(--grey)">each scaled to its own peak</span>
           </span>
         </div>
         <canvas id="cvGreeks" height="240"></canvas>
@@ -173,7 +174,7 @@
       <p>Differentiate with respect to anything and the sum passes straight through.</p>
       <div class="mline">∂V/∂x = Σ qᵢ · ∂Vᵢ/∂x</div>
       <p class="mread">Reads as: <b>the sensitivity of the whole is the sum of the sensitivities of the parts.</b></p>
-      <p><b>Where it breaks.</b> The algebra never breaks; the interpretation does. Summing vega across legs assumes every leg's volatility moves by the same amount, and on a skewed surface or across expiries they do not — <a href="book.html" style="color:var(--blue)">page 11</a> shows a book whose net vega of 417 produces anything from $743 to $1,238 on moves that all look like two points.</p>
+      <p><b>Where it breaks.</b> The algebra never breaks; the interpretation does. Summing vega across legs assumes every leg's volatility moves by the same amount, and on a skewed surface or across expiries they do not — <a href="book.html" style="color:var(--blue)">page 23</a> shows a book whose net vega of 417 produces anything from $743 to $1,238 on moves that all look like two points.</p>
     </div>
   </details>
 
@@ -189,7 +190,7 @@
 
   <div class="prose">
     <p class="lead">A payoff diagram has one axis and cannot show what a position is long. Reduce a structure instead to what it holds along the five dimensions a surface actually has, and comparison becomes trivial.</p>
-    <p><b>Direction</b> is delta. <b>Realized</b> is gamma — does this profit from movement happening. <b>Vol level</b> is vega — does it profit from movement being <em>repriced</em>. <b>Skew</b> is vanna, the axis that page 02's smile acts along. <b>Vol convexity</b> is volga, whether your vega grows as vol grows.</p>
+    <p><b>Direction</b> is delta. <b>Realized</b> is gamma — does this profit from movement happening. <b>Vol level</b> is vega — does it profit from movement being <em>repriced</em>. <b>Skew</b> is vanna, the axis that page 07's smile acts along. <b>Vol convexity</b> is volga, whether your vega grows as vol grows.</p>
     <p>Each bar below is normalized against the same greek on a one-lot at-the-money straddle, so the units are comparable across structures and across strikes. A straddle is by construction 1.0 on realized and 1.0 on vol level, which makes it a natural yardstick.</p>
     <p>Two habits worth building from this figure. First, <b>read the sign before the size</b> — most structures are obvious once you know whether they are long or short each axis. Second, <b>notice what is near zero</b>. A butterfly is barely directional and barely skewed; almost all of it is a short-realized, short-vol bet concentrated in one place. That is a much more useful description than "long one, short two, long one."</p>
   </div>
@@ -477,7 +478,7 @@
       <div class="mline">P&amp;L above K₃ = c − (K₃ − K₂)</div>
       <p class="mread">Reads as: <b>keep the credit, pay the full width of the call spread.</b> That is the worst the upside can ever do, because nothing above K₃ changes.</p>
       <p>Between K₂ and K₃ the loss on the call spread is smaller than the width, so the P&amp;L is higher than at K₃. The worst upside outcome is therefore the one above K₃, and it is non-negative exactly when c ≥ K₃ − K₂. The big lizard and twisted sister are the same argument with the width measured from the straddle strike and on the put side.</p>
-      <p><b>Where it breaks.</b> The condition is a statement about expiry. Before then the short call can be assigned early — into a dividend, say, from page 08 — which removes one leg and leaves the others. A settlement right at a short strike brings page 08's pin risk. Margin is charged on the position, not on the inequality, so a lizard that has no upside risk on paper can still tie up capital against it. And the condition says nothing at all about the downside, which is where the position's real risk lives.</p>
+      <p><b>Where it breaks.</b> The condition is a statement about expiry. Before then the short call can be assigned early — into a dividend, say, from page 04 — which removes one leg and leaves the others. A settlement right at a short strike brings page 04's pin risk. Margin is charged on the position, not on the inequality, so a lizard that has no upside risk on paper can still tie up capital against it. And the condition says nothing at all about the downside, which is where the position's real risk lives.</p>
     </div>
   </details>
 
@@ -488,14 +489,14 @@
   <div class="chead">
     <div class="cnum">06</div>
     <h2>Where the surface comes from</h2>
-    <p class="dek">Page 02 showed the surface is skewed. This chapter is the argument that structural flow is a large part of why.</p>
+    <p class="dek">Page 07 showed the surface is skewed. This chapter is the argument that structural flow is a large part of why.</p>
   </div>
 
   <div class="prose">
     <p class="lead">Chapter 04's two shelves are not symmetric. Run down the institutional list and nearly every entry does the same two things: <b>sells upside volatility</b> and <b>buys downside volatility</b>. Overwriting programs sell calls, month after month, mechanically. Pension and insurance mandates buy puts. Collars do both at once. Structured note issuance leaves dealers with exposures they must hedge in the same direction.</p>
     <p>None of these are opportunistic. They are mandates, and they recur regardless of where implied volatility is trading — an overwriting program sells calls in January because it is January, not because calls look rich.</p>
     <p>Persistent one-way flow has to be absorbed by somebody, and the price of absorbing it is the surface's shape. Downside strikes bid, upside strikes offered, is exactly what a persistent buyer of puts and seller of calls produces in a market where the other side must be paid to warehouse the risk.</p>
-    <p><b>How much of the skew this explains is genuinely contested</b>, and it would be dishonest to present flow as the whole story. Page 02 showed that jumps and correlated stochastic volatility each generate skew from pure modeling assumptions with no flow at all, and index skew persisted through decades with very different flow regimes. The honest position is that skew has several sufficient causes and the observed surface is their sum, with the mix varying by underlying and by tenor.</p>
+    <p><b>How much of the skew this explains is genuinely contested</b>, and it would be dishonest to present flow as the whole story. Page 07 showed that jumps and correlated stochastic volatility each generate skew from pure modeling assumptions with no flow at all, and index skew persisted through decades with very different flow regimes. The honest position is that skew has several sufficient causes and the observed surface is their sum, with the mix varying by underlying and by tenor.</p>
     <p>What is not contested is the trading implication, and it is the one worth taking from this page: <b>when you buy an option you are usually buying it from somebody whose reason has nothing to do with your reason.</b> The overwriter selling you a call has no view on volatility. The pension buying puts is not forecasting a crash. Treating every price as though it encodes a view is a good way to find edge that is not there — and treating persistent flow as though it were information is a good way to be on the wrong side of a mandate that will still be running next quarter.</p>
   </div>
 
@@ -554,11 +555,11 @@
   <details class="derive">
     <summary>Derivation — why an imbalance with no information still becomes a price</summary>
     <div class="body">
-      <p>A dealer who absorbs a one-way flow ends up holding inventory it did not choose. Page 05's market-making chapter shows what it does about that: it skews its quotes away from the side it already owns.</p>
+      <p>A dealer who absorbs a one-way flow ends up holding inventory it did not choose. Page 14's market-making chapter shows what it does about that: it skews its quotes away from the side it already owns.</p>
       <div class="mline">quote mid = fair value − k · inventory</div>
       <p class="mread">Reads as: <b>the price shown is the dealer's estimate of value, shifted by how much it already holds.</b> Long calls from overwriters, it marks calls down to discourage more selling and encourage buying.</p>
       <p>When the flow is persistent the inventory never clears, so the shift never goes away. Across many strikes and many dealers, that permanent shift is the slope of the surface — the overwriting term at the upside, the put-buying term at the downside.</p>
-      <p><b>Where it breaks.</b> Flow is not the only generator of skew. Page 02 showed jumps and correlated stochastic volatility each produce one from pure modeling assumptions, and index skew persisted through very different flow regimes. Positioning is inferred rather than observed, so the size of κ in any real market is a matter of estimation and argument. Read the figure as which way each flow pushes, not as a decomposition of any real surface.</p>
+      <p><b>Where it breaks.</b> Flow is not the only generator of skew. Page 07 showed jumps and correlated stochastic volatility each produce one from pure modeling assumptions, and index skew persisted through very different flow regimes. Positioning is inferred rather than observed, so the size of κ in any real market is a matter of estimation and argument. Read the figure as which way each flow pushes, not as a decomposition of any real surface.</p>
     </div>
   </details>
 
@@ -574,7 +575,7 @@
 
   <div class="prose">
     <p class="lead">Every structure below is a way of buying or selling some mix of direction, movement, the price of movement, skew and time. None of them is good or bad. A structure makes money when the market has mispriced the thing it is long or short, and loses when it has not — so the question is never "is this a good strategy" but "what is this structure betting on, and is that thing mispriced right now?"</p>
-    <p>There are only five honest sources of edge in options, and every "how to win" below is one of them. <b>Price</b>: implied volatility is wrong relative to what will be realized — the variance risk premium, measured with the vol cone in the <a href="tools.html" style="color:var(--blue)">toolkit</a>. <b>Shape</b>: one part of the surface is rich or cheap relative to another — skew and term structure, <a href="surface.html" style="color:var(--blue)">page 02</a>. <b>Events</b>: a catalyst is priced wrong, <a href="catalyst.html" style="color:var(--blue)">page 03</a>. <b>Flow</b>: you are paid for warehousing someone else's mandated trade, chapter 06. <b>Execution and sizing</b>: you pay less to trade and you size so a bad outcome does not end the game, <a href="execution.html" style="color:var(--blue)">page 06</a> and the toolkit's Kelly tool. A structure is the vehicle; the edge has to come from one of those five.</p>
+    <p>There are only five honest sources of edge in options, and every "how to win" below is one of them. <b>Price</b>: implied volatility is wrong relative to what will be realized — the variance risk premium, measured with the vol cone in the <a href="tools.html" style="color:var(--blue)">toolkit</a>. <b>Shape</b>: one part of the surface is rich or cheap relative to another — skew and term structure, <a href="surface.html" style="color:var(--blue)">page 07</a>. <b>Events</b>: a catalyst is priced wrong, <a href="catalyst.html" style="color:var(--blue)">page 08</a>. <b>Flow</b>: you are paid for warehousing someone else's mandated trade, chapter 06. <b>Execution and sizing</b>: you pay less to trade and you size so a bad outcome does not end the game, <a href="execution.html" style="color:var(--blue)">page 13</a> and the toolkit's Kelly tool. A structure is the vehicle; the edge has to come from one of those five.</p>
     <p>The live numbers on each card use chapter 01's market — change spot, vol or expiry there and every card reprices. Filter by what you are trying to do.</p>
   </div>
 
@@ -583,6 +584,56 @@
 
   <div class="chips" role="group" aria-label="Filter structures" id="fgChips"></div>
   <div id="fgCards"></div>
+
+  <div class="prose">
+    <p>The field guide reads structures; the desk builds them, usually from a sentence a client says on the phone. Take the calls below. Each request comes with the payoff it describes, drawn faint; build legs until your payoff lies on it. Any equivalent build counts, a butterfly made of puts as much as one made of calls, and the readout prices what you built in chapter 01's market, because the next thing the client asks is what it costs.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Build it for the client</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--ochre)"></i>What the client described</span>
+            <span><i class="swl" style="background:var(--blue)"></i>What you built</span>
+          </span>
+        </div>
+        <p class="simmsg" id="sbMsg" aria-live="polite"></p>
+        <canvas id="cvSB" height="260"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your legs</h4>
+        <div class="sbrow">
+          <select id="sbSide" aria-label="Long or short"><option value="1">Long</option><option value="-1">Short</option></select>
+          <select id="sbType" aria-label="Instrument"><option value="C">call</option><option value="P">put</option><option value="S">100 shares</option></select>
+          <select id="sbK" aria-label="Strike"><option>80</option><option>85</option><option>90</option><option>95</option><option selected>100</option><option>105</option><option>110</option><option>115</option><option>120</option></select>
+          <button class="act" id="sbAdd">Add</button>
+        </div>
+        <ul class="sblegs" id="sbLegs"></ul>
+        <div class="btnrow simbtns">
+          <button class="act ghost" id="sbClear">Clear</button>
+          <button class="act ghost" id="sbShow">Show me</button>
+          <button class="act ghost" id="sbNext">Next client</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvSB"></div>
+      </div>
+    </div>
+    <figcaption>Seven requests, in the words clients use: a collar, a call spread, a butterfly, a short iron condor, a synthetic long, a straddle and a risk reversal. The payoff is the contract; the words are the client's view of the world. Translating one into the other, and then into a price, is most of what a structuring desk does all day.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A structurer listens for three things in a request: where the client wants to be paid, where they will accept losses, and what they will give up to cheapen it. Every common structure is an answer to those three questions, and the first follow-up is always "what does it cost", which in practice means "what can I sell to make it zero cost".</p>
+    <ul>
+      <li>Zero-cost structures are not free. They are paid for in the payoff you gave away.</li>
+      <li>The same payoff can be built several ways; choose the one with the tightest spreads and the fewest legs.</li>
+      <li>Short legs carry assignment and margin. The client's sentence rarely mentions either.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> say the payoff back to the client in their words before you quote a price.</p>
+  </aside>
+
+  <p class="xlink"><span class="lab">Practise it</span>Every structure here has a breakeven and a worst case. Drill them in the <a href="https://cafe-helado.github.io/Option-Breakeven-Drill/" target="_blank" rel="noopener">Breakeven Drill ↗</a>.</p>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -669,7 +720,7 @@
       <button>Because index providers publish it</button>
       <button>It does not; the surface is set by realized volatility</button>
     </div>
-    <div class="ans"><b>Someone has to warehouse the imbalance.</b> This is the same mechanism page 10 uses to explain persistently rich implied correlation, and the same one page 05 uses for the spread: durable one-way flow becomes a price.</div>
+    <div class="ans"><b>Someone has to warehouse the imbalance.</b> This is the same mechanism page 12 uses to explain persistently rich implied correlation, and the same one page 14 uses for the spread: durable one-way flow becomes a price.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
@@ -841,11 +892,14 @@ function fingerprint(legs){
       legs.forEach(([cp,K,n])=>{const gg=bs(x,K,T,MKT.vol,MKT.r,MKT.q,cp===1);
         a+=gg.gamma*n;b+=gg.vega/100*n;c+=gg.theta/365*n;});
       gam.push(a*100);veg.push(b);the.push(c);});
-    const g2=Fig(document.getElementById("cvGreeks"),{h:240,x0:lo,x1:hi,
-      y0:Math.min(0,...gam,...veg,...the)*1.15,y1:Math.max(0,...gam,...veg,...the)*1.15||1,pad:{l:62}});
-    axes(g2,v=>"$"+v.toFixed(0),v=>v.toFixed(2),5,4);
-    clip(g2,()=>{line(g2,xs,gam,C("--moss"),1.9);line(g2,xs,veg,C("--ochre"),1.9);
-      line(g2,xs,the,C("--verm"),1.9);});
+    /* gamma, vega and theta are in different units, and on one shared axis
+       vega and theta were crushed flat beside gamma. Each is scaled to its own
+       largest size, so the shapes and signs compare; the sizes are in the readout. */
+    const unit=a=>{const m=Math.max(...a.map(Math.abs))||1;return a.map(v=>v/m);};
+    const g2=Fig(document.getElementById("cvGreeks"),{h:240,x0:lo,x1:hi,y0:-1.12,y1:1.12,pad:{l:62}});
+    axes(g2,v=>"$"+v.toFixed(0),v=>v===0?"0":v>0?"+peak":"−peak",5,2);
+    clip(g2,()=>{line(g2,xs,unit(gam),C("--moss"),1.9);line(g2,xs,unit(veg),C("--ochre"),1.9);
+      line(g2,xs,unit(the),C("--verm"),1.9);});
     vline(g2,MKT.S,C("--ochre"),null,[2,4]);
     document.getElementById("legTab").innerHTML=
       "<tr><th>Qty</th><th>Type</th><th>Strike</th></tr>"+
@@ -1072,22 +1126,22 @@ const FG=[
   why:"Portfolio insurance and bearish speculation with a capped loss. Pensions and insurers buy index puts as mandated hedges; that demand is one reason downside implied vols sit above realized.",
   win:"Puts carry the skew premium, so on average they lose money relative to their payoff — they win when the drop is larger or faster than the price assumed. They are worth most when bought while the market is calm and skew is flat.",
   pit:"The bleed: a permanent put programme can cost more than the drawdowns it prevents. Buying after a sell-off, when implied and skew are already high. Choosing a strike so far out that it pays only in a crash you will not get.",
-  how:"Finance with a put spread or a collar if you only need protection over a range. Roll on a schedule rather than on fear. Measure the programme by the drawdown it caps per dollar spent, not by whether this month's put paid.",pg:["surface.html","Page 02"]},
+  how:"Finance with a put spread or a collar if you only need protection over a range. Roll on a schedule rather than on fear. Measure the programme by the drawdown it caps per dollar spent, not by whether this month's put paid.",pg:["surface.html","Page 07"]},
  {n:"Short put (cash-secured)",c:"income",l:[["p",0.95,-1]],v:"Flat to up; happy to own the stock lower.",
   why:"Paid to place a limit order to buy. It harvests both the variance risk premium and the put-skew premium, which is why systematic put-writing indices have historically earned equity-like returns with lower volatility — until the drawdowns.",
   win:"Implied must exceed what is realized often enough to pay for the occasional gap. The edge is real on average and concentrated in calm periods following a spike, when implied is still elevated and realized has come down.",
   pit:"It is short a crash and correlated with everything else you own. Selling in a calm market at low implied gives the least premium for the same tail. Margin calls arrive at the worst moment, so leverage turns a drawdown into a forced exit.",
-  how:"Size so a 30% gap is survivable without selling. Sell more after vol spikes and less in calm. Spread expiries so a single month cannot sink the book. Sell only on names or indices you would actually hold.",pg:["variance.html","Page 09"]},
+  how:"Size so a 30% gap is survivable without selling. Sell more after vol spikes and less in calm. Spread expiries so a single month cannot sink the book. Sell only on names or indices you would actually hold.",pg:["variance.html","Page 11"]},
  {n:"Covered call",c:"income",l:[["s",1,1],["c",1.05,-1]],v:"Hold the stock, collect income, accept a cap.",
   why:"The most common option strategy in the world. Overwriting programmes at pensions, funds and in buy-write ETFs sell calls monthly against holdings — the structural supply of upside volatility from chapter 06.",
   win:"A covered call is identical to a short put (page 19), so it earns when the call's implied vol exceeds the vol the stock then delivers. It underperforms the stock in strong rallies by construction.",
-  pit:"Capping the upside in exactly the months that make a year's return. Selling the cheapest part of an equity surface — upside calls usually carry the lowest implieds. Early assignment before an ex-dividend date (page 08). Treating the premium as yield rather than as the price of volatility sold.",
+  pit:"Capping the upside in exactly the months that make a year's return. Selling the cheapest part of an equity surface — upside calls usually carry the lowest implieds. Early assignment before an ex-dividend date (page 04). Treating the premium as yield rather than as the price of volatility sold.",
   how:"Overwrite when call implied is rich against the cone, not on a calendar. Put the strike above the expected move. Know that you are short volatility and size the stock position accordingly.",pg:["atlas.html","Page 19"]},
  {n:"Protective put",c:"hedge",l:[["s",1,1],["p",0.95,1]],v:"Own the stock with a floor.",
   why:"Insurance for a concentrated or long-held position. Common for executives with restricted stock, family offices and funds protecting a gain through an event.",
   win:"Wins when the stock falls below the strike by more than the premium — and, as insurance, is worth it when the loss it prevents would be ruinous rather than merely painful.",
   pit:"Continuous cost; the same skew premium as a long put. Rolling every month at the money is one of the most expensive habits in options.",
-  how:"Protect for the window that matters, not forever. Use a put spread when the disaster case below a level is acceptable, or a collar when upside can be given away.",pg:["early-exercise.html","Page 08"]},
+  how:"Protect for the window that matters, not forever. Use a put spread when the disaster case below a level is acceptable, or a collar when upside can be given away.",pg:["early-exercise.html","Page 04"]},
  {n:"Collar",c:"hedge",l:[["s",1,1],["p",0.90,1],["c",1.10,-1]],v:"Floor and cap, often for zero premium.",
   why:"Corporate treasurers and concentrated holders protecting a position on a budget. Banks offer it as a product, and the flow is persistent and one-sided.",
   win:"The collar holder is buying skew: on a steep surface the zero-cost call strike comes in closer to the money (chapter 03). It wins as insurance; economically the holder pays the skew premium to the dealer.",
@@ -1097,17 +1151,17 @@ const FG=[
   why:"A directional bet with much less vega and theta than an outright call. The workhorse of directional option trading at funds and desks.",
   win:"Needs the stock to reach the short strike by expiry. Its edge comes from strike selection: the short leg should sit where you think the move stops, so you sell the upside you did not expect to keep.",
   pit:"Capping the upside on a big move. Two bid–offers to cross. Early assignment on the short leg in American options.",
-  how:"Put the short strike at your target or the expected move. Prefer it to an outright when implied is high.",pg:["spreading.html","Page 14"]},
+  how:"Put the short strike at your target or the expected move. Prefer it to an outright when implied is high.",pg:["spreading.html","Page 10"]},
  {n:"Bear put spread",c:"dir",l:[["p",1.00,1],["p",0.90,-1]],v:"Down, to a target.",
   why:"The bearish mirror, and on equities a structurally attractive one: the lower put you sell sits higher on the skew, so it recovers more of the cost than the symmetric call spread would.",
   win:"Needs the decline to reach the lower strike. Skew helps — you are selling the richer leg.",
   pit:"A crash through the lower strike pays only the width. Pin risk near either strike at expiry.",
-  how:"Use when you are bearish but do not need crash protection. Check how much the short leg's skew is paying you.",pg:["spreading.html","Page 14"]},
+  how:"Use when you are bearish but do not need crash protection. Check how much the short leg's skew is paying you.",pg:["spreading.html","Page 10"]},
  {n:"Credit spread (bull put)",c:"income",l:[["p",0.95,-1],["p",0.90,1]],v:"Flat to up, collected up front.",
   why:"Sold heavily by retail and systematic income products because the cash arrives first and the win rate is high.",
-  win:"It is the same trade as the bull call spread on the same strikes, differing only by interest on the width (page 14). It wins exactly when that debit spread would.",
+  win:"It is the same trade as the bull call spread on the same strikes, differing only by interest on the width (page 10). It wins exactly when that debit spread would.",
   pit:"The credit illusion — a large maximum loss against a small maximum gain feels like income until it is not. Early assignment on the short put after a drop. Ignoring that the identical debit spread exists.",
-  how:"Choose between credit and debit versions on margin and assignment, never on 'collecting premium'. Sell where skew makes the short leg rich.",pg:["spreading.html","Page 14"]},
+  how:"Choose between credit and debit versions on margin and assignment, never on 'collecting premium'. Sell where skew makes the short leg rich.",pg:["spreading.html","Page 10"]},
  {n:"Risk reversal",c:"dir",l:[["c",1.10,1],["p",0.90,-1]],v:"Direction plus a view that skew is too steep.",
   why:"How FX desks quote skew and how equity funds get bullish exposure cheaply: sell the expensive downside put to buy the cheap upside call.",
   win:"Wins on a rally, and wins on the skew if downside vol falls relative to upside. It is the fund's side of the corporate's collar.",
@@ -1115,9 +1169,9 @@ const FG=[
   how:"Trade it when skew is historically steep and you are already willing to own the stock lower. Size as if you own the shares.",pg:["structures.html","Chapter 03"]},
  {n:"Long straddle",c:"vol",l:[["c",1.00,1],["p",1.00,1]],v:"A large move either way; or realized vol above implied.",
   why:"The purest long-volatility position. Vol funds buy it delta-hedged to own realized volatility; event traders buy it into catalysts.",
-  win:"Delta-hedged, it earns the gap between realized and implied variance, weighted by when the movement happens (page 16, chapter 07). Into an event it wins if the move beats the straddle-implied move by more than the vol crush costs.",
-  pit:"Theta every day. Losing two thirds of fairly priced event trades and abandoning the strategy (page 03). Buying after a spike when implied is already high.",
-  how:"Buy when implied sits low in its cone and you have a reason to expect realized to rise. Hedge on a rule (page 06). Judge the strategy over many trades, never by its hit rate.",pg:["catalyst.html","Page 03"]},
+  win:"Delta-hedged, it earns the gap between realized and implied variance, weighted by when the movement happens (page 25, chapter 07). Into an event it wins if the move beats the straddle-implied move by more than the vol crush costs.",
+  pit:"Theta every day. Losing two thirds of fairly priced event trades and abandoning the strategy (page 08). Buying after a spike when implied is already high.",
+  how:"Buy when implied sits low in its cone and you have a reason to expect realized to rise. Hedge on a rule (page 13). Judge the strategy over many trades, never by its hit rate.",pg:["catalyst.html","Page 08"]},
  {n:"Long strangle",c:"vol",l:[["c",1.10,1],["p",0.90,1]],v:"A big move, cheaper than a straddle.",
   why:"Cheaper long vol with long vol-of-vol: the wings gain vega as volatility explodes, which is why strangles outperform in genuine regime changes.",
   win:"Needs a move past either strike plus the premium, or a rise in implied — especially of the wings.",
@@ -1127,7 +1181,7 @@ const FG=[
   why:"The direct way to harvest the variance risk premium. Vol funds, market makers and systematic short-vol products run it, usually delta-hedged.",
   win:"Implied has historically exceeded subsequent realized vol on most indices most of the time; the seller collects that gap. The premium is largest just after a spike.",
   pit:"Unlimited loss on a gap; correlation spikes in crashes; margin forces you out at the bottom. Short-vol products have been wiped out in single sessions when volatility doubled overnight.",
-  how:"Sell only when implied exceeds your realized forecast by a margin. Delta-hedge or buy far wings to cap the tail. Size to the worst week, not the average month.",pg:["real-world.html","Page 15"]},
+  how:"Sell only when implied exceeds your realized forecast by a margin. Delta-hedge or buy far wings to cap the tail. Size to the worst week, not the average month.",pg:["real-world.html","Page 20"]},
  {n:"Iron condor",c:"vol",l:[["p",0.85,1],["p",0.95,-1],["c",1.05,-1],["c",1.15,1]],v:"A range, with defined risk.",
   why:"The most popular income structure among retail traders because of its high win rate and capped loss.",
   win:"A short strangle with tail insurance bought back: it wins when the premium collected exceeds the expected loss, including the cost of the wings.",
@@ -1135,19 +1189,19 @@ const FG=[
   how:"Price the wings as insurance you are buying, not as decoration. Compare to the short strangle plus separate tail protection. Take profits early rather than holding into gamma.",pg:["atlas.html","Page 19"]},
  {n:"Butterfly",c:"vol",l:[["c",0.95,1],["c",1.00,-2],["c",1.05,1]],v:"The stock pins near one price.",
   why:"Cheap, defined-risk bets on a precise outcome — an expected pin at expiry, or a takeout price in a cash deal.",
-  win:"Wins when the stock finishes near the body. Its edge comes from knowing where the stock is likely to end, which in deal situations (page 20) is sometimes knowable.",
+  win:"Wins when the stock finishes near the body. Its edge comes from knowing where the stock is likely to end, which in deal situations (page 15) is sometimes knowable.",
   pit:"Low probability; three strikes and wide spreads; short gamma at the body as expiry approaches.",
-  how:"Center it on a level with a reason to attract the price — open interest, a deal price. Use broken-wing versions to shift the risk to the side you are comfortable with.",pg:["merger.html","Page 20"]},
+  how:"Center it on a level with a reason to attract the price — open interest, a deal price. Use broken-wing versions to shift the risk to the side you are comfortable with.",pg:["merger.html","Page 15"]},
  {n:"Iron butterfly",c:"vol",l:[["p",0.90,1],["p",1.00,-1],["c",1.00,-1],["c",1.10,1]],v:"A short straddle with wings.",
   why:"Captures most of a short straddle's premium with a capped loss; popular for selling event vol with defined risk.",
   win:"Wins if the stock stays near the strike and implied is rich.",
   pit:"The same gamma risk as a short straddle near the strike, and the wings cost more on a skewed surface.",
-  how:"Sell where the straddle is rich and the wings are cheap; check both against the surface.",pg:["catalyst.html","Page 03"]},
+  how:"Sell where the straddle is rich and the wings are cheap; check both against the surface.",pg:["catalyst.html","Page 08"]},
  {n:"Calendar spread",c:"vol",l:[["c",1.00,-1,1],["c",1.00,1,3]],v:"Front-month quiet, back-month vol holds or rises.",
   why:"The way to trade term structure: short the front, long the back. It isolates an event or a front-month dislocation from the overall vol level.",
   win:"Long vega, short gamma, collects front theta. Wins when the front decays faster than the back and implied holds — or when an event priced into the front comes in quieter than priced.",
   pit:"A big move early (short front gamma). The back month's implied falling. An event you did not know was inside the front expiry.",
-  how:"Strip events out of the term structure first (page 03). Trade it when forward vol between the expiries looks wrong, not merely when the curve is inverted.",pg:["catalyst.html","Page 03"]},
+  how:"Strip events out of the term structure first (page 08). Trade it when forward vol between the expiries looks wrong, not merely when the curve is inverted.",pg:["catalyst.html","Page 08"]},
  {n:"Diagonal",c:"dir",l:[["c",1.05,-1,1],["c",0.95,1,3]],v:"A calendar with a directional lean.",
   why:"Includes the 'poor man's covered call' — a long-dated in-the-money call standing in for stock, with short-dated calls sold against it.",
   win:"Two trades in one: the directional exposure of the long leg and the term-structure carry of selling the front.",
@@ -1156,13 +1210,13 @@ const FG=[
  {n:"Ratio spread (1×2)",c:"vol",l:[["c",1.05,1],["c",1.15,-2]],v:"A moderate rise, financed by selling the wing.",
   why:"Sells expensive wing volatility to finance a directional view; dealers and funds use it when the wing is rich.",
   win:"Wins most at the short strike. Its edge is the wing's richness.",
-  pit:"Unlimited loss above the upper breakeven — the more right you are, the worse it gets (page 14).",
-  how:"Only where the wing is genuinely rich, and with a plan for the tail: a long further-out call, or a stop.",pg:["spreading.html","Page 14"]},
+  pit:"Unlimited loss above the upper breakeven — the more right you are, the worse it gets (page 10).",
+  how:"Only where the wing is genuinely rich, and with a plan for the tail: a long further-out call, or a stop.",pg:["spreading.html","Page 10"]},
  {n:"Backspread",c:"vol",l:[["c",1.05,-1],["c",1.15,2]],v:"A big move in one direction.",
   why:"Buys tail convexity cheaply by selling a nearer option; a favorite before regime changes.",
   win:"Wins on a large move; loses in the middle.",
   pit:"The worst outcome is a moderate move to the long strike at expiry.",
-  how:"Use when you expect a jump rather than drift, and the far wing is cheap.",pg:["spreading.html","Page 14"]},
+  how:"Use when you expect a jump rather than drift, and the far wing is cheap.",pg:["spreading.html","Page 10"]},
  {n:"Jade lizard",c:"income",l:[["p",0.98,-1],["c",1.02,-1],["c",1.04,1]],v:"Flat to up with no upside risk — if the condition holds.",
   why:"A retail income structure designed to remove upside risk from a short strangle.",
   win:"Only when the credit covers the call spread's width (chapter 05); then it is a short put plus a free call spread.",
@@ -1171,13 +1225,13 @@ const FG=[
  {n:"Conversion / reversal",c:"arb",l:[["s",1,1],["p",1.00,1],["c",1.00,-1]],v:"No market view — a financing trade.",
   why:"Run by financing desks and market makers to lend or borrow through the options market at the implied rate.",
   win:"Wins when the implied rate beats your funding (conversion) or undercuts it (reversal).",
-  pit:"Borrow recalls on the reversal side, early assignment and unexpected dividends (page 07).",
-  how:"Compare against the correct side's funding rate, and monitor borrow as closely as rate.",pg:["parity.html","Page 07"]},
+  pit:"Borrow recalls on the reversal side, early assignment and unexpected dividends (page 03).",
+  how:"Compare against the correct side's funding rate, and monitor borrow as closely as rate.",pg:["parity.html","Page 03"]},
  {n:"Box spread",c:"arb",l:[["c",0.95,1],["c",1.05,-1],["p",1.05,1],["p",0.95,-1]],v:"No market view — a synthetic loan.",
   why:"A bull call spread plus a bear put spread on the same strikes pays the width at expiry no matter what: a zero-coupon bond. Institutions use European index boxes to borrow or lend.",
   win:"Its price implies an interest rate; it wins only if that rate beats your alternative.",
   pit:"On American-style single-stock options the short legs can be assigned early, turning a riskless box into a large unhedged position — the classic way this 'riskless' trade blows up.",
-  how:"Use European-style, cash-settled index options, and compare the implied rate with your funding.",pg:["parity.html","Page 07"]}
+  how:"Use European-style, cash-settled index options, and compare the implied rate with your funding.",pg:["parity.html","Page 03"]}
 ];
 const FGCAT={all:"All",dir:"Directional",income:"Income",vol:"Volatility",hedge:"Hedging",arb:"Financing"};
 let FGSEL="all";
@@ -1217,7 +1271,68 @@ document.querySelectorAll("[data-load]").forEach(b=>b.addEventListener("click",(
   document.getElementById("cvGreeks").scrollIntoView({behavior:"smooth",block:"center"});
 }));
 
-function drawAll(){draw1();draw3();draw5();draw6();draw7();}
+/* ══════════ 07b — build it for the client ══════════
+   Each request is a client's words and a target payoff at expiry. The reader
+   adds legs (long or short a call, put or 100 shares, strikes 80 to 120);
+   the build is accepted when its expiry payoff equals the target at every
+   price, so any equivalent structure counts. The readout prices the build in
+   chapter 01's market (MKT) for the premium and greeks a client would ask
+   about. Quantities are per one-lot. */
+const REQ = [
+  ["I own the stock. Protect me below 90, and pay for it by giving up anything above 115.", [["S", 1], ["P", 1, 90], ["C", -1, 115]], "a collar"],
+  ["I think it gets to about 110 and no further. Give me that upside cheaply.", [["C", 1, 100], ["C", -1, 110]], "a call spread"],
+  ["It will be pinned near 100 at expiry. Pay me if it is, and cap my loss if it isn't.", [["C", 1, 90], ["C", -2, 100], ["C", 1, 110]], "a butterfly"],
+  ["Pay me for staying between 90 and 110, but I want my worst case capped.", [["P", 1, 85], ["P", -1, 90], ["C", -1, 110], ["C", 1, 115]], "a short iron condor"],
+  ["Make me long the stock without buying any shares.", [["C", 1, 100], ["P", -1, 100]], "a synthetic long"],
+  ["There is a ruling next week. A big move either way, I do not care which.", [["C", 1, 100], ["P", 1, 100]], "a straddle"],
+  ["Upside above 110, paid for by taking the stock at 90 if it falls.", [["C", 1, 110], ["P", -1, 90]], "a risk reversal"]
+];
+const SB = { req: 0, legs: [], done: {} };
+const legPay = (l, S) => l[0] === "S" ? l[1] * (S - MKT.S) : l[0] === "C" ? l[1] * Math.max(0, S - l[2]) : l[1] * Math.max(0, l[2] - S);
+const payOf = (legs, S) => legs.reduce((a, l) => a + legPay(l, S), 0);
+/* equal everywhere on a fine grid that includes every strike and the far wings */
+function sameStructure(a, b){ for (let S = 40; S <= 160; S += 0.5) if (Math.abs(payOf(a, S) - payOf(b, S)) > 1e-9) return false; return true; }
+function buildPrice(legs){ const T = MKT.days / 365; let px = 0, d = 0, gm = 0, vg = 0, th = 0;
+  legs.forEach(l => { if (l[0] === "S") { px += l[1] * MKT.S; d += l[1]; return; }
+    const b = bs(MKT.S, l[2], T, MKT.vol, MKT.r, MKT.q, l[0] === "C"); px += l[1] * b.price; d += l[1] * b.delta; gm += l[1] * b.gamma; vg += l[1] * b.vega / 100; th += l[1] * b.theta / 365; });
+  return { px, d, gm, vg, th }; }
+(function(){
+  const list = document.getElementById("sbLegs"), msg = document.getElementById("sbMsg");
+  const name = l => (l[1] > 0 ? "Long " : "Short ") + (Math.abs(l[1]) > 1 ? Math.abs(l[1]) + " × " : "") + (l[0] === "S" ? "100 shares" : (l[0] === "C" ? "call " : "put ") + l[2]);
+  function add(){ const side = +document.getElementById("sbSide").value, type = document.getElementById("sbType").value, K = +document.getElementById("sbK").value;
+    const same = SB.legs.find(l => l[0] === type && (type === "S" || l[2] === K));
+    if (same) { same[1] += side; if (!same[1]) SB.legs = SB.legs.filter(l => l !== same); } else SB.legs.push(type === "S" ? ["S", side] : [type, side, K]);
+    draw(); }
+  document.getElementById("sbAdd").addEventListener("click", add);
+  document.getElementById("sbClear").addEventListener("click", () => { SB.legs = []; draw(); });
+  document.getElementById("sbNext").addEventListener("click", () => { SB.req = (SB.req + 1) % REQ.length; SB.legs = []; draw(); });
+  document.getElementById("sbShow").addEventListener("click", () => { SB.legs = REQ[SB.req][1].map(l => l.slice()); draw(); });
+  list.addEventListener("click", e => { const i = e.target.dataset && e.target.dataset.i; if (i !== undefined) { SB.legs.splice(+i, 1); draw(); } });
+  window.drawSB = draw;
+  function draw(){
+    const [words, target, label] = REQ[SB.req], ok = SB.legs.length && sameStructure(SB.legs, target);
+    if (ok) SB.done[SB.req] = true;
+    msg.textContent = "Client " + (SB.req + 1) + " of " + REQ.length + ": “" + words + "”" + (ok ? " Done: that is " + label + (SB.legs.length > target.length ? ", built with more legs than it needs." : ".") : "");
+    list.innerHTML = SB.legs.length ? SB.legs.map((l, i) => `<li>${name(l)} <button type="button" class="act ghost" data-i="${i}" aria-label="Remove">×</button></li>`).join("") : "<li style=\"color:var(--grey)\">No legs yet</li>";
+    const xs = []; for (let S = 70; S <= 130; S += 0.5) xs.push(S);
+    const tg = xs.map(S => payOf(target, S)), me = xs.map(S => payOf(SB.legs, S));
+    const all = tg.concat(me), lo = Math.min(-5, ...all), hi = Math.max(5, ...all), pad = (hi - lo) * 0.12;
+    const o = Fig(document.getElementById("cvSB"), { h: 260, x0: 70, x1: 130, y0: lo - pad, y1: hi + pad, pad: { l: 52, r: 14, t: 14 } });
+    axes(o, v => "$" + v.toFixed(0), v => (v > 0 ? "+" : "") + v.toFixed(0), 6, 4);
+    clip(o, () => { line(o, xs, tg, C("--ochre"), 5, null, 0.45); line(o, xs, me, ok ? C("--moss") : C("--blue"), 2.4); });
+    vline(o, MKT.S, C("--grey"), "spot", [2, 4]);
+    const p = buildPrice(SB.legs), t = buildPrice(target);
+    document.getElementById("kvSB").innerHTML = kvHTML([
+      ["Your build costs", (p.px >= 0 ? "$" : "−$") + Math.abs(p.px).toFixed(2) + (p.px < 0 ? " (a credit)" : "")],
+      ["Delta / gamma", p.d.toFixed(2) + " / " + p.gm.toFixed(4)],
+      ["Vega / theta per day", p.vg.toFixed(3) + " / " + p.th.toFixed(3)],
+      ["Matches the request", ok ? "yes" : "not yet", ok ? "moss" : "grey"],
+      ["Requests solved", Object.keys(SB.done).length + " of " + REQ.length]
+    ]);
+  }
+})();
+
+function drawAll(){drawSB();draw1();draw3();draw5();draw6();draw7();}
 LAB.boot(drawAll);
 
 </script>

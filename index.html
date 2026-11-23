@@ -37,7 +37,7 @@
   color:var(--grey);font-weight:600;margin:0 0 4px;padding-bottom:14px;border-bottom:1px solid var(--hair);
 }
 .entry{
-  display:grid;grid-template-columns:74px 1fr 128px;gap:0 24px;align-items:start;
+  display:grid;grid-template-columns:74px 1fr;gap:0 24px;align-items:start;
   padding:26px 0;border-bottom:1px solid var(--hair);text-decoration:none;color:inherit;
 }
 .entry:hover{background:rgba(31,76,232,.035)}
@@ -52,7 +52,8 @@
   color:var(--blue);font-weight:500;margin:7px 0 0;max-width:58ch;
 }
 .entry:hover p.subj{color:var(--blue)}
-.shelf h2.grp{margin-top:52px}
+.shelf h2.grp{margin-top:52px;scroll-margin-top:24px}
+.shelf h2.grp:first-child{margin-top:0}
 .entry .tags{margin-top:11px;display:flex;gap:7px;flex-wrap:wrap}
 .entry .tags span{
   font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
@@ -77,17 +78,33 @@
 .colophon{max-width:1180px;margin:0 auto;padding:0 34px 90px}
 .colophon p{max-width:66ch;color:var(--ink2);font-weight:300;font-size:15.5px;line-height:1.65}
 @media(max-width:760px){.colophon{padding:0 16px 70px}}
-.map{max-width:1180px;margin:34px auto 8px;padding:0 24px}
-.map h2{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:500;margin:0 0 14px}
-.map .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.map .idea{background:var(--card);border:1px solid var(--hair);border-top:3px solid var(--blue);border-radius:2px;padding:14px 13px 12px}
-.map .idea .k{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--blue);letter-spacing:.08em}
-.map .idea h3{font-family:'Fraunces',serif;font-size:15.5px;line-height:1.22;margin:5px 0 10px;font-weight:700}
-.map .idea a{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.35;color:var(--ink);text-decoration:none;padding:5px 0;border-top:1px solid var(--hair)}
-.map .idea a b{color:var(--grey);font-weight:500;margin-right:6px}
-.map .idea a:hover{color:var(--blue)}
-.map .idea.pr{border-top-color:var(--moss)}
-.map .note{font-family:'Newsreader',serif;font-size:15px;color:var(--grey);margin:12px 0 0}
+.route{max-width:1180px;margin:46px auto 0;padding:0 34px}
+.route h2{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);font-weight:600;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+.route ol{list-style:none;margin:0;padding:0;position:relative}
+.route ol::before{content:"";position:absolute;left:15px;top:22px;bottom:22px;width:2px;background:var(--blue);opacity:.35}
+.route .stop{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:10px 28px;align-items:center;padding:13px 0;border-bottom:1px solid var(--hair)}
+.route .idea{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink)}
+.route .idea .k{position:relative;flex:none;width:32px;height:32px;border-radius:50%;background:var(--chalk);border:2px solid var(--blue);
+  color:var(--blue);font:600 13px/28px var(--mono);text-align:center}
+.route .idea .t{font-family:var(--disp);font-weight:700;font-size:18px;line-height:1.2;letter-spacing:-.01em}
+.route .idea:hover .t{color:var(--blue)}
+.route .pages{display:flex;flex-wrap:wrap;gap:7px}
+.route .pages a{font-family:var(--mono);font-size:12px;line-height:1;color:var(--ink);text-decoration:none;background:var(--card);
+  border:1px solid var(--hair);border-radius:999px;padding:7px 11px 7px 9px;white-space:nowrap}
+.route .pages a b{color:var(--blue);font-weight:600;margin-right:7px}
+.route .pages a:hover{border-color:var(--blue);color:var(--blue)}
+.route .stop.pr .k{border-color:var(--moss);color:var(--moss)}
+.route .stop.pr .pages a b{color:var(--moss)}
+.route .pages a.ext{border-style:dashed}
+.shelf p.elsewhere{color:var(--ink2);font-size:16px;margin:14px 0 0;max-width:70ch}
+.shelf p.elsewhere a{color:var(--blue)}
+.route .note{font-family:var(--serif,'Newsreader'),serif;font-size:15.5px;color:var(--grey);margin:14px 0 0;max-width:70ch}
+@media(max-width:760px){
+  .route{padding:0 16px}
+  .route .stop{grid-template-columns:1fr;gap:9px}
+  .route .pages{padding-left:46px}
+  .route .pages a{white-space:normal}
+}
 </style>
 </head>
 <body>
@@ -99,23 +116,47 @@
   <p class="sub" style="margin-top:14px"><a href="program.html" style="color:var(--blue)">New here, or training for a seat? Start with the program &rarr;</a></p>
 </div>
 
-<div class="map">
-  <h2>The series on one screen: seven ideas, and the pages that build each</h2>
-  <div class="cols">
-    <div class="idea"><div class="k">1</div><h3>A payoff is a bet on a distribution</h3><a href="black-scholes.html"><b>01</b>Price from paths</a><a href="binomial.html"><b>12</b>One step, two outcomes</a></div>
-    <div class="idea"><div class="k">2</div><h3>Call minus put is the forward</h3><a href="parity.html"><b>07</b>The parity machine</a><a href="forwards.html"><b>13</b>Cost of carry</a><a href="early-exercise.html"><b>08</b>When to exercise</a><a href="carry.html"><b>23</b>Dividends and borrow</a></div>
-    <div class="idea"><div class="k">3</div><h3>Vol is the price, and &sigma;&radic;T is the ruler</h3><a href="screen.html"><b>17</b>Reading the screen</a><a href="rulers.html"><b>18</b>Two rulers</a><a href="tools.html"><b>TK</b>Vol to moves</a></div>
-    <div class="idea"><div class="k">4</div><h3>Hedged, it is realized against implied</h3><a href="atlas.html"><b>19</b>The Greek atlas</a><a href="real-world.html"><b>15</b>Where it breaks</a><a href="dynamics.html"><b>22</b>When the surface moves</a><a href="converts.html"><b>24</b>Vol through a bond</a></div>
-    <div class="idea"><div class="k">5</div><h3>The surface prices each piece of the distribution</h3><a href="surface.html"><b>02</b>Skew and density</a><a href="catalyst.html"><b>03</b>Events</a><a href="structures.html"><b>04</b>Structures</a><a href="spreading.html"><b>14</b>Choosing a spread</a><a href="variance.html"><b>09</b>Variance</a><a href="dispersion.html"><b>10</b>Correlation</a></div>
-    <div class="idea"><div class="k">6</div><h3>Edge is what is left after costs</h3><a href="microstructure.html"><b>05</b>Spreads and flow</a><a href="execution.html"><b>06</b>Hedging and execution</a><a href="merger.html"><b>20</b>Deals</a><a href="playbook.html"><b>21</b>Strategies that get run</a></div>
-    <div class="idea"><div class="k">7</div><h3>Size it, and run the book</h3><a href="book.html"><b>11</b>Risk, P&amp;L, the columns</a><a href="capital.html"><b>25</b>Capital and margin</a><a href="tools.html"><b>TK</b>Kelly sizing</a></div>
-    <div class="idea pr"><div class="k">&check;</div><h3>Practice</h3><a href="program.html"><b>PG</b>The program</a><a href="questions.html"><b>16</b>Forty questions</a><a href="workbook.html"><b>WB</b>Problem sets</a></div>
-  </div>
-  <p class="note">Read left to right if you are starting out: each idea needs the ones before it. The full descriptions follow in page order.</p>
-</div>
+<nav class="route" aria-label="The series as a route">
+  <h2>The series as a route: seven ideas, in the order the pages build on each other</h2>
+  <ol>
+    <li class="stop">
+      <a class="idea" href="#idea-1"><span class="k">1</span><span class="t">A payoff is a bet on a distribution</span></a>
+      <div class="pages"><a href="black-scholes.html"><b>01</b>Price from paths</a><a href="binomial.html"><b>02</b>One step, two outcomes</a></div>
+    </li>
+    <li class="stop">
+      <a class="idea" href="#idea-2"><span class="k">2</span><span class="t">Call minus put is the forward</span></a>
+      <div class="pages"><a href="parity.html"><b>03</b>The parity machine</a><a href="early-exercise.html"><b>04</b>When to exercise</a><a href="forwards.html"><b>05</b>Cost of carry</a><a href="carry.html"><b>06</b>Dividends and borrow</a></div>
+    </li>
+    <li class="stop">
+      <a class="idea" href="#idea-3"><span class="k">3</span><span class="t">The surface prices each piece of the distribution</span></a>
+      <div class="pages"><a href="surface.html"><b>07</b>Skew and density</a><a href="catalyst.html"><b>08</b>Events</a><a href="structures.html"><b>09</b>Structures</a><a href="spreading.html"><b>10</b>Choosing a spread</a><a href="variance.html"><b>11</b>Variance</a><a href="dispersion.html"><b>12</b>Correlation</a></div>
+    </li>
+    <li class="stop">
+      <a class="idea" href="#idea-4"><span class="k">4</span><span class="t">Edge is what is left after costs</span></a>
+      <div class="pages"><a href="execution.html"><b>13</b>Hedging and execution</a><a href="microstructure.html"><b>14</b>Spreads and flow</a><a href="merger.html"><b>15</b>Deals</a><a href="playbook.html"><b>16</b>Strategies that get run</a></div>
+    </li>
+    <li class="stop">
+      <a class="idea" href="#idea-5"><span class="k">5</span><span class="t">Vol is the price, and σ√T is the ruler</span></a>
+      <div class="pages"><a href="screen.html"><b>17</b>Reading the screen</a><a href="rulers.html"><b>18</b>Two rulers</a></div>
+    </li>
+    <li class="stop">
+      <a class="idea" href="#idea-6"><span class="k">6</span><span class="t">Hedged, it is realized against implied</span></a>
+      <div class="pages"><a href="atlas.html"><b>19</b>The Greek atlas</a><a href="real-world.html"><b>20</b>Where it breaks</a><a href="dynamics.html"><b>21</b>When the surface moves</a><a href="converts.html"><b>22</b>Vol through a bond</a></div>
+    </li>
+    <li class="stop">
+      <a class="idea" href="#idea-7"><span class="k">7</span><span class="t">Size it, and run the book</span></a>
+      <div class="pages"><a href="book.html"><b>23</b>Risk, P&amp;L, the columns</a><a href="capital.html"><b>24</b>Capital and margin</a></div>
+    </li>
+    <li class="stop pr">
+      <a class="idea" href="#idea-p"><span class="k">&check;</span><span class="t">Practice and tools</span></a>
+      <div class="pages"><a href="questions.html"><b>25</b>Forty questions</a><a href="program.html"><b>PG</b>The program</a><a href="workbook.html"><b>WB</b>Problem sets</a><a href="tools.html"><b>KIT</b>The toolkit</a><a href="https://cafe-helado.github.io/PutCall-Parity-Game/" target="_blank" rel="noopener" class="ext"><b>↗</b>Parity Drill</a><a href="https://cafe-helado.github.io/Option-Breakeven-Drill/" target="_blank" rel="noopener" class="ext"><b>↗</b>Breakeven Drill</a><a href="https://cafe-helado.github.io/stats-trading/" target="_blank" rel="noopener" class="ext"><b>↗</b>Chance, visually</a></div>
+    </li>
+  </ol>
+  <p class="note">Starting out? Read down the line: the pages are numbered in this order, and each one leans on the pages before it. The full descriptions follow under the same seven headings.</p>
+</nav>
 
 <div class="shelf">
-  <h2>Foundations &mdash; what an option is worth</h2>
+  <h2 class="grp" id="idea-1">1 &middot; A payoff is a bet on a distribution</h2>
 
   <a class="entry" href="black-scholes.html">
     <span class="n">01</span>
@@ -125,185 +166,165 @@
       <p>Black–Scholes built from random paths. The price emerges as a running average before the formula appears; the greeks get a section each; a delta hedge runs live to show the drift never mattered. Ends with desk drills for turning greeks into dollars.</p>
       <div class="tags"><span>Math primer</span><span>Greeks in depth</span><span>Replication</span><span>Desk drills</span></div>
     </div>
-    <span class="st live">Live →</span>
   </a>
-
-  <a class="entry" href="surface.html">
-    <span class="n">02</span>
-    <div>
-      <h3>The Shape of What We Don't Believe</h3>
-      <p class="subj">Volatility skew and smile, and the distribution behind them</p>
-      <p>The volatility surface read as a probability distribution. Breeden–Litzenberger turns the smile into a density you can look at; jumps and stochastic vol are separated by their term structure rather than their shape; sticky rules decide what your delta actually is; and two arbitrage checks tell you when a surface cannot be right.</p>
-      <div class="tags"><span>Skew &amp; smile</span><span>Implied density</span><span>Term structure</span><span>Sticky rules</span><span>Arb bounds</span></div>
-    </div>
-    <span class="st live">Live →</span>
-  </a>
-
-  <a class="entry" href="catalyst.html">
-    <span class="n">03</span>
-    <div>
-      <h3>One Number Holding Two Things</h3>
-      <p class="subj">Event volatility &mdash; earnings, term structure, vol crush</p>
-      <p>Implied vol into an earnings date blends ordinary drift with one scheduled shock. Because variance adds, two expiries separate them exactly — a kinked term structure goes flat once one number is removed. Also: why the quoted implied move is 80% of a standard deviation, and why a fairly priced earnings straddle loses two times in three.</p>
-      <div class="tags"><span>Event vol</span><span>Vol days</span><span>The strip</span><span>Vol crush</span><span>Calendars</span></div>
-    </div>
-    <span class="st live">Live →</span>
-  </a>
-
-  <a class="entry" href="structures.html">
-    <span class="n">04</span>
-    <div>
-      <h3>The Same Trade, Read Twice</h3>
-      <p class="subj">Eighteen option structures, and what each one really is</p>
-      <p>Eighteen structures, each drawn as a payoff and as a five-axis exposure fingerprint. A corporate's collar and a fund's risk reversal turn out to be one instrument with the sign flipped — every greek annihilates exactly. And the lizards get their missing condition: they only remove the tail when the credit covers the spread width, which frequently it doesn't.</p>
-      <div class="tags"><span>Structures</span><span>Fingerprints</span><span>Lizards</span><span>Flow</span></div>
-    </div>
-    <span class="st live">Live →</span>
-  </a>
-
-  <h2 class="grp">The market &mdash; where a price comes from, and what trading costs</h2>
-
-  <a class="entry" href="microstructure.html">
-    <span class="n">05</span>
-    <div>
-      <h3>Every Price Has Someone Behind It</h3>
-      <p class="subj">Bid-offer spreads, market making, and dealer gamma</p>
-      <p>A tick is a fixed number of cents and a wildly variable number of vol points — 0.04 on a six-month at-the-money, 0.70 on a seven-day five-delta, and tens of points further out the wing. Then: what is actually inside a spread, a market-making simulator where quoting too tight loses money outright, and dealer gamma with the flow condition that usually goes unstated.</p>
-      <div class="tags"><span>Ticks in vol</span><span>Spreads</span><span>Adverse selection</span><span>Dealer gamma</span><span>Pinning</span></div>
-    </div>
-    <span class="st live">Live →</span>
-  </a>
-
-  <a class="entry" href="execution.html">
-    <span class="n">06</span>
-    <div>
-      <h3>The Hedge That Costs Something</h3>
-      <p class="subj">Transaction costs, hedging frequency, and execution algos</p>
-      <p>Page 01 proved replication works and never charged for a single trade. Put the bill back in and continuous hedging stops being a theorem — the objective becomes a U-curve with an interior optimum that moves with costs and risk aversion. Then: impact against timing risk, the algo menu, why the same fills score on benchmark against VWAP and lose 1.47 against arrival, dark-pool adverse selection, and ETF creation bands.</p>
-      <div class="tags"><span>Rehedge optimum</span><span>Algos</span><span>Benchmarks</span><span>Dark pools</span><span>ETFs</span></div>
-    </div>
-    <span class="st live">Live →</span>
-  </a>
-
-  <h2 class="grp">Arbitrage and exercise &mdash; relationships that must hold</h2>
-
-  <a class="entry" href="parity.html">
-    <span class="n">07</span>
-    <div>
-      <h3>Two Ways to Own the Same Thing</h3>
-      <p class="subj">Put&ndash;call parity, conversions, boxes and jelly rolls</p>
-      <p>Put-call parity as a machine for building stock, calls, puts and cash out of each other. A conversion's P&amp;L distribution is a vertical line — not a narrow one, a single value on every path. Then: carry and settlement, revcon pricing with live implied rates, jelly rolls priced leg by leg, and the ways a riskless trade actually loses.</p>
-      <div class="tags"><span>Parity</span><span>Revcons</span><span>Jelly rolls</span><span>Borrow</span><span>Speed drill</span></div>
-    </div>
-    <span class="st live">Live →</span>
-  </a>
-
-  <a class="entry" href="early-exercise.html">
-    <span class="n">08</span>
-    <div>
-      <h3>A Decision Worth Exactly Nothing</h3>
-      <p class="subj">American options &mdash; early exercise, assignment, dividends</p>
-      <p>Priced in the same tree across six hundred cases, the right to exercise a call early is worth 1.85&times;10<sup>&minus;13</sup>. What it costs is always the option's time value &mdash; interest on the strike plus the insurance you drop &mdash; and only three things can ever beat that. Then the operational half: assignment is a binomial draw, a two-cent settlement hands you $3,800 of weekend risk, and a cash merger takes the stock up while every call on it goes to zero.</p>
-      <div class="tags"><span>American options</span><span>Exercise boundary</span><span>Dividends</span><span>Assignment</span><span>Pin risk</span><span>Corporate actions</span></div>
-    </div>
-    <span class="st live">Live &rarr;</span>
-  </a>
-
-  <h2 class="grp">Volatility as an instrument &mdash; trading it, and carrying it</h2>
-
-  <a class="entry" href="variance.html">
-    <span class="n">09</span>
-    <div>
-      <h3>Only One of Them Is Tradeable</h3>
-      <p class="subj">Variance swaps, the log contract, and what VIX actually is</p>
-      <p>Delta-hedge one particular contract and your P&amp;L <em>is</em> the realized variance &mdash; on every path, correlation 0.99998 hedging daily, not on average. That contract is a logarithm, you build it from ordinary options weighted by 1/K&sup2;, and then the wings turn out to be a third of it: cut the strike range to 92&ndash;108% and a 25 variance swap prices at 17.4. Ends with what VIX actually is, and the jump that breaks the whole argument.</p>
-      <div class="tags"><span>Variance vs volatility</span><span>Log contract</span><span>Static replication</span><span>Variance swaps</span><span>VIX</span></div>
-    </div>
-    <span class="st live">Live &rarr;</span>
-  </a>
-
-  <a class="entry" href="dispersion.html">
-    <span class="n">10</span>
-    <div>
-      <h3>Correlation, Whether You Meant To or Not</h3>
-      <p class="subj">Index against single-name vol, implied correlation, dispersion</p>
-      <p>Twenty stocks averaging 39% volatility make an index worth anywhere from 9% to 39%, and the whole range is one number nobody quotes. Back it out of an index price, trade it against the components, and watch the volatility level cancel between the legs &mdash; leaving a straight line in realized correlation. Then the part that matters: correlation is bounded at one, and it gets there on the day you cannot afford it.</p>
-      <div class="tags"><span>Index algebra</span><span>Implied correlation</span><span>Dispersion</span><span>Flow</span><span>Correlation to one</span></div>
-    </div>
-    <span class="st live">Live &rarr;</span>
-  </a>
-
-  <a class="entry" href="book.html">
-    <span class="n">11</span>
-    <div>
-      <h3>The Sum of the Parts</h3>
-      <p class="subj">Portfolio greeks, scenario matrices, and risk limits</p>
-      <p>Ten pages priced one option at a time. A book is a portfolio: dollar units add, rates do not, and a greek report is wrong by 0.7% on a 1% move and 58% on a 20% one. The scenario matrix is what a risk manager actually reads. And a net vega of 417 turns out to describe four volatility moves whose P&amp;L runs from $743 to $1,238 &mdash; the safest-looking number on the page hiding the most.</p>
-      <div class="tags"><span>Aggregating greeks</span><span>Scenario matrix</span><span>Bucketed vega</span><span>Limits</span><span>Reading a report</span></div>
-    </div>
-    <span class="st live">Live &rarr;</span>
-  </a>
-
-  <h2 class="grp">The theory from other directions &mdash; and where it fails</h2>
 
   <a class="entry" href="binomial.html">
-    <span class="n">12</span>
+    <span class="n">02</span>
     <div>
       <h3>The Price That Ignores the Odds</h3>
       <p class="subj">The binomial model, replication, and risk-neutral pricing</p>
       <p>The companion to page 01, arrived at from the opposite direction. One period, two outcomes, and a portfolio of stock and cash that reproduces the option exactly — its cost is the price, and the argument never mentions probability. Slide the odds of an up move from 1% to 99% and the expected payoff moves a hundredfold while the price sits at 5.000000. Then: the probability that isn't one, convergence as a sawtooth, and the American exercise no formula can reach.</p>
       <div class="tags"><span>Replication</span><span>Risk-neutral pricing</span><span>Lattices</span><span>Convergence</span><span>American exercise</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
+  </a>
+
+  <h2 class="grp" id="idea-2">2 &middot; Call minus put is the forward</h2>
+
+  <a class="entry" href="parity.html">
+    <span class="n">03</span>
+    <div>
+      <h3>Two Ways to Own the Same Thing</h3>
+      <p class="subj">Put&ndash;call parity, conversions, boxes and jelly rolls</p>
+      <p>Put-call parity as a machine for building stock, calls, puts and cash out of each other. A conversion's P&amp;L distribution is a vertical line — not a narrow one, a single value on every path. Then: carry and settlement, revcon pricing with live implied rates, jelly rolls priced leg by leg, and the ways a riskless trade actually loses.</p>
+      <div class="tags"><span>Parity</span><span>Revcons</span><span>Jelly rolls</span><span>Borrow</span><span>Speed drill</span></div>
+    </div>
+  </a>
+
+  <a class="entry" href="early-exercise.html">
+    <span class="n">04</span>
+    <div>
+      <h3>A Decision Worth Exactly Nothing</h3>
+      <p class="subj">American options &mdash; early exercise, assignment, dividends</p>
+      <p>Priced in the same tree across six hundred cases, the right to exercise a call early is worth 1.85&times;10<sup>&minus;13</sup>. What it costs is always the option's time value &mdash; interest on the strike plus the insurance you drop &mdash; and only three things can ever beat that. Then the operational half: assignment is a binomial draw, a two-cent settlement hands you $3,800 of weekend risk, and a cash merger takes the stock up while every call on it goes to zero.</p>
+      <div class="tags"><span>American options</span><span>Exercise boundary</span><span>Dividends</span><span>Assignment</span><span>Pin risk</span><span>Corporate actions</span></div>
+    </div>
   </a>
 
   <a class="entry" href="forwards.html">
-    <span class="n">13</span>
+    <span class="n">05</span>
     <div>
       <h3>The Forward Is the Real Underlying</h3>
       <p class="subj">Forwards and futures, cost of carry, and Black-76</p>
-      <p>Options are not priced off the stock price. Buy the share, borrow the money, collect the dividends, sell it forward — the P&amp;L is exactly zero at every outcome, which is what fixes the price and why a futures curve is carry rather than a forecast. Then contract specs, Black-76, and the finding that inverts page 08 completely: on a futures contract, <em>both</em> American calls and puts get exercised early, because a European futures option can trade below its intrinsic value.</p>
+      <p>Options are not priced off the stock price. Buy the share, borrow the money, collect the dividends, sell it forward — the P&amp;L is exactly zero at every outcome, which is what fixes the price and why a futures curve is carry rather than a forecast. Then contract specs, Black-76, and the finding that inverts page 04 completely: on a futures contract, <em>both</em> American calls and puts get exercised early, because a European futures option can trade below its intrinsic value.</p>
       <div class="tags"><span>Cost of carry</span><span>Forward pricing</span><span>Contract specs</span><span>Black-76</span><span>Futures options</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
+  </a>
+
+  <a class="entry" href="carry.html">
+    <span class="n">06</span>
+    <div>
+      <h3>The Carry Curve</h3>
+      <p class="subj">Dividends and borrow, read off the options</p>
+      <p>Every expiry on a chain quotes a forward. Line them up and the shortfall against stock-plus-interest is a term structure of carry: a sawtooth where the dividends fall, settling to the yield plus the borrow, and inverted when a squeeze is expected to pass. Between two expiries there is one unknown, which is what a jelly roll trades — a 30-cent dividend cut the company has not announced moves one roll by 29 cents and nothing else. And a dividend change is a delta nobody hedged: halve it and a two-year conversion loses $225 a contract at every strike.</p>
+      <div class="tags"><span>Implied dividends</span><span>Borrow term structure</span><span>Jelly rolls</span><span>Conversions</span></div>
+    </div>
+  </a>
+
+  <h2 class="grp" id="idea-3">3 &middot; The surface prices each piece of the distribution</h2>
+
+  <a class="entry" href="surface.html">
+    <span class="n">07</span>
+    <div>
+      <h3>The Shape of What We Don't Believe</h3>
+      <p class="subj">Volatility skew and smile, and the distribution behind them</p>
+      <p>The volatility surface read as a probability distribution. Breeden–Litzenberger turns the smile into a density you can look at; jumps and stochastic vol are separated by their term structure rather than their shape; sticky rules decide what your delta actually is; and two arbitrage checks tell you when a surface cannot be right.</p>
+      <div class="tags"><span>Skew &amp; smile</span><span>Implied density</span><span>Term structure</span><span>Sticky rules</span><span>Arb bounds</span></div>
+    </div>
+  </a>
+
+  <a class="entry" href="catalyst.html">
+    <span class="n">08</span>
+    <div>
+      <h3>One Number Holding Two Things</h3>
+      <p class="subj">Event volatility &mdash; earnings, term structure, vol crush</p>
+      <p>Implied vol into an earnings date blends ordinary drift with one scheduled shock. Because variance adds, two expiries separate them exactly — a kinked term structure goes flat once one number is removed. Also: why the quoted implied move is 80% of a standard deviation, and why a fairly priced earnings straddle loses two times in three.</p>
+      <div class="tags"><span>Event vol</span><span>Vol days</span><span>The strip</span><span>Vol crush</span><span>Calendars</span></div>
+    </div>
+  </a>
+
+  <a class="entry" href="structures.html">
+    <span class="n">09</span>
+    <div>
+      <h3>The Same Trade, Read Twice</h3>
+      <p class="subj">Eighteen option structures, and what each one really is</p>
+      <p>Eighteen structures, each drawn as a payoff and as a five-axis exposure fingerprint. A corporate's collar and a fund's risk reversal turn out to be one instrument with the sign flipped — every greek annihilates exactly. And the lizards get their missing condition: they only remove the tail when the credit covers the spread width, which frequently it doesn't.</p>
+      <div class="tags"><span>Structures</span><span>Fingerprints</span><span>Lizards</span><span>Flow</span></div>
+    </div>
   </a>
 
   <a class="entry" href="spreading.html">
-    <span class="n">14</span>
+    <span class="n">10</span>
     <div>
       <h3>Nobody Trades One Option</h3>
       <p class="subj">Choosing between spreads &mdash; verticals, ratios, butterflies</p>
-      <p>Page 04 catalogued structures; this one chooses between them. Five bullish structures sized to identical delta, and the lead changes hands four times across the outcome range &mdash; the long call is simultaneously the best trade if you are wrong, the worst if you are slightly right, and the best again if you are extremely right. Also: a "credit spread" and the matching debit spread are the same trade, differing by eleven cents of interest.</p>
+      <p>Page 09 catalogued structures; this one chooses between them. Five bullish structures sized to identical delta, and the lead changes hands four times across the outcome range &mdash; the long call is simultaneously the best trade if you are wrong, the worst if you are slightly right, and the best again if you are extremely right. Also: a "credit spread" and the matching debit spread are the same trade, differing by eleven cents of interest.</p>
       <div class="tags"><span>Why spread</span><span>Verticals</span><span>Ratios</span><span>Butterflies</span><span>Choosing</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
 
-  <a class="entry" href="real-world.html">
+  <a class="entry" href="variance.html">
+    <span class="n">11</span>
+    <div>
+      <h3>Only One of Them Is Tradeable</h3>
+      <p class="subj">Variance swaps, the log contract, and what VIX actually is</p>
+      <p>Delta-hedge one particular contract and your P&amp;L <em>is</em> the realized variance &mdash; on every path, correlation 0.99998 hedging daily, not on average. That contract is a logarithm, you build it from ordinary options weighted by 1/K&sup2;, and then the wings turn out to be a third of it: cut the strike range to 92&ndash;108% and a 25 variance swap prices at 17.4. Ends with what VIX actually is, and the jump that breaks the whole argument.</p>
+      <div class="tags"><span>Variance vs volatility</span><span>Log contract</span><span>Static replication</span><span>Variance swaps</span><span>VIX</span></div>
+    </div>
+  </a>
+
+  <a class="entry" href="dispersion.html">
+    <span class="n">12</span>
+    <div>
+      <h3>Correlation, Whether You Meant To or Not</h3>
+      <p class="subj">Index against single-name vol, implied correlation, dispersion</p>
+      <p>Twenty stocks averaging 39% volatility make an index worth anywhere from 9% to 39%, and the whole range is one number nobody quotes. Back it out of an index price, trade it against the components, and watch the volatility level cancel between the legs &mdash; leaving a straight line in realized correlation. Then the part that matters: correlation is bounded at one, and it gets there on the day you cannot afford it.</p>
+      <div class="tags"><span>Index algebra</span><span>Implied correlation</span><span>Dispersion</span><span>Flow</span><span>Correlation to one</span></div>
+    </div>
+  </a>
+
+  <h2 class="grp" id="idea-4">4 &middot; Edge is what is left after costs</h2>
+
+  <a class="entry" href="execution.html">
+    <span class="n">13</span>
+    <div>
+      <h3>The Hedge That Costs Something</h3>
+      <p class="subj">Transaction costs, hedging frequency, and execution algos</p>
+      <p>Page 01 proved replication works and never charged for a single trade. Put the bill back in and continuous hedging stops being a theorem — the objective becomes a U-curve with an interior optimum that moves with costs and risk aversion. Then: impact against timing risk, the algo menu, why the same fills score on benchmark against VWAP and lose 1.47 against arrival, dark-pool adverse selection, and ETF creation bands.</p>
+      <div class="tags"><span>Rehedge optimum</span><span>Algos</span><span>Benchmarks</span><span>Dark pools</span><span>ETFs</span></div>
+    </div>
+  </a>
+
+  <a class="entry" href="microstructure.html">
+    <span class="n">14</span>
+    <div>
+      <h3>Every Price Has Someone Behind It</h3>
+      <p class="subj">Bid-offer spreads, market making, and dealer gamma</p>
+      <p>A tick is a fixed number of cents and a wildly variable number of vol points — 0.04 on a six-month at-the-money, 0.70 on a seven-day five-delta, and tens of points further out the wing. Then: what is actually inside a spread, a market-making simulator where quoting too tight loses money outright, and dealer gamma with the flow condition that usually goes unstated.</p>
+      <div class="tags"><span>Ticks in vol</span><span>Spreads</span><span>Adverse selection</span><span>Dealer gamma</span><span>Pinning</span></div>
+    </div>
+  </a>
+
+  <a class="entry" href="merger.html">
     <span class="n">15</span>
     <div>
-      <h3>Every Assumption, and What It Costs</h3>
-      <p class="subj">Model assumptions, jumps, fat tails, and model risk</p>
-      <p>The page that argues with the other fourteen. Page 01 proved hedging error falls like 1/&radic;N &mdash; add jumps and thirty-two times the hedging buys 1.9&times; instead of 5.5&times;, because a jump does not get smaller when you trade faster. Then: a fat-tailed world with <em>identical</em> variance smiles anyway, one volatility on a skewed chain errs from &minus;74% to +213%, and an argument for why the model is still the right thing to use.</p>
-      <div class="tags"><span>Model risk</span><span>Jumps</span><span>Fat tails</span><span>Smile origins</span><span>What survives</span></div>
+      <h3>A Deal Is a Price on Two Futures</h3>
+      <p class="subj">Merger arbitrage, and the options on a binary outcome</p>
+      <p>A target after an announcement is a claim on the deal price if the deal closes and the standalone value if it breaks, financed until somebody decides. Gross and net spreads, and why a fund's long record is funding plus a premium. Implied odds with the carry done properly — the common shortcut charges interest in only one outcome and is three points wrong. Stock deals and their basis risk, what a rate cut does to an arb book twice, the antitrust tree priced node by node (a second request costs about 23 cents of odds and 9 of time), why a special dividend is worth the odds times the dividend, and options that bet on the shape of the bad hump.</p>
+      <div class="tags"><span>Spreads</span><span>Implied odds</span><span>Stock deals</span><span>Rates</span><span>Antitrust tree</span><span>Special dividends</span><span>Binary events</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
 
-  <h2 class="grp">Practice &mdash; questions to think with</h2>
-
-  <a class="entry" href="questions.html">
+  <a class="entry" href="playbook.html">
     <span class="n">16</span>
     <div>
-      <h3>The Questions They Ask You</h3>
-      <p class="subj">Forty graded interview questions, each worked in a figure</p>
-      <p>The other fifteen pages each build one subject; this one takes them apart and reassembles them in the shape a question comes in. A ladder of forty cards from warm-up to hard, then six worked at full length &mdash; why a six-wide call spread can never be worth six, why four quarterly options cost twice the year, why a fifty-cent arbitrage is really a borrow rate, and how you sell at 30, watch it realize 25, and still lose. Ends with a randomized drill at three tiers.</p>
-      <div class="tags"><span>Question ladder</span><span>Bounds</span><span>&radic;T scaling</span><span>Dollar gamma</span><span>Drills</span></div>
+      <h3>The Playbook</h3>
+      <p class="subj">The strategies people and institutions actually run</p>
+      <p>Not structures — strategies. Systematic put-writing, overwriting programmes, collars for concentrated stock, tail-risk hedging, delta-hedged vol arbitrage, dispersion, earnings vol, VIX products, market making, merger arbitrage, financing trades, structured products, convertible arbitrage and 0DTE trading: why each one gets paid, how it is run, how it blows up and what the survivors do differently. A 30-year simulation shows why selling insurance wins 93% of months and still has a skewness of −9.</p>
+      <div class="tags"><span>Put-writing</span><span>Tail hedging</span><span>Vol arb</span><span>Dispersion</span><span>VIX</span><span>Market making</span><span>Return shapes</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
 
-  <h2 class="grp">The screen &mdash; what the job actually looks like</h2>
+  <h2 class="grp" id="idea-5">5 &middot; Vol is the price, and σ√T is the ruler</h2>
 
   <a class="entry" href="screen.html">
     <span class="n">17</span>
@@ -313,7 +334,6 @@
       <p>Sixteen pages of theory and none of them said how to look at a chain. The conversions that turn a wall of numbers into a picture: a strike five points away is 2.33 sigma on a $25 stock and 0.12 on a $500 one, and the multiplication that tells you which. Then delta as a moneyness ruler and where the 16-delta rule of thumb stops working, what a ten-cent quote does to the IV column, reading skew and term structure by eye, and a procedure short enough to run before anyone expects an answer.</p>
       <div class="tags"><span>Strike spacing</span><span>Sigmas</span><span>Delta as a ruler</span><span>The IV column</span><span>Risk reversal</span><span>The scan</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
 
   <a class="entry" href="rulers.html">
@@ -324,79 +344,85 @@
       <p>An option pays an absolute value, so a straddle prices the expected absolute move — and the screen quotes a standard deviation beside it. For a normal the two differ by √(2/π) = 0.7979, which is why the implied move is breached 42.5% of the time rather than the 31.7% a one-sigma reading expects. Then the part that constant hides: 0.7979 belongs to the normal alone, falling to exactly 3/4 at six degrees of freedom and 1/√2 at four, so the same straddle implies a bigger sigma the fatter the tails. Ends on the same choice made on realized data, where one estimator is steady and the other is honest.</p>
       <div class="tags"><span>MAD vs σ</span><span>0.7979</span><span>Implied move</span><span>Breach rates</span><span>Fat tails</span><span>Robust estimators</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
+
+  <h2 class="grp" id="idea-6">6 &middot; Hedged, it is realized against implied</h2>
 
   <a class="entry" href="atlas.html">
     <span class="n">19</span>
     <div>
       <h3>The Greek Atlas</h3>
       <p class="subj">Every structure on every axis, and what survives a delta hedge</p>
-      <p>Page 04's fingerprint is a snapshot at one spot. This is what it hides. Three of the greeks people quote separately are one number: theta tracks gamma across any mix of strikes and expiries, and vega joins them at a single expiry — so no strike selection will ever make a one-expiry structure long gamma and short vega. Sixteen structures on every axis, including the pair the vocabulary hides: a covered call is a short put to twelve decimals, and a covered put is a short call. Then profiles that change sign across spot, gamma that explodes as 1/√T while vega drains, and the result to carry to a desk — delta-hedged at a flat vol, every structure breaks even on the same 1.570% move, and skew is the only thing that separates them.</p>
+      <p>Page 09's fingerprint is a snapshot at one spot. This is what it hides. Three of the greeks people quote separately are one number: theta tracks gamma across any mix of strikes and expiries, and vega joins them at a single expiry — so no strike selection will ever make a one-expiry structure long gamma and short vega. Sixteen structures on every axis, including the pair the vocabulary hides: a covered call is a short put to twelve decimals, and a covered put is a short call. Then profiles that change sign across spot, gamma that explodes as 1/√T while vega drains, and the result to carry to a desk — delta-hedged at a flat vol, every structure breaks even on the same 1.570% move, and skew is the only thing that separates them.</p>
       <div class="tags"><span>Greek identities</span><span>16 structures</span><span>Profiles vs spot</span><span>Time decay</span><span>Delta-hedged breakeven</span><span>Vega notional</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
-  <a class="entry" href="merger.html">
+
+  <a class="entry" href="real-world.html">
     <span class="n">20</span>
     <div>
-      <h3>A Deal Is a Price on Two Futures</h3>
-      <p class="subj">Merger arbitrage, and the options on a binary outcome</p>
-      <p>A target after an announcement is a claim on the deal price if the deal closes and the standalone value if it breaks, financed until somebody decides. Gross and net spreads, and why a fund's long record is funding plus a premium. Implied odds with the carry done properly — the common shortcut charges interest in only one outcome and is three points wrong. Stock deals and their basis risk, what a rate cut does to an arb book twice, the antitrust tree priced node by node (a second request costs about 23 cents of odds and 9 of time), why a special dividend is worth the odds times the dividend, and options that bet on the shape of the bad hump.</p>
-      <div class="tags"><span>Spreads</span><span>Implied odds</span><span>Stock deals</span><span>Rates</span><span>Antitrust tree</span><span>Special dividends</span><span>Binary events</span></div>
+      <h3>Every Assumption, and What It Costs</h3>
+      <p class="subj">Model assumptions, jumps, fat tails, and model risk</p>
+      <p>The page that argues with the other fourteen. Page 01 proved hedging error falls like 1/&radic;N &mdash; add jumps and thirty-two times the hedging buys 1.9&times; instead of 5.5&times;, because a jump does not get smaller when you trade faster. Then: a fat-tailed world with <em>identical</em> variance smiles anyway, one volatility on a skewed chain errs from &minus;74% to +213%, and an argument for why the model is still the right thing to use.</p>
+      <div class="tags"><span>Model risk</span><span>Jumps</span><span>Fat tails</span><span>Smile origins</span><span>What survives</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
-  <a class="entry" href="playbook.html">
-    <span class="n">21</span>
-    <div>
-      <h3>The Playbook</h3>
-      <p class="subj">The strategies people and institutions actually run</p>
-      <p>Not structures — strategies. Systematic put-writing, overwriting programmes, collars for concentrated stock, tail-risk hedging, delta-hedged vol arbitrage, dispersion, earnings vol, VIX products, market making, merger arbitrage, financing trades, structured products, convertible arbitrage and 0DTE trading: why each one gets paid, how it is run, how it blows up and what the survivors do differently. A 30-year simulation shows why selling insurance wins 93% of months and still has a skewness of −9.</p>
-      <div class="tags"><span>Put-writing</span><span>Tail hedging</span><span>Vol arb</span><span>Dispersion</span><span>VIX</span><span>Market making</span><span>Return shapes</span></div>
-    </div>
-    <span class="st live">Live &rarr;</span>
-  </a>
+
   <a class="entry" href="dynamics.html">
-    <span class="n">22</span>
+    <span class="n">21</span>
     <div>
       <h3>Surface Dynamics</h3>
       <p class="subj">What your hedge does when the surface moves</p>
       <p>Every greek holds something still that will not stay still. One dial for how at-the-money vol slides along the skew turns a delta-hedged call from a gamma smile into a directional bet, and gives the delta your vega is hiding: long $1,000 of vega at 40 vol is short $40,000 of stock. Then the gamma that only appears when vol moves with spot, a vega total that flips from long $10,000 to short $15,000 when shocks fade with tenor, the daily bill for owning skew and the break-even that sits at twice the slope, and why a 16% stock on daily closes is an 18% stock on weekly ones.</p>
       <div class="tags"><span>Spot–vol beta</span><span>Shadow gamma</span><span>Weighted vega</span><span>Skew carry</span><span>Sampling</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
-  <a class="entry" href="carry.html">
-    <span class="n">23</span>
-    <div>
-      <h3>The Carry Curve</h3>
-      <p class="subj">Dividends and borrow, read off the options</p>
-      <p>Every expiry on a chain quotes a forward. Line them up and the shortfall against stock-plus-interest is a term structure of carry: a sawtooth where the dividends fall, settling to the yield plus the borrow, and inverted when a squeeze is expected to pass. Between two expiries there is one unknown, which is what a jelly roll trades — a 30-cent dividend cut the company has not announced moves one roll by 29 cents and nothing else. And a dividend change is a delta nobody hedged: halve it and a two-year conversion loses $225 a contract at every strike.</p>
-      <div class="tags"><span>Implied dividends</span><span>Borrow term structure</span><span>Jelly rolls</span><span>Conversions</span></div>
-    </div>
-    <span class="st live">Live &rarr;</span>
-  </a>
+
   <a class="entry" href="converts.html">
-    <span class="n">24</span>
+    <span class="n">22</span>
     <div>
       <h3>Convertibles</h3>
       <p class="subj">Volatility bought through a bond</p>
       <p>A convertible taken apart into a bond floor, a conversion value and the option between them. Convertible arbitrage as volatility arbitrage with a bond to finance: a yearly account in which a bond bought at 28% implied carries at −$6.90, earns $16.20 if the stock realizes 38%, and needs 32.6% to break even — or 46.4% once the stock costs 6% to borrow. Then the risk the option model leaves out: let the credit spread widen ten basis points for each 1% the stock falls and a hedged position that was long gamma loses $84.80 on a 30% fall.</p>
       <div class="tags"><span>Bond floor</span><span>Vol arbitrage</span><span>Carry</span><span>Credit–equity link</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
+
+  <h2 class="grp" id="idea-7">7 &middot; Size it, and run the book</h2>
+
+  <a class="entry" href="book.html">
+    <span class="n">23</span>
+    <div>
+      <h3>The Sum of the Parts</h3>
+      <p class="subj">Portfolio greeks, scenario matrices, and risk limits</p>
+      <p>Ten pages priced one option at a time. A book is a portfolio: dollar units add, rates do not, and a greek report is wrong by 0.7% on a 1% move and 58% on a 20% one. The scenario matrix is what a risk manager actually reads. And a net vega of 417 turns out to describe four volatility moves whose P&amp;L runs from $743 to $1,238 &mdash; the safest-looking number on the page hiding the most.</p>
+      <div class="tags"><span>Aggregating greeks</span><span>Scenario matrix</span><span>Bucketed vega</span><span>Limits</span><span>Reading a report</span></div>
+    </div>
+  </a>
+
   <a class="entry" href="capital.html">
-    <span class="n">25</span>
+    <span class="n">24</span>
     <div>
       <h3>Capital</h3>
       <p class="subj">The constraint that sizes a book</p>
       <p>The same short put ties up $1,632 under a strategy-based rule, $872 under a risk-based one and $407 as a spread, so its premium is an 8%, 15% or 23% return. Then an account that uses half its capital as margin: a 5% fall costs 13% of equity and 46% of the excess, because the requirement rises as the equity falls, and the margin call arrives at 10.7%. At 80% utilization it arrives at 2.8%.</p>
       <div class="tags"><span>Margin</span><span>Return on capital</span><span>Utilization</span><span>Stress sizing</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
+
+  <h2 class="grp" id="idea-p">Practice and tools</h2>
+  <p class="elsewhere">Also on this site's shelf: the <a href="https://cafe-helado.github.io/PutCall-Parity-Game/" target="_blank" rel="noopener">Parity Drill ↗</a> and the <a href="https://cafe-helado.github.io/Option-Breakeven-Drill/" target="_blank" rel="noopener">Breakeven Drill ↗</a>, two standalone games, and <a href="https://cafe-helado.github.io/stats-trading/" target="_blank" rel="noopener">Chance, visually ↗</a>, the companion series on probability and statistics for people who price risk.</p>
+
+  <a class="entry" href="questions.html">
+    <span class="n">25</span>
+    <div>
+      <h3>The Questions They Ask You</h3>
+      <p class="subj">Forty graded interview questions, each worked in a figure</p>
+      <p>The other fifteen pages each build one subject; this one takes them apart and reassembles them in the shape a question comes in. A ladder of forty cards from warm-up to hard, then six worked at full length &mdash; why a six-wide call spread can never be worth six, why four quarterly options cost twice the year, why a fifty-cent arbitrage is really a borrow rate, and how you sell at 30, watch it realize 25, and still lose. Ends with a randomized drill at three tiers.</p>
+      <div class="tags"><span>Question ladder</span><span>Bounds</span><span>&radic;T scaling</span><span>Dollar gamma</span><span>Drills</span></div>
+    </div>
+  </a>
+
   <a class="entry" href="program.html">
     <span class="n">PG</span>
     <div>
@@ -405,8 +431,8 @@
       <p>Seven stations in the order they depend on each other, each with a page to watch, drills to clear and one task on a real screen. Forty timed drills with computed answers, including screens where the right answer is that there is nothing to do, and a ten-rep head-math sprint. A ledger that brings back what you miss sooner than what you know, a one-page readiness report, a map of where option edge comes from, and a trade memo to print.</p>
       <div class="tags"><span>Start here</span><span>Timed drills</span><span>Spot the mispricing</span><span>Spaced repetition</span><span>Edge map</span><span>Trade memo</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
+
   <a class="entry" href="workbook.html">
     <span class="n">WB</span>
     <div>
@@ -415,17 +441,16 @@
       <p>A printable problem set for all twenty-five pages, each matched to the chapters of Natenberg, Sinclair, Hull, Gatheral, Bennett and Taleb that cover the same ground. Numeric answers are computed by the same engine as the pages, so the key cannot drift from the arithmetic, and the coding-minded pages carry a build-it exercise in Python.</p>
       <div class="tags"><span>Problem sets</span><span>Reading map</span><span>Printable</span><span>Build it</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
+
   <a class="entry" href="tools.html">
-    <span class="n">TK</span>
+    <span class="n">KIT</span>
     <div>
       <h3>The Toolkit</h3>
       <p class="subj">Five calculators to keep beside a screen</p>
       <p>Annual vol to daily, weekly and expiry moves, with a cheat sheet to print. A realized-vol cone from any column of closes you paste in, with the implied you are quoted laid over it. The expected P&amp;L of a delta-hedged option if your realized-vol view is right. Kelly sizing for an option structure, given its cost, its payout and the probability you believe. And volatility drag — why compounding investors pay for volatility, and what daily rebalancing does to a leveraged ETF.</p>
       <div class="tags"><span>Vol to moves</span><span>Vol cone</span><span>Hedged P&amp;L</span><span>Kelly</span><span>Leveraged ETFs</span></div>
     </div>
-    <span class="st live">Live &rarr;</span>
   </a>
 </div>
 

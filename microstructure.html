@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 05 · The Market, Not the Model</span>
+    <span class="num">No. 14 · The Market, Not the Model</span>
   </div>
 </header>
 
@@ -46,7 +46,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 05</div>
+    <div class="eyebrow">An interactive derivation · No. 14</div>
     <h1>Every price has <em>someone</em> behind it</h1>
     <p class="sub">Five pages of this series have produced prices from models. A real option has a bid, an ask, a queue, and a counterparty who may know something you don't — and the difference between the model price and the one you get is where a desk actually lives.</p>
   </div>
@@ -57,7 +57,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">Needs <a href="black-scholes.html" style="color:var(--blue)">page 01</a> for the greeks and vega in particular. It is the sibling of <a href="execution.html" style="color:var(--blue)">page 06</a> — that one is what happens when you are taking, this one is what happens when you are quoting.</p>
+  <p class="lede">Needs <a href="black-scholes.html" style="color:var(--blue)">page 01</a> for the greeks and vega in particular. It is the sibling of <a href="execution.html" style="color:var(--blue)">page 13</a> — that one is what happens when you are taking, this one is what happens when you are quoting.</p>
   <ol>
     <li><b>Chapter 01 is the one to internalise.</b> A tick is a fixed amount of money and a wildly variable amount of volatility.</li>
     <li><b>Chapter 03 is felt rather than read.</b> Quote a market, get filled, and notice who filled you.</li>
@@ -209,7 +209,7 @@
     <p class="lead">Adverse selection is usually defined and rarely felt. Here it is a number you can move.</p>
     <p>You quote a two-sided market some number of vol points wide around your fair value. Flow arrives. <b>Uninformed traders</b> hit your quote because they want the option — the tighter you are, the more of them you win. <b>Informed traders</b> only trade when your quote is wrong by more than their edge, which means every fill from them is a fill you did not want.</p>
     <p>Quote too tight and the arithmetic is brutal. At a 0.20 vol-point half-width you get filled on <b>321</b> of 400 arrivals and lose <b>30.8</b> — you are winning enormous volume and most of the volume that matters is picking you off. Widen and volume collapses while P&amp;L per fill climbs; at 3.50 wide you make <b>2.38 per fill</b> and only trade six times. These are expected values; the figure averages 500 simulated sessions and lands within a few tenths of them.</p>
-    <p>The optimum sits in between, around <b>1.2 vol points</b> in these settings, and it is the same shape as page 06's execution problem viewed from the other side of the trade — a quantity you want more of, against a cost that grows with getting it.</p>
+    <p>The optimum sits in between, around <b>1.2 vol points</b> in these settings, and it is the same shape as page 13's execution problem viewed from the other side of the trade — a quantity you want more of, against a cost that grows with getting it.</p>
     <p>Watch the informed percentage column as you widen. It <em>rises</em>: informed traders are the last to be deterred, because they only trade when they have an edge big enough to cross your spread. You cannot widen your way out of <span class="term" data-t="Adverse selection" data-def="The cost of being filled by someone who knew more than you. It is not a fee — it is the systematic tendency of your fills to happen just before the price moves against you.">adverse selection</span>, only price it.</p>
   </div>
 
@@ -247,6 +247,52 @@
     </div>
   </div>
 
+
+  <div class="prose">
+    <p>The figure above runs whole days at once. Now quote one yourself, trade by trade. Somewhere behind the screen is a true value that drifts and sometimes jumps; three traders in ten know where it is going. You set how wide to quote and how far to lean your quotes against your inventory, and you can change both mid-session. Green fills came from customers; red ones came from someone who knew more than you.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Make the market, trade by trade</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--ink)"></i>True value</span>
+            <span><i class="sw" style="background:var(--blue)"></i>Your quotes</span>
+            <span><i class="sw" style="background:var(--moss)"></i>Customer fill</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Informed fill</span>
+          </span>
+        </div>
+        <p class="simmsg" id="qmMsg" aria-live="polite"></p>
+        <canvas id="cvQM" height="240"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your quotes</h4>
+        <div id="ctlQM"></div>
+        <div class="btnrow simbtns">
+          <button class="act" id="qmOne">Next trade</button>
+          <button class="act ghost" id="qmTen">Next ten</button>
+          <button class="act ghost" id="qmAll">Finish the session</button>
+          <button class="act ghost" id="qmNew">New session</button>
+          <button class="act ghost" id="qmReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvQM"></div>
+      </div>
+    </div>
+    <figcaption>Averaged over 300 sessions, a one-cent half-spread loses $61, because informed traders are 22.6% of its fills; at twelve cents they are 3.0% and the session averages $514, the best width here. Wider than the fifteen cents customers will tolerate and the flow dries up, leaving only the traders who know a jump is coming. Leaning your quotes a cent per hundred shares of inventory gives up some of the average, $514 to $441, and more than halves the swing from session to session, $329 to $145.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A market maker prices two things into every spread: the cost of trading with someone who knows more, and the risk of the inventory left behind. They widen when the flow looks informed, after news or before a print, and they skew rather than widen when inventory builds, because a skewed quote invites the trade that flattens the book.</p>
+    <ul>
+      <li>Tight markets attract volume and the traders you least want; wide ones attract nobody.</li>
+      <li>Watch which fills move against you right after: that is the informed share, and it sets the spread.</li>
+      <li>Skew is cheaper than hedging: let the next customer take your inventory off you.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> if most of your fills lose money a minute later, your quotes are too tight for this flow.</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -384,7 +430,7 @@
     <p class="lead">Everything in this page compounds on expiration day. Gamma is at its maximum, so hedging flows per unit of price move are at their largest. Open interest is concentrated at round strikes. And the deadline is absolute — whatever is unhedged at the close is a decision, not a position.</p>
     <p>Pinning is the observable result, and the mechanism is chapter 05's with the dial turned up. But two other things happen that are worth knowing separately.</p>
     <p><b>Delta discontinuity.</b> An option's delta at expiry is a step function, so a stock oscillating around a heavily-owned strike hands hedgers alternating large buy and sell orders. That is what makes the last hour at a pinned strike look strange.</p>
-    <p><b>The exercise decision.</b> Near the money at the close, whether a contract is exercised stops being automatic and becomes a judgement about where the stock will open. This is where page 07's assignment mechanics and <a href="index.html" style="color:var(--blue)">page 08's</a> early-exercise arithmetic meet the microstructure — and it is the reason expiration is an operations problem as much as a trading one.</p>
+    <p><b>The exercise decision.</b> Near the money at the close, whether a contract is exercised stops being automatic and becomes a judgement about where the stock will open. This is where page 03's assignment mechanics and <a href="index.html" style="color:var(--blue)">page 04's</a> early-exercise arithmetic meet the microstructure — and it is the reason expiration is an operations problem as much as a trading one.</p>
     <p>The practical stance: treat a large open-interest strike as a place where the price is more likely to spend the last session than a random walk would suggest, and treat that tendency as a weak statistical regularity rather than a reliable trade. The effect is real, measurable, and much smaller than the confidence with which it is usually discussed.</p>
   </div>
 
@@ -428,7 +474,7 @@
     <p><b>Size is priced separately from price.</b> The quote you see is for the quoted size. Asking for ten times that is a different trade with a different price, because it moves the maker's inventory ten times as far and the skew has to pay for it.</p>
     <p><b>Widening is a position statement.</b> A maker who has been picked off repeatedly on one side widens that side specifically. An asymmetric market is usually a maker telling you what they already own.</p>
     <p>The figure runs a day. Orders arrive, the maker quotes with a skew proportional to inventory, and the position wanders. Turn the inventory aversion up and the position hugs zero while the spread capture falls, because skewing away from the market costs you fills. Turn it down and you capture more spread and end the day with a position you did not choose — and the P&amp;L standard deviation, which is the number a risk manager cares about, grows with it.</p>
-    <p>The result is the same shape as page 06's U-curve and page 05's own quoting simulation: an interior optimum between two costs that run in opposite directions. It is worth noticing how often that shape has turned up in this series, because it is what almost every real trading decision looks like once both sides of it are priced.</p>
+    <p>The result is the same shape as page 13's U-curve and page 14's own quoting simulation: an interior optimum between two costs that run in opposite directions. It is worth noticing how often that shape has turned up in this series, because it is what almost every real trading decision looks like once both sides of it are priced.</p>
   </div>
 
   <div class="mline">quote mid = fair value − k · inventory</div>
@@ -619,7 +665,7 @@
       <button>None; the option expires worthless</button>
       <button>Only the transaction cost of closing</button>
     </div>
-    <div class="ans"><b>A position, not a cent.</b> Page 08 puts the numbers on it: $20 of intrinsic against roughly $3,800 of weekend risk on ten contracts. Expiry closes the option, not the stock position it delivers.</div>
+    <div class="ans"><b>A position, not a cent.</b> Page 04 puts the numbers on it: $20 of intrinsic against roughly $3,800 of weekend risk on ten contracts. Expiry closes the option, not the stock position it delivers.</div>
   </div>
 
   <div class="check" data-quiz="1" style="margin-left:0;max-width:none">
@@ -1090,7 +1136,76 @@ const sAl = { q: 150, s: 100 };
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();drawInv();drawAl();}
+/* ══════════ 03b — make the market, trade by trade ══════════
+   True value starts at $10.00 and moves 2 cents a trade, with a 25-cent jump
+   one trade in fifteen. One trader arrives per step. With probability 0.3 they
+   are informed: they know the value after this step's move and buy at your
+   offer if it is below it, sell at your bid if it is above. Otherwise they are
+   noise: a random side, and they trade if your price is within 15 cents of
+   the value. You quote value-estimate +/- half-spread, shifted down by the
+   skew times your inventory (in 100-lots). Your estimate is the last trade's
+   value plus what the flow has told you; here, simply the previous value.
+   P&L is cash plus inventory at the current value, per 100 shares. */
+const sQM = { half: 0.05, skew: 0.01 };
+const QM = { steps: 80, i: 0, cash: 0, inv: 0, fills: [], vals: [10], seed: 0 };
+function qmWorld(seed){ return withSeed(2700 + seed, () => { const v = [10], who = [], side = [], tol = [];
+  for (let t = 0; t < QM.steps; t++) { const j = Math.random() < 1 / 15 ? (Math.random() < 0.5 ? -0.25 : 0.25) : 0;
+    v.push(Math.max(1, v[t] + 0.02 * gauss() + j)); who.push(Math.random() < 0.3 ? "i" : "n"); side.push(Math.random() < 0.5 ? 1 : -1); }
+  return { v, who, side }; }); }
+function qmStep(w, s){ const t = QM.i; if (t >= QM.steps) return; const est = w.v[t], mid = est - s.skew * QM.inv, bid = mid - s.half, ask = mid + s.half, val = w.v[t + 1];
+  let f = null;
+  if (w.who[t] === "i") { if (val > ask) f = { side: -1, px: ask }; else if (val < bid) f = { side: 1, px: bid }; }
+  else { if (w.side[t] > 0 && ask - val <= 0.15) f = { side: -1, px: ask }; else if (w.side[t] < 0 && val - bid <= 0.15) f = { side: 1, px: bid }; }
+  if (f) { QM.inv += f.side; QM.cash -= f.side * f.px * 100; QM.fills.push({ t: t + 1, px: f.px, side: f.side, who: w.who[t] }); }
+  QM.i++; QM.vals.push(val); }
+const qmPnL = w => QM.cash + QM.inv * 100 * w.v[QM.i];
+function qmRun(half, skew, seed){ const save = { ...QM }; QM.i = 0; QM.cash = 0; QM.inv = 0; QM.fills = []; QM.vals = [10];
+  const w = qmWorld(seed || 0); while (QM.i < QM.steps) qmStep(w, { half, skew });
+  const out = { pnl: qmPnL(w), fills: QM.fills.length, inf: QM.fills.filter(f => f.who === "i").length, maxInv: 0 };
+  Object.assign(QM, save); return out; }
+function qmMany(half, skew, n){ let a = 0; for (let k = 0; k < n; k++) a += qmRun(half, skew, k).pnl; return a / n; }
+(function(){
+  let w = qmWorld(0);
+  const reset = () => { QM.i = 0; QM.cash = 0; QM.inv = 0; QM.fills = []; QM.vals = [10]; };
+  sliders(document.getElementById("ctlQM"), [
+    { id: "hQM", k: "half", lbl: "½s", name: "Half-spread", min: 0.01, max: 0.20, step: 0.01, fmt: v => (v * 100).toFixed(0) + "¢" },
+    { id: "kQM", k: "skew", lbl: "k", name: "Skew per 100 shares of inventory", min: 0, max: 0.05, step: 0.005, fmt: v => (v * 100).toFixed(1) + "¢" }
+  ], sQM, () => draw(),"cQM");
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", () => { fn(); draw(); });
+  on("qmOne", () => qmStep(w, sQM));
+  on("qmTen", () => { for (let i = 0; i < 10; i++) qmStep(w, sQM); });
+  on("qmAll", () => { while (QM.i < QM.steps) qmStep(w, sQM); });
+  on("qmNew", () => { QM.seed++; w = qmWorld(QM.seed); reset(); });
+  on("qmReset", reset);
+  window.drawQM = draw;
+  function draw(){
+    const t = QM.i, xs = QM.vals.map((_, i) => i), money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    const est = w.v[Math.min(t, QM.steps - 1)], mid = est - sQM.skew * QM.inv;
+    const last = QM.fills.length && QM.fills[QM.fills.length - 1].t === t ? QM.fills[QM.fills.length - 1] : null;
+    document.getElementById("qmMsg").textContent = t === 0 ? "You are quoting $" + (mid - sQM.half).toFixed(2) + " bid, $" + (mid + sQM.half).toFixed(2) + " offer. Step through the flow."
+      : (last ? "Trade " + t + ": " + (last.who === "i" ? "an informed trader " : "a customer ") + (last.side > 0 ? "sells to you at $" : "buys from you at $") + last.px.toFixed(2) + "." : "Trade " + t + ": nobody trades with you.") +
+        " Inventory " + (QM.inv * 100) + " shares, P&L " + money0(qmPnL(w)) + "." + (t === QM.steps ? " End of the session." : "");
+    const vs = QM.vals, lo = Math.min(...vs) - 0.3, hi = Math.max(...vs) + 0.3;
+    const o = Fig(document.getElementById("cvQM"), { h: 240, x0: 0, x1: QM.steps, y0: lo, y1: hi, pad: { l: 52, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => "$" + v.toFixed(2), 8, 4);
+    const g = o.g;
+    clip(o, () => { line(o, xs, vs, C("--ink"), 1.8);
+      if (t < QM.steps) { g.fillStyle = C("--blue"); g.globalAlpha = 0.18; g.fillRect(o.X(t), o.Y(mid + sQM.half), o.X(Math.min(QM.steps, t + 1)) - o.X(t) + 4, o.Y(mid - sQM.half) - o.Y(mid + sQM.half)); g.globalAlpha = 1; } });
+    QM.fills.forEach(f => { g.fillStyle = f.who === "i" ? C("--verm") : C("--moss"); g.beginPath();
+      if (f.side > 0) { g.moveTo(o.X(f.t), o.Y(f.px) + 5); g.lineTo(o.X(f.t) - 4, o.Y(f.px) - 3); g.lineTo(o.X(f.t) + 4, o.Y(f.px) - 3); }
+      else { g.moveTo(o.X(f.t), o.Y(f.px) - 5); g.lineTo(o.X(f.t) - 4, o.Y(f.px) + 3); g.lineTo(o.X(f.t) + 4, o.Y(f.px) + 3); } g.fill(); });
+    const nI = QM.fills.filter(f => f.who === "i").length;
+    document.getElementById("kvQM").innerHTML = kvHTML([
+      ["Trade", t + " of " + QM.steps],
+      ["Fills", QM.fills.length + ", of which informed " + nI, nI > QM.fills.length / 3 ? "verm" : "grey"],
+      ["Inventory", (QM.inv * 100) + " shares"],
+      ["P&L", money0(qmPnL(w)), qmPnL(w) >= 0 ? "moss" : "verm"],
+      ["Average over 300 sessions at these quotes", money0(qmMany(sQM.half, sQM.skew, 300))]
+    ]);
+  }
+})();
+
+function drawAll(){drawQM();draw1();draw2();draw3();draw4();draw5();drawInv();drawAl();}
 LAB.boot(drawAll);
 
 </script>

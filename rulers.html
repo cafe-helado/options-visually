@@ -55,10 +55,10 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede"><a href="catalyst.html">Page 03</a> established the identity in one line: a straddle costs about <code>0.7979·S·σ√T</code>, so the implied move it quotes is about 80% of a one-sigma move. This page is about why that number is 0.7979, what happens when it is not, and what the difference does to a position.</p>
+  <p class="lede"><a href="catalyst.html">Page 08</a> established the identity in one line: a straddle costs about <code>0.7979·S·σ√T</code>, so the implied move it quotes is about 80% of a one-sigma move. This page is about why that number is 0.7979, what happens when it is not, and what the difference does to a position.</p>
   <ol>
     <li><b>Chapter 02 is the conversion to have automatic.</b> Divide a straddle-implied move by <b>0.7979</b> — equivalently multiply by <b>1.2533</b> — to get a standard deviation. Reading the implied move <em>as</em> one sigma understates volatility by <b>20.2%</b> of itself.</li>
-    <li><b>Chapter 03 is the part page 03 does not cover.</b> That 0.7979 is <em>the normal distribution's</em> ratio and nothing more. Under fatter tails it falls — to exactly <b>3/4</b> for a t with six degrees of freedom, and to <b>1/√2</b> for a t with four.</li>
+    <li><b>Chapter 03 is the part page 08 does not cover.</b> That 0.7979 is <em>the normal distribution's</em> ratio and nothing more. Under fatter tails it falls — to exactly <b>3/4</b> for a t with six degrees of freedom, and to <b>1/√2</b> for a t with four.</li>
     <li><b>Chapter 04 is the one that surprises people.</b> Fat tails make the stock exceed the straddle-implied move <em>less</em> often, not more. The straddle buyer wins less frequently and wins bigger.</li>
   </ol>
   <details class="drop">
@@ -115,6 +115,8 @@
 
   <div class="mline">MAD = E|X − μ|          σ = √( E[(X − μ)²] )          for a normal, MAD = √(2/π)·σ ≈ 0.7979·σ</div>
   <p class="mread">Reads as: <b>average the distances, or average the squared distances and take the root.</b> The squaring is what makes the second larger, because it pays disproportionate attention to the observations far from the middle.</p>
+
+  <p class="xlink"><span class="lab">The statistics underneath</span><a href="https://cafe-helado.github.io/stats-trading/describe.html" target="_blank" rel="noopener">Describing a pile of numbers ↗</a> builds standard deviation and mean absolute deviation from scratch, in Chance, visually.</p>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -235,7 +237,7 @@
     <span class="lab">Where this comes from</span>
     <p>For a standardized Student t with ν degrees of freedom, the mean absolute deviation and the standard deviation both have closed forms:</p>
     <p><b>E|T| = 2√ν · Γ((ν+1)/2) ÷ ( √π · (ν−1) · Γ(ν/2) )</b> and <b>σ = √( ν/(ν−2) )</b>, so the ratio is the first divided by the second. The gamma functions collapse at small integer ν, which is why the values come out as recognizable constants — 2/π at ν = 3, 1/√2 at ν = 4, exactly 3/4 at ν = 6 — and why the limit as ν grows is √(2/π), the normal's value, approached from below.</p>
-    <p><b>Where it breaks:</b> the standard deviation only exists for ν &gt; 2, and the ratio is undefined below that — for a t with 2 degrees of freedom the variance is infinite while the mean absolute deviation is perfectly finite, so the straddle has a price and the volatility does not exist. That is not a pathology invented for a textbook; it is the formal version of the complaint that a single implied volatility cannot describe a distribution whose second moment is dominated by events that have not happened yet, which <a href="real-world.html">page 15</a> takes up directly. The Student t is also only a stand-in — real return distributions are skewed, and skew breaks the symmetry every formula here assumes.</p>
+    <p><b>Where it breaks:</b> the standard deviation only exists for ν &gt; 2, and the ratio is undefined below that — for a t with 2 degrees of freedom the variance is infinite while the mean absolute deviation is perfectly finite, so the straddle has a price and the volatility does not exist. That is not a pathology invented for a textbook; it is the formal version of the complaint that a single implied volatility cannot describe a distribution whose second moment is dominated by events that have not happened yet, which <a href="real-world.html">page 20</a> takes up directly. The Student t is also only a stand-in — real return distributions are skewed, and skew breaks the symmetry every formula here assumes.</p>
   </div>
 
   <div class="check">
@@ -263,7 +265,7 @@
     <p class="lead">Here is a result that runs against most people's instinct. If the distribution has fatter tails, does the stock exceed the straddle-implied move more often or less often?</p>
     <p>Less often. Under a normal, the breach rate is <b>42.49%</b>. Under a t with 30 degrees of freedom it is <b>41.9%</b>; with 10, <b>40.7%</b>; with 6, <b>39.4%</b>; with 4, <b>37.4%</b>. Under a Laplace distribution the answer is exactly <b>e⁻¹ = 36.79%</b>.</p>
     <p>The reason is that a fat-tailed distribution is not simply "more spread out." It is more concentrated in the middle <em>and</em> more spread in the extremes — that is what excess kurtosis means. The straddle prices the average absolute move, and the average is pulled upward by the rare large outcomes. So the breakeven sits further out relative to the bulk of the distribution, and the many quiet days fall short of it.</p>
-    <p>For a straddle buyer this is the whole character of the trade in one number. Fatter tails do not make the position win more often; they make it <em>lose small more often and win big less often</em>. The expected value can be identical while the path is completely different, which is <a href="questions.html">page 16</a>'s distinction between an edge and a distribution of outcomes arriving in the most concrete possible form.</p>
+    <p>For a straddle buyer this is the whole character of the trade in one number. Fatter tails do not make the position win more often; they make it <em>lose small more often and win big less often</em>. The expected value can be identical while the path is completely different, which is <a href="questions.html">page 25</a>'s distinction between an edge and a distribution of outcomes arriving in the most concrete possible form.</p>
     <p>And it explains something that otherwise looks like a puzzle: sellers of options report high hit rates in exactly the markets where their tail risk is worst. The hit rate is high <em>because</em> the tail is fat. Those are the same fact.</p>
   </div>
 
@@ -288,6 +290,45 @@
     </div>
     <figcaption>Two horizontal lines and a curve that sits between them. The distance from the grey line to the gold one is the error from confusing the two rulers; the slope of the red curve is the effect of the tails on top of it.</figcaption>
   </figure>
+
+  <div class="prose">
+    <p>Feel it from the trading side. Every straddle below is priced exactly at the expected absolute move of the distribution you choose, so on average neither side makes anything. Pick a side, set how fat the tails are, and trade. Watch how often you win, and what the worst trade looks like.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Trade it on fat tails</h3></div>
+        <p class="simmsg" id="rtMsg" aria-live="polite"></p>
+        <canvas id="cvRT" height="220"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your side</h4>
+        <div class="btnrow lvpick" id="rtSide"><button class="act ghost" data-s="1">Buy straddles</button><button class="act ghost" data-s="-1">Sell straddles</button></div>
+        <div id="ctlRT"></div>
+        <div class="btnrow simbtns">
+          <button class="act" id="rtOne">One trade</button>
+          <button class="act ghost" id="rtFifty">Fifty trades</button>
+          <button class="act ghost" id="rtReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvRT"></div>
+      </div>
+    </div>
+    <figcaption>With tails close to normal the buyer wins 41.9% of trades; at four degrees of freedom, 37.4%; at three, 35.1%. Every price is fair, so the averages stay at zero. What fat tails change is how the zero is made: the buyer loses more often and wins bigger, and the seller's worst trade in four thousand grows from $3,017 near the normal to $15,270 at four degrees of freedom, on a $1,000-per-sigma position.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A trader who sells straddles and wins two times in three is not proving an edge; on fat tails that is what a fair price looks like. The edge, if there is one, is in the average after the big losses, so a seller is judged on the worst trade and a buyer on whether they can afford the long run of small losses before it.</p>
+    <ul>
+      <li>Win rate tells you the shape of a strategy, not its value.</li>
+      <li>Fatter tails make selling look better month to month and worse in the year that matters.</li>
+      <li>Price straddles from the distribution you believe, not from the normal's 0.7979.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> on a fairly priced straddle, the buyer should expect to lose more often than they win.</p>
+  </aside>
+
+  <p class="xlink"><span class="lab">The statistics underneath</span><a href="https://cafe-helado.github.io/stats-trading/tails.html" target="_blank" rel="noopener">The tails ↗</a>, in Chance, visually, is the longer treatment of what fat tails do to a measurement.</p>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -339,6 +380,8 @@
     </div>
     <figcaption>Drag the contamination up from zero. The blue histogram widens and stays centered; the green one holds its width and walks to the left. Stability and honesty are trading against each other.</figcaption>
   </figure>
+
+  <p class="xlink"><span class="lab">The statistics underneath</span><a href="https://cafe-helado.github.io/stats-trading/sample.html" target="_blank" rel="noopener">What a sample can tell you ↗</a>: how far an estimate from a finite run of returns can be trusted.</p>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -480,7 +523,7 @@
 </main>
 
 <footer>
-  <p class="n">The straddle identity here assumes a strike at the forward and no rates or dividends; away from the forward the price is no longer a pure expected absolute move and the 0.7979 stops applying cleanly, which is why the number belongs to the at-the-money straddle specifically and not to option prices in general. The approximation is also always high — it truncates an expansion — by 0.03% at thirty vol and thirty days and by 0.22% at eighty vol, so it is a quoting convenience rather than a pricing tool. Every distribution compared in chapters 03 and 04 is symmetric, and real equity returns are not; skew breaks the symmetry that lets a single ratio describe both sides of the move, and a put-side implied move and a call-side one are genuinely different numbers on a skewed surface. The Student t is a convenient stand-in for fat tails rather than a claim about what returns are, and its degrees-of-freedom parameter is not something anyone can estimate reliably — <a href="real-world.html">page 15</a> is about that gap. The estimator comparison in chapter 05 uses a two-regime contamination, which is a mild caricature of a real return series: actual volatility clusters, so the extreme days arrive together rather than independently, and that makes both estimators noisier than shown here.</p>
+  <p class="n">The straddle identity here assumes a strike at the forward and no rates or dividends; away from the forward the price is no longer a pure expected absolute move and the 0.7979 stops applying cleanly, which is why the number belongs to the at-the-money straddle specifically and not to option prices in general. The approximation is also always high — it truncates an expansion — by 0.03% at thirty vol and thirty days and by 0.22% at eighty vol, so it is a quoting convenience rather than a pricing tool. Every distribution compared in chapters 03 and 04 is symmetric, and real equity returns are not; skew breaks the symmetry that lets a single ratio describe both sides of the move, and a put-side implied move and a call-side one are genuinely different numbers on a skewed surface. The Student t is a convenient stand-in for fat tails rather than a claim about what returns are, and its degrees-of-freedom parameter is not something anyone can estimate reliably — <a href="real-world.html">page 20</a> is about that gap. The estimator comparison in chapter 05 uses a two-regime contamination, which is a mild caricature of a real return series: actual volatility clusters, so the extreme days arrive together rather than independently, and that makes both estimators noisier than shown here.</p>
 </footer>
 
 <script src="assets/lab.js"></script>
@@ -665,7 +708,7 @@ const s1 = { vol: 30, T: 30, S: 100 };
     { id: "a1", k: "vol", lbl: "σ", name: "Implied volatility", min: 5, max: 120, step: 1, fmt: v => v.toFixed(0) + "%" },
     { id: "b1", k: "T", lbl: "T", name: "Days to expiry", min: 1, max: 365, step: 1, fmt: v => v.toFixed(0) + "d" },
     { id: "c1", k: "S", lbl: "S", name: "Spot", min: 10, max: 500, step: 5, fmt: v => "$" + v.toFixed(0) }
-  ], s1, () => draw(), "c1");
+  ], s1, () => draw(),"c1");
   window.draw1 = draw;
   function draw() {
     const v = s1.vol / 100, T = s1.T / 365;
@@ -703,7 +746,7 @@ const s2 = { v: 0.30, T: 30, S: 100 };
     { id: "a2", k: "v", lbl: "σ", name: "Implied volatility", min: 0.05, max: 1.50, step: 0.01, fmt: v => (v * 100).toFixed(0) + "%" },
     { id: "b2", k: "T", lbl: "T", name: "Days to expiry", min: 1, max: 730, step: 1, fmt: v => v.toFixed(0) + "d" },
     { id: "c2s", k: "S", lbl: "S", name: "Spot", min: 10, max: 500, step: 5, fmt: v => "$" + v.toFixed(0) }
-  ], s2, () => draw(), "c2");
+  ], s2, () => draw(),"c2");
   window.draw2 = draw;
   function draw() {
     const T = s2.T / 365;
@@ -738,7 +781,7 @@ const s3 = { df: 6, move: 5 };
   sliders(document.getElementById("ctl3"), [
     { id: "a3", k: "df", lbl: "ν", name: "Degrees of freedom", min: 2.2, max: 60, step: 0.1, fmt: v => v.toFixed(1) },
     { id: "b3", k: "move", lbl: "m", name: "The quoted implied move", min: 0.5, max: 20, step: 0.1, fmt: v => v.toFixed(1) + "%" }
-  ], s3, () => draw(), "c3");
+  ], s3, () => draw(),"c3");
   window.draw3 = draw;
   window.__named = () => NAMED;
   function draw() {
@@ -790,7 +833,7 @@ const s4 = { df: 6 };
 (function () {
   sliders(document.getElementById("ctl4"), [
     { id: "a4", k: "df", lbl: "ν", name: "Degrees of freedom", min: 2.5, max: 60, step: 0.1, fmt: v => v.toFixed(1) }
-  ], s4, () => draw(), "c4");
+  ], s4, () => draw(),"c4");
   window.draw4 = draw;
   window.__breach = { normal: breachNormal, t: breachT, oneSigma: breachOneSigma };
   function draw() {
@@ -823,7 +866,7 @@ const s5 = { contam: 6, mult: 4, n: 252 };
     { id: "a5", k: "contam", lbl: "c", name: "Share of wild days", min: 0, max: 25, step: 1, fmt: v => v.toFixed(0) + "%" },
     { id: "b5", k: "mult", lbl: "×", name: "How much wilder they are", min: 1.5, max: 8, step: 0.5, fmt: v => v.toFixed(1) + "×" },
     { id: "c5", k: "n", lbl: "n", name: "Days in each sample", min: 21, max: 504, step: 21, fmt: v => v.toFixed(0) + "d" }
-  ], s5, () => draw(), "c5");
+  ], s5, () => draw(),"c5");
   window.draw5 = draw;
   window.__est = estimatorRun;
   function draw() {
@@ -981,7 +1024,51 @@ const s5 = { contam: 6, mult: 4, n: 252 };
   };
 })();
 
+/* ══════════ 04b — trade it on fat tails ══════════
+   Each straddle is priced exactly at the expected absolute move for the
+   distribution on the slider: tRatio(v) standard deviations (the normal's
+   0.7979 at v = 30 is close enough to show the limit). The move is a
+   standardized Student t, drawn as z / sqrt(chi-square / v), scaled to unit
+   variance. $1,000 per standard deviation of move. Buying wins when the move
+   beats the price; the average is zero on either side by construction. */
+const sRT = { v: 4, side: 1 };
+const RT = { trades: [] };
+function rtDraw(v, k){ return withSeed(1500 + k * 7 + v, () => { let c = 0; for (let i = 0; i < v; i++) { const g = gauss(); c += g * g; }
+  return gauss() / Math.sqrt(c / v) * Math.sqrt((v - 2) / v); }); }
+function rtBatch(v, n, start){ const out = []; for (let k = 0; k < n; k++) out.push(Math.abs(rtDraw(v, (start || 0) + k)) - tRatio(v)); return out; }
+(function(){
+  sliders(document.getElementById("ctlRT"), [
+    { id: "vRT", k: "v", lbl: "ν", name: "Tail fatness (degrees of freedom; 30 is near normal)", min: 3, max: 30, step: 1, fmt: v => v.toFixed(0) }
+  ], sRT, () => { RT.trades = []; draw(); },"cRT");
+  document.querySelectorAll("#rtSide button").forEach(b => b.addEventListener("click", () => { sRT.side = +b.dataset.s; RT.trades = []; draw(); }));
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", () => { fn(); draw(); });
+  on("rtOne", () => { RT.trades.push(...rtBatch(sRT.v, 1, RT.trades.length)); });
+  on("rtFifty", () => { RT.trades.push(...rtBatch(sRT.v, 50, RT.trades.length)); });
+  on("rtReset", () => { RT.trades = []; });
+  window.drawRT = draw;
+  function draw(){
+    document.querySelectorAll("#rtSide button").forEach(b => b.classList.toggle("on", +b.dataset.s === sRT.side));
+    const pnl = RT.trades.map(x => sRT.side * x * 1000), n = pnl.length, money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    const wins = pnl.filter(x => x > 0).length, avg = n ? pnl.reduce((a, b) => a + b, 0) / n : 0, worst = n ? Math.min(...pnl) : 0;
+    const pWinBuy = breachT(sRT.v), pWin = sRT.side > 0 ? pWinBuy : 1 - pWinBuy;
+    document.getElementById("rtMsg").textContent = "Each straddle costs " + tRatio(sRT.v).toFixed(4) + " standard deviations of move, exactly fair. " +
+      (n ? "After " + n + " trades you are " + (sRT.side > 0 ? "long" : "short") + ": won " + wins + " (" + Math.round(wins / n * 100) + "%), average " + money0(avg) + ", worst " + money0(worst) + "." : "Choose a side and trade.");
+    const cum = []; let c = 0; pnl.forEach(x => cum.push(c += x)); const xs = cum.map((_, i) => i + 1);
+    const m = Math.max(2000, ...cum.map(Math.abs)) * 1.15;
+    const o = Fig(document.getElementById("cvRT"), { h: 220, x0: 0, x1: Math.max(50, n), y0: -m, y1: m, pad: { l: 60, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => (v < 0 ? "−$" : "$") + Math.abs(v).toFixed(0), 5, 4);
+    clip(o, () => { if (n) line(o, [0].concat(xs), [0].concat(cum), sRT.side > 0 ? C("--blue") : C("--verm"), 2.4); });
+    document.getElementById("kvRT").innerHTML = kvHTML([
+      ["Straddle price, in sigmas", tRatio(sRT.v).toFixed(4)],
+      ["Chance this side wins a trade", (pWin * 100).toFixed(1) + "%", "blue"],
+      ["Trades", String(n)], ["Won", n ? wins + " (" + Math.round(wins / n * 100) + "%)" : "—"],
+      ["Average per trade", n ? money0(avg) : "—"], ["Worst single trade", n ? money0(worst) : "—", "verm"]
+    ]);
+  }
+})();
+
 function drawAll() {
+  drawRT();
   drawHero(); draw1(); draw2(); draw3(); draw4(); draw5(); drawDrill();
 }
 LAB.boot(drawAll);

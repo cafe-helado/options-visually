@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 13 · Carry, Forwards and Futures</span>
+    <span class="num">No. 05 · Carry, Forwards and Futures</span>
   </div>
 </header>
 
@@ -46,9 +46,9 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 13</div>
+    <div class="eyebrow">An interactive derivation · No. 05</div>
     <h1>The forward is the real <em>underlying</em></h1>
-    <p class="sub">Options are not priced off the stock price. They are priced off the forward, and once you see that, options on futures become the simple case and options on shares become the complicated one — including a rule from page 08 that inverts completely.</p>
+    <p class="sub">Options are not priced off the stock price. They are priced off the forward, and once you see that, options on futures become the simple case and options on shares become the complicated one — including a rule from page 04 that inverts completely.</p>
   </div>
   <div class="scrollcue">Scroll ↓</div>
 </div>
@@ -57,10 +57,10 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">This is the plumbing chapter the series skipped. <a href="black-scholes.html" style="color:var(--blue)">Page 01</a> priced an option on a share and quietly used a forward; <a href="parity.html" style="color:var(--blue)">page 07</a> traded the financing without ever defining it. This page defines it, and then shows what changes when the underlying is a futures contract instead of a share.</p>
+  <p class="lede">This is the plumbing chapter the series skipped. <a href="black-scholes.html" style="color:var(--blue)">Page 01</a> priced an option on a share and quietly used a forward; <a href="parity.html" style="color:var(--blue)">page 03</a> traded the financing without ever defining it. This page defines it, and then shows what changes when the underlying is a futures contract instead of a share.</p>
   <ol>
     <li><b>Chapter 01 is the whole idea.</b> A forward price is not a prediction. It is the cost of a package you can assemble today, and the package's P&amp;L is exactly zero at every possible outcome.</li>
-    <li><b>Chapter 05 is the one that will surprise you.</b> Page 08 proved an American call on a non-dividend payer is never exercised early. Put the identical option on a futures contract and <em>both</em> sides exercise early.</li>
+    <li><b>Chapter 05 is the one that will surprise you.</b> Page 04 proved an American call on a non-dividend payer is never exercised early. Put the identical option on a futures contract and <em>both</em> sides exercise early.</li>
     <li><b>Chapter 03 is the least glamorous and the most frequently expensive.</b> Multipliers, settlement style and exercise style decide what actually lands in your account.</li>
   </ol>
   <details class="drop">
@@ -90,7 +90,7 @@
     <p class="lead">Ask what a stock will be worth in six months and you get an opinion. Ask what price you can <em>agree today</em> to trade it at in six months and you get a number that follows from arithmetic, because the trade can be assembled out of things you can already do.</p>
     <p>Here is the package. Borrow 100 at 5%. Buy the share. Hold it for six months, collecting dividends at 2%. Simultaneously agree to sell it forward at F. At delivery you hand over the share, receive F, and repay the loan. If F is anything other than <b>100 · e<sup>(0.05−0.02)·0.5</sup> = 101.5113</b>, that package makes or loses money with no risk, and somebody will do it until it doesn't.</p>
     <p>The figure runs the ledger across every terminal spot price from 60 to 160. The locked P&amp;L is <b>0.0000000000</b> in every column. Not small, not approximately zero — the position has no exposure to the outcome at all, which is exactly why the forward price is determined rather than debated.</p>
-    <p>That has a consequence people find hard to accept. A forward is <b>not a forecast</b>. Change your expected return on the stock to −20% a year and the expected spot in a year drops to 80.25; change it to +25% and it rises to 125.86. The one-year forward stays at <b>103.0455</b> through all of it, because no step in the construction used an expected return. This is the same argument as <a href="binomial.html#c1" style="color:var(--blue)">page 12's replication</a>, applied one instrument earlier.</p>
+    <p>That has a consequence people find hard to accept. A forward is <b>not a forecast</b>. Change your expected return on the stock to −20% a year and the expected spot in a year drops to 80.25; change it to +25% and it rises to 125.86. The one-year forward stays at <b>103.0455</b> through all of it, because no step in the construction used an expected return. This is the same argument as <a href="binomial.html#c1" style="color:var(--blue)">page 02's replication</a>, applied one instrument earlier.</p>
     <p>So when a futures curve is upward sloping, the market is not predicting a rise. It is telling you what it costs to carry the thing — and reading contango as bullishness is one of the most durable misreadings in finance.</p>
   </div>
 
@@ -151,7 +151,7 @@
       <p class="mread">Reads as: <b>you end with the forward price, minus the loan, plus whatever the share paid you.</b> The share itself is gone — you delivered it — so its price at T never enters.</p>
       <p>The profit is <b>F − S·e<sup>(r−q)T</sup></b>, locked at inception and independent of S<sub>T</sub>. If that is positive, everyone does it until it isn't.</p>
       <p>Now suppose the forward trades below. Reverse every leg: short the share, invest the proceeds, buy the forward. The profit is <b>S·e<sup>(r−q)T</sup> − F</b>, again locked. Both inequalities close, so the forward is pinned to a point rather than a band.</p>
-      <p><b>Where it breaks.</b> The second argument is the fragile one, and it is fragile in practice rather than in theory. It requires shorting the share, which requires borrowing it, which costs a fee that is not the risk-free rate and can spike without warning. On a hard-to-borrow name the lower arbitrage stops working and the forward can sit persistently below the formula — the difference <em>is</em> the borrow cost, which is how the market quotes it. <a href="parity.html#c9" style="color:var(--blue)">Page 07</a> trades that gap directly. The other assumptions are milder: financing at a single rate rather than a bid and an ask, dividends known rather than estimated, and no cost to holding the share, which is false for physical commodities and is where convenience yield comes from.</p>
+      <p><b>Where it breaks.</b> The second argument is the fragile one, and it is fragile in practice rather than in theory. It requires shorting the share, which requires borrowing it, which costs a fee that is not the risk-free rate and can spike without warning. On a hard-to-borrow name the lower arbitrage stops working and the forward can sit persistently below the formula — the difference <em>is</em> the borrow cost, which is how the market quotes it. <a href="parity.html#c9" style="color:var(--blue)">Page 03</a> trades that gap directly. The other assumptions are milder: financing at a single rate rather than a bid and an ask, dividends known rather than estimated, and no cost to holding the share, which is false for physical commodities and is where convenience yield comes from.</p>
     </div>
   </details>
 </section>
@@ -236,8 +236,8 @@
   <div class="prose">
     <p class="lead">Everything in this series so far has been priced per unit of underlying. A real trade is a number of contracts, each controlling a multiple of something, settling in a specific way on a specific date. Getting that chain wrong is not a modeling error, it is a wire transfer.</p>
     <p>The multiplier is the first link. A single-stock option on a 172.40 share controls 100 shares — <b>$17,240</b> of notional per contract. An index option with a 100 multiplier on a 5,280 index controls <b>$528,000</b>. An E-mini equity index future with a 50 multiplier on the same index controls <b>$264,000</b>. Three instruments on similar-sounding things, differing by a factor of thirty in what one unit commits you to.</p>
-    <p>Then <b>settlement style</b>. A single-stock option is physically settled: exercise and shares move. An index option is <span class="term" data-t="Cash settlement" data-def="Settled by a payment computed from a reference price, with nothing delivered. Standard for index products, because an index cannot be handed over.">cash settled</span>, because there is nothing to deliver — you receive the difference. On a 5,200 call settling at 5,283.47 with a 100 multiplier, that is <b>(5,283.47 − 5,200) × 100 = $8,347</b>, and no position in anything remains afterwards. That distinction changes what happens on expiration weekend entirely: <a href="early-exercise.html#c7" style="color:var(--blue)">page 08's pin risk</a> is a physical-settlement problem and largely evaporates under cash settlement.</p>
-    <p>Then <b>exercise style</b>. American for most single-stock options, European for most index options — which is why page 08's early-exercise machinery applies to one and not the other.</p>
+    <p>Then <b>settlement style</b>. A single-stock option is physically settled: exercise and shares move. An index option is <span class="term" data-t="Cash settlement" data-def="Settled by a payment computed from a reference price, with nothing delivered. Standard for index products, because an index cannot be handed over.">cash settled</span>, because there is nothing to deliver — you receive the difference. On a 5,200 call settling at 5,283.47 with a 100 multiplier, that is <b>(5,283.47 − 5,200) × 100 = $8,347</b>, and no position in anything remains afterwards. That distinction changes what happens on expiration weekend entirely: <a href="early-exercise.html#c7" style="color:var(--blue)">page 04's pin risk</a> is a physical-settlement problem and largely evaporates under cash settlement.</p>
+    <p>Then <b>exercise style</b>. American for most single-stock options, European for most index options — which is why page 04's early-exercise machinery applies to one and not the other.</p>
     <p>And finally <b>the settlement price itself</b>, which is not always the closing price. Some index products settle on a special quotation calculated from opening prices on the expiration morning, a value that may never trade as a level anywhere. A position held to expiry settles against a number the screen never printed.</p>
     <p>The figure walks the chain from a quote to an amount of money, with the multiplier and settlement style as controls. It is deliberately mundane. It is also the calculation most likely to be wrong by a factor of ten in a real book.</p>
   </div>
@@ -259,6 +259,48 @@
     <figcaption>The bars are on the same axis on purpose. An index option and a single-stock option look like the same kind of object on a screen and commit you to amounts that differ by more than an order of magnitude — which is the entire reason position limits are written in contracts and risk limits are written in dollars.</figcaption>
   </figure>
 
+  <div class="prose">
+    <p>Now use the multiplier for what it is mostly used for. You run a $25 million stock portfolio with a beta of 1.15 to an index at 5,000, and you want the market out of it for the next three months. The index future is $50 a point, so one contract controls $250,000. Choose how many to sell, then watch sixty trading days of a market you did not choose.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Hedge a portfolio with futures</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Your hedged book</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Beta-matched hedge</span>
+            <span><i class="sw" style="background:var(--grey)"></i>Unhedged</span>
+          </span>
+        </div>
+        <canvas id="cvFH" height="270"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your hedge</h4>
+        <div id="ctlFH"></div>
+        <div class="btnrow simbtns">
+          <button class="act ghost" id="fhDollar">Match the dollars</button>
+          <button class="act ghost" id="fhBeta">Match the beta</button>
+          <button class="act ghost" id="fhNew">New market</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvFH"></div>
+      </div>
+    </div>
+    <figcaption>On the first market the index falls. The 100 futures that match the dollars lose $479,000, because 15% of the portfolio's market exposure was never hedged; the 115 that match the beta lose $61,000; unhedged loses $3.27 million. Over 300 markets the 60-day results spread by $2.28 million unhedged, $722,000 dollar-matched and $672,000 beta-matched. That last number is the stock-specific risk, and no index future can touch it.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A portfolio manager hedging with futures thinks in beta-dollars, not dollars: how much index exposure the book really carries. Contracts = beta × portfolio value ÷ (future × multiplier). Get the multiplier wrong and the hedge is off by an order of magnitude; get the beta wrong and it is off by the difference, every day, in the direction you least want.</p>
+    <ul>
+      <li>An index hedge removes the market and leaves everything else. Measure what is left before you call the book hedged.</li>
+      <li>Betas drift and are noisy to estimate; desks re-estimate and resize rather than set and forget.</li>
+      <li>Rolling the future each quarter costs the carry the forward price builds in, which chapter 01 constructs.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> one future here is $250,000 of index; 1.15 × $25m ÷ $250,000 = 115 contracts.</p>
+  </aside>
+
   <div class="check">
     <span class="lab">Check yourself</span>
     <p class="q">You are short 10 index calls, cash settled, that finish 83.47 points in the money on a 100 multiplier. What happens on Monday?</p>
@@ -268,7 +310,7 @@
       <button>You are assigned 1,000 units of the index</button>
       <button>Nothing until you choose to close the position</button>
     </div>
-    <div class="ans"><b>You pay and you are flat.</b> Ten contracts × 83.47 points × 100 = $83,470. The absence of a residual position is the whole point of cash settlement, and it is why index expirations do not produce page 08's Monday-morning surprise. The trade-off is that you cannot influence or hedge the settlement print, which for a special opening quotation is a number assembled from prices you never saw as a level.</div>
+    <div class="ans"><b>You pay and you are flat.</b> Ten contracts × 83.47 points × 100 = $83,470. The absence of a residual position is the whole point of cash settlement, and it is why index expirations do not produce page 04's Monday-morning surprise. The trade-off is that you cannot influence or hedge the settlement print, which for a special opening quotation is a number assembled from prices you never saw as a level.</div>
   </div>
 </section>
 
@@ -340,16 +382,16 @@
 <section class="chapter" id="c5">
   <div class="chead">
     <div class="cnum">05</div>
-    <h2>Where page 08's rule inverts</h2>
+    <h2>Where page 04's rule inverts</h2>
     <p class="dek">An American call on a non-dividend payer is never exercised early. Put the identical option on a futures contract and both sides exercise early.</p>
   </div>
 
   <div class="prose">
-    <p class="lead"><a href="early-exercise.html#c1" style="color:var(--blue)">Page 08 opened</a> by proving something absolute: on a stock that pays no dividend, the right to exercise an American call early is worth exactly zero, measured at 1.85 × 10<sup>−13</sup> across six hundred cases. The proof was one line — a call is worth more alive than dead because selling it recovers the discount on the strike.</p>
+    <p class="lead"><a href="early-exercise.html#c1" style="color:var(--blue)">Page 04 opened</a> by proving something absolute: on a stock that pays no dividend, the right to exercise an American call early is worth exactly zero, measured at 1.85 × 10<sup>−13</sup> across six hundred cases. The proof was one line — a call is worth more alive than dead because selling it recovers the discount on the strike.</p>
     <p>Now price the same option on a futures contract. On a one-year 100-strike with 30 volatility and rates at 8%, the numbers come out like this.</p>
-    <p>At <b>F = 130</b> the European call is worth <b>30.9927</b> and the American is <b>32.2092</b> — an early-exercise premium of <b>1.2166</b>. At <b>F = 70</b> the European put is <b>29.0132</b> and the American is <b>30.4624</b>, a premium of <b>1.4492</b>. At the money both sides carry a premium of <b>0.2205</b>, identically, because futures options are symmetric in F and K in a way stock options are not. Meanwhile the stock call's premium at the same moneyness is <b>0.00e+0</b>, exactly as page 08 promised.</p>
+    <p>At <b>F = 130</b> the European call is worth <b>30.9927</b> and the American is <b>32.2092</b> — an early-exercise premium of <b>1.2166</b>. At <b>F = 70</b> the European put is <b>29.0132</b> and the American is <b>30.4624</b>, a premium of <b>1.4492</b>. At the money both sides carry a premium of <b>0.2205</b>, identically, because futures options are symmetric in F and K in a way stock options are not. Meanwhile the stock call's premium at the same moneyness is <b>0.00e+0</b>, exactly as page 04 promised.</p>
     <p>The mechanism is visible in one number. A European futures option can trade <b>below its intrinsic value</b>. At F = 140 the European call is worth <b>39.0630</b> against an intrinsic of 40 — below by <b>0.9370</b>. At F = 200 it is <b>92.4494</b> against 100, below by <b>7.5506</b>.</p>
-    <p>That is impossible for a stock option, and the impossibility is precisely page 08's proof: the bound there was <b>c ≥ S − Ke<sup>−rT</sup></b>, which sits <em>above</em> the intrinsic S − K. For a futures option the corresponding bound is <b>c ≥ e<sup>−rT</sup>(F − K)</b>, which sits <em>below</em> the intrinsic F − K. Both terms get discounted instead of just one, so the floor drops beneath the exercise value and exercising becomes worth doing.</p>
+    <p>That is impossible for a stock option, and the impossibility is precisely page 04's proof: the bound there was <b>c ≥ S − Ke<sup>−rT</sup></b>, which sits <em>above</em> the intrinsic S − K. For a futures option the corresponding bound is <b>c ≥ e<sup>−rT</sup>(F − K)</b>, which sits <em>below</em> the intrinsic F − K. Both terms get discounted instead of just one, so the floor drops beneath the exercise value and exercising becomes worth doing.</p>
     <p>The intuition, stripped of algebra: exercising a deep futures option converts a claim you will collect later into cash you hold now, and holding cash earns interest. Nothing is given up in exchange, because a futures position — unlike a share — costs nothing to hold. So the interest on the intrinsic is free money, and it beats the remaining time value once the option is deep enough.</p>
     <p>Two consequences worth carrying. Deep in-the-money futures options should not be assumed to have time value; check. And the early-exercise premium is <b>symmetric</b> here, so a futures options book carries the risk on both wings, where an equity book carries it almost entirely on the put side.</p>
   </div>
@@ -378,7 +420,7 @@
         <div class="kv" style="margin-top:20px" id="kv5"></div>
       </div>
     </div>
-    <figcaption>The gray line is page 08's result, drawn here for comparison and pinned to zero across the whole range. The two colored curves are the same option on a futures contract. The lower panel shows why: where the blue price curve dips beneath the dashed intrinsic line, exercising immediately is worth more than holding, and the tree finds it.</figcaption>
+    <figcaption>The gray line is page 04's result, drawn here for comparison and pinned to zero across the whole range. The two colored curves are the same option on a futures contract. The lower panel shows why: where the blue price curve dips beneath the dashed intrinsic line, exercising immediately is worth more than holding, and the tree finds it.</figcaption>
   </figure>
 
   <div class="try">
@@ -414,7 +456,7 @@
 
   <div class="prose">
     <p class="lead">Index derivatives look like equity derivatives and differ in three ways that each remove a whole chapter of complication — and add a different one.</p>
-    <p><b>The dividends are inside the index, not attached to it.</b> A price index falls as its members go ex, so the dividend stream shows up in the carry rather than as something you can collect by exercising. That deletes page 08's entire dividend-capture apparatus for index options: there is no ex-date on which owning the deliverable pays you something the option does not.</p>
+    <p><b>The dividends are inside the index, not attached to it.</b> A price index falls as its members go ex, so the dividend stream shows up in the carry rather than as something you can collect by exercising. That deletes page 04's entire dividend-capture apparatus for index options: there is no ex-date on which owning the deliverable pays you something the option does not.</p>
     <p><b>Settlement is cash and exercise is usually European.</b> Between them, the two remove early exercise and pin risk almost entirely. There is no Monday-morning share position, because there was never a share.</p>
     <p><b>But the settlement price is its own hazard.</b> Several index products settle against a special quotation computed from opening prices on expiration morning rather than from a traded close. The resulting number is a weighted assembly of prices that may never have coexisted, and it can differ from any level the index printed. A position carried to expiry settles against something you could not have traded, which is a small, specific and entirely one-directional risk.</p>
     <p>The figure prices the same strike as an index option and as a single-stock option to show which complications survive the change of underlying. The comparison is worth having explicitly, because most option education is written about single stocks and most option <em>volume</em> is in index products.</p>
@@ -446,7 +488,7 @@
       <button>Because index options are cash settled</button>
       <button>Because index dividends are too small to matter</button>
     </div>
-    <div class="ans"><b>The dividends are inside the index.</b> Exercising an index option gives you cash, not a basket you could hold through an ex-date, so there is nothing to capture. Cash settlement is a genuine reason early exercise is rare, but the deeper reason is that the economic incentive page 08 identified never exists here in the first place.</div>
+    <div class="ans"><b>The dividends are inside the index.</b> Exercising an index option gives you cash, not a basket you could hold through an ex-date, so there is nothing to capture. Cash settlement is a genuine reason early exercise is rare, but the deeper reason is that the economic incentive page 04 identified never exists here in the first place.</div>
   </div>
 </section>
 
@@ -460,7 +502,7 @@
 
   <div class="prose">
     <p class="lead">Chapter 01's derivation closed the arbitrage from both sides and therefore pinned the forward to a point. Every failure on this page is a failure of one of those two legs.</p>
-    <p><b>Borrow breaks the lower arbitrage.</b> Selling the share requires borrowing it, at a fee that is not the risk-free rate. On a hard-to-borrow name that fee is large, variable and revocable — a recall can force you to close at the worst moment. When it bites, the forward sits persistently below the textbook level and the gap <em>is</em> the market's borrow quote. <a href="parity.html#c9" style="color:var(--blue)">Page 07</a> shows the same effect arriving through put–call parity, which is the same arbitrage wearing options.</p>
+    <p><b>Borrow breaks the lower arbitrage.</b> Selling the share requires borrowing it, at a fee that is not the risk-free rate. On a hard-to-borrow name that fee is large, variable and revocable — a recall can force you to close at the worst moment. When it bites, the forward sits persistently below the textbook level and the gap <em>is</em> the market's borrow quote. <a href="parity.html#c9" style="color:var(--blue)">Page 03</a> shows the same effect arriving through put–call parity, which is the same arbitrage wearing options.</p>
     <p><b>There is no single rate.</b> You borrow at one rate and lend at another, so the arbitrage closes to a band rather than a point. The band is narrow for a large institution and not narrow for anybody else, and it widens exactly when funding markets are stressed.</p>
     <p><b>Dividends are forecasts.</b> Anything beyond the next declared payment is an estimate. A two-year forward contains eight of them, so a long-dated forward is partly a bet on a dividend policy — and special dividends, buybacks and cuts all arrive with little notice.</p>
     <p><b>Futures are not forwards.</b> The two are equal only when interest rates are deterministic. A futures contract settles its mark-to-market daily, so gains are financed at rates that themselves move; when rates and the underlying are correlated, that daily settlement is worth something and the futures price separates from the forward. The effect is negligible on short-dated equity index products and material on long-dated rate-sensitive ones.</p>
@@ -1047,7 +1089,7 @@ const s6={q:0.02,r:0.05,T:0.5,v:0.20};
   window.draw6=draw;
   function draw(){
     const rows=[
-      ["Single stock option","physical","American","attached — capture by exercising","yes (page 08)","yes"],
+      ["Single stock option","physical","American","attached — capture by exercising","yes (page 04)","yes"],
       ["Index option","cash","European","inside the index, in the carry","no","no"],
       ["Option on a future","cash","American","none — the future has no carry","both sides (ch 05)","no"]
     ];
@@ -1198,7 +1240,59 @@ const s7={borrow:0.0025,spread:0.005,r:0.05,q:0.02,T:1};
   window.drawDrill=next;
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
+/* ══════════ 03b — hedge a portfolio with futures ══════════
+   A $25m stock portfolio with beta 1.15 to an index at 5,000; the future is
+   $50 a point. Each of 60 trading days the index moves (16% vol) and the
+   portfolio moves beta times that plus its own noise (6% a year of residual).
+   The reader chooses how many futures to sell; three P&L lines run on the
+   same days: unhedged, the reader's hedge, and the residual left by the
+   beta-correct hedge. Carry and basis are left out so only the ratio shows. */
+const sFH = { N: 100, seed: 0, beta: 1.15 };
+const FH = { V: 25e6, F: 5000, mult: 50, days: 60, iv: 0.16, res: 0.06 };
+function fhPaths(seed){ return withSeed(8800 + seed, () => { const m = [], e = [];
+  for (let i = 0; i < FH.days; i++) { m.push(FH.iv / Math.sqrt(252) * gauss()); e.push(FH.res / Math.sqrt(252) * gauss()); }
+  return { m, e }; }); }
+const fhRight = beta => Math.round(beta * FH.V / (FH.F * FH.mult));
+/* cumulative P&L of portfolio + N short futures, with daily resizing of neither (a static hedge) */
+function fhRun(N, beta, seed){ const P = fhPaths(seed || 0); let V = FH.V, F = FH.F, cum = 0; const out = [0], unh = [0];
+  let cu = 0;
+  for (let i = 0; i < FH.days; i++) { const dV = V * (beta * P.m[i] + P.e[i]), dF = F * P.m[i];
+    V += dV; F += dF; cum += dV - N * FH.mult * dF; cu += dV; out.push(cum); unh.push(cu); }
+  return { pnl: out, unh, final: cum, idx: F }; }
+function fhStats(N, beta, seeds){ let a = 0, b = 0; for (let k = 0; k < seeds; k++) { const f = fhRun(N, beta, k).final; a += f; b += f * f; }
+  return { mean: a / seeds, sd: Math.sqrt(b / seeds - (a / seeds) ** 2) }; }
+(function(){
+  sliders(document.getElementById("ctlFH"), [
+    { id: "NFH", k: "N", lbl: "N", name: "Futures you sell", min: 0, max: 160, step: 1, fmt: v => v.toFixed(0) },
+    { id: "bFH", k: "beta", lbl: "β", name: "The portfolio's beta", min: 0.6, max: 1.6, step: 0.05, fmt: v => v.toFixed(2) }
+  ], sFH, () => draw(),"cFH");
+  window.drawFH = draw;
+  document.getElementById("fhNew").addEventListener("click", () => { sFH.seed++; draw(); });
+  document.getElementById("fhDollar").addEventListener("click", () => preset("cFH", { N: Math.round(FH.V / (FH.F * FH.mult)) }, "cvFH", true));
+  document.getElementById("fhBeta").addEventListener("click", () => preset("cFH", { N: fhRight(sFH.beta) }, "cvFH", true));
+  function draw(){
+    const me = fhRun(sFH.N, sFH.beta, sFH.seed), best = fhRun(fhRight(sFH.beta), sFH.beta, sFH.seed), xs = me.pnl.map((_, i) => i);
+    const all = me.pnl.concat(me.unh, best.pnl), m = Math.max(2e5, ...all.map(Math.abs)) * 1.12;
+    const o = Fig(document.getElementById("cvFH"), { h: 270, x0: 0, x1: FH.days, y0: -m, y1: m, pad: { l: 64, r: 14, t: 14 } });
+    axes(o, v => "day " + v.toFixed(0), v => (v < 0 ? "−$" : "$") + (Math.abs(v) / 1e6).toFixed(1) + "m", 6, 4);
+    clip(o, () => { line(o, xs, me.unh, C("--grey"), 1.6, [5, 4]); line(o, xs, best.pnl, C("--moss"), 1.6); line(o, xs, me.pnl, C("--blue"), 2.8); });
+    const st = fhStats(sFH.N, sFH.beta, 300), sb = fhStats(fhRight(sFH.beta), sFH.beta, 300), su = fhStats(0, sFH.beta, 300);
+    const d0m = v => (v < 0 ? "−$" : "$") + Math.round(Math.abs(v)).toLocaleString("en-US");
+    document.getElementById("kvFH").innerHTML = kvHTML([
+      ["One future controls", d0m(FH.F * FH.mult)],
+      ["Dollar-matched hedge", Math.round(FH.V / (FH.F * FH.mult)) + " futures"],
+      ["Beta-matched hedge", fhRight(sFH.beta) + " futures", "moss"],
+      ["You sold", Math.round(sFH.N) + " futures", "blue"],
+      ["This path, 60 days: yours", d0m(me.final), "blue"],
+      ["  unhedged", d0m(me.unh[FH.days])],
+      ["Spread over 300 markets: yours", d0m(st.sd)],
+      ["  beta-matched", d0m(sb.sd), "moss"],
+      ["  unhedged", d0m(su.sd)]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();drawFH();draw2();draw3();draw4();draw5();draw6();draw7();drawDrill();}
 LAB.boot(drawAll);
 
 </script>

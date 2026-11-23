@@ -28,7 +28,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">&larr; Options, visually</a>
-    <span class="num">No. 23 &middot; The carry curve</span>
+    <span class="num">No. 06 &middot; The carry curve</span>
   </div>
 </header>
 
@@ -53,7 +53,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">Page 07 built parity at one expiry and page 17 used it to fix the forward before reading implied vols. This page lines the forwards up across expiries. The result is a term structure of carry, and three things follow from it: where the dividends sit, what the stock costs to borrow at each horizon, and who gains or loses when a dividend changes.</p>
+  <p class="lede">Page 03 built parity at one expiry, and page 17 will use it to fix the forward before reading implied vols. This page lines the forwards up across expiries. The result is a term structure of carry, and three things follow from it: where the dividends sit, what the stock costs to borrow at each horizon, and who gains or loses when a dividend changes.</p>
   <ol>
     <li><b>Chapter 01 reads one chain.</b> Call-minus-put at each expiry becomes a single annualized rate.</li>
     <li><b>Chapter 02 looks between expiries,</b> which is what a jelly roll trades, and separates dividend from borrow.</li>
@@ -193,6 +193,42 @@
 
   <div class="mline">D<sub>implied</sub> = F(T<sub>1</sub>) &times; e<sup>(r &minus; b)(T<sub>2</sub> &minus; T<sub>1</sub>)</sup> &minus; F(T<sub>2</sub>)</div>
   <p class="mread">Reads as: <b>grow the near forward to the far date at the rate less the borrow fee; whatever the far forward falls short by is the dividend the market expects in between.</b></p>
+
+  <div class="prose">
+    <p>A roll between two expiries that straddle an ex-date has one unknown, so trading it is trading that dividend and nothing else. Each round below gives you a company, a headline and the dividend the roll implies. Buy the roll if you think the announced dividend will come in above that number, sell it if below, or pass. Fifty contracts: every cent of dividend is $50.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop"><h3>Trade the roll into the board meeting</h3></div>
+        <p class="simmsg" id="rlMsg" aria-live="polite"></p>
+        <canvas id="cvRL" height="210"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your roll</h4>
+        <div class="btnrow simbtns">
+          <button class="act" id="rlBuy">Buy the roll</button>
+          <button class="act" id="rlSell">Sell the roll</button>
+          <button class="act ghost" id="rlPass">Pass</button>
+          <button class="act ghost" id="rlNext">Next company</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvRL"></div>
+      </div>
+    </div>
+    <figcaption>In the first round the market prices an 18% chance that a quiet board suspends a $0.80 dividend, so the roll implies $0.658; the board pays the $0.80 and a bought roll makes $710. Over 2,000 rounds, buying every roll loses about $35 a round and selling every one makes about the same: the market's number is close to fair on average. Trading only where your chance of a cut differs from the market's averages $331 a round. The roll pays for being right about the dividend and for nothing else.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>Dividend traders read the implied dividend off the options the way bond traders read a yield: the number the market has agreed on, to be compared with their own. The view is a probability of a cut and its size; the roll is the cleanest way to hold that view, because the stock's direction and its volatility cancel out of it.</p>
+    <ul>
+      <li>Implied dividends move on the same news as credit: earnings misses, peer cuts, spreads widening.</li>
+      <li>The tail is one-sided. A dividend rarely rises by surprise and often falls to zero.</li>
+      <li>Size from the cut, not the cent: a suspension moves the roll by the whole dividend.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> implied dividend ≈ regular dividend × (1 − market's chance of a cut × size of the cut).</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -443,7 +479,66 @@ const P3 = { div: 0.60, b0: 0.01, b1: 0.01 };
   }
 })();
 
-function drawAll(){ window.draw1(); window.draw2(); window.draw3(); }
+/* ══════════ 02b — trade the roll into the board meeting ══════════
+   Each round: a company paying a regular dividend D0 that goes ex between two
+   expiries, a headline, and the dividend the jelly roll implies. The roll's
+   only unknown is that dividend, so its P&L is (announced - implied) per share,
+   times 100 shares a contract, 50 contracts, long if you bought the roll. The
+   headline sets a hidden chance of a cut; the market's price uses its own
+   estimate of that chance, which is sometimes too calm and sometimes too
+   scared. */
+const RL = { round: 0, pick: null, total: 0, N: 50,
+  heads: [["Management reaffirmed the dividend on last quarter's call.", 0.04],
+          ["Earnings fell 30% and two peers cut their payouts this month.", 0.45],
+          ["An activist is pushing the board to spend the cash on buybacks.", 0.30],
+          ["The board meets the week before the ex-date. Nothing has been said.", 0.15],
+          ["Credit spreads on the company's bonds widened sharply this week.", 0.35]] };
+function rollRound(n){ return withSeed(6200 + n, () => {
+  const [head, p] = RL.heads[Math.floor(Math.random() * RL.heads.length)];
+  const D0 = +(0.4 + 1.2 * Math.random()).toFixed(2), cutTo = Math.random() < 0.5 ? 0.5 : 0;
+  const pMkt = Math.min(0.95, Math.max(0.01, p * (0.4 + 1.2 * Math.random())));
+  const implied = +(D0 * (1 - pMkt * (1 - cutTo))).toFixed(3);
+  const cut = Math.random() < p, actual = cut ? +(D0 * cutTo).toFixed(2) : D0;
+  return { head, p, D0, cutTo, pMkt, implied, cut, actual };
+}); }
+const rollPnL = (r, pick) => (pick === "buy" ? 1 : pick === "sell" ? -1 : 0) * (r.actual - r.implied) * 100 * RL.N;
+function rollEdge(r){ const fair = r.D0 * (1 - r.p * (1 - r.cutTo)); return fair - r.implied; }
+(function(){
+  let r = rollRound(0);
+  const msg = document.getElementById("rlMsg"), money0 = v => (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  function pick(p){ if (RL.pick) return; RL.pick = p; RL.total += rollPnL(r, p); draw(); }
+  document.getElementById("rlBuy").addEventListener("click", () => pick("buy"));
+  document.getElementById("rlSell").addEventListener("click", () => pick("sell"));
+  document.getElementById("rlPass").addEventListener("click", () => pick("pass"));
+  document.getElementById("rlNext").addEventListener("click", () => { RL.round++; RL.pick = null; r = rollRound(RL.round); draw(); });
+  window.drawRL = draw;
+  function draw(){
+    msg.textContent = !RL.pick
+      ? "Round " + (RL.round + 1) + ". Regular dividend $" + r.D0.toFixed(2) + ". " + r.head + " The roll implies $" + r.implied.toFixed(3) + ". Buy the roll if you think the dividend will come in higher, sell it if lower."
+      : "The board " + (r.cut ? (r.cutTo ? "halves the dividend to $" + r.actual.toFixed(2) : "suspends the dividend") : "pays the regular $" + r.actual.toFixed(2)) + ". " +
+        (RL.pick === "pass" ? "You passed." : "Your " + (RL.pick === "buy" ? "long" : "short") + " roll " + (rollPnL(r, RL.pick) >= 0 ? "makes " : "loses ") + money0(Math.abs(rollPnL(r, RL.pick))) + ".") +
+        " The headline's real chance of a cut was " + Math.round(r.p * 100) + "%; the market priced " + Math.round(r.pMkt * 100) + "%.";
+    const outs = [r.D0 * r.cutTo, r.D0], hi = r.D0 * 1.25;
+    const o = Fig(document.getElementById("cvRL"), { h: 210, x0: 0, x1: 3, y0: 0, y1: hi, pad: { l: 52, r: 14, t: 14, b: 26 } });
+    axes(o, () => "", v => "$" + v.toFixed(2), 3, 4);
+    const g = o.g, bw = Math.min(70, o.pw / 6);
+    const bar = (x, v, col, lab, alpha) => { g.fillStyle = col; g.globalAlpha = alpha || 0.8; g.fillRect(o.X(x) - bw / 2, o.Y(v), bw, o.Y(0) - o.Y(v)); g.globalAlpha = 1;
+      g.fillStyle = C("--ink"); g.font = "10px 'IBM Plex Mono', monospace"; g.textAlign = "center"; g.textBaseline = "bottom"; g.fillText("$" + v.toFixed(2), o.X(x), o.Y(v) - 3);
+      g.fillStyle = C("--grey"); g.textBaseline = "top"; g.fillText(lab, o.X(x), o.P.t + o.ph + 7); };
+    bar(0.5, r.D0, C("--grey"), "regular", 0.5);
+    bar(1.5, r.implied, C("--blue"), "roll implies");
+    if (RL.pick) bar(2.5, r.actual, r.actual >= r.implied ? C("--moss") : C("--verm"), "announced");
+    else { g.fillStyle = C("--grey"); g.font = "11px 'IBM Plex Mono', monospace"; g.textAlign = "center"; g.fillText("?", o.X(2.5), o.Y(r.D0 / 2)); g.textBaseline = "top"; g.font = "10px 'IBM Plex Mono', monospace"; g.fillText("announced", o.X(2.5), o.P.t + o.ph + 7); }
+    document.getElementById("kvRL").innerHTML = kvHTML([
+      ["Round", String(RL.round + 1)],
+      ["Each cent of dividend is worth", money0(0.01 * 100 * RL.N)],
+      ["This round", RL.pick ? money0(rollPnL(r, RL.pick)) : "—"],
+      ["Running total", money0(RL.total), RL.total >= 0 ? "moss" : "verm"]
+    ]);
+  }
+})();
+
+function drawAll(){ drawRL(); window.draw1(); window.draw2(); window.draw3(); }
 LAB.boot(drawAll);
 
 </script>

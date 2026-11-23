@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 08 · Early Exercise and Assignment</span>
+    <span class="num">No. 04 · Early Exercise and Assignment</span>
   </div>
 </header>
 
@@ -49,7 +49,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 08</div>
+    <div class="eyebrow">An interactive derivation · No. 04</div>
     <h1>A decision worth <em>exactly</em> nothing</h1>
     <p class="sub">An American option carries a right its European twin does not: exercise it whenever you like. Priced across six hundred cases, that right is worth 0.0000000000002. Knowing the handful of situations where it suddenly isn't is most of what this subject is.</p>
   </div>
@@ -60,7 +60,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">Almost everything on this page falls out of one equation, and that equation is put–call parity wearing a different hat. If you have read <a href="parity.html" style="color:var(--blue)">page 07</a> you already have it; if not, chapter 02 derives what you need in four lines.</p>
+  <p class="lede">Almost everything on this page falls out of one equation, and that equation is put–call parity wearing a different hat. If you have read <a href="parity.html" style="color:var(--blue)">page 03</a> you already have it; if not, chapter 02 derives what you need in four lines.</p>
   <ol>
     <li><b>Chapters 01 and 02 are the whole argument.</b> Exercising early costs you the option's time value, always, exactly. Everything after that is a catalogue of the things that can be worth more than time value, and there are only three.</li>
     <li><b>The call rule is exact; the put rule is not.</b> Chapter 03's criterion is arithmetic you can do on a phone. Chapter 04's needs a tree, and it shows how badly the phone version misses.</li>
@@ -227,7 +227,7 @@
     <div class="body">
       <p>Start with put–call parity for European options on a non-dividend payer.</p>
       <div class="mline">c − p = S − Ke<sup>−rτ</sup></div>
-      <p class="mread">Reads as: <b>a call minus a put is stock financed to expiry.</b> Page 07 builds this from scratch; here we only rearrange it.</p>
+      <p class="mread">Reads as: <b>a call minus a put is stock financed to expiry.</b> Page 03 builds this from scratch; here we only rearrange it.</p>
       <p>Solve for the call, then subtract the intrinsic value <b>S − K</b>, which is what exercise would pay.</p>
       <div class="mline">c − (S − K) = p + S − Ke<sup>−rτ</sup> − S + K</div>
       <p class="mread">Reads as: <b>time value equals the put plus whatever is left of the strike terms.</b> The two spot terms cancel, which is why the answer contains no spot except through the put.</p>
@@ -451,6 +451,48 @@
     </div>
   </div>
 
+  <div class="prose">
+    <p>Every exercise notice in that table lands on someone. Sit in that seat: you are a market maker short 50 calls at each strike, hedged with stock, the afternoon before the ex-date. A holder who exercises takes your stock before the dividend is paid, and their edge is your loss, share for share. You can buy any strike back before the close for 5 cents a share over fair value. Tick the ones worth it, then see who exercised.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The other side of the screen</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="sw" style="background:var(--verm)"></i>Loss if every holder exercises</span>
+            <span><i class="swl" style="background:var(--blue)"></i>Cost to buy the strike back</span>
+            <span><i class="swl" style="background:var(--ink)"></i>What exercise actually cost (after the morning)</span>
+          </span>
+        </div>
+        <p class="simmsg" id="ngMsg" aria-live="polite"></p>
+        <canvas id="cvNG" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your short calls</h4>
+        <table class="wtab" id="ngTab" style="min-width:0"></table>
+        <div class="btnrow simbtns">
+          <button class="act" id="ngGo">Go to tomorrow morning</button>
+          <button class="act ghost" id="ngNext">Next ex-date</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvNG"></div>
+      </div>
+    </div>
+    <figcaption>On the first ex-date the five strikes from 85 to 105 clear the hurdle. Doing nothing costs $28,677 when most of their holders exercise. Buying those five back costs $1,065 net, which on this morning is as good as perfect hindsight. The two strikes that do not clear are cheaper to leave: the odd holder who exercises them anyway hands you money.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>For a market maker, dividend risk is not a theory question; it is a list run every afternoon before an ex-date. Deep in-the-money short calls are the exposure, because their time value is smallest and a rational holder will take the dividend. The desk either buys them back, or plans for the assignment and the stock it will lose overnight.</p>
+    <ul>
+      <li>The edge is zero-sum: every dollar an attentive holder captures, a short call pays.</li>
+      <li>Some holders never exercise. That is a gift, but not one to plan a book around.</li>
+      <li>"Dividend play" trades exist to harvest exactly the strikes where both sides are short and long and someone has not done the work.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> the afternoon before an ex-date, sort your short calls by dividend minus hurdle, and buy back everything that clears by more than the spread.</p>
+  </aside>
+
   <div class="check">
     <span class="lab">Check yourself</span>
     <p class="q">You run the screen and the 105 strike misses by two cents. The dividend is confirmed, but the stock rallies 3% in the last hour of trading. What happens to that row?</p>
@@ -604,7 +646,7 @@
     <p class="lead">Corporate actions adjust option contracts, and the adjustments fall into two categories that behave completely differently. The first kind changes the <em>ratio</em>: how many shares one contract delivers and at what strike. The second changes the <em>composition</em>: what the deliverable is made of. The first is invisible to your risk. The second annihilates it.</p>
     <p>Take a two-for-one split. The strike halves, the deliverable stays at 100 shares, and you hold twice as many contracts. Every per-share number changes and every position-level number does not. A 100-strike call on a $120 stock worth <b>25.2795</b> becomes two 50-strike calls on a $60 stock worth <b>12.6398</b> each. Position value, dollar delta, gamma cash and vega all come through with a residual of exactly zero. Share delta doubles, which is correct — twice as many shares at half the price.</p>
     <p>Odd ratios work identically, they just look worse. A three-for-two split leaves you one contract with a <b>150-share</b> deliverable struck at <b>66.667</b>, and the position value comes through with a residual of <b>−9 × 10<sup>−13</sup></b>. The identity table below computes both sides live; drag anything and the residual column stays at the floor. The reason is that Black–Scholes is homogeneous of degree one in spot and strike — scale both by the same factor and the price scales with them — so a ratio adjustment is a change of units and nothing more.</p>
-    <p>Now the other kind. A cash merger at $85 replaces the deliverable with $8,500 in cash. The contract survives, the expiry survives, and the option becomes a claim on a fixed amount of money. Volatility no longer enters, because there is nothing left to be volatile. That is the limit <em>once the deal is certain</em>. Until it closes, the deliverable is still the stock, and the deal can break or be topped by a higher bid — so calls above the deal price keep exactly the value of those two outcomes. The table below is the certain-deal limit; <a href="merger.html" style="color:var(--blue)">page 20</a> prices the uncertainty.</p>
+    <p>Now the other kind. A cash merger at $85 replaces the deliverable with $8,500 in cash. The contract survives, the expiry survives, and the option becomes a claim on a fixed amount of money. Volatility no longer enters, because there is nothing left to be volatile. That is the limit <em>once the deal is certain</em>. Until it closes, the deliverable is still the stock, and the deal can break or be topped by a higher bid — so calls above the deal price keep exactly the value of those two outcomes. The table below is the certain-deal limit; <a href="merger.html" style="color:var(--blue)">page 15</a> prices the uncertainty.</p>
     <p>The consequence is a table people find hard to believe. Announce an all-cash deal at $85 on a stock trading $84 with six months and a 40 volatility, and the stock goes <em>up</em> — while every call on it goes down. The 90-strike call, worth <b>7.80</b>, becomes worthless: the deliverable will never exceed $85, so the strike will never be reached, regardless of the five and a half months remaining. The at-the-money 85 call goes from <b>9.85</b> to zero on the same logic. Even the deep 70-strike falls from <b>18.48</b> to <b>14.67</b>, because its price contained time value and time value requires uncertainty. Vega is zero on every line.</p>
     <p>Nothing was mispriced and nothing was adjusted incorrectly. The contracts do exactly what their terms say. The lesson is that greeks describe a deliverable, not a contract, and when the deliverable stops being a random variable the greeks stop existing — which is a different and much more abrupt failure than the ones the rest of this series deals in.</p>
   </div>
@@ -1150,10 +1192,16 @@ const s1 = { v: 0.28, r: 0.045, T: 0.75, cp: 1 };
 
     const mx = Math.max(1e-13, Math.max.apply(null, df.map(Math.abs)));
     const tiny = mx < 1e-6;
-    const lim = Math.max(mx * 1.4, tiny ? 1e-12 : 0.4);
+    /* a zero gap is drawn on the same scale a real one would use, so it reads
+       as nothing, which is the point; zooming to 1e-12 made rounding noise
+       look like a result */
+    const lim = Math.max(mx * 1.4, 0.4);
     const o2 = Fig(document.getElementById("cv1d"), { h: 170, x0: 55, x1: 190, y0: 0, y1: lim, pad: { l: 52 } });
-    axes(o2, v => v.toFixed(0), v => tiny ? v.toExponential(0) : v.toFixed(2), 5, 3);
+    axes(o2, v => v.toFixed(0), v => v.toFixed(2), 5, 3);
     clip(o2, () => line(o2, xs, df, C("--moss"), 2.6));
+    if (tiny) { const g = o2.g; g.fillStyle = C("--moss"); g.font = "11px 'IBM Plex Mono', monospace";
+      g.textAlign = "left"; g.textBaseline = "bottom";
+      g.fillText(NARROW() ? "zero everywhere: never worth exercising" : "zero at every spot: early exercise is never worth anything here", o2.P.l + 8, o2.Y(0) - 8); }
     vline(o2, K, C("--ochre"), "K");
 
     const atm = tree2(100, K, s1.T, s1.v, s1.r, N, cp);
@@ -1810,8 +1858,9 @@ const sEx = { m: 15, days: 45, r: 0.045, v: 0.28, D: 1.10, b: 0.005 };
         g.globalAlpha = .9 - .22 * i; g.fillStyle = col; g.fillRect(x0, t, x1 - x0, Math.max(1, b - t - 1));
         g.globalAlpha = 1; if (b - t > 13 && !NARROW()) { g.fillStyle = C("--chalk"); g.fillText(n.replace("Interest on the strike", "Interest").replace("The put given up", "Put given up").replace("The call given up", "Call given up"), (x0 + x1) / 2, (t + b) / 2 + 3); } y += v; });
       g.fillStyle = C("--grey"); g.fillText(label, o.X(x), o.P.t + o.ph + 16); };
-    stack(0.8, c.gain, C("--moss"), "Call: collects"); stack(1.7, c.lose, C("--verm"), "Call: gives up");
-    stack(3.3, p.gain, C("--moss"), "Put: collects"); stack(4.2, p.lose, C("--verm"), "Put: gives up"); g.restore();
+    const nw = NARROW();
+    stack(0.8, c.gain, C("--moss"), nw ? "Call +" : "Call: collects"); stack(1.7, c.lose, C("--verm"), nw ? "Call −" : "Call: gives up");
+    stack(3.3, p.gain, C("--moss"), nw ? "Put +" : "Put: collects"); stack(4.2, p.lose, C("--verm"), nw ? "Put −" : "Put: gives up"); g.restore();
     vline(o, 2.5, C("--hair"), null, [2, 4]);
     const verdict = x => x.net > 0.005 ? "exercise, +" + dl(x.net) : x.net < -0.005 ? "hold, exercising costs " + dl(-x.net) : "indifferent";
     document.getElementById("kvEx").innerHTML = kvHTML([
@@ -1827,7 +1876,80 @@ const sEx = { m: 15, days: 45, r: 0.045, v: 0.28, D: 1.10, b: 0.005 };
   }
 })();
 
+/* ══════════ 05b — the other side of the screen ══════════
+   You are short 50 calls at each strike, hedged with stock, the afternoon
+   before an ex-date. A holder who exercises takes your stock before the
+   dividend: their edge (dividend minus hurdle, chapter 05's formula) is your
+   loss per share. Buying a strike back before the close costs 5 cents a share
+   over fair value. Tomorrow most holders with a positive edge exercise and a
+   few without one do too. */
+const NG = { round: 0, buy: {}, revealed: false, N: 50, cost: 0.05, KS: [85, 90, 95, 100, 105, 110, 115] };
+function nightRound(n){ return withSeed(5600 + n, () => {
+  const S = +(100 + 30 * Math.random()).toFixed(2), D = +(0.8 + 1.4 * Math.random()).toFixed(2), days = 20 + Math.floor(40 * Math.random());
+  const v = 0.25 + 0.15 * Math.random(), r = 0.045, tau = days / 365;
+  const rows = NG.KS.map(K => { const vk = v + (100 - K) / 100 * 0.55 * 0.31;
+    const h = floorOf(K, r, tau) + bs(S - D, K, tau, vk, r, 0, false).price, edge = D - h;
+    const frac = edge > 0 ? 0.75 + 0.23 * Math.random() : 0.03 * Math.random();
+    return { K, h, edge, frac }; });
+  return { S, D, days, rows };
+}); }
+/* per strike: hold and take whatever exercise comes, or buy back at the spread */
+function nightPnL(rd, buy){ return rd.rows.map(x => buy[x.K] ? -NG.cost * 100 * NG.N : -x.frac * x.edge * 100 * NG.N); }
+function nightScore(rd, buy){
+  const mine = nightPnL(rd, buy).reduce((a, b) => a + b, 0);
+  const none = nightPnL(rd, {}).reduce((a, b) => a + b, 0);
+  const best = rd.rows.reduce((a, x) => a + Math.max(-NG.cost * 100 * NG.N, -x.frac * x.edge * 100 * NG.N), 0);
+  return { mine, none, best };
+}
+(function(){
+  let rd = nightRound(0);
+  const tab = document.getElementById("ngTab"), msg = document.getElementById("ngMsg");
+  const money0 = v => (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  function render(){
+    const pnl = nightPnL(rd, NG.buy);
+    tab.innerHTML = "<tr><th>Strike</th><th>Edge</th><th>Buy back?</th>" + (NG.revealed ? "<th>Exercised</th><th>Your P&amp;L</th>" : "") + "</tr>" +
+      rd.rows.map((x, i) => `<tr><td>${x.K}</td><td style="color:${x.edge > 0 ? "var(--moss)" : "var(--grey)"}">${x.edge.toFixed(3)}</td>` +
+        `<td><input type="checkbox" data-k="${x.K}" ${NG.buy[x.K] ? "checked" : ""} ${NG.revealed ? "disabled" : ""} aria-label="Buy back the ${x.K} calls"></td>` +
+        (NG.revealed ? `<td>${Math.round(x.frac * 100)}%</td><td style="color:${pnl[i] < 0 ? "var(--verm)" : "var(--moss)"}">${money0(pnl[i])}</td>` : "") + "</tr>").join("");
+    tab.querySelectorAll("input[data-k]").forEach(cb => cb.addEventListener("change", () => { NG.buy[+cb.dataset.k] = cb.checked; draw(); }));
+  }
+  function draw(){
+    render();
+    const sc = nightScore(rd, NG.buy);
+    msg.textContent = NG.revealed
+      ? "Morning. You finished at " + money0(sc.mine) + ". Doing nothing would have cost " + money0(sc.none) + "; perfect hindsight, " + money0(sc.best) + ". Every dollar of edge a holder captured came out of a short call that was not bought back."
+      : "Stock $" + rd.S.toFixed(2) + ", dividend $" + rd.D.toFixed(2) + " tomorrow, " + rd.days + " days to expiry. Tick the strikes to buy back before the close at 5 cents a share, then go to tomorrow morning.";
+    const xs = rd.rows.map(x => x.K), loss = rd.rows.map(x => Math.max(0, x.edge) * 100 * NG.N), costL = NG.cost * 100 * NG.N;
+    const hi = Math.max(costL * 2, ...loss) * 1.2;
+    const o = Fig(document.getElementById("cvNG"), { h: 230, x0: 82, x1: 118, y0: 0, y1: hi, pad: { l: 60, r: 14, t: 14 } });
+    axes(o, v => v.toFixed(0), v => "$" + Math.round(v).toLocaleString("en-US"), 7, 4);
+    const g = o.g, bw = 18;
+    rd.rows.forEach((x, i) => {
+      const L = loss[i], X = o.X(x.K);
+      g.fillStyle = NG.buy[x.K] ? C("--grey") : C("--verm"); g.globalAlpha = NG.buy[x.K] ? 0.35 : 0.7;
+      g.fillRect(X - bw / 2, o.Y(L), bw, o.Y(0) - o.Y(L));
+      if (NG.revealed) { const got = x.frac * Math.max(0, x.edge) * 100 * NG.N; g.globalAlpha = 1; g.strokeStyle = C("--ink"); g.lineWidth = 2;
+        g.beginPath(); g.moveTo(X - bw / 2 - 3, o.Y(got)); g.lineTo(X + bw / 2 + 3, o.Y(got)); g.stroke(); }
+      g.globalAlpha = 1;
+    });
+    clip(o, () => line(o, [82, 118], [costL, costL], C("--blue"), 2, [5, 4]));
+    g.fillStyle = C("--blue"); g.font = "10px 'IBM Plex Mono', monospace"; g.textAlign = "right"; g.textBaseline = "bottom";
+    g.fillText("cost to buy back a strike: " + money0(costL), o.P.l + o.pw - 4, o.Y(costL) - 3);
+    document.getElementById("kvNG").innerHTML = kvHTML([
+      ["Round", String(NG.round + 1)],
+      ["Strikes bought back", String(Object.values(NG.buy).filter(Boolean).length)],
+      ["Your P&L", NG.revealed ? money0(sc.mine) : "—"],
+      ["Doing nothing", NG.revealed ? money0(sc.none) : "—"],
+      ["Perfect hindsight", NG.revealed ? money0(sc.best) : "—"]
+    ]);
+  }
+  document.getElementById("ngGo").addEventListener("click", () => { NG.revealed = true; draw(); });
+  document.getElementById("ngNext").addEventListener("click", () => { NG.round++; NG.buy = {}; NG.revealed = false; rd = nightRound(NG.round); draw(); });
+  window.drawNG = draw;
+})();
+
 function drawAll() {
+  drawNG();
   draw1(); draw2(); draw3(); draw4(); draw5(); draw6(); draw7(); draw8(); draw9(); drawEx(); drawDrill();
 }
 LAB.boot(drawAll);

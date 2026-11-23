@@ -27,7 +27,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">← Options, visually</a>
-    <span class="num">No. 07 · Parity, Boxes and Rolls</span>
+    <span class="num">No. 03 · Parity, Boxes and Rolls</span>
   </div>
 </header>
 
@@ -47,7 +47,7 @@
 <div class="hero">
   <canvas id="heroCv" aria-hidden="true"></canvas>
   <div class="heroInner">
-    <div class="eyebrow">An interactive derivation · No. 07</div>
+    <div class="eyebrow">An interactive derivation · No. 03</div>
     <h1>Two ways to own the <em>same</em> thing</h1>
     <p class="sub">Put-call parity is not an identity to memorize. It is a machine for building any one of stock, calls, puts and cash out of the other three — and the price of the machine is a number you can read off the screen and compare to your funding.</p>
   </div>
@@ -291,6 +291,8 @@
     <p>That distinction is not pedantry. With S = 90 and K = 95, using the signed amount the identity holds exactly; using true intrinsic, which floors at zero, the two sides come out 1.61 and 6.61. Desk usage always means the signed parity amount, and the identity is stated without the caveat because on a buy-write the call is normally in the money. Take the sheet literally on an out-of-the-money strike and you will get a wrong answer with no warning.</p>
   </div>
 
+  <p class="xlink"><span class="lab">Practise it</span><a href="https://cafe-helado.github.io/PutCall-Parity-Game/" target="_blank" rel="noopener">Parity Drill ↗</a>: solve the missing call or put from a straddle and a combo, the way this chapter does it, until it is automatic.</p>
+
   <div class="check">
     <span class="lab">Check yourself</span>
     <p class="q">A straddle is quoted at 7.80 and the combo at 5.42. What is the call worth?</p>
@@ -428,6 +430,51 @@
       <p><b>The lesson generalizes.</b> Every attempted simplification moved a piece of the sign logic <em>into</em> the formula, where it then had to be right for all cases at once. Leaving all of it in a single signed input — where a human decides once, from cash-flow direction — is what makes it work for high dividend and none, HTB and ETB, convert and reverse, without a single special case.</p>
     </div>
   </details>
+
+  <div class="prose">
+    <p>Now trade it. Each screen below is a market in one stock with a call and a put at one strike, real bid and offer prices, a funding rate and a borrow fee. Sometimes a leg is stale. Decide whether a conversion or a reversal locks in money at the prices shown, or whether to pass. Most screens should be passed: a violation smaller than the spreads is not a trade, and on a hard-to-borrow name the fee eats a reversal that looks free.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>The quote board</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--grey)"></i>Stock leg</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Put leg</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Call leg</span>
+            <span><i class="swl" style="background:var(--blue)"></i>The package</span>
+          </span>
+        </div>
+        <p class="simmsg" id="bdMsg" aria-live="polite"></p>
+        <canvas id="cvBD" height="240"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>The screen</h4>
+        <table class="wtab bdtab" id="bdTab" style="min-width:0"></table>
+        <div class="btnrow simbtns">
+          <button class="act" id="bdConv">Conversion</button>
+          <button class="act" id="bdRev">Reversal</button>
+          <button class="act ghost" id="bdPass">Pass</button>
+          <button class="act ghost" id="bdNext">Next screen</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvBD"></div>
+      </div>
+    </div>
+    <figcaption>Whatever the stock does by expiry, the three legs of a conversion or a reversal add up to one flat line: that is parity, drawn. Where the line sits is the whole trade, and it is set by the prices you actually pay and receive, the funding rate, and on a reversal the cost of borrowing the stock you are short.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A conversion desk does not look for "mispriced options". It looks at the rate a package implies and compares it with its own cost of money. The trade is financing: buy the conversion and you are lending at the implied rate; sell it and you are borrowing. What separates desks is their funding, their borrow, and their spreads, because the edges are cents.</p>
+    <ul>
+      <li>Price every violation through the bid and the offer first. Most disappear.</li>
+      <li>A reversal is only as good as the borrow; on a hard-to-borrow stock the fee is the market's way of pricing the squeeze risk.</li>
+      <li>American puts add early-exercise risk to the conversion; page 04 is that problem.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> quote a conversion as a rate, not a price, and compare it with what your money costs.</p>
+  </aside>
 
   <div class="check">
     <span class="lab">Check yourself</span>
@@ -594,7 +641,7 @@
     <p>This produces results that look alarming and are not. <b>Negative implied rates are ordinary on hard-to-borrow names.</b> A negative rate means the converter is paying to hold the trade, which makes sense when the cost of borrowing exceeds the interest earned on the short sale proceeds. The test is never whether the rate is positive. It is whether the rate beats <em>your</em> funding: a convert implying 12% against a 15% borrow is a three-point loss even though 12% sounds enormous.</p>
     <p><b>Where the real risk lives.</b> A revcon is described as riskless and is not, and on the <em>reversal</em> side the gap is almost entirely the borrow. The reverser is short the stock. If it becomes harder to borrow after the trade is on, the borrow fee rises while the package price is fixed — you are locked into borrowing at a rate that was fair and no longer is. Worse, a <b>recall</b> forces you to buy in the short leg at whatever the market offers, which converts a financing trade into a directional one at the worst possible moment. The converter is on the other side of that event: long the shares, it can lend them out at the new, higher fee. This is the mechanism behind most of the memorable revcon losses, and it is not in any of the formulas above.</p>
     <p>The conversion carries two smaller risks of its own. <b>Early exercise:</b> the options are American, so a short in-the-money call can be exercised against you before an ex-dividend date, unwinding one leg and taking away the dividend you had priced in. And <b>unannounced dividends:</b> parity requires knowing r/c, and a special dividend declared after you trade changes it retroactively.</p>
-    <p>Early assignment is worth seeing rather than describing, because it does something specific to the picture from chapter 03. The rule is chapter 04's buy-write identity read at the ex-date: a rational holder exercises a call early only when the dividend exceeds the call's remaining time value, and that time value is the put plus the interest on the strike. The simulation uses the shorter test <code>put value &lt; dividend</code>, which drops the interest term and so slightly overstates assignment; page 08 does the exact version.</p>
+    <p>Early assignment is worth seeing rather than describing, because it does something specific to the picture from chapter 03. The rule is chapter 04's buy-write identity read at the ex-date: a rational holder exercises a call early only when the dividend exceeds the call's remaining time value, and that time value is the put plus the interest on the strike. The simulation uses the shorter test <code>put value &lt; dividend</code>, which drops the interest term and so slightly overstates assignment; page 04 does the exact version.</p>
     <p>Feed that rule into the same simulation and the vertical line from chapter 03 <b>splits into two</b>. Most paths still pay exactly the carry. The ones where the call goes deep enough in the money before the ex-date get assigned, you deliver the stock early, and you never collect the dividend you had already priced into the package. The gap between the two modes is essentially that dividend.</p>
     <p>This is the honest version of "riskless." The trade has no <em>market</em> risk — no path dependence, no vol exposure, nothing chapter 03 could not eliminate. What it has is a set of discrete, structural ways to lose: assignment, recall, and a dividend that changes. None of them are in the pricing formula, and all of them are in the P&amp;L.</p>
   </div>
@@ -703,6 +750,8 @@
       </table>
     </div>
   </figure>
+  <p class="xlink"><span class="lab">Practise it</span><a href="https://cafe-helado.github.io/PutCall-Parity-Game/" target="_blank" rel="noopener">Parity Drill ↗</a> is a standalone version of this drill, with the combo and straddle forms.</p>
+
 </section>
 
 <!-- ══════════ quiz ══════════ -->
@@ -1470,7 +1519,85 @@ function convGap(rate, K, d){ const q = rate / 100 / 360, Ir = K - K / Math.pow(
   }
 })();
 
-function drawAll(){draw1();draw2();draw3();draw4();drawBw();draw5();draw7();drawConv();draw9();}
+/* ══════════ 06b — the quote board ══════════
+   Each screen is a seeded market: stock, a call and a put at one strike,
+   bid/ask on all three, a funding rate and a borrow fee. Fair values satisfy
+   parity with no dividend; then sometimes one leg is pushed off. The reader
+   picks conversion (buy stock at the offer, buy the put at the offer, sell
+   the call at the bid), reversal (short stock at the bid paying the borrow
+   fee, sell the put at the bid, buy the call at the offer) or pass. Both
+   packages are valued in today's dollars per contract of 100 shares. */
+const BD = { n: 0, screen: null, picked: null, score: { right: 0, done: 0 } };
+function boardScreen(n){ return withSeed(7300 + n, () => {
+  const rnd = (a, b) => a + (b - a) * Math.random();
+  const S = Math.round(rnd(40, 160)), K = Math.round(S / 5) * 5, days = [30, 45, 60, 90, 120][Math.floor(Math.random() * 5)];
+  const T = days / 365, r = +rnd(0.040, 0.055).toFixed(4), vol = rnd(0.20, 0.55);
+  const htb = Math.random() < 0.25, fee = htb ? +rnd(0.06, 0.15).toFixed(3) : 0.003;
+  let C = bs(S, K, T, vol, r, 0, true).price, P = C - S + K * Math.exp(-r * T);
+  const kind = ["none", "call", "put", "none", "call", "put", "small"][Math.floor(Math.random() * 7)];
+  const amt = kind === "small" ? rnd(0.02, 0.05) : rnd(0.12, 0.45), sgn = Math.random() < 0.5 ? 1 : -1;
+  if (kind === "call") C += sgn * amt; if (kind === "put") P += sgn * amt; if (kind === "small") C += sgn * amt;
+  const hs = 0.01, ho = +rnd(0.03, 0.06).toFixed(2);
+  const q = (m, h) => ({ bid: Math.max(0.01, Math.round((m - h) * 100) / 100), ask: Math.round((m + h) * 100) / 100 });
+  return { S, K, days, T, r, fee, htb, stock: q(S, hs), call: q(C, ho), put: q(P, ho) };
+}); }
+function boardValue(m){
+  const df = Math.exp(-m.r * m.T);
+  /* conversion: pay S_ask + P_ask - C_bid today, receive K at expiry */
+  const conv = 100 * (m.K * df - (m.stock.ask + m.put.ask - m.call.bid));
+  /* reversal: receive S_bid + P_bid - C_ask today, pay K at expiry, pay the borrow fee on the short */
+  const rev = 100 * ((m.stock.bid + m.put.bid - m.call.ask) - m.K * df - m.stock.bid * m.fee * m.T);
+  const best = conv > 0.5 && conv >= rev ? "conversion" : rev > 0.5 ? "reversal" : "pass";
+  return { conv, rev, best };
+}
+(function(){
+  const msg = document.getElementById("bdMsg"), tab = document.getElementById("bdTab");
+  function newScreen(){ BD.screen = boardScreen(BD.n); BD.picked = null; draw(); }
+  function pick(a){ if (BD.picked) return; BD.picked = a; const v = boardValue(BD.screen);
+    BD.score.done++; if (a === v.best) BD.score.right++; draw(); }
+  document.getElementById("bdConv").addEventListener("click", () => pick("conversion"));
+  document.getElementById("bdRev").addEventListener("click", () => pick("reversal"));
+  document.getElementById("bdPass").addEventListener("click", () => pick("pass"));
+  document.getElementById("bdNext").addEventListener("click", () => { BD.n++; newScreen(); });
+  window.drawBD = draw;
+  BD.screen = boardScreen(0);
+  function draw(){
+    const m = BD.screen, v = boardValue(m), f = x => x.toFixed(2);
+    tab.innerHTML = `<tr><th></th><th>Bid</th><th>Ask</th></tr>
+      <tr><td>Stock</td><td>${f(m.stock.bid)}</td><td>${f(m.stock.ask)}</td></tr>
+      <tr><td>${m.K} call, ${m.days}d</td><td>${f(m.call.bid)}</td><td>${f(m.call.ask)}</td></tr>
+      <tr><td>${m.K} put, ${m.days}d</td><td>${f(m.put.bid)}</td><td>${f(m.put.ask)}</td></tr>
+      <tr><td>Funding</td><td colspan="2">${(m.r * 100).toFixed(2)}% a year</td></tr>
+      <tr><td>Borrow fee</td><td colspan="2" style="color:${m.htb ? "var(--verm)" : "inherit"}">${(m.fee * 100).toFixed(1)}% a year${m.htb ? " — hard to borrow" : ""}</td></tr>`;
+    const dollars = x => (x >= 0 ? "+$" : "−$") + Math.abs(x).toFixed(2);
+    if (!BD.picked) msg.textContent = "Screen " + (BD.n + 1) + ". Is there a trade? Conversion, reversal, or pass. Fills are at the bid and offer shown.";
+    else {
+      const got = BD.picked === "conversion" ? v.conv : BD.picked === "reversal" ? v.rev : 0;
+      msg.textContent = (BD.picked === v.best ? "Right. " : "Not this one. ") + "Conversion would lock " + dollars(v.conv) + " a contract, reversal " + dollars(v.rev) +
+        (m.htb ? " after a " + (m.fee * 100).toFixed(1) + "% borrow fee" : "") + ". The best answer was " + v.best + "; you " + (BD.picked === "pass" ? "passed" : "took the " + BD.picked + " for " + dollars(got)) + ".";
+    }
+    /* the payoff at expiry of whichever package is picked (conversion before a pick): each leg, and the flat sum */
+    const pk = BD.picked === "reversal" ? -1 : 1, lo = m.K * 0.6, hi = m.K * 1.4, xs = [];
+    for (let i = 0; i <= 80; i++) xs.push(lo + (hi - lo) * i / 80);
+    const stockL = xs.map(x => pk * (x - (pk > 0 ? m.stock.ask : m.stock.bid)));
+    const putL = xs.map(x => pk * (Math.max(0, m.K - x) - (pk > 0 ? m.put.ask : m.put.bid)));
+    const callL = xs.map(x => -pk * (Math.max(0, x - m.K) - (pk > 0 ? m.call.bid : m.call.ask)));
+    const sum = xs.map((_, i) => stockL[i] + putL[i] + callL[i]);
+    const span = m.K * 0.45;
+    const o = Fig(document.getElementById("cvBD"), { h: 240, x0: lo, x1: hi, y0: -span, y1: span, pad: { l: 52, r: 14, t: 14 } });
+    axes(o, x => "$" + x.toFixed(0), y => (y >= 0 ? "+" : "") + y.toFixed(0), 5, 4);
+    clip(o, () => { line(o, xs, stockL, C("--grey"), 1.2, null, 0.6); line(o, xs, putL, C("--moss"), 1.2, null, 0.6); line(o, xs, callL, C("--verm"), 1.2, null, 0.6); line(o, xs, sum, C("--blue"), 3); });
+    vline(o, m.K, C("--ochre"), "strike");
+    o.g.fillStyle = C("--blue"); o.g.font = "10.5px 'IBM Plex Mono', monospace"; o.g.textAlign = "left"; o.g.textBaseline = "bottom";
+    o.g.fillText((pk > 0 ? "conversion" : "reversal") + ": the legs sum to a flat line", o.P.l + 6, o.Y(sum[0]) - 6);
+    document.getElementById("kvBD").innerHTML = kvHTML([
+      ["Screens", String(BD.score.done)], ["Right", String(BD.score.right)],
+      ["Conversion locks", BD.picked ? dollars(v.conv) : "—"], ["Reversal locks", BD.picked ? dollars(v.rev) : "—"]
+    ]);
+  }
+})();
+
+function drawAll(){draw1();drawBD();draw2();draw3();draw4();drawBw();draw5();draw7();drawConv();draw9();}
 LAB.boot(drawAll);
 
 </script>

@@ -140,7 +140,7 @@
   </div>
   <div class="prose">
     <p class="lead">A delta-hedged long option earns ½Γ(ΔS)² on each move and pays theta for it. Theta is set by the implied vol you paid; the gamma income is set by the vol that actually happens. Average it out and the expected P&amp;L is vega × (σ_r² − σ_i²)/(2σ_i) — close to vega times the vol difference for small gaps, and convex for large ones because the payoff is in variance.</p>
-    <p>Two caveats to carry. This is an <em>expectation</em>: <a href="questions.html" style="color:var(--blue)">page 16 chapter 07</a> shows the same realized vol paying anywhere from −2.61 to +6.12 depending on when it arrives relative to your gamma. And it assumes the option stays near the money; far from the strike, gamma fades and so does the income.</p>
+    <p>Two caveats to carry. This is an <em>expectation</em>: <a href="questions.html" style="color:var(--blue)">page 25 chapter 07</a> shows the same realized vol paying anywhere from −2.61 to +6.12 depending on when it arrives relative to your gamma. And it assumes the option stays near the money; far from the strike, gamma fades and so does the income.</p>
   </div>
   <figure class="bleed">
     <div class="split wide">
@@ -155,7 +155,7 @@
         <div class="kv" style="margin-top:20px" id="kv3"></div>
       </div>
     </div>
-    <figcaption>Notice the blue curve bends above the grey line on both sides. The long option gains more for each extra point of realized vol than it loses for each point short — the variance convexity of <a href="variance.html" style="color:var(--blue)">page 09</a> showing up in an ordinary option.</figcaption>
+    <figcaption>Notice the blue curve bends above the grey line on both sides. The long option gains more for each extra point of realized vol than it loses for each point short — the variance convexity of <a href="variance.html" style="color:var(--blue)">page 11</a> showing up in an ordinary option.</figcaption>
   </figure>
   <div class="mline">E[P&amp;L] ≈ vega · (σ_r² − σ_i²) / (2σ_i)</div>
   <p class="mread">Reads as: <b>you are paid the difference in variances, converted into vol points through vega.</b> Short the option and the sign flips.</p>
@@ -170,7 +170,7 @@
   </div>
   <div class="prose">
     <p class="lead">Price a structure as a bet: it costs c and pays W if you are right. The market's implied probability is c/W. If you believe a higher probability p, you have an edge — and the question every trader underweights is how much of the bankroll to put on it.</p>
-    <p>The <span class="term" data-t="Kelly criterion" data-def="The bet size that maximizes the expected logarithm of wealth, and so the long-run growth rate. Betting more than Kelly lowers growth while raising risk; most practitioners bet a fraction of it.">Kelly criterion</span> answers: bet f* = p − (1 − p)/b, where b = (W − c)/c is the payout odds. Growth rises to a peak at f* and falls away on both sides. For a small, even-odds edge, twice Kelly gives back all of the growth and half Kelly keeps three-quarters of it; for a long-shot payoff the curve is lopsided — on this trade half Kelly keeps 86% — but the penalty for oversizing always arrives. Because your p is an estimate, most practitioners bet a fraction of Kelly. The default here is <a href="merger.html" style="color:var(--blue)">page 20</a>'s biotech trade: a 10/5 put spread at $0.19 that pays $5 if the failure price is as bad as your team thinks.</p>
+    <p>The <span class="term" data-t="Kelly criterion" data-def="The bet size that maximizes the expected logarithm of wealth, and so the long-run growth rate. Betting more than Kelly lowers growth while raising risk; most practitioners bet a fraction of it.">Kelly criterion</span> answers: bet f* = p − (1 − p)/b, where b = (W − c)/c is the payout odds. Growth rises to a peak at f* and falls away on both sides. For a small, even-odds edge, twice Kelly gives back all of the growth and half Kelly keeps three-quarters of it; for a long-shot payoff the curve is lopsided — on this trade half Kelly keeps 86% — but the penalty for oversizing always arrives. Because your p is an estimate, most practitioners bet a fraction of Kelly. The default here is <a href="merger.html" style="color:var(--blue)">page 15</a>'s biotech trade: a 10/5 put spread at $0.19 that pays $5 if the failure price is as bad as your team thinks.</p>
   </div>
   <figure class="bleed">
     <div class="split wide">
@@ -189,6 +189,8 @@
   </figure>
   <div class="mline">f* = p − (1 − p) / b   ·   g(f) = p·ln(1 + f·b) + (1 − p)·ln(1 − f)</div>
   <p class="mread">Reads as: <b>bet your edge divided by the odds; growth is the probability-weighted log of what happens to your bankroll.</b></p>
+  <p class="xlink"><span class="lab">The statistics underneath</span><a href="https://cafe-helado.github.io/stats-trading/ev.html" target="_blank" rel="noopener">Expectation and bet sizing ↗</a>, in Chance, visually, derives the Kelly fraction this calculator uses.</p>
+
 </section>
 
 <!-- ══════════ 05 ══════════ -->
@@ -357,7 +359,12 @@ window.hedgedPnL=(S,iv,rv,T)=>{const g=bs(S,S,T,iv,0,0,true);return g.vega*(rv*r
   window.draw3=draw;
   function draw(){
     const T=s3.days/365,M=100*s3.n;
-    const o=Fig(document.getElementById("cv3"),{h:280,x0:0.05,x1:Math.max(1,s3.iv*2.2),y0:-hedgedPnL(s3.S,s3.iv,0.05,T)*M*1.1,y1:hedgedPnL(s3.S,s3.iv,Math.max(1,s3.iv*2.2),T)*M*1.05,pad:{l:66}});
+    /* the floor is the lower of the two curves at the lowest realized vol;
+       it used to be written as minus a number that is already negative,
+       which put the floor above zero and most of the chart below the axis */
+    const xHi=Math.max(1,s3.iv*2.2),vg=bs(s3.S,s3.S,T,s3.iv,0,0,true).vega*M;
+    const lo=Math.min(hedgedPnL(s3.S,s3.iv,0.05,T)*M,vg*(0.05-s3.iv)),hi=Math.max(hedgedPnL(s3.S,s3.iv,xHi,T)*M,vg*(xHi-s3.iv));
+    const o=Fig(document.getElementById("cv3"),{h:280,x0:0.05,x1:xHi,y0:lo-(hi-lo)*.06,y1:hi+(hi-lo)*.06,pad:{l:66}});
     axes(o,v=>(v*100).toFixed(0)+"%",v=>usd(v,0),5,4);
     clip(o,()=>{line(o,[0.05,Math.max(1,s3.iv*2.2)],[0,0],C("--grey"),1,[3,3]);
       curve(o,0.05,Math.max(1,s3.iv*2.2),rv=>hedgedPnL(s3.S,s3.iv,rv,T)*M,C("--blue"),2.4);
@@ -371,7 +378,7 @@ window.hedgedPnL=(S,iv,rv,T)=>{const g=bs(S,S,T,iv,0,0,true);return g.vega*(rv*r
       ["Your view's daily move",pc(s3.rv/Math.sqrt(365))],
       ["Theta / day",usd(g.theta/365*M,0)],
       ["Vega / point",usd(g.vega/100*M,0)],
-      ["Caveat","path-weighted; see page 16 ch. 07"]
+      ["Caveat","path-weighted; see page 25 ch. 07"]
     ]);
   }
 })();

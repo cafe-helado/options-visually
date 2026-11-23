@@ -28,7 +28,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">&larr; Options, visually</a>
-    <span class="num">No. 24 &middot; Convertibles</span>
+    <span class="num">No. 22 &middot; Convertibles</span>
   </div>
 </header>
 
@@ -53,7 +53,7 @@
 
 <div class="orient">
   <h2>Start here</h2>
-  <p class="lede">You need delta hedging from page 01 and the idea from page 21 that a hedged option earns realized volatility against the implied volatility it was bought at. This page applies both to an instrument that is not listed on any options exchange. Volatility arbitrage in its plain form is chapter 02; the other two chapters are what makes the convertible version different.</p>
+  <p class="lede">You need delta hedging from page 01 and the idea from page 16 that a hedged option earns realized volatility against the implied volatility it was bought at. This page applies both to an instrument that is not listed on any options exchange. Volatility arbitrage in its plain form is chapter 02; the other two chapters are what makes the convertible version different.</p>
   <ol>
     <li><b>Chapter 01 takes the instrument apart:</b> a bond floor, a conversion value, and the option between them.</li>
     <li><b>Chapter 02 is the trade.</b> Long the bond, short the shares, and a yearly account of carry and volatility.</li>
@@ -180,7 +180,7 @@
   <p class="mread">Reads as: <b>half the position's gamma, times the stock price squared, times the gap between realized and implied variance.</b> This is the whole of volatility arbitrage in one line: you are long or short that gap, scaled by gamma, and everything else is cost.</p>
 
   <div class="prose">
-    <p>That line is the same for a listed option, and the general trade is the one page 21 lists as delta-hedged volatility arbitrage: forecast realized volatility, buy what is priced below the forecast, sell what is priced above, hedge the delta, and size by vega. Three things it leaves out decide whether the forecast gets paid. The gap is earned through gamma, so it matters where the stock is when the movement comes, not only how much there is. Each rehedge crosses a spread. And the option can reprice against you long before the realized volatility shows up.</p>
+    <p>That line is the same for a listed option, and the general trade is the one page 16 lists as delta-hedged volatility arbitrage: forecast realized volatility, buy what is priced below the forecast, sell what is priced above, hedge the delta, and size by vega. Three things it leaves out decide whether the forecast gets paid. The gap is earned through gamma, so it matters where the stock is when the movement comes, not only how much there is. Each rehedge crosses a spread. And the option can reprice against you long before the realized volatility shows up.</p>
     <p>The reason to do it through a convertible is the price. Convertibles are issued by companies that want cheap financing, to buyers who mostly cannot short stock, so the option inside has often been priced below listed options on the same name. Here the bond would be worth $67 more if it were priced at 38% instead of 28%. That discount is the edge, and it is also a statement that nobody else wanted the package, which is the subject of the next chapter.</p>
     <p>The carry line is the fragile part. Make the stock hard to borrow and the year turns negative even with volatility on your side.</p>
   </div>
@@ -252,6 +252,51 @@
     <p>The short stock does hedge some of this, since a falling share price pays the short. It is the wrong size for it. The delta was set by an option model that knows nothing about default, and it shrinks as the stock falls, at the moment the credit exposure is growing. Desks address that by hedging more stock than the model delta on weak credits, or by buying credit protection or puts, and each of those costs carry that chapter 02 did not count.</p>
     <p>Two more things belong here that no slider captures. The link between spread and stock is an assumption and it is not linear: it is quiet for long periods and violent in a few weeks. And the holders are concentrated. When many funds own the same bonds on leverage and one is forced to sell, the bonds cheapen, the others mark down, and the selling spreads, which is what happened across the convertible market in 2008. Cheapness that widens is a loss before it is an opportunity.</p>
   </div>
+
+  <div class="prose">
+    <p>Run the position through it. You are long 100 bonds and short their delta in stock, rehedged every day, through thirty trading days that start calm and turn into a sell-off. The issuer's credit spread widens 10 basis points for every 1% the stock falls. You can carry credit protection on any share of the bond floor's spread risk; it pays when the floor falls and costs the day's spread while you hold it. Buy it whenever you like.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Run the arbitrage through a sell-off</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Your book</span>
+            <span><i class="sw" style="background:var(--grey)"></i>No protection</span>
+            <span><i class="swl" style="background:var(--verm)"></i>Credit spread</span>
+          </span>
+        </div>
+        <p class="simmsg" id="cxMsg" aria-live="polite"></p>
+        <canvas id="cvCX" height="230"></canvas>
+        <canvas id="cvCX2" height="120"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your protection</h4>
+        <div id="ctlCX"></div>
+        <div class="btnrow simbtns">
+          <button class="act" id="cxNext">Next day</button>
+          <button class="act ghost" id="cxWeek">Next week</button>
+          <button class="act ghost" id="cxAll">Play thirty days</button>
+          <button class="act ghost" id="cxReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvCX"></div>
+      </div>
+    </div>
+    <figcaption>The stock falls to $79.50 by day 20 and the spread widens to 5.05%. With no protection the delta-hedged bonds lose $374 in the calm days and $6,928 by the end of the sell-off, finishing at a loss of $7,038: the stock hedge did its job, and the floor fell out from under it. Protected from the first day, the same thirty days end $33 up. Protection bought on day 16, halfway down, still leaves a loss of $3,887. Insurance bought after the fire starts pays only for what is left to burn.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A convertible arbitrageur hedges the stock with stock and the credit with credit, and spends most of their risk time on the link between the two. In a sell-off the equity hedge works and the bond floor does not, because the market reprices the issuer's chance of paying back at the same moment it reprices the stock.</p>
+    <ul>
+      <li>Delta-hedged is not hedged: the floor carries credit risk the stock hedge cannot see.</li>
+      <li>Protection is cheapest when nobody wants it. Put it on in the calm, size it to the floor.</li>
+      <li>Watch borrow too: the stock you are short gets harder to borrow exactly when everyone is selling it.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> if the issuer's spread moves with its stock, your delta hedge is short a put on its credit.</p>
+  </aside>
 
   <div class="try">
     <span class="lab">Try this</span>
@@ -448,7 +493,58 @@ const S3 = 80, SP3 = 0.03;
   }
 })();
 
-function drawAll(){ window.draw1(); window.draw2(); window.draw3(); }
+/* ══════════ 03b — run the arbitrage through a sell-off ══════════
+   Long 100 bonds, short their delta in stock, rehedged daily, at 30 vol and a
+   3% credit spread. Thirty trading days: ten calm, ten falling about 3% a day,
+   ten flat. The spread widens 10 bp for each 1% the stock is below where it
+   started. The reader can carry credit protection on any share of the bond
+   floor's spread risk: each day it gains what the floor lost to the widening
+   on that share, and costs that day's spread on the same share of face. */
+const sCX = { h: 0 };
+const CX = { N: 100, vol: 0.30, s0: 0.03, k: 10, S: null, day: 0, hist: [], log: [] };
+function cxPath(){ return withSeed(6600, () => { const S = [100];
+  for (let d = 1; d <= 30; d++) S.push(S[d - 1] * Math.exp((d > 10 && d <= 20 ? -0.03 : 0) + 0.015 * gauss())); return S; }); }
+const cxSpread = S => CX.s0 + Math.max(0, (100 - S) / 100 * 100) * CX.k / 1e4;
+const cxT = d => CB.T - d * 1.4 / 365;
+/* one day's P&L for the bonds and stock hedge, and for credit protection of share h */
+function cxDay(S, d, h){ const S0 = S[d - 1], S1 = S[d], s0 = cxSpread(S0), s1 = cxSpread(S1), T0 = cxT(d - 1), T1 = cxT(d);
+  const eq = CX.N * (cbPrice(S1, CX.vol, s1, T1) - cbPrice(S0, CX.vol, s0, T0) - cbDelta(S0, CX.vol, T0) * (S1 - S0));
+  const cr = CX.N * h * ((bondFloor(s0, T0) - bondFloor(s1, T0)) - s0 * CB.face * 1.4 / 365);
+  return { eq, cr }; }
+function cxRun(hs){ const S = cxPath(); let a = 0; const out = [0]; for (let d = 1; d <= 30; d++) { const r = cxDay(S, d, typeof hs === "function" ? hs(d) : hs); a += r.eq + r.cr; out.push(a); } return out; }
+(function(){
+  CX.S = cxPath();
+  const reset = () => { CX.day = 0; CX.hist = [{ pnl: 0, h: sCX.h }]; CX.log = []; };
+  reset();
+  sliders(document.getElementById("ctlCX"), [
+    { id: "hCX", k: "h", lbl: "h", name: "Credit protection, share of the floor's spread risk", min: 0, max: 1, step: 0.25, fmt: v => (v * 100).toFixed(0) + "%" }
+  ], sCX, () => { CX.log.push("day " + CX.day + ": protection set to " + Math.round(sCX.h * 100) + "%"); draw(); },"cCX");
+  const step = () => { if (CX.day >= 30) return; CX.day++; const r = cxDay(CX.S, CX.day, sCX.h), prev = CX.hist[CX.hist.length - 1].pnl; CX.hist.push({ pnl: prev + r.eq + r.cr, h: sCX.h }); };
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", () => { fn(); draw(); });
+  on("cxNext", step); on("cxWeek", () => { for (let i = 0; i < 5; i++) step(); }); on("cxAll", () => { while (CX.day < 30) step(); }); on("cxReset", reset);
+  window.drawCX = draw;
+  function draw(){
+    const d = CX.day, S = CX.S, xs = [], me = [], none = cxRun(0), full = cxRun(1);
+    for (let i = 0; i <= d; i++) { xs.push(i); me.push(CX.hist[i].pnl); }
+    const money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    document.getElementById("cxMsg").textContent = (d === 0 ? "Day 0. Long 100 bonds, short their delta in stock. The credit spread is 3.00%." :
+      "Day " + d + ": stock $" + S[d].toFixed(2) + ", credit spread " + (cxSpread(S[d]) * 100).toFixed(2) + "%. Your book " + money0(me[d]) + ".") +
+      (d === 30 ? " Without protection the same days ended at " + money0(none[30]) + "; fully protected from the start, " + money0(full[30]) + "." : "");
+    const m = Math.max(5000, ...me.map(Math.abs), ...none.slice(0, d + 1).map(Math.abs)) * 1.15;
+    const o = Fig(document.getElementById("cvCX"), { h: 230, x0: 0, x1: 30, y0: -m, y1: m, pad: { l: 64, r: 14, t: 14 } });
+    axes(o, v => "day " + v.toFixed(0), v => (v < 0 ? "−$" : "$") + (Math.abs(v) / 1000).toFixed(0) + "k", 6, 4);
+    clip(o, () => { line(o, xs, none.slice(0, d + 1), C("--grey"), 1.6, [5, 4]); line(o, xs, me, C("--blue"), 2.6); });
+    const b = Fig(document.getElementById("cvCX2"), { h: 120, x0: 0, x1: 30, y0: 0.02, y1: Math.max(0.07, ...S.slice(0, d + 1).map(cxSpread)) + 0.005, pad: { l: 64, r: 14, t: 8 } });
+    axes(b, v => "day " + v.toFixed(0), v => (v * 100).toFixed(1) + "%", 6, 2);
+    clip(b, () => line(b, xs, S.slice(0, d + 1).map(cxSpread), C("--verm"), 2));
+    document.getElementById("kvCX").innerHTML = kvHTML([
+      ["Day", d + " of 30"], ["Stock", "$" + S[d].toFixed(2)], ["Credit spread", (cxSpread(S[d]) * 100).toFixed(2) + "%"],
+      ["Protection now", Math.round(sCX.h * 100) + "%"], ["Your book", money0(me[d]), "blue"], ["Unprotected, same days", money0(none[d])]
+    ]);
+  }
+})();
+
+function drawAll(){ drawCX(); window.draw1(); window.draw2(); window.draw3(); }
 LAB.boot(drawAll);
 
 </script>

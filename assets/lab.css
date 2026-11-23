@@ -465,3 +465,53 @@ footer .n{max-width:66ch}
 }
 .pwatoast button.x:hover{color:var(--chalk);background:none}
 @media(prefers-reduced-motion:reduce){.pwatoast{transition:none}}
+
+/* tutor launcher (the panel styles itself, in assets/tutor.js) */
+.tutorBtn{position:fixed;right:16px;bottom:16px;z-index:9998;font:12px/1 'IBM Plex Mono',monospace;
+  letter-spacing:.04em;background:var(--ink);color:var(--chalk);border:0;padding:10px 14px;cursor:pointer;
+  box-shadow:0 6px 18px rgba(20,24,26,.18)}
+.tutorBtn:hover{background:var(--blue)}
+.askFig{font:11px/1 'IBM Plex Mono',monospace;background:none;border:1px solid var(--hair);color:var(--grey);
+  padding:3px 7px;cursor:pointer;margin-left:auto}
+.askFig:hover{color:var(--ink);border-color:var(--ink)}
+@media print{.tutorBtn,.askFig,#tutor{display:none!important}}
+
+/* hover readout canvas, laid over a figure by lab.js */
+canvas.probe{display:block}
+
+/* trader's lens — how a desk thinks about the chapter's idea */
+.lens{max-width:var(--col,680px);margin:30px auto;padding:16px 20px 14px 18px;border-left:3px solid var(--ochre);
+  background:linear-gradient(90deg,rgba(224,162,21,.09),rgba(224,162,21,0) 85%)}
+.lens .lab{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#9a6d00;font-weight:600;margin-bottom:6px}
+.lens p{margin:0 0 8px;font-size:16.5px;line-height:1.55}
+.lens ul{margin:4px 0 6px;padding-left:20px}.lens li{margin:3px 0;font-size:16px;line-height:1.5}
+.lens .rule{font-family:var(--mono);font-size:12.5px;color:var(--ink2);border-top:1px dashed var(--hair);padding-top:8px;margin-top:8px}
+.lens .rule b{color:var(--ink)}
+@media(max-width:760px){.lens{margin:24px 16px}}
+
+/* a one-line narration above a simulation */
+.simmsg{font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--ink2);min-height:3em;margin:0 0 8px;padding:8px 10px;border-left:2px solid var(--blue);background:rgba(31,76,232,.04)}
+.simbtns{margin-top:14px;flex-wrap:wrap}
+
+/* a one-line pointer to a related game or companion page */
+.xlink{max-width:var(--col);margin:22px 0 22px 104px;font-size:15.5px;line-height:1.55;color:var(--ink2)}
+.xlink .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-right:10px;font-weight:600}
+.xlink a{color:var(--blue)}
+@media(max-width:760px){.xlink{margin:20px 16px}}
+
+/* structure builder controls */
+.sbrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sbrow select{font-family:var(--mono);font-size:12px;padding:6px;background:var(--card);border:1px solid var(--hair);color:var(--ink)}
+.sblegs{list-style:none;margin:12px 0 0;padding:0;font-family:var(--mono);font-size:12px}
+.sblegs li{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--hair)}
+.sblegs li button{padding:2px 8px;min-height:0}
+
+.lvpick button.on{background:var(--ink);color:var(--chalk);border-color:var(--ink)}
+
+.sctab tr[data-k]{cursor:pointer}.sctab tr[data-k]:hover td{background:rgba(31,76,232,.06)}
+.sctab tr.scbest td{background:rgba(14,148,99,.16)}.sctab tr.scwrong td{background:rgba(229,67,44,.14)}
+
+.brswitches{display:grid;gap:8px}.brsw{font-family:var(--mono);font-size:12px;display:flex;gap:8px;align-items:center;cursor:pointer}
+
+.lmctl{display:grid;gap:6px}.lmrow{display:grid;grid-template-columns:1fr auto 40px auto;gap:6px;align-items:center;font-family:var(--mono);font-size:11.5px}
+.lmrow b{text-align:center}.lmrow button{padding:2px 10px;min-height:0}

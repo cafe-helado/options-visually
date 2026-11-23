@@ -28,7 +28,7 @@
 <header class="serieshead">
   <div class="in">
     <a class="home" href="index.html">&larr; Options, visually</a>
-    <span class="num">No. 22 &middot; Surface dynamics</span>
+    <span class="num">No. 21 &middot; Surface dynamics</span>
   </div>
 </header>
 
@@ -106,6 +106,49 @@
     </div>
     <figcaption>The grey curve is a smile: long gamma, paid both ways. The blue curve is tilted, and a tilted line through the hedge point is a delta. The position was never flat. Dollars per contract, no time passing.</figcaption>
   </figure>
+
+  <div class="prose">
+    <p>Now hedge without knowing the dial. You are long 100 puts struck at 95, and every day you rehedge at the delta your chosen rule implies. The market follows its own rule, which you learn only at the end. A second book, hedged at the market's true delta, trades the same days beside you.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Hedge under the wrong rule</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Your hedge</span>
+            <span><i class="swl" style="background:var(--moss)"></i>Hedged under the market's rule</span>
+          </span>
+        </div>
+        <p class="simmsg" id="rwMsg" aria-live="polite"></p>
+        <canvas id="cvRW" height="230"></canvas>
+        <canvas id="cvRW2" height="110"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Hedge as if</h4>
+        <div class="btnrow lvpick" id="rwPick"><button class="act ghost" data-r="0">Sticky delta</button><button class="act ghost" data-r="1">Sticky strike</button><button class="act ghost" data-r="2">Local-vol-like</button></div>
+        <div class="btnrow simbtns">
+          <button class="act" id="rwNext">Next day</button>
+          <button class="act ghost" id="rwAll">Play twenty days</button>
+          <button class="act ghost" id="rwNew">New round</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvRW"></div>
+      </div>
+    </div>
+    <figcaption>In the first round the market moves sticky delta and spot trends up to $104.09. Hedged at the true delta the puts make $810; hedged as if sticky strike they make $1,226, and as if local-vol-like $1,637. The wrong rule won, this time, because a wrong delta is a position in the stock and the stock went the right way. Over 300 rounds, hedging one notch off the market's rule moves the result an average $758 away from the correct hedge, and two notches $1,619, in whichever direction the trend happens to run.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A skew trader's delta is a statement about how the surface moves, and they say it out loud: "we hedge sticky strike in quiet markets and closer to sticky delta when things move". Getting it wrong does not show up as a model error; it shows up as an unexplained directional P&L that correlates with the market, which is exactly how it is caught in attribution.</p>
+    <ul>
+      <li>If your hedged book makes money when the market rallies and loses when it falls, check your delta's dial before your view.</li>
+      <li>Estimate the dial from the data: how much at-the-money vol actually moves per 1% of spot.</li>
+      <li>The difference between rules is skew times vega times the move; it is largest in steep-skew names.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> a hedged options book should not be correlated with the market. If it is, the delta is wrong.</p>
+  </aside>
 
   <div class="try">
     <span class="lab">Try this</span>
@@ -659,7 +702,9 @@ function samp5(p){ const r = arPath(50400, p.vol / Math.sqrt(252), p.phi, SEED5)
   ], s5, () => draw(),"c5");
   window.draw5 = draw;
   function draw(){
-    const p = s5, th = k => 100 * p.vol * Math.sqrt(varRatio(k, p.phi)), sm = samp5(p), top = Math.max(th(21), 100 * p.vol) * 1.35, bot = Math.min(th(21), 100 * p.vol) * .7;
+    const p = s5, th = k => 100 * p.vol * Math.sqrt(varRatio(k, p.phi)), sm = samp5(p), vals = [th(1), th(21), 100 * p.vol, ...sm.map(v => 100 * v)],
+      /* fit the range to the curve and the sampled points: the difference the chapter is about is a couple of points */
+      pad5 = Math.max(1, (Math.max(...vals) - Math.min(...vals)) * 0.5), top = Math.max(...vals) + pad5, bot = Math.max(0, Math.min(...vals) - pad5);
     const o = Fig(document.getElementById("cv5"), { h: 290, x0: 1, x1: 21, y0: bot, y1: top, pad: { l: 58 } });
     axes(o, v => v.toFixed(0) + "d", v => v.toFixed(0) + "%", 5, 5);
     const xs = [], ys = []; for (let k = 1; k <= 21; k++){ xs.push(k); ys.push(th(k)); }
@@ -675,7 +720,57 @@ function samp5(p){ const r = arPath(50400, p.vol / Math.sqrt(252), p.phi, SEED5)
   }
 })();
 
-function drawAll(){ window.draw1(); window.draw2(); window.draw3(); window.draw4(); window.draw5(); }
+/* ══════════ 01b — hedge under the wrong rule ══════════
+   Long 100 puts struck at 95, 30 days, on a surface with 25% at the money
+   and skew b = -0.20 per unit of log-moneyness. Each round the market follows
+   a hidden dial, R = 0, 1 or 2 (volAt). The reader hedges daily at the delta
+   their chosen dial implies (effDelta); a second book hedges at the true
+   dial's delta. Twenty trading days on a seeded path with a trend; daily P&L
+   is the change in the puts' true value minus the hedge's gain. */
+const sRW = { guess: 1, round: 0 };
+const RWP = { atm: 0.25, b: -0.20, K: 95, N: 100 * 100 };
+function rwRound(n){ return withSeed(4800 + n, () => { const R = [0, 1, 2][Math.floor(Math.random() * 3)], mu = (Math.random() < 0.5 ? -1 : 1) * (0.004 + 0.004 * Math.random());
+  const S = [S0]; for (let d = 0; d < 20; d++) S.push(S[d] * Math.exp(mu + 0.016 * gauss())); return { R, S, mu }; }); }
+function rwBook(rd, ssr){ const pT = { atm: RWP.atm, b: RWP.b, ssr: rd.R }, pH = { atm: RWP.atm, b: RWP.b, ssr };
+  const pnl = [0]; let cum = 0;
+  for (let d = 1; d <= 20; d++) { const T0 = (30 - (d - 1) * 1.4) / 365, T1 = (30 - d * 1.4) / 365;
+    const dV = px(RWP.K, rd.S[d], T1, false, pT) - px(RWP.K, rd.S[d - 1], T0, false, pT), dl = effDelta(RWP.K, rd.S[d - 1], T0, false, pH);
+    cum += RWP.N * (dV - dl * (rd.S[d] - rd.S[d - 1])); pnl.push(cum); }
+  return pnl; }
+(function(){
+  let day = 0, rd = rwRound(0);
+  const NAMES = ["sticky delta (R = 0)", "sticky strike (R = 1)", "local-vol-like (R = 2)"];
+  document.querySelectorAll("#rwPick button").forEach(b => b.addEventListener("click", () => { sRW.guess = +b.dataset.r; draw(); }));
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", () => { fn(); draw(); });
+  on("rwNext", () => { day = Math.min(20, day + 1); });
+  on("rwAll", () => { day = 20; });
+  on("rwNew", () => { sRW.round++; rd = rwRound(sRW.round); day = 0; });
+  window.drawRW = draw;
+  function draw(){
+    document.querySelectorAll("#rwPick button").forEach(b => { b.classList.toggle("on", +b.dataset.r === sRW.guess); b.disabled = day > 0; });
+    const mine = rwBook(rd, sRW.guess), right = rwBook(rd, rd.R), xs = [], a = [], b = [];
+    for (let d = 0; d <= day; d++) { xs.push(d); a.push(mine[d]); b.push(right[d]); }
+    const money0 = v => (v < 0 ? "−$" : "$") + Math.abs(Math.round(v)).toLocaleString("en-US");
+    document.getElementById("rwMsg").textContent = day === 0
+      ? "Round " + (sRW.round + 1) + ". Pick the rule you will hedge under, then step through the days. The market's rule is hidden until the end."
+      : "Day " + day + ": spot $" + rd.S[day].toFixed(2) + ". Your book " + money0(mine[day]) + "; hedged under the market's real rule, " + money0(right[day]) + "." +
+        (day === 20 ? " The market was " + NAMES[rd.R] + ". You hedged as if " + NAMES[sRW.guess] + "." : "");
+    const m = Math.max(3000, ...mine.map(Math.abs), ...right.map(Math.abs)) * 1.15;
+    const o = Fig(document.getElementById("cvRW"), { h: 230, x0: 0, x1: 20, y0: -m, y1: m, pad: { l: 64, r: 14, t: 14 } });
+    axes(o, v => "day " + v.toFixed(0), v => (v < 0 ? "−$" : "$") + (Math.abs(v) / 1000).toFixed(1) + "k", 5, 4);
+    clip(o, () => { line(o, xs, b, C("--moss"), 1.8); line(o, xs, a, C("--blue"), 2.6); });
+    const lo = Math.min(...rd.S) - 1, hi = Math.max(...rd.S) + 1, sp = Fig(document.getElementById("cvRW2"), { h: 110, x0: 0, x1: 20, y0: lo, y1: hi, pad: { l: 64, r: 14, t: 8 } });
+    axes(sp, v => "day " + v.toFixed(0), v => "$" + v.toFixed(0), 5, 2);
+    clip(sp, () => line(sp, xs, rd.S.slice(0, day + 1), C("--ink"), 2));
+    document.getElementById("kvRW").innerHTML = kvHTML([
+      ["Day", day + " of 20"], ["You hedge as if", NAMES[sRW.guess], "blue"],
+      ["Your P&L", money0(mine[day])], ["Hedged under the true rule", money0(right[day]), "moss"],
+      ["The market's rule", day === 20 ? NAMES[rd.R] : "hidden"]
+    ]);
+  }
+})();
+
+function drawAll(){ drawRW(); window.draw1(); window.draw2(); window.draw3(); window.draw4(); window.draw5(); }
 LAB.boot(drawAll);
 
 </script>

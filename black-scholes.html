@@ -290,6 +290,8 @@
     </figure>
   </div>
 
+  <p class="xlink"><span class="lab">The statistics underneath</span><a href="https://cafe-helado.github.io/stats-trading/dist.html" target="_blank" rel="noopener">The distributions you actually meet ↗</a> and <a href="https://cafe-helado.github.io/stats-trading/shape.html" target="_blank" rel="noopener">Randomness has a shape ↗</a>, from the companion series Chance, visually.</p>
+
   <div class="check">
     <span class="lab">Check yourself</span>
     <p class="q">A stock's price is currently 100 and its expected price in one year is also 100. A one-year 100-strike call must therefore be worth about zero — after all, on average it finishes exactly at the money. What's wrong with this reasoning?</p>
@@ -1072,6 +1074,52 @@
     </div>
   </div>
 
+  <div class="prose">
+    <p>The figure above hedges for you. Now do it yourself. You are short one 30-day at-the-money call on 100 shares, sold at 20% implied volatility, and you start delta-hedged. Each day the stock moves along a path you cannot see ahead, and you either rehedge to the new delta or hold what you have. Two shadow books trade the same path: one rehedges every day, one never touches its hedge after the first morning.</p>
+  </div>
+
+  <figure class="bleed">
+    <div class="split wide">
+      <div>
+        <div class="figtop">
+          <h3>Hedge it yourself</h3>
+          <span class="legend" style="margin:0">
+            <span><i class="swl" style="background:var(--blue)"></i>Your book</span>
+            <span><i class="swl" style="background:var(--grey)"></i>Rehedges daily</span>
+            <span><i class="sw" style="background:var(--verm)"></i>Never rehedges</span>
+          </span>
+        </div>
+        <p class="simmsg" id="hgMsg" aria-live="polite"></p>
+        <canvas id="cvHA" height="150"></canvas>
+        <canvas id="cvHB" height="230"></canvas>
+      </div>
+      <div class="rail panel">
+        <h4>Your hedge</h4>
+        <div id="ctlH"></div>
+        <div class="btnrow simbtns">
+          <button class="act" id="hgRe">Rehedge, next day</button>
+          <button class="act ghost" id="hgHold">Hold, next day</button>
+          <button class="act ghost" id="hgAuto">Rehedge daily to expiry</button>
+          <button class="act ghost" id="hgNew">New path</button>
+          <button class="act ghost" id="hgReset">Start over</button>
+        </div>
+        <div class="kv" style="margin-top:16px" id="kvH"></div>
+      </div>
+    </div>
+    <figcaption>On the first path, with realized volatility equal to the 20% you sold at, the daily hedger finishes $2 up on a $229 premium: the hedge has turned the option into nothing but its volatility. Set realized to 10% and the same hedging finishes $144 up; set it to 30% and it finishes $157 down. The book that never rehedges happens to finish ahead on this path, which is luck: over 500 paths at 20% both books average close to zero, but the daily hedger's results spread by $33 and the unhedged book's by $168. Ochre ticks mark the days you held.</figcaption>
+  </figure>
+
+  <aside class="lens">
+    <span class="lab">Trader's lens</span>
+    <p>A delta hedger is not forecasting direction. Short options, they collect theta every day the stock sits still and pay it back, with interest, every day it moves a lot. Rehedging does not change which of those wins; realized against implied decides that. What rehedging does is lock each day's result in, so the book's outcome is the volatility it was sold at, not the path it happened to take.</p>
+    <ul>
+      <li>The break-even move is about one standard deviation a day: S × σ ÷ √365, roughly $1.05 on a $100 stock at 20 vol.</li>
+      <li>Skipping a rehedge is a directional bet the size of the hedge gap, whether you meant one or not.</li>
+      <li>Real books rehedge on a band, not a clock: when delta drifts past a set number of shares, or the move passes the break-even.</li>
+    </ul>
+    <p class="rule"><b>Rule of thumb:</b> short gamma wants quiet days; if the stock moves more than its daily sigma, theta did not pay for it.</p>
+  </aside>
+
   <div class="check">
     <span class="lab">Check yourself</span>
     <p class="q">Two traders hedge identical short calls with the same discipline. One is convinced the stock will rally hard; the other is convinced it will collapse. Both are right about their own view — the stock does what they each predicted, in two parallel worlds with the same volatility. Whose hedging P&amp;L is better?</p>
@@ -1695,7 +1743,7 @@ const D2={term:[],show:[],bins:null,lo:0,hi:0,NB:46};
     {id:"mu2",k:"mu",lbl:"μ",name:"Drift",min:-.4,max:.5,step:.01,fmt:pct},
     {id:"d2",k:"days",lbl:"T",name:"Horizon (days)",min:20,max:730,step:5,fmt:v=>v.toFixed(0)}
   ];
-  sliders(document.getElementById("ctl2"),specs,s2,()=>{clear();draw();},"c2");
+  sliders(document.getElementById("ctl2"),specs,s2,()=>{clear();withSeed(2024,()=>add(160));draw();},"c2");
   function bounds(){const T=s2.days/365,sd=s2.sig*Math.sqrt(T);
     D2.lo=Math.max(1,s2.S*Math.exp(-3.4*sd));D2.hi=s2.S*Math.exp(3.8*sd);}
   function clear(){D2.term=[];D2.show=[];bounds();D2.bins=new Int32Array(D2.NB);}
@@ -1797,6 +1845,8 @@ const D2={term:[],show:[],bins:null,lo:0,hi:0,NB:46};
   document.getElementById("run2").addEventListener("click",()=>runBatch(400));
   document.getElementById("clr2").addEventListener("click",()=>{clear();draw();});
   clear();
+  /* open on a first batch so the fan and its histogram are already there */
+  withSeed(2024,()=>add(160));
 })();
 
 /* ══════════════════════════════════════════════
@@ -1812,7 +1862,7 @@ const D3={n:0,sum:0,sum2:0,hist:[],term:[]};
     {id:"r3",k:"r",lbl:"r",name:"Risk-free",min:0,max:.12,step:.0025,fmt:pct2},
     {id:"q3",k:"q",lbl:"q",name:"Dividend",min:0,max:.08,step:.0025,fmt:pct2}
   ];
-  sliders(document.getElementById("ctl3"),specs,s3,()=>{reset();draw();},"c3");
+  sliders(document.getElementById("ctl3"),specs,s3,()=>{reset();withSeed(2025,()=>add(300));draw();},"c3");
   function reset(){D3.n=0;D3.sum=0;D3.sum2=0;D3.hist=[];D3.term=[];}
   function bsp(){return bs(s3.S,s3.K,s3.days/365,s3.sig,s3.r,s3.q,s3.cp).price;}
   function add(k){
@@ -1918,6 +1968,8 @@ const D3={n:0,sum:0,sum2:0,hist:[],term:[]};
   }
   document.getElementById("run3").addEventListener("click",()=>batch(2000));
   document.getElementById("clr3").addEventListener("click",()=>{reset();draw();});
+  /* open part-way: the estimate has started to settle, and Run carries it on */
+  withSeed(2025,()=>add(300));
   const cb=document.getElementById("c3call"),pb=document.getElementById("c3put");
   cb.addEventListener("click",()=>{s3.cp=true;cb.setAttribute("aria-pressed",true);
     pb.setAttribute("aria-pressed",false);reset();draw();sync4();});
@@ -2166,7 +2218,7 @@ function drawTree(o){
   });
   g.fillStyle=C("--grey");g.textAlign="left";g.textBaseline="middle";
   g.font="9px 'IBM Plex Mono', monospace";
-  g.fillText("dashed = second route to the same number",8,h-12);
+  g.fillText(NARROW()?"dashed: a second route":"dashed = second route to the same number",8,h-12);
   // identities
   const T=s5.days/365,hh=1e-5,B=(S,K,t,v)=>bs(S,K,t,v,s5.r,s5.q,s5.cp);
   const dDdv=(B(s5.S,s5.K,T,s5.sig+hh).delta-B(s5.S,s5.K,T,s5.sig-hh).delta)/(2*hh);
@@ -2274,7 +2326,7 @@ const D6={errs:[],last:null};
     {id:"st6",k:"steps",lbl:"N",name:"Rehedges",min:1,max:250,step:1,fmt:v=>v.toFixed(0)}
   ];
   sliders(document.getElementById("ctl6"),specs,s6,()=>{
-    D6.errs=[];trial(true);draw();
+    D6.errs=[];trial(true);withSeed(2026,()=>{for(let i=0;i<40;i++)trial();});draw();
   },"c6");
   function trial(preview){
     const T=s6.days/365,N=Math.max(1,Math.round(s6.steps)),dt=T/N;
@@ -2366,7 +2418,8 @@ const D6={errs:[],last:null};
   document.getElementById("run6").addEventListener("click",()=>batch(300));
   document.getElementById("one6").addEventListener("click",()=>{trial();draw();});
   document.getElementById("clr6").addEventListener("click",()=>{D6.errs=[];trial(true);draw();});
-  trial(true);
+  /* open with forty hedged paths already in the histogram */
+  withSeed(2026,()=>{for(let i=0;i<40;i++)trial();});
 })();
 
 /* ══════════════════════════════════════════════
@@ -2434,7 +2487,7 @@ const sM1={r:.10};
       g.globalAlpha=.5;g.beginPath();g.moveTo(o.P.l,y);g.lineTo(o.P.l+o.pw,y);g.stroke();g.globalAlpha=1;
       g.fillText(v.toFixed(4),o.P.l-7,y);}
     g.textAlign="center";g.textBaseline="top";
-    [1,12,365,20000].forEach(n=>g.fillText(n===1?"yearly":n===12?"monthly":n===365?"daily":"20k×",o.X(lx(n)),o.P.t+o.ph+7));
+    [1,12,365,20000].forEach(n=>{g.textAlign=n===20000?"right":n===1?"left":"center";g.fillText(n===1?"yearly":n===12?"monthly":n===365?"daily":"20k×",n===20000?o.w-1:o.X(lx(n)),o.P.t+o.ph+7);});g.textAlign="center";
     g.strokeStyle=C("--verm");g.lineWidth=1.6;g.setLineDash([5,4]);
     const ty=Math.round(o.Y(lim))+.5;
     g.beginPath();g.moveTo(o.P.l,ty);g.lineTo(o.P.l+o.pw,ty);g.stroke();g.setLineDash([]);
@@ -2975,7 +3028,92 @@ const POS={
   stats();next();
 })();
 
-function drawAll(){drawDesk();drawM1();drawM2();drawM3();drawM4();drawM5();drawM6();draw0();draw1();draw2();draw3();sync4();draw5();draw6();}
+/* ══════════ 06b — hedge it yourself ══════════
+   Short one 30-day at-the-money call on 100 shares, sold at 20% implied, rates
+   and dividends zero so nothing but gamma and theta moves the P&L. The stock
+   follows a seeded lognormal path at the realized vol on the slider; the same
+   seed gives the same shocks at every vol, so changing the slider rescales the
+   path rather than replacing it. Each day the reader rehedges to the new delta
+   or holds. Two shadow books run on the same path: one rehedges every day, one
+   never does. */
+const sH = { rv: 0.20, seed: 0 };
+const HG = { K: 100, iv: 0.20, days: 30, mult: 100 };
+function hgPath(seed, rv){ return withSeed(4100 + seed, () => { const p = [100];
+  for (let i = 0; i < HG.days; i++) p.push(p[i] * Math.exp(-0.5 * rv * rv / 365 + rv * Math.sqrt(1 / 365) * gauss()));
+  return p; }); }
+const hgVal = (S, d) => { const T = (HG.days - d) / 365; return HG.mult * (T > 1e-9 ? bs(S, HG.K, T, HG.iv, 0, 0, true).price : Math.max(0, S - HG.K)); };
+const hgDelta = (S, d) => { const T = (HG.days - d) / 365; return T > 1e-9 ? Math.round(HG.mult * bs(S, HG.K, T, HG.iv, 0, 0, true).delta) : (S > HG.K ? HG.mult : 0); };
+/* a book: shares held and cash; P&L = cash + shares x S - option value */
+function hgBook(p){ const h = hgDelta(p[0], 0); return { h, cash: hgVal(p[0], 0) - h * p[0], pnl: [0] }; }
+function hgMark(b, p, d){ return b.cash + b.h * p[d] - hgVal(p[d], d); }
+function hgRehedge(b, p, d){ const n = hgDelta(p[d], d); b.cash -= (n - b.h) * p[d]; b.h = n; }
+/* the whole path for a fixed policy: "daily" or "never" (for the shadows and verify.js) */
+function hgRun(policy, rv, seed){ const p = hgPath(seed || 0, rv), b = hgBook(p);
+  for (let d = 1; d <= HG.days; d++) { b.pnl.push(hgMark(b, p, d)); if (policy === "daily" && d < HG.days) hgRehedge(b, p, d); }
+  return { p, pnl: b.pnl, final: b.pnl[HG.days] }; }
+const HS = { day: 0, p: null, me: null, held: [], daily: null, never: null, msg: "" };
+function hgReset(){ HS.p = hgPath(sH.seed, sH.rv); HS.me = hgBook(HS.p); HS.day = 0; HS.held = [];
+  HS.daily = hgRun("daily", sH.rv, sH.seed); HS.never = hgRun("never", sH.rv, sH.seed);
+  HS.msg = "Day 0. You sold the call for $" + hgVal(100, 0).toFixed(0) + " and bought " + HS.me.h + " shares against it. Realized vol on this path: " + Math.round(sH.rv * 100) + "%, implied 20%."; }
+function hgStep(rehedge){
+  if (HS.day >= HG.days) return;
+  if (HS.day > 0) { if (rehedge) hgRehedge(HS.me, HS.p, HS.day); else HS.held.push(HS.day); }
+  HS.day++; const d = HS.day, mv = HS.p[d] / HS.p[d - 1] - 1;
+  HS.me.pnl.push(hgMark(HS.me, HS.p, d));
+  const day = HS.me.pnl[d] - HS.me.pnl[d - 1];
+  HS.msg = "Day " + d + ": the stock " + (mv < 0 ? "falls " : "rises ") + Math.abs(mv * 100).toFixed(2) + "% to $" + HS.p[d].toFixed(2) + ". Your book " + (day >= 0 ? "made $" : "lost $") + Math.abs(day).toFixed(0) + " today.";
+  if (d === HG.days) HS.msg += " Expiry. You finish at $" + HS.me.pnl[d].toFixed(0) + "; the daily hedger at $" + HS.daily.final.toFixed(0) + "; the book that never rehedged at $" + HS.never.final.toFixed(0) + ".";
+}
+(function(){
+  sliders(document.getElementById("ctlH"), [
+    { id: "rvH", k: "rv", lbl: "σr", name: "Realized vol on the path (implied is 20%)", min: 0.10, max: 0.40, step: 0.01, fmt: v => (v * 100).toFixed(0) + "%" }
+  ], sH, () => { hgReset(); draw(); },"cH");
+  window.drawH = draw;
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", () => { fn(); draw(); });
+  on("hgRe", () => hgStep(true));
+  on("hgHold", () => hgStep(false));
+  on("hgAuto", () => { while (HS.day < HG.days) hgStep(true); });
+  on("hgNew", () => { sH.seed++; hgReset(); });
+  on("hgReset", hgReset);
+  hgReset();
+  function draw(){
+    const d = HS.day, xs = []; for (let i = 0; i <= d; i++) xs.push(i);
+    document.getElementById("hgMsg").textContent = HS.msg;
+    /* the axes grow with what has happened, never with what is coming */
+    const seen = HS.p.slice(0, d + 1), sLo = Math.min(HG.K, ...seen), sHi = Math.max(HG.K, ...seen), pad = Math.max(1.5, (sHi - sLo) * 0.3);
+    const lo = sLo - pad, hi = sHi + pad;
+    const a = Fig(document.getElementById("cvHA"), { h: 150, x0: 0, x1: HG.days, y0: lo, y1: hi, pad: { l: 60, r: 14, t: 12 } });
+    axes(a, v => "day " + v.toFixed(0), v => "$" + v.toFixed(0), 6, 3);
+    clip(a, () => { line(a, [0, HG.days], [HG.K, HG.K], C("--ochre"), 1, [4, 4], 0.25); line(a, xs, seen, C("--ink"), 2.2); });
+    a.g.fillStyle = C("--ochre"); a.g.font = "9.5px 'IBM Plex Mono', monospace"; a.g.textAlign = "right"; a.g.textBaseline = "bottom";
+    a.g.fillText("strike", a.P.l + a.pw - 4, a.Y(HG.K) - 2);
+    const all = HS.me.pnl.concat(HS.daily.pnl.slice(0, d + 1), HS.never.pnl.slice(0, d + 1));
+    const m = Math.max(40, ...all.map(Math.abs)) * 1.2;
+    const b = Fig(document.getElementById("cvHB"), { h: 230, x0: 0, x1: HG.days, y0: -m, y1: m, pad: { l: 60, r: 14, t: 12 } });
+    axes(b, v => "day " + v.toFixed(0), v => (v < 0 ? "−$" : "$") + Math.abs(v).toFixed(0), 6, 4);
+    clip(b, () => {
+      line(b, xs, HS.never.pnl.slice(0, d + 1), C("--verm"), 1.6, [5, 4]);
+      line(b, xs, HS.daily.pnl.slice(0, d + 1), C("--grey"), 1.8);
+      line(b, xs, HS.me.pnl, C("--blue"), 2.8);
+    });
+    const g = b.g; g.fillStyle = C("--ochre");
+    HS.held.forEach(h => { g.fillRect(b.X(h) - 1.5, b.P.t + b.ph - 7, 3, 7); });
+    const S = HS.p[d], want = hgDelta(S, d);
+    document.getElementById("kvH").innerHTML = kvHTML([
+      ["Day", d + " of " + HG.days],
+      ["Stock", "$" + S.toFixed(2)],
+      ["Delta now, in shares", d < HG.days ? String(want) : "expired"],
+      ["You hold", String(HS.me.h) + " shares"],
+      ["Hedge off by", d < HG.days ? (HS.me.h - want > 0 ? "+" : "") + (HS.me.h - want) + " shares" : "—", Math.abs(HS.me.h - want) > 8 ? "verm" : "grey"],
+      ["Your P&L", "$" + HS.me.pnl[d].toFixed(0), "blue"],
+      ["Daily hedger", "$" + HS.daily.pnl[d].toFixed(0)],
+      ["Never rehedged", "$" + HS.never.pnl[d].toFixed(0), "verm"],
+      ["Days you held", String(HS.held.length)]
+    ]);
+  }
+})();
+
+function drawAll(){drawDesk();drawM1();drawM2();drawM3();drawM4();drawM5();drawM6();draw0();draw1();draw2();draw3();sync4();draw5();draw6();drawH();}
 LAB.boot(drawAll);
 
 </script>

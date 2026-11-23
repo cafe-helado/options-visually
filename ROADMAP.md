@@ -1,5 +1,7 @@
 # Roadmap
 
+_Pages are numbered by reading order since 22 November 2026; the sections below stay in the order they were built._
+
 Twenty-five pages and three companions. Each needs a result that is hard to believe from a description and
 obvious once you have watched it — if a page has no such moment, it is an article,
 not a page in this series.
@@ -17,7 +19,7 @@ Signature: the delta hedge lands on zero regardless of drift.
 
 ---
 
-## 02 · The Surface — why one volatility isn't enough  ✅ live (surface.html)
+## 07 · The Surface — why one volatility isn't enough  ✅ live (surface.html)
 
 **Spine:** Black–Scholes assumes one σ. The market quotes a different one for every
 strike and expiry. The surface is not a failure of the model; it is the market telling
@@ -50,7 +52,7 @@ Chapters
 
 ---
 
-## 03 · Catalyst and Noise — decomposing volatility  ✅ live (catalyst.html)
+## 08 · Catalyst and Noise — decomposing volatility  ✅ live (catalyst.html)
 
 **Spine:** variance is additive.  σ²T = σ_diff²·T + Σ J².  One equation, whole page.
 
@@ -89,7 +91,7 @@ Chapters
 
 ---
 
-## 04 · The Structure Zoo — two lenses on the same instrument  ✅ live (structures.html)
+## 09 · The Structure Zoo — two lenses on the same instrument  ✅ live (structures.html)
 
 **Spine:** an institution buys a *payoff*; a vol fund buys a *greek exposure*. The
 same structure gets two orthogonal descriptions. Show both panels at once.
@@ -122,9 +124,9 @@ Chapters
 
 ---
 
-## 05 · The Market, Not the Model — options microstructure  ✅ live (microstructure.html)
+## 14 · The Market, Not the Model — options microstructure  ✅ live (microstructure.html)
 
-**Spine:** every price in pages 01–04 is a model output. A real option has a bid, an
+**Spine:** every price in pages 01, 07, 08 and 09 is a model output. A real option has a bid, an
 ask, a queue, and a counterparty who may know something you don't.
 
 Verified: one cent is 0.04 vol points on a 180d ATM option and **11.57 vol points on a
@@ -170,7 +172,7 @@ Two constraints on writing it
 
 ---
 
-## 06 · Executing the Hedge — algos, dark pools, ETFs  ✅ live (execution.html)
+## 13 · Executing the Hedge — algos, dark pools, ETFs  ✅ live (execution.html)
 
 **Spine:** page 01 proved replication works and never charged for it. Every rebalance
 is an order that pays a spread and moves the market. Put the bill back in.
@@ -197,7 +199,7 @@ report says the algo did its job, the other says it cost a point and a half. VWA
 forgives trend and punishes deviation; arrival punishes delay.
 
 Signature 3: dark pool adverse selection. Rest at the midpoint, get filled, and watch
-what happens next. Fills cluster right before adverse moves. Same lesson as page 05's
+what happens next. Fills cluster right before adverse moves. Same lesson as page 14's
 market-making sim, taken from the other side of the trade.
 
 Chapters
@@ -227,7 +229,7 @@ series needs to be shorter.
 
 ---
 
-## 07 · Parity, Boxes and Rolls — arbitrage as construction  ✅ live
+## 03 · Parity, Boxes and Rolls — arbitrage as construction  ✅ live
 
 **Spine:** put–call parity is not an identity to memorize, it is a machine for
 building one instrument out of others. Everything here is that machine applied twice.
@@ -254,7 +256,7 @@ Chapters
 
 ---
 
-## 08 · A Decision Worth Exactly Nothing  ✅ live (early-exercise.html)
+## 04 · A Decision Worth Exactly Nothing  ✅ live (early-exercise.html)
 
 **Spine:** the American premium is the value of a decision, and most of the time that
 value is zero. Knowing exactly when it is not is a real edge and is mostly arithmetic.
@@ -325,7 +327,7 @@ convention, dated, and taught as mechanism rather than rulebook.
 
 ---
 
-## 09 · Only One of Them Is Tradeable  ✅ live (variance.html)
+## 11 · Only One of Them Is Tradeable  ✅ live (variance.html)
 
 Signature as built: delta-hedge a log contract and plot each path's P&L against the
 realized variance it delivered. It is a LINE, not a cloud — correlation 0.99998 at 10
@@ -346,7 +348,7 @@ at lambda=1/J=-20% and 1.10 at 0.5/-30%, always under-hedging a falling stock.
 Caught in review: the payoff was coded in decimals when vega notional is dollars per
 volatility POINT — a clean 100x error the prose numbers exposed.
 
-## 09-superseded · Variance, Volatility, and the Log Contract
+## 11-superseded · Variance, Volatility, and the Log Contract
 
 **Spine:** variance is replicable with a static strip of options; volatility is not.
 That asymmetry is the whole subject.
@@ -365,7 +367,7 @@ Chapters
 
 ---
 
-## 10 · Correlation, Whether You Meant To or Not  ✅ live (dispersion.html)
+## 12 · Correlation, Whether You Meant To or Not  ✅ live (dispersion.html)
 
 Signature as built: index volatility against correlation with both hard bounds drawn.
 Twenty names averaging 39.10% give an index of 9.05% at rho=0 and exactly 39.10% at
@@ -387,7 +389,7 @@ Control experiment worth keeping: scale every single-name vol by any factor and 
 dispersion P&L barely moves. The position is insensitive to the thing everyone
 discusses and fully exposed to the thing nobody quotes.
 
-## 10-superseded · Dispersion and Correlation
+## 12-superseded · Dispersion and Correlation
 
 **Spine:** index variance is a weighted sum of single-name variances plus a correlation
 term. Trade the difference and you are trading correlation, whether you meant to or not.
@@ -404,7 +406,7 @@ Chapters
 
 ---
 
-## 11 · The Sum of the Parts  ✅ live (book.html)
+## 23 · The Sum of the Parts  ✅ live (book.html)
 
 Signature as built: a spot x vol scenario matrix with three views on one grid — full
 reprice, greek estimate, and the error between them. Four-position book; at +20% spot
@@ -422,7 +424,7 @@ Also: dollar delta adds ($56.8k from legs of -2,496/+1,430/+709/+914 shares), ga
 cash adds ($2,042 net from a -$18,002 and a +$20,033 leg — a small net over a large
 gross), and vega adds arithmetically while meaning nothing.
 
-## 11-superseded · The Book
+## 23-superseded · The Book
 
 **Spine:** everything so far has been one option. A book is a portfolio, and portfolio
 risk is not the sum of the parts.
@@ -458,7 +460,7 @@ Chapters
 
 ---
 
-## 12 · The Price That Ignores the Odds  ✅ live (binomial.html)
+## 02 · The Price That Ignores the Odds  ✅ live (binomial.html)
 
 Natenberg 5 and 19. Signature: one step, two outcomes, and a replicating portfolio
 whose cost is the price. Slide the real-world P(up) from 1% to 99% and the expected
@@ -472,13 +474,13 @@ against a forward of 105.12711. American put premium at S=80/K=100/r=10% is 4.02
 16.2413. p leaves (0,1) when dt > (sigma/r)^2 — at 5% vol and 10% rates a one-year
 single step gives p = 1.5388 and the tree returns a number rather than an error.
 
-## 13 · The Forward Is the Real Underlying  ✅ live (forwards.html)
+## 05 · The Forward Is the Real Underlying  ✅ live (forwards.html)
 
 Natenberg 1, 2, 3 and 22. Signature: cash-and-carry P&L is 3.1e-14 across terminal
 spots from 40 to 240, so the forward is built rather than forecast — it sits at
 103.0455 while expected spot ranges 80.25 to 125.86 as drift moves.
 
-The find: page 08's rule INVERTS on futures. Both American calls and puts exercise
+The find: page 04's rule INVERTS on futures. Both American calls and puts exercise
 early — at F=130 the call premium is 1.2166, at F=70 the put premium is 1.4492, at
 the money both are 0.2205 exactly, against a stock call premium of 0.00e+0. The
 mechanism is one discount factor: a stock call is floored at S - Ke^-rT (above
@@ -488,9 +490,9 @@ trades under its own intrinsic — 39.0630 against 40 at F=140.
 Also: Black-76 equals the spot model to 1.2e-14; the futures delta is the spot delta
 times exactly e^-rT, so you hedge with ~1.8 fewer contracts per hundred.
 
-## 14 · Nobody Trades One Option  ✅ live (spreading.html)
+## 10 · Nobody Trades One Option  ✅ live (spreading.html)
 
-Natenberg 10-13, the decision page 04 never made. Signature: five bullish structures
+Natenberg 10-13, the decision page 09 never made. Signature: five bullish structures
 sized to identical 100-share deltas, and the lead changes hands FOUR times across five
 regions — long call at 80, risk reversal at 90, short put 95-105, 1x2 ratio 110-120,
 long call again at 130. The long call is simultaneously best if you are wrong, worst
@@ -506,7 +508,7 @@ on the same delta. The 1x2 ratio peaks at 8.904 and crosses back through zero at
 Caught in review: the bull put spread had its legs inverted, and the lead changes four
 times rather than five.
 
-## 15 · Every Assumption, and What It Costs  ✅ live (real-world.html)
+## 20 · Every Assumption, and What It Costs  ✅ live (real-world.html)
 
 Natenberg 23. Signature: page 01's 1/sqrt(N) hedging law, broken. Under diffusion
 sd*sqrt(N) is flat (8.4 -> 8.7) and 32x the hedging buys 5.50x, close to the sqrt(32)
@@ -520,7 +522,7 @@ Variance and shape are separate facts. Pricing a skewed chain at the ATM vol err
 -73.9% at K=75 and +213.3% at K=125 while being only -2.0% at the money, which is
 why the practice survives: the model is right where it gets checked.
 
-## 16 · The Questions They Ask You  ✅ live (questions.html)
+## 25 · The Questions They Ask You  ✅ live (questions.html)
 
 Not from Natenberg's contents — from the gap between his contents and a desk. The
 series could explain every subject and still leave a reader unable to answer a
@@ -558,7 +560,7 @@ drill questions for a finite answer, prompt, working and tolerance.
 
 ## 18 · Two Rulers  ✅ live (rulers.html)
 
-Standard deviation against mean absolute deviation. Page 03 established the
+Standard deviation against mean absolute deviation. Page 08 established the
 identity in one line — a straddle costs about 0.7979·S·σ√T — and this page is
 about why that constant is what it is and what happens when it is not.
 
@@ -579,7 +581,7 @@ clean normal, needing 14.2% more data. With 6% of days at 4x vol the true
 sigma is 1.3784; RMS reads it correctly with a spread of 0.155 while the
 absolute estimator reads 85.6% of it with a spread of 0.080.
 
-## 20 · A Deal Is a Price on Two Futures  ✅ live (merger.html)
+## 15 · A Deal Is a Price on Two Futures  ✅ live (merger.html)
 
 Merger arbitrage, built from a desk primer and interview sheet. Spreads as a
 rate (gross, annualized, net of funding); implied odds with the carry charged
@@ -634,7 +636,7 @@ kills it) and a printable trade memo. Every key is re-derived in verify.js.
 - Hedging from a corporate seat (Natenberg's hedging chapter) and expiration
   P&L from scratch — the two topics the Natenberg mapping still flags.
 
-## 21 · The Playbook  ✅ live (playbook.html)
+## 16 · The Playbook  ✅ live (playbook.html)
 
 Strategies rather than structures: fifteen that people and institutions run,
 each with why it pays, how it is run, how it loses and what it takes to win,
@@ -644,7 +646,7 @@ rate, skewness −9.2 and a −19% worst month; the index 13.0% a year with a 26
 drawdown; the index plus rolled 15%-out puts 13.6% with a 19% drawdown. The
 New-history button exists to show how path-dependent the tail-hedge result is.
 
-## 22 · Surface Dynamics  ✅ live (dynamics.html)
+## 21 · Surface Dynamics  ✅ live (dynamics.html)
 
 What a hedge does when the surface moves. One dial, R (the skew-stickiness
 ratio), runs through the page: ATM vol moves R × b points per 1% of spot.
@@ -672,7 +674,7 @@ Still open from the same gap list: normalized skew and a chain order of
 operations on screen.html, index-equivalent gamma on book.html, judgment
 questions on questions.html.
 
-## 23 · The Carry Curve  ✅ live (carry.html)
+## 06 · The Carry Curve  ✅ live (carry.html)
 
 Implied dividends and the borrow term structure, from forwards lined up
 across expiries. $100 stock, 4.5% rate, $0.60 a quarter, 1% borrow.
@@ -692,7 +694,7 @@ Still open from the same deep-cut list: capital and margin as the sizing
 constraint, US listed market structure, dispersion weighting schemes,
 variance-swap mark-to-market.
 
-## 24 · Convertibles  ✅ live (converts.html)
+## 22 · Convertibles  ✅ live (converts.html)
 
 Convertible arbitrage as a volatility trade. $1,000 face, 5 years, 2% coupon,
 ten shares per bond, 4% risk-free; priced as bond floor + ten calls.
@@ -709,7 +711,7 @@ ten shares per bond, 4% risk-free; priced as bond floor + ten calls.
 book.html also gained chapter 08, the day's P&L by cause (mark-to-market,
 greek attribution by bucket, carry, new-trade edge, fees, unexplained).
 
-## 25 · Capital  ✅ live (capital.html)
+## 24 · Capital  ✅ live (capital.html)
 
 Margin as the constraint. 30-day 95 put on a $100 stock at 30 vol: premium
 $132; strategy-based requirement $1,632 (8.1%), risk-based $872 (15.2%),
