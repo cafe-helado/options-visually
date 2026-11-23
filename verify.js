@@ -1943,6 +1943,119 @@ PAGES["playbook"] = () => {
     yes("the SVG is a path, not empty", M.shapeSvg("short").indexOf("<path") > 0); }
 };
 
+PAGES["exam"] = () => {
+  /* The exam's numeric keys are computed on the page from the numbers each
+     question shows. Each is re-derived here by a different route, over a few
+     hundred seeds: integration instead of the closed form, repricing instead
+     of a greek, the other side of parity, capital.html's own margin code. */
+  const M = load("exam.html", ["BANK", "BY", "inst", "VERSIONS", "WEIGHTS", "PAGE", "planFor", "randomPlan", "scaleWeights", "grade", "parseNum", "calcEval", "bs", "ncdf", "npdf"]);
+  const CAPM = load("capital.html", ["stratMargin", "riskMargin"]);
+  const N = 300, each = (id, f) => { let bad = 0; for (let i = 1; i <= N; i++){ const q = M.inst(id, i * 7919 + 11); if (!f(q, q.q, q.parts)) bad++; } return bad; };
+  const B = M.bs, px = (S, K, T, v, r, q, c) => B(S, K, T, v, r, q, c).price, within = (x, p, slack) => Math.abs(x - p.ans) <= p.tol * (slack || 1);
+  const simpson = (f, a, b, n) => { const h = (b - a) / n; let s = f(a) + f(b); for (let i = 1; i < n; i++) s += f(a + i * h) * (i % 2 ? 4 : 2); return s * h / 3; };
+  const bsect = (f, lo, hi) => { for (let i = 0; i < 80; i++){ const m = (lo + hi) / 2; if (f(lo) * f(m) <= 0) hi = m; else lo = m; } return (lo + hi) / 2; };
+  const CLAIMED = [];
+  const chk = (label, id, f) => { CLAIMED.push(id); eq(label, each(id, f), 0, 0); };
+
+  /* the papers */
+  const ideaOf = id => M.PAGE[M.BY[id].page][0];
+  yes("three fixed versions of forty", ["A", "B", "C"].every(k => M.VERSIONS[k].length === 40));
+  yes("every version id is in the bank, and no version repeats a question", ["A", "B", "C"].every(k => M.VERSIONS[k].every(id => M.BY[id]) && new Set(M.VERSIONS[k]).size === 40));
+  yes("no question is shared between versions", new Set([].concat(M.VERSIONS.A, M.VERSIONS.B, M.VERSIONS.C)).size === 120);
+  yes("each version follows the idea weights", ["A", "B", "C"].every(k => [1, 2, 3, 4, 5, 6, 7, 8].every(i => M.VERSIONS[k].filter(id => ideaOf(id) === i).length === M.WEIGHTS[i])));
+  yes("each version covers all twenty-five pages", ["A", "B", "C"].every(k => new Set(M.VERSIONS[k].map(id => M.BY[id].page)).size === 25));
+  yes("each version mixes all three levels and has numeric questions", ["A", "B", "C"].every(k => [1, 2, 3].every(l => M.VERSIONS[k].filter(id => M.BY[id].lvl === l).length >= 5) &&
+    M.VERSIONS[k].filter(id => M.BY[id].kind !== "mc").length >= 6));
+  yes("each version has at least one multi-step scenario", ["A", "B", "C"].every(k => M.VERSIONS[k].some(id => M.BY[id].kind === "multi")));
+  yes("a random paper replays exactly from its seed", JSON.stringify(M.randomPlan(4242, 40)) === JSON.stringify(M.randomPlan(4242, 40)) && JSON.stringify(M.randomPlan(4242, 40)) !== JSON.stringify(M.randomPlan(4243, 40)));
+  yes("random papers have the right length and weights", [40, 20].every(n => { const p = M.randomPlan(77, n), w = M.scaleWeights(n);
+    return p.items.length === n && new Set(p.items.map(x => x[0])).size === n && [1, 2, 3, 4, 5, 6, 7, 8].every(i => p.items.filter(x => ideaOf(x[0]) === i).length === w[i]); }));
+  yes("a fixed version deals the same numbers every time", JSON.stringify(M.planFor("B").items.map(([id, s]) => M.inst(id, s).parts)) === JSON.stringify(M.planFor("B").items.map(([id, s]) => M.inst(id, s).parts)));
+  yes("every template deals cleanly: no NaN, one right option, four distinct options on single choice", M.BANK.every(t => { for (let i = 1; i <= 40; i++){ const q = M.inst(t.id, i * 131);
+    if (/NaN|undefined|Infinity/.test(q.stem + q.why + JSON.stringify(q.parts))) return false;
+    if (!q.parts.every(p => p.t === "num" ? isFinite(p.ans) && p.tol >= 0 && p.unit : p.ok >= 0 && p.ok < p.opts.length && new Set(p.opts).size === p.opts.length)) return false;
+    if (t.kind === "mc" && q.parts[0].opts.length !== 4) return false; } return true; }));
+  yes("grading: the key scores full marks, wrong answers zero", M.BANK.every(t => { const q = M.inst(t.id, 99);
+    const good = M.grade([q], [q.parts.map(p => p.t === "mc" ? p.ok : String(p.ans))]).got === 1;
+    const bad = M.grade([q], [q.parts.map(p => p.t === "mc" ? (p.ok + 1) % p.opts.length : String(p.ans + 3 * p.tol + 1))]).got === 0; return good && bad; }));
+  yes("answers typed with $, commas, % and a unicode minus are read", M.parseNum("$1,234.5") === 1234.5 && M.parseNum("−2.5%") === -2.5 && isNaN(M.parseNum("abc")));
+  eq("calculator: 0.4*100*0.3*sqrt(30/365)", M.calcEval("0.4*100*0.3*sqrt(30/365)"), 0.4 * 100 * 0.3 * Math.sqrt(30 / 365), 1e-12);
+  eq("calculator: N(0) and powers bind tighter than minus", M.calcEval("N(0) - 2^2"), -3.5, 1e-7);
+
+  /* 1 · distribution */
+  chk("bs call = discounted payoff integrated over the lognormal", "n-bs-call", (x, q, p) => { const m = (q.r - q.v * q.v / 2) * q.T, s = q.v * Math.sqrt(q.T);
+    const I = Math.exp(-q.r * q.T) * simpson(z => Math.max(q.S * Math.exp(m + s * z) - q.K, 0) * M.npdf(z), -9, 9, 6000); return Math.abs(I - p[0].ans) < 0.005; });
+  chk("P(finish above K) = density integrated above the strike", "n-bs-prob", (x, q, p) => { const z0 = (Math.log(q.K / q.S) - (q.r - q.v * q.v / 2) * q.T) / (q.v * Math.sqrt(q.T));
+    const P = simpson(z => M.npdf(z), z0, 12, 4000); return Math.abs(100 * P - p[0].ans) < 0.01; });
+  chk("one-step call: risk-neutral expectation matches replication", "n-bin-call", (x, q, p) => { const qq = (q.R - q.dn) / (q.u - q.dn);
+    return Math.abs((qq * Math.max(q.S * q.u - q.K, 0) + (1 - qq) * Math.max(q.S * q.dn - q.K, 0)) / q.R - p[0].ans) < 1e-9; });
+  chk("risk-neutral q makes the stock earn the cash rate", "n-bin-q", (x, q, p) => Math.abs(p[0].ans * q.u + (1 - p[0].ans) * q.dn - q.R) < 1e-12 && p[0].ans > 0 && p[0].ans < 1);
+  chk("hedge sizing: deltas by bump-and-reprice", "n-hedge", (x, q, p) => { const h = 1e-3, D = S => (px(S + h, q.K, q.T, q.v, q.r, 0, true) - px(S - h, q.K, q.T, q.v, q.r, 0, true)) / (2 * h);
+    return Math.abs(D(q.S) - p[0].ans) < 1e-4 && Math.abs(q.N * 100 * D(q.S) - p[1].ans) < 0.5 && Math.abs(q.N * 100 * (D(q.S1) - D(q.S)) - p[2].ans) < 0.5; });
+
+  /* 2 · parity and the forward */
+  chk("put by parity equals the Black–Scholes put", "n-put-parity", (x, q, p) => Math.abs(px(q.S, q.K, q.T, q.v, q.r, 0, false) - p[0].ans) <= 0.0051);
+  chk("implied dividend recovers the dividend the prices were built with", "n-div-pv", (x, q, p) => Math.abs(p[0].ans - q.D) <= 0.011);
+  chk("revcon: the side and size follow the planted mispricing", "n-revcon", (x, q, p) => { const fair = q.S - q.K * Math.exp(-q.r * q.T);
+    return Math.abs(px(q.S, q.K, q.T, q.v, q.r, 0, true) - px(q.S, q.K, q.T, q.v, q.r, 0, false) - fair) < 1e-9 && Math.abs(p[0].ans - fair) < 1e-9 &&
+      p[1].ok === (q.dev > 0 ? 0 : q.dev < 0 ? 1 : 2) && Math.abs(p[2].ans - Math.abs(q.dev) * 100) <= 1.1; });
+  chk("box: the implied rate reprices the box and recovers the rate", "n-box", (x, q, p) => Math.abs(q.W * Math.exp(-p[0].ans / 100 * q.T) - q.px) < 1e-9 && Math.abs(p[0].ans / 100 - q.rr) < 0.0003);
+  chk("rate conversion: both grow a dollar to the same amount", "n-rateconv", (x, q, p) => Math.abs(Math.exp(p[0].ans / 100 * q.T) - (1 + q.s * q.T)) < 1e-12);
+  chk("forward: grow the stock, then subtract the dividend grown from its date", "n-forward", (x, q, p) => Math.abs(q.S * Math.exp(q.r * q.T) - q.D * Math.exp(q.r * (q.T - q.t1 / 365)) - p[0].ans) < 1e-9);
+  chk("early exercise: decision agrees with dividend against interest plus put", "n-earlyex", (x, q, p) => { const t = q.tau / 365, P = px(q.S - q.D, q.K, t, q.v, q.r, 0, false),
+    gain = q.D - q.K * (1 - Math.exp(-q.r * t)) - P; return Math.abs(gain - p[2].ans) < 1e-6 && p[1].ok === (gain > 0 ? 0 : 1); });
+  chk("implied borrow recovers the borrow the prices were built with", "n-borrow", (x, q, p) => Math.abs(p[0].ans - q.b * 100) <= p[0].tol);
+
+  /* 3 · the surface */
+  chk("forward vol: near variance plus forward variance is far variance", "n-fwdvol", (x, q, p) => Math.abs(q.v1 * q.v1 * q.d1 + p[0].ans * p[0].ans * (q.d2 - q.d1) - q.v2 * q.v2 * q.d2) < 1e-6);
+  chk("event move recovers the planted one", "n-event", (x, q, p) => Math.abs(p[0].ans - q.J * 100) <= 0.1);
+  chk("implied move: inverting the straddle for vol gives the same sigma", "n-impmove", (x, q, p) => { const v = bsect(s => 2 * px(q.S, q.S, q.T, s, 0, 0, true) - q.X, 0.01, 5);
+    return within(q.S * v * Math.sqrt(q.T), p[0], 0.4); });
+  chk("variance swap: variance notional times the variance difference", "n-varswap", (x, q, p) => Math.abs(q.N / (2 * q.K) * (q.s - q.K) * (q.s + q.K) - p[0].ans) < 1e-6);
+  chk("implied correlation rebuilds the index vol from the full covariance sum", "n-impcorr", (x, q, p) => { const w = 1 / q.n; let v2 = 0;
+    for (let i = 0; i < q.n; i++) for (let j = 0; j < q.n; j++) v2 += w * w * q.ss * q.ss * (i === j ? 1 : p[0].ans); return Math.abs(Math.sqrt(v2) - q.si) < 1e-9; });
+  chk("skew delta: reprice with the vol that moves with spot", "n-effdelta", (x, q, p) => { const h = 0.01, P = S => px(S, q.K, q.T, q.v + q.sk * (S - q.S) / 100, q.r, 0, true);
+    return Math.abs((P(q.S + h) - P(q.S - h)) / (2 * h) - p[0].ans) < 1e-4; });
+  chk("vertical: break-even by bisection on the payoff, max profit from the width", "n-vertical", (x, q, p) => { const pay = s => Math.min(Math.max(s - q.K1, 0), q.K2 - q.K1);
+    return Math.abs(bsect(s => pay(s) - q.debit, q.K1, q.K2) - p[0].ans) < 1e-6 && Math.abs((pay(1e9) - q.debit) * 100 - p[1].ans) < 1e-6; });
+
+  /* 4 · costs */
+  chk("tick in vol points: invert the price plus one tick", "n-tickvol", (x, q, p) => { const P0 = px(q.S, q.K, q.T, q.v, 0.04, 0, true);
+    const ex = 100 * (bsect(s => px(q.S, q.K, q.T, s, 0.04, 0, true) - P0 - q.tk, q.v, q.v + 1) - q.v); return within(ex, p[0]) && Math.abs(ex - q.ex) < 1e-6; });
+  chk("deal probability: discounted expectation reprices the target", "n-mprob", (x, q, p) => Math.abs(p[0].ans - 100 * q.p) <= 0.1);
+  chk("deal spread: gross return over days, scaled to a year", "n-mann", (x, q, p) => Math.abs((q.O / q.S - 1) * (365 / q.d) * 100 - p[0].ans) < 1e-9);
+
+  /* 5 · the ruler */
+  chk("straddle: closed form 2S(2N(σ√T/2) − 1), and 0.8·S·σ√T is inside the band", "n-straddle", (x, q, p) => Math.abs(2 * q.S * (2 * M.ncdf(q.v * Math.sqrt(q.T) / 2) - 1) - p[0].ans) < 1e-6 && within(0.7979 * q.S * q.v * Math.sqrt(q.T), p[0]));
+  chk("daily move: the rule of 16 lands inside the band, √365 does not", "n-rule16", (x, q, p) => within(q.S * q.v / 16, p[0]) && !within(q.S * q.v / Math.sqrt(365), p[0]));
+  chk("strike distance is −d2 with drift chosen to cancel", "n-strikesd", (x, q, p) => Math.abs(-B(q.S, q.K, q.T, q.v, q.v * q.v / 2, 0, true).d2 - p[0].ans) < 1e-9);
+  chk("mean absolute move by integrating |x| against the normal", "n-mad", (x, q, p) => Math.abs(simpson(z => Math.abs(z) * q.s * M.npdf(z), -10, 10, 4000) - p[0].ans) < 1e-6);
+
+  /* 6 · realized against implied */
+  chk("gamma P&L: full repricing less the delta hedge lands in the band", "n-gpnl", (x, q, p) => { const V = S => 2 * px(S, q.S, q.T, q.v, 0, 0, true), dS = q.S * q.x;
+    const D = (V(q.S + 1e-4) - V(q.S - 1e-4)) / 2e-4; return within((V(q.S + dS) - V(q.S) - D * dS) * 100 * q.N, p[0]); });
+  chk("break-even move from theta and gamma per trading day", "n-be", (x, q, p) => { const b = B(100, 100, 0.25, q.v, 0, 0, true);
+    return Math.abs(Math.sqrt(2 * Math.abs(b.theta) / 252 / b.gamma) - p[0].ans) < 1e-6; });
+  chk("convertible premium over parity", "n-cbprem", (x, q, p) => Math.abs((q.P - q.cr * q.S) / (q.cr * q.S) * 100 - p[0].ans) < 1e-9 && p[0].ans > 0);
+
+  /* 7 · the book */
+  chk("vega P&L: repricing at the new vol lands in the band", "n-vegapnl", (x, q, p) => within(q.N * 100 * (px(q.S, q.K, q.T, q.v + q.dv / 100, 0.04, 0, true) - px(q.S, q.K, q.T, q.v, 0.04, 0, true)), p[0]));
+  chk("dollar gamma per 1%: a symmetric reprice of ±1%", "n-dgamma", (x, q, p) => { const h = 0.01 * q.S, V = S => px(S, q.S, q.T, q.v, 0.04, 0, true);
+    return within((V(q.S + h) + V(q.S - h) - 2 * V(q.S)) / 2 * 100 * q.N, p[0]); });
+  chk("strategy margin agrees with capital.html's own rule", "n-stratm", (x, q, p) => Math.abs(CAPM.stratMargin(q.S, q.T, q.v, q.K) - p[0].ans) <= 0.6);
+  chk("margin scenario: capital.html's scan gives the same requirements", "n-margin", (x, q, p) => {
+    const legs = [{ n: -1, K: 95, call: false }], m0 = CAPM.riskMargin(100, 30 / 365, 0.3, legs), m1 = CAPM.riskMargin(100 * (1 + q.m), 30 / 365, 0.3 - q.m, legs);
+    return Math.abs(m0 - q.m0) <= 0.5 && Math.abs(m1 - q.m1) <= 0.5 && p[0].ans === Math.floor(q.u * 100000 / q.m0) &&
+      Math.abs(p[2].ans - (100000 + p[1].ans - p[0].ans * q.m1)) < 1e-6 && p[2].ans < 100000 - p[0].ans * q.m0 + p[1].ans; });
+
+  /* 8 · the questions page */
+  chk("call spread cap: deep in the money at no vol it is worth the discounted width", "n-csmax", (x, q, p) =>
+    Math.abs(px(1e4, 100, q.T, 1e-4, q.r, 0, true) - px(1e4, 100 + q.w, q.T, 1e-4, q.r, 0, true) - p[0].ans) < 1e-6);
+  chk("three-month straddle: closed form, and half the year is inside the band", "n-quarter", (x, q, p) =>
+    Math.abs(2 * q.S * (2 * M.ncdf(q.v * 0.5 / 2) - 1) - p[0].ans) < 1e-6 && within(q.X / 2, p[0]));
+  yes("every numeric template has a claim here", M.BANK.filter(t => t.kind !== "mc").every(t => CLAIMED.indexOf(t.id) >= 0));
+};
+
 const only = process.argv[2];
 const names = only ? [only.replace(/\.html$/, "")] : Object.keys(PAGES);
 /* Every Monte Carlo claim used to draw from the real Math.random, so the
