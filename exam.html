@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#EDF0EC">
+<title>The Exam — full papers for Options, visually</title>
+<meta name="description" content="Three fixed forty-question papers and a seeded random one over all twenty-five pages: timed, marked on hand-in, with the working and the chapter for every answer.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Exam — full papers for Options, visually">
+<meta property="og:description" content="Three fixed forty-question papers and a seeded random one over all twenty-five pages: timed, marked on hand-in, with the working and the chapter for every answer.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EDF0EC'/><circle cx='16' cy='16' r='7' fill='none' stroke='%231F4CE8' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/lab.css">
+<link rel="stylesheet" href="assets/mobile.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Options">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+<style>
+  [hidden]{display:none !important}
+  .panel h4{margin:0 0 10px}
+  .panel+.panel{margin-top:14px}
+  .seg.wide{flex-wrap:wrap;margin-bottom:16px} .seg.wide button,.rrow .seg button{padding:11px 10px;cursor:pointer;color:var(--ink);min-width:0}
+  .seg button[aria-pressed=true]{color:var(--chalk)}
+  .rrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:-4px 0 6px}
+  .rrow label{font-family:var(--mono);font-size:12px;color:var(--grey)}
+  .rrow input,.numin,#calcIn{font-family:var(--mono);font-size:16px;padding:8px 10px;border:1px solid var(--hair);background:var(--chalk);color:var(--ink)}
+  .quiet{font-size:14px;color:var(--grey)} .mix{font-size:15px;color:var(--ink2);margin:14px 0}
+  button.act.big{padding:14px 26px;font-size:13px} button.act.sm{padding:5px 10px}
+  .rules{margin:0;padding-left:20px;font-size:16px;line-height:1.55;color:var(--ink2)} .rules li{margin:4px 0}
+  .resume{border-color:var(--blue)}
+  .ptab{font-family:var(--mono);font-size:12.5px;border-collapse:collapse;min-width:0;width:100%}
+  .ptab th,.ptab td{padding:6px 10px 6px 0;border-bottom:1px solid var(--hair);text-align:left;vertical-align:middle}
+  .ptab th{color:var(--grey);font-weight:500;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .ptab.pg tr.ok td:last-child{color:var(--moss)} .ptab.pg tr.no td:last-child{color:var(--verm)} .ptab a{color:var(--blue)}
+  .exbar{position:sticky;top:40px;z-index:6;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;
+    background:var(--chalk);border-bottom:1px solid var(--hair);padding:10px 0;margin-bottom:16px;font-family:var(--mono);font-size:12px;color:var(--grey)}
+  #exLabel{color:var(--ink);font-weight:600} #exTimer{font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums} #exTimer.low{color:var(--verm)}
+  .qcard{background:var(--card);border:1px solid var(--hair);border-radius:2px;padding:22px 24px}
+  .qhead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:12px}
+  .qstem{font-size:18px;line-height:1.55;max-width:62ch} .qstem b{font-family:var(--mono);font-weight:500;font-size:16px}
+  .part{margin-top:16px} .ppr{font-size:16px;margin:0 0 8px;color:var(--ink2)}
+  .opts2{display:flex;flex-direction:column;gap:8px}
+  .opts2 button{display:flex;gap:12px;align-items:flex-start;text-align:left;font:inherit;font-size:16px;line-height:1.45;padding:11px 14px;border:1px solid var(--hair);background:var(--chalk);color:var(--ink);cursor:pointer;border-radius:2px}
+  .opts2 button:hover{border-color:var(--ink)} .opts2 button[aria-pressed=true]{border-color:var(--blue);background:var(--blue);color:var(--chalk)}
+  .ol{font-family:var(--mono);font-size:12px;font-weight:600;min-width:1.2em;padding-top:2px}
+  .ansrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap} .numin{width:11em;max-width:100%} .unit{font-family:var(--mono);font-size:12px;color:var(--grey)}
+  .exnav{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+  .navgrid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+  .nb{width:40px;height:38px;font-family:var(--mono);font-size:12px;border:1px solid var(--hair);background:var(--card);color:var(--ink);cursor:pointer;border-radius:2px;position:relative}
+  .nb.half{background:var(--chalk2)} .nb.done{background:var(--ink2);color:var(--chalk);border-color:var(--ink2)}
+  .nb.cur{outline:2px solid var(--blue);outline-offset:1px} .nb.flag::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--ochre)}
+  .navkey{font-family:var(--mono);font-size:11px;color:var(--grey)} .navkey i{display:inline-block;width:10px;height:10px;border:1px solid var(--hair);vertical-align:-1px;margin:0 4px 0 10px}
+  #confirmHost{border:1px solid var(--verm);background:var(--card);padding:18px 20px;margin:14px 0}
+  .calc{margin-top:16px;border:1px solid var(--hair);background:var(--card);padding:10px 14px} .calc summary{cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)}
+  .calc .ansrow{margin-top:10px} #calcIn{flex:1;min-width:0;width:100%} #calcOut{font-family:var(--mono);font-size:15px;margin-top:8px;min-height:1.3em} #calcOut.err{color:var(--verm);font-size:12px}
+  .srow{display:grid;grid-template-columns:minmax(0,1fr) 90px 62px;gap:10px;align-items:center;font-size:14px;margin:6px 0}
+  .srow i{display:block;height:8px;background:var(--hair)} .srow b{display:block;height:8px;background:var(--moss)} .srow .sv{font-family:var(--mono);font-size:12px;text-align:right}
+  .dstats .v.sm{font-size:16px;padding-top:6px}
+  .split.res{margin:18px 0 8px}
+  .rvbar{margin:24px 0 10px}
+  .rv{border:1px solid var(--hair);border-left:4px solid var(--hair);background:var(--card);padding:16px 18px;margin:10px 0}
+  .rv.ok{border-left-color:var(--moss)} .rv.no{border-left-color:var(--verm)} .rv.half{border-left-color:var(--ochre)}
+  .rvh{display:flex;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px}
+  .rvh b{color:var(--ink)} .rv .qstem{font-size:16px} .rvp p{margin:6px 0;font-size:15px}
+  .tag{font-family:var(--mono);font-weight:600} .tag.ok{color:var(--moss)} .tag.no{color:var(--verm)}
+  .work{font-size:15px;color:var(--ink2);line-height:1.6;max-width:66ch;margin-top:10px} .src{font-size:14px;margin:10px 0 0} .src a{color:var(--blue)}
+  #printHost{display:none}
+  @media (max-width:700px){.exbar{top:37px}}
+  @media (max-width:640px){.qcard{padding:16px 14px}.qstem{font-size:17px}.srow{grid-template-columns:minmax(0,1fr) 60px 56px}.nb{width:38px}.seg.wide button{flex:1 1 45%}}
+  @media print{
+    body[data-print] .serieshead,body[data-print] footer,body[data-print] .progress,body[data-print] main>*:not(#printHost),body[data-print] .tutorBtn{display:none !important}
+    body[data-print] #printHost{display:block} #printHost .pk{break-inside:avoid;border-bottom:1px solid #ccc;padding:6px 0} #printHost h2{font-size:18px}
+  }
+</style>
+
+<header class="serieshead">
+  <div class="in">
+    <a class="home" href="index.html">&larr; Options, visually</a>
+    <span class="num">Companion &middot; Exam</span>
+  </div>
+</header>
+<div class="progress" id="prog"></div>
+
+<main>
+
+<div class="orient">
+  <h2>The exam</h2>
+  <p class="lede">Full-length papers over all twenty-five pages, set at the depth of a trainee options desk interview. Forty questions, weighted by the seven ideas on the reading route: concepts where the wrong answers are the real misconceptions, numbers to compute against a tolerance, and multi-step scenarios such as sizing a hedge, a dividend exercise decision, and the margin after a fall. Nothing is marked until you hand it in.</p>
+</div>
+
+<div id="startHost"></div>
+
+<div id="examHost" hidden>
+  <div class="exbar"><span id="exLabel"></span><span id="exCount"></span><span id="exTimer"></span></div>
+  <div class="qcard" id="qHost"></div>
+  <div class="exnav">
+    <button class="act ghost" id="prevBtn" data-act="prev">&larr; Previous</button>
+    <button class="act ghost" id="flagBtn" data-act="flag" aria-pressed="false">Flag for review</button>
+    <button class="act" id="nextBtn" data-act="next">Next &rarr;</button>
+  </div>
+  <div id="confirmHost" hidden></div>
+  <div class="navgrid" id="navHost"></div>
+  <p class="navkey">Answered<i style="background:var(--ink2)"></i> Partly<i style="background:var(--chalk2)"></i> Flagged<i style="background:var(--ochre);border-radius:50%"></i> &nbsp; Keys: &larr; &rarr; to move, 1&ndash;4 to choose, F to flag.</p>
+  <div class="btnrow"><button class="act" data-act="review">Hand the paper in&hellip;</button></div>
+  <details class="calc" id="calcBox">
+    <summary>Calculator</summary>
+    <div class="ansrow"><input id="calcIn" autocomplete="off" spellcheck="false" aria-label="Expression to calculate" placeholder="0.4*100*0.3*sqrt(30/365)"><button class="act" data-act="calc=">=</button><button class="act ghost" data-act="calcuse">Use in answer</button></div>
+    <div id="calcOut" role="status"></div>
+    <p class="quiet">+ &minus; * / ^ and brackets; sqrt, ln, log, exp, abs; N() is the normal distribution; pi, e, and ans for the last result.</p>
+  </details>
+</div>
+
+<div id="resultsHost" hidden></div>
+<div id="printHost"></div>
+
+</main>
+
+<footer>
+  <p class="n">Numeric keys are computed on this page with Black&ndash;Scholes and the carry each question states, and re-derived a different way by verify.js. Attempts and results are kept in this browser only.</p>
+</footer>
+
+<script src="assets/lab.js"></script>
+<script src="assets/pwa.js" defer></script>
+<script>
+"use strict";
+
+/* ══ The exam ══════════════════════════════════════════════════════════
+   Full-length papers over the whole series. One script, in this order:
+   a seedable generator; the page and idea tables; the question bank
+   (multiple choice, numeric with a tolerance band, multi-step scenarios);
+   the three fixed versions and the seeded random paper; grading; storage;
+   rendering; one delegated handler for clicks, one for typing.
+   Every numeric key is computed here from the numbers the question shows,
+   never typed, and verify.js re-derives each one by a different route.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── a seedable generator, so any paper can be replayed exactly ──────── */
+let __seed = 1;
+function rnd(){ __seed = (__seed + 0x6D2B79F5) | 0; let t = Math.imul(__seed ^ (__seed >>> 15), 1 | __seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
+function seed(n){ __seed = n | 0; }
+function hashStr(s){ let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h | 0; }
+const pick = a => a[Math.floor(rnd() * a.length)];
+const r2 = x => Math.round(x * 100) / 100;
+const f1 = x => x.toFixed(1), f2 = x => x.toFixed(2), f3 = x => x.toFixed(3), f4 = x => x.toFixed(4);
+const pc0 = v => (v * 100).toFixed(0) + "%", pc1 = v => (v * 100).toFixed(1) + "%", pc2 = v => (v * 100).toFixed(2) + "%";
+const sgn = x => (x < 0 ? "−" : "");
+const usd = x => sgn(x) + "$" + Math.round(Math.abs(x)).toLocaleString("en-US");
+const usd2 = x => sgn(x) + "$" + Math.abs(x).toFixed(2);
+const num0 = x => sgn(x) + Math.round(Math.abs(x)).toLocaleString("en-US");
+const pxo = (S, K, T, v, r, q, call) => bs(S, K, T, v, r, q, call).price;
+const RT2PI = Math.sqrt(2 / Math.PI);
+
+/* ── where each question is taught ───────────────────────────────────── */
+const IDEA = ["",
+  "A payoff is a bet on a distribution",
+  "Call minus put is the forward",
+  "The surface prices each piece of the distribution",
+  "Edge is what is left after costs",
+  "Vol is the price, and σ√T is the ruler",
+  "Hedged, it is realized against implied",
+  "Size it, and run the book",
+  "The questions they ask you"];
+const PAGE = {
+  "black-scholes": [1, "01", "Price from paths"], "binomial": [1, "02", "One step, two outcomes"],
+  "parity": [2, "03", "The parity machine"], "early-exercise": [2, "04", "When to exercise"],
+  "forwards": [2, "05", "Cost of carry"], "carry": [2, "06", "Dividends and borrow"],
+  "surface": [3, "07", "Skew and density"], "catalyst": [3, "08", "Events"], "structures": [3, "09", "Structures"],
+  "spreading": [3, "10", "Choosing a spread"], "variance": [3, "11", "Variance"], "dispersion": [3, "12", "Correlation"],
+  "execution": [4, "13", "Hedging and execution"], "microstructure": [4, "14", "Spreads and flow"],
+  "merger": [4, "15", "Deals"], "playbook": [4, "16", "Strategies that get run"],
+  "screen": [5, "17", "Reading the screen"], "rulers": [5, "18", "Two rulers"],
+  "atlas": [6, "19", "The Greek atlas"], "real-world": [6, "20", "Where it breaks"],
+  "dynamics": [6, "21", "When the surface moves"], "converts": [6, "22", "Vol through a bond"],
+  "book": [7, "23", "Risk, P&L, the columns"], "capital": [7, "24", "Capital and margin"],
+  "questions": [8, "25", "Forty questions"]
+};
+/* chapter titles, for the "where this is taught" link under each answer */
+const CH = {
+  "black-scholes": { c1: "What you actually own", c2: "One path, and the two numbers that shape it", c4: "The price is an average, taken carefully",
+    c5: "Now the formula", c6: "Six views of one density", c7: "The part that makes it true", c8: "What the gamma costs", c9: "On the desk" },
+  "binomial": { c1: "One step, two outcomes, one price", c2: "The probability that is not a probability", c4: "Convergence is a sawtooth",
+    c5: "What the lattice can do that the formula cannot", c7: "Where it breaks" },
+  "parity": { c1: "One identity", c4: "The combo and the straddle", c5: "What r/c actually is", c6: "The conversion and the reversal",
+    c7: "Simple, compound, and which one the screen means", c8: "Jelly rolls", c9: "Borrow, and why the riskless trade isn't" },
+  "early-exercise": { c1: "The right to exercise early is worth zero", c3: "Only a dividend can pay for it", c4: "The put runs on interest instead",
+    c6: "Assignment is a lottery you are already in", c7: "Twenty dollars of intrinsic, two thousand of risk", c8: "A ratio change survives" },
+  "forwards": { c1: "A forward price is built, not forecast", c4: "Options on futures", c5: "Where page 04's rule inverts", c6: "Index products" },
+  "carry": { c1: "Each expiry quotes one number", c2: "Between two expiries there is exactly one unknown", c3: "A dividend change is a delta nobody hedged" },
+  "surface": { c1: "One volatility per option", c2: "The smile is a probability distribution", c3: "Two ways to make a smile", c4: "The other axis",
+    c5: "What your delta actually is", c6: "Surfaces that cannot be right" },
+  "catalyst": { c2: "Not all days are equal", c3: "Stripping the event out", c4: "The implied move, and the factor everyone drops", c5: "Through the print", c6: "Expressing it" },
+  "structures": { c1: "Two readings of one ticket", c2: "The fingerprint", c3: "The same trade, from both sides", c5: "The lizards" },
+  "spreading": { c2: "The vertical, and the credit-spread illusion", c5: "Ratios", c7: "Choosing" },
+  "variance": { c1: "The square is not a detail", c4: "The wings are not a detail either", c5: "What the contract actually pays", c6: "VIX is this, implemented", c7: "Where it breaks" },
+  "dispersion": { c1: "An index is not the average of its parts", c2: "Nobody quotes correlation", c4: "Why implied correlation is persistently rich", c5: "Correlation goes to one" },
+  "execution": { c2: "Impact against timing risk", c4: "The benchmark decides the verdict", c5: "Dark venues", c6: "Hedging with the basket" },
+  "microstructure": { c1: "What a tick is worth", c2: "What is actually inside a spread", c3: "Quote a market yourself", c5: "Dealer gamma", c8: "Who gets filled" },
+  "merger": { c1: "The spread is a rate, not a profit", c2: "The price is a probability", c5: "A second request", c7: "Options on a binary outcome" },
+  "playbook": { c1: "Every strategy is paid for a shape of risk", c2: "The playbook", c3: "Choosing a strategy" },
+  "screen": { c1: "A chain is a distribution printed sideways", c2: "A strike's distance in dollars is meaningless", c3: "Delta is the ruler",
+    c4: "What each column is actually telling you", c6: "Before you believe the IV column, find the forward", c7: "The five-second scan" },
+  "rulers": { c1: "Two rulers, one distribution", c3: "0.7979 is the normal's number", c4: "Fat tails mean fewer wins", c5: "Measuring volatility with absolute values" },
+  "atlas": { c1: "Four axes, not seven", c4: "What time does to a profile", c5: "Delta-hedged, they all break even on the same move" },
+  "real-world": { c2: "The hedging error stops falling", c3: "Fat tails, at exactly the same variance", c4: "What one volatility costs", c5: "What survives" },
+  "dynamics": { c1: "One hedge, three outcomes", c3: "A vega total is a guess about the term structure", c4: "What skew pays and what it costs", c5: "Which realized volatility" },
+  "converts": { c1: "A bond with a call stapled to it", c2: "The trade is volatility arbitrage", c3: "The floor is not a floor" },
+  "book": { c1: "Some greeks add", c3: "How far can you trust a greek report?", c4: "One vega number across the term structure", c5: "Gamma across names",
+    c6: "Limits", c8: "Where the day's P&L came from" },
+  "capital": { c1: "One trade, three capital numbers", c2: "The requirement moves against you" },
+  "questions": { c2: "A six-wide call spread", c3: "Four quarterly options cost twice the year", c4: "Long gamma and short vega", c7: "You sold at 30", c8: "How to take one you have never seen" }
+};
+
+/* ══ the bank ══════════════════════════════════════════════════════════
+   A template is {id, page, ch, lvl, kind, make}. make() returns
+   {stem, parts:[...], why, q}; a part is {t:"mc", opts, ok, fixed} or
+   {t:"num", ans, tol, unit}. Single-part questions may return opts/ok or
+   ans/tol/unit at the top level. q carries the inputs verify.js needs.
+   lvl: 1 warm-up, 2 standard, 3 hard.                                     */
+const BANK = [], BY = {};
+function add(t){ if (BY[t.id]) throw new Error("duplicate question id " + t.id); t.idea = PAGE[t.page][0]; BANK.push(t); BY[t.id] = t; }
+function mc(id, page, ch, lvl, stem, opts, why){ add({ id, page, ch, lvl, kind: "mc", make: () => ({ stem, opts, ok: 0, why }) }); }
+function num(id, page, ch, lvl, make){ add({ id, page, ch, lvl, kind: "num", make }); }
+function multi(id, page, ch, lvl, make){ add({ id, page, ch, lvl, kind: "multi", make }); }
+
+/* ── 1 · A payoff is a bet on a distribution ─────────────────────────── */
+mc("bs-own", "black-scholes", "c1", 1,
+  "You buy the 100-strike call for $4.00 with the stock at $100. At expiry the stock is $103. What is your profit or loss per share?",
+  ["−$1.00: the call pays $3.00 at expiry and cost $4.00", "+$3.00: the call finished $3 in the money",
+   "+$7.00: the $3 of intrinsic plus the $4 you paid comes back", "−$4.00: below the $104 break-even the call expires worthless"],
+  "<b>−$1.00.</b> An in-the-money call pays stock minus strike, $3, whatever you paid for it. Profit is payoff minus premium. Break-even at $104 is where profit is zero, not where the option starts paying.");
+mc("bs-drift", "black-scholes", "c4", 2,
+  "Two analysts agree on the stock's volatility. One expects it to rise 20% a year, the other expects nothing. What should they disagree about in the call's Black–Scholes price?",
+  ["Nothing: the price comes from the cost of hedging, which uses the riskless rate, not the expected return",
+   "The bullish one should pay more, since the call is more likely to finish in the money",
+   "They should split the difference and price at a 10% drift",
+   "Drift only matters for long-dated calls, so it depends on the expiry"],
+  "<b>Nothing.</b> The price is what it costs to manufacture the payoff by delta-hedging, and the hedge cancels the drift. Every path is grown at the riskless rate in the average. A view on drift is a view on the stock, and the stock is the cheaper way to express it.");
+mc("bs-voltime", "black-scholes", "c2", 2,
+  "For an at-the-money option, doubling volatility has about the same effect on its value as multiplying time to expiry by",
+  ["Four", "Two", "The square root of two", "Eight"],
+  "<b>Four.</b> The spread of outcomes is σ√T, and an at-the-money price is close to proportional to it (0.4·S·σ√T for a call). Doubling σ doubles σ√T; so does multiplying T by four.");
+mc("bs-gamma", "black-scholes", "c8", 2,
+  "You buy an at-the-money call at 20 implied and delta-hedge it every day. The stock realizes 25 volatility over the life. Roughly what happens to the hedged position?",
+  ["It makes money: the gains from rebalancing on the moves outrun the theta paid, because realized beat implied",
+   "It loses: higher volatility makes delta change more, and each rebalance costs you",
+   "Nothing: being delta-hedged means there is no exposure left",
+   "It makes money only if the stock finishes above the strike"],
+  "<b>It makes money.</b> Long gamma, each rebalance sells after rallies and buys after dips, earning ½Γ(ΔS)² per move. Theta is the rent for that, priced at 20 vol. At 25 the moves are bigger than the rent assumed. Where the stock finishes hardly matters; the path does.");
+mc("bs-desk", "black-scholes", "c9", 3,
+  "Two delta-hedged long-gamma books each realize 25 vol over a month against 20 implied. In the first the big moves came while the option was at the money. In the second they came while it was far out of the money. Which made more?",
+  ["The first: hedged P&L weights each move by the gamma held at the time, and gamma peaks at the money",
+   "The same: both realized the same volatility, so both earned the same spread",
+   "The second: out-of-the-money options carry more leverage",
+   "Neither: a delta-hedged book cannot earn from volatility"],
+  "<b>The first.</b> The day's hedged P&L is ½·Γ·S²·(realized² − implied²)·dt. A big move where gamma is close to zero earns close to nothing. So the same realized vol pays very different amounts depending on where the moves land.");
+mc("bs-density", "black-scholes", "c6", 2,
+  "The price of a 110 call depends on which part of the risk-neutral terminal distribution?",
+  ["Only the part above 110, each outcome weighted by how far above 110 it lands", "The whole distribution, weighted equally",
+   "Only the probability of finishing above 110", "Only the mean of the distribution"],
+  "<b>Only the part above 110, weighted by distance.</b> The payoff is zero below the strike, so nothing there matters. Above it, a finish at 130 is worth twice a finish at 120. The probability alone prices a digital, not a call.");
+mc("bs-n2", "black-scholes", "c5", 2,
+  "In the Black–Scholes call formula, N(d2) is",
+  ["The risk-neutral probability that the call finishes in the money", "The real-world probability that the call finishes in the money",
+   "The call's delta", "The probability that the stock rises"],
+  "<b>The risk-neutral probability of finishing in the money.</b> K·e^(−rT)·N(d2) is the present value of paying the strike in the states where you exercise. N(d1) is the delta. Neither is a real-world forecast, since both use the riskless drift.");
+mc("bin-q", "binomial", "c2", 2,
+  "In a one-step tree the risk-neutral up probability comes out at 0.6. What does that tell you about the real chance the stock goes up?",
+  ["Nothing: 0.6 is the weight that makes the stock earn the riskless rate, set by the up move, the down move and the rate",
+   "The stock goes up 60% of the time", "The market is bullish on the stock",
+   "Options are overpriced if the real chance is below 0.6"],
+  "<b>Nothing.</b> q = (R − d)/(u − d) uses only the two moves and the rate. Change the real probability and the option's price does not move, because the replicating portfolio does not care which branch happens.");
+mc("bin-saw", "binomial", "c4", 3,
+  "You add steps to a binomial tree for an at-the-money European call. How does the price behave?",
+  ["It converges in a sawtooth, above and below the limit as the strike falls on or between nodes, so average two neighboring step counts",
+   "It falls steadily towards the Black–Scholes price from above", "It rises steadily towards the Black–Scholes price from below",
+   "It never settles, because the tree has no volatility input"],
+  "<b>A sawtooth.</b> Whether a node lands exactly on the strike alternates with the step count, so the error flips sign. Averaging consecutive step counts, or placing a node on the strike, cancels most of it.");
+mc("bin-am", "binomial", "c5", 2,
+  "What can the lattice do that the closed-form Black–Scholes formula cannot?",
+  ["Check early exercise at every node, so it prices American options",
+   "Price an option without a volatility input", "Remove the need for an interest rate",
+   "Price European calls more accurately than the formula"],
+  "<b>American exercise.</b> At each node the tree compares holding with exercising and keeps the larger. The closed form has no node to check. For a European option the tree only converges to the formula.");
+mc("bin-break", "binomial", "c7", 3,
+  "Your tree's risk-neutral up probability comes out above 1. What has gone wrong?",
+  ["Cash grows faster than the stock's up move, so shorting the stock and lending the proceeds is riskless profit",
+   "The down move beats cash, so buying the stock with borrowed money is riskless profit",
+   "Volatility is too high for the step size, which only costs accuracy",
+   "Nothing: the option is simply cheap"],
+  "<b>Cash beats the up move.</b> q > 1 means R > u: even the best stock outcome earns less than lending. Short the stock and lend, and you win in both states. A valid tree needs d < R < u.");
+
+num("n-bs-call", "black-scholes", "c5", 2, () => {
+  const S = pick([50, 80, 100, 120, 200]), K = Math.round(S * pick([0.9, 0.95, 1, 1.05, 1.1])), d = pick([30, 60, 91, 182, 365]),
+    T = d / 365, v = pick([0.2, 0.25, 0.3, 0.4]), r = pick([0.03, 0.04, 0.05]), b = bs(S, K, T, v, r, 0, true);
+  return { stem: "A European call: stock <b>" + S + "</b>, strike <b>" + K + "</b>, <b>" + d + "</b> days, volatility <b>" + pc0(v) + "</b>, rate <b>" + pc1(r) +
+      "</b> continuously compounded, no dividends. What is its Black–Scholes price?",
+    ans: b.price, tol: Math.max(0.03, 0.015 * b.price), unit: "$ per share", q: { S, K, T, v, r },
+    why: "d1 = [ln(S/K) + (r + σ²/2)T] ÷ σ√T = " + f3(b.d1) + ", and d2 = d1 − σ√T = " + f3(b.d2) + ". N(d1) = " + f4(b.N1) + ", N(d2) = " + f4(b.N2) +
+      ". C = S·N(d1) − K·e^(−rT)·N(d2) = " + f2(S * b.N1) + " − " + f2(K * Math.exp(-r * T) * b.N2) + " = <b>" + f2(b.price) + "</b>." };
+});
+num("n-bs-prob", "black-scholes", "c6", 2, () => {
+  const S = 100, K = pick([90, 95, 105, 110, 120]), d = pick([30, 91, 182]), T = d / 365, v = pick([0.2, 0.3, 0.4]), r = 0.04, b = bs(S, K, T, v, r, 0, true);
+  return { stem: "Stock <b>100</b>, strike <b>" + K + "</b>, <b>" + d + "</b> days, volatility <b>" + pc0(v) + "</b>, rate <b>4%</b>, no dividends. What is the risk-neutral probability that the stock finishes above " + K + "?",
+    ans: 100 * b.N2, tol: 1.0, unit: "%", q: { S, K, T, v, r },
+    why: "The probability is N(d2), with d2 = [ln(S/K) + (r − σ²/2)T] ÷ σ√T = " + f3(b.d2) + ". N(" + f3(b.d2) + ") = <b>" + pc1(b.N2) +
+      "</b>. The delta, N(d1) = " + pc1(b.N1) + ", is close but not the same number." };
+});
+num("n-bin-call", "binomial", "c1", 2, () => {
+  const S = 100, u = pick([1.1, 1.15, 1.2, 1.25]), dn = pick([0.8, 0.85, 0.9]), R = pick([1, 1.01, 1.02, 1.03]);
+  const K = pick([90, 95, 100, 105].filter(k => k < S * u));
+  const Su = S * u, Sd = S * dn, Cu = Math.max(Su - K, 0), Cd = Math.max(Sd - K, 0), D = (Cu - Cd) / (Su - Sd), B = (Cu - D * Su) / R, ans = D * S + B;
+  return { stem: "A stock at <b>100</b> will be either <b>" + f2(Su) + "</b> or <b>" + f2(Sd) + "</b> in one period. Cash grows by a factor of <b>" + R.toFixed(2) +
+      "</b> over the period. Price a call struck at <b>" + K + "</b> expiring at the end of the period, by replication.",
+    ans, tol: 0.01, unit: "$ per share", q: { S, u, dn, R, K },
+    why: "The call pays " + f2(Cu) + " up and " + f2(Cd) + " down. Hold Δ = (" + f2(Cu) + " − " + f2(Cd) + ") ÷ (" + f2(Su) + " − " + f2(Sd) + ") = " + f4(D) +
+      " shares and " + (B < 0 ? "borrow " + f2(-B) : "lend " + f2(B)) + " so the package pays the same in both states. It costs Δ·S + B = <b>" + f2(ans) + "</b>." };
+});
+num("n-bin-q", "binomial", "c2", 1, () => {
+  const u = pick([1.1, 1.15, 1.2, 1.25]), dn = pick([0.8, 0.85, 0.9]), R = pick([1, 1.01, 1.02, 1.03]), q = (R - dn) / (u - dn);
+  return { stem: "A one-step tree: the stock multiplies by <b>" + u.toFixed(2) + "</b> or by <b>" + dn.toFixed(2) + "</b>, and cash grows by <b>" + R.toFixed(2) +
+      "</b>. What is the risk-neutral probability of the up move?",
+    ans: q, tol: 0.005, unit: "probability, 0 to 1", q: { u, dn, R },
+    why: "The weight that makes the stock earn the same as cash: q·u + (1 − q)·d = R, so q = (R − d) ÷ (u − d) = (" + R.toFixed(2) + " − " + dn.toFixed(2) + ") ÷ (" +
+      u.toFixed(2) + " − " + dn.toFixed(2) + ") = <b>" + f3(q) + "</b>." };
+});
+multi("n-hedge", "black-scholes", "c7", 3, () => {
+  const S = pick([50, 100, 150]), K = Math.round(S * pick([1, 1.05])), d = pick([30, 60, 90]), T = d / 365, v = pick([0.2, 0.3, 0.4]), r = 0.04;
+  const N = pick([10, 20, 25, 50]), x = pick([-0.05, -0.03, 0.02, 0.03, 0.05]), S1 = S * (1 + x);
+  const b0 = bs(S, K, T, v, r, 0, true), b1 = bs(S1, K, T, v, r, 0, true), sh0 = N * 100 * b0.delta, add1 = N * 100 * (b1.delta - b0.delta);
+  return { stem: "You sell <b>" + N + "</b> call contracts (100 shares each): stock <b>" + S + "</b>, strike <b>" + K + "</b>, <b>" + d + "</b> days, volatility <b>" + pc0(v) +
+      "</b>, rate <b>4%</b>, no dividends. You hedge with stock.",
+    parts: [
+      { p: "Delta of one call, per share", t: "num", ans: b0.delta, tol: 0.01, unit: "0 to 1" },
+      { p: "Shares to buy to be delta-neutral", t: "num", ans: sh0, tol: Math.max(5, N * 100 * 0.01), unit: "shares" },
+      { p: "The stock jumps instantly to " + f2(S1) + ". How many more shares do you buy to be neutral again? Negative means sell.", t: "num", ans: add1, tol: Math.max(5, N * 100 * 0.012), unit: "shares" }],
+    q: { S, K, T, v, r, N, S1 },
+    why: "Delta is N(d1) = " + f3(b0.delta) + ". Short " + N * 100 + " calls' worth of shares is short " + num0(sh0) + " deltas, so buy <b>" + num0(sh0) + "</b> shares. At " + f2(S1) +
+      " the delta is " + f3(b1.delta) + ", so the calls are short " + num0(N * 100 * b1.delta) + " deltas and you " + (add1 >= 0 ? "buy " : "sell ") + "<b>" + num0(Math.abs(add1)) +
+      "</b> shares. Short gamma: you buy after rallies and sell after drops, which is the cost the premium paid you for." };
+});
+
+/* ── 2 · Call minus put is the forward ───────────────────────────────── */
+mc("par-syn", "parity", "c1", 1,
+  "Long a call and short a put, same strike, same expiry, is equivalent to",
+  ["A long forward at the strike: the stock, bought with a loan of the strike's present value", "A straddle",
+   "A short position in the stock", "A long call spread"],
+  "<b>A long forward.</b> At expiry you own the stock for K in every state: the call is exercised above K, the put is assigned below. So C − P = S − K·e^(−rT) on a non-dividend stock.");
+mc("par-conv", "parity", "c6", 2,
+  "European options, no dividends, easy borrow. At one strike C − P is $1.00 above S − K·e^(−rT). Every other strike is on parity. What do you trade?",
+  ["A conversion: sell the call, buy the put, buy the stock", "A reversal: buy the call, sell the put, short the stock",
+   "Buy the straddle, since the call is rich", "Nothing: a gap like that is borrow"],
+  "<b>A conversion.</b> The synthetic (C − P) is rich against the real forward, so sell the synthetic and buy the real thing. The package delivers stock at K in every state and locks the $1.00 less costs. One strike off is a mispricing; every strike off together would be carry.");
+mc("par-borrow", "parity", "c9", 3,
+  "No dividend before expiry. At every strike C − P sits about $0.40 below S − K·e^(−rT), so the reversal looks like free money. What is it most likely?",
+  ["Borrow: the stock is hard to borrow, and the reversal's short stock pays that fee", "An arbitrage at every strike, so do all of them",
+   "A dividend increase that only affects the calls", "Stale call quotes"],
+  "<b>Borrow.</b> A gap that is the same at every strike is a carry term, not a mispriced option. The reversal shorts stock, and a hard-to-borrow name charges for that. The options are pricing the fee. Without a locate there is no trade at all.");
+mc("par-rc", "parity", "c5", 2,
+  "A market in r/c (reversal/conversion) quoted on a desk is",
+  ["The carry: interest on the strike less dividends and borrow over the life, the gap between C − P and S − K",
+   "The volatility spread between calls and puts", "The commission for doing the conversion", "The skew between the call and put strikes"],
+  "<b>The carry.</b> C − P = S − K + (interest on K) − (dividends) − (borrow). The r/c is everything after S − K. It has no volatility in it, which is why it trades like a rate.");
+mc("par-combo", "parity", "c4", 2,
+  "The combo is a long call and a short put at one strike; the straddle is a long call and a long put at the same strike. Compare their gamma and vega.",
+  ["The combo has none of either; the straddle has twice the call's", "Both have the same gamma; only vega differs",
+   "The combo has twice the straddle's gamma", "Both have zero vega at the money"],
+  "<b>The combo has none.</b> A call and a put at the same strike have identical gamma and vega. Long one and short the other cancels them, leaving a forward. Long both doubles them.");
+mc("par-jelly", "parity", "c8", 3,
+  "A jelly roll (long the far synthetic, short the near synthetic, same strike) is a position in",
+  ["The carry between the two expiries: interest on the strike over the gap, less dividends paid inside it",
+   "The volatility spread between the two expiries", "The stock's direction over the gap", "The skew at that strike"],
+  "<b>Carry between expiries.</b> Each synthetic is a forward. The difference of two forwards is the financing between their dates: interest on K over the interval, minus the dividends that fall inside it. Volatility cancels.");
+mc("ee-zero", "early-exercise", "c1", 1,
+  "On a stock that pays no dividends, with positive rates, early exercise of an American call is",
+  ["Never optimal: selling the call, or holding it hedged, is always worth at least as much", "Optimal when the call is deep in the money",
+   "Optimal on the last day before expiry", "Optimal when volatility is low"],
+  "<b>Never optimal.</b> Exercising pays the strike early, losing interest, and throws away the put-like protection inside the call. The call is worth at least S − K·e^(−rT), which is more than S − K.");
+mc("ee-put", "early-exercise", "c4", 2,
+  "Why can it pay to exercise a deep in-the-money American put early?",
+  ["Exercising receives the strike now, and the interest on it can exceed the put's remaining time value",
+   "A dividend is about to be paid", "A put has no time value once it is in the money", "To avoid being assigned on it"],
+  "<b>Interest on the strike.</b> Deep in the money the put behaves like a short forward, with little optionality left. Cash received today earns interest; once that exceeds what the option part is worth, exercise. The call's equivalent driver is a dividend.");
+mc("ee-leftover", "early-exercise", "c6", 2,
+  "Tonight is the last chance to exercise calls for tomorrow's dividend, and some holders who should will not. You are short those calls. What is the effect?",
+  ["Any short not assigned keeps the call's value across the ex-date, so the shorts collect what the non-exercisers leave behind",
+   "Nothing: assignment is spread evenly, so every short is assigned in proportion", "You are guaranteed to be assigned on all of them",
+   "The exchange forces exercise of every in-the-money call"],
+  "<b>The shorts collect it.</b> Assignment is random across short positions. Each long who forgets loses roughly the dividend less the time value, and that value lands with whichever shorts escape assignment. Desks trade size into this, and why it pays is the subject of the chapter.");
+mc("ee-pin", "early-exercise", "c7", 3,
+  "At expiry the stock closes at 50.02 and you are short 20 of the 50 calls. What is your risk over the weekend?",
+  ["You do not know how many will be exercised, so on Monday you may be short anywhere from zero to 2,000 shares",
+   "None: they are two cents in the money, worth $40 in total", "You will certainly be assigned on all 20, so buy 2,000 shares now",
+   "Only the $40 of intrinsic value you owe"],
+  "<b>Unknown share count.</b> Holders can exercise or not, and after-hours news moves the decision. You can wake up short 2,000 shares into a gap, or flat. The intrinsic value is small; the position you may or may not hold is not.");
+mc("ee-merger", "early-exercise", "c8", 3,
+  "A cash takeover of the target closes before your options expire. What happens to listed options on the target?",
+  ["They become rights to the cash price, so all time value disappears and they are worth intrinsic against the deal price",
+   "They convert into the acquirer's options at the same implied volatility", "They are cancelled and the premiums refunded",
+   "Nothing changes until expiry"],
+  "<b>They settle into cash.</b> A ratio change (a split) survives because the deliverable is still stock. A composition change into cash leaves nothing to move, so the options are worth what they are in the money against the cash, and nothing more.");
+mc("fwd-built", "forwards", "c1", 1,
+  "A one-year forward on a stock that pays no dividends sits above spot because",
+  ["Holding the stock to deliver costs the interest on its price; the forward is spot plus carry, not a forecast",
+   "The market expects the stock to rise", "Investors demand an equity risk premium", "Volatility makes the future price higher"],
+  "<b>Carry.</b> A dealer who sells the forward buys the stock today with borrowed money and delivers it. The fair forward is whatever makes that break even: S·e^(rT). It says nothing about where the stock is going.");
+mc("fwd-black", "forwards", "c4", 2,
+  "In the Black (1976) model for an option on a futures contract, the futures is treated like a stock whose dividend yield equals the rate. Why?",
+  ["A futures position costs nothing to hold, so its expected growth under the pricing measure is zero",
+   "Futures pay dividends at the rate", "The exchange requires it", "Futures have no volatility of their own"],
+  "<b>Holding futures costs nothing.</b> A stock's forward grows at r − q. A futures contract requires no outlay, so its drift under the pricing measure is zero, which is r − q with q = r. Plug that in and Black–Scholes becomes Black.");
+mc("fwd-invert", "forwards", "c5", 3,
+  "A deep in-the-money American call on a futures contract, premium paid up front. Can early exercise be optimal?",
+  ["Yes: exercising turns the option into futures plus cash now, the cash earns interest, and the futures costs nothing to hold",
+   "No, never, for the same reason as a call on a non-dividend stock", "Only if the futures pays a dividend", "Only on the last trading day"],
+  "<b>Yes.</b> With a stock, exercising pays the strike early and costs interest. With a futures call, exercising receives the intrinsic value in cash. Holding the futures afterwards costs nothing. Deep in the money the interest on that cash can beat the remaining time value, so the stock rule inverts.");
+mc("fwd-index", "forwards", "c6", 2,
+  "An index's options imply a forward well below S·e^(rT). The most likely reason is",
+  ["Dividends expected over the life, which the index holder receives and the forward holder does not",
+   "The market expects the index to fall", "The index is hard to borrow", "A mispricing in the futures"],
+  "<b>Dividends.</b> F = (S − PV(dividends))·e^(rT). An index pays a steady stream of dividends, and the options price them through the forward. The forward is carry arithmetic, not a forecast.");
+mc("carry-unknown", "carry", "c2", 3,
+  "With the rate known, C − P at one strike gives each expiry's carry. What does the difference between two adjacent expiries tell you?",
+  ["The dividends plus borrow expected between those two dates: one unknown per interval", "The forward volatility between the dates",
+   "The real-world expected return over the interval", "Nothing: the two carries are independent"],
+  "<b>What is paid between the dates.</b> Each expiry's forward bakes in everything up to its date. Subtracting two leaves only the interval, and with the rate known there is one number left: dividends and borrow. That is how a carry curve is read off a chain.");
+mc("carry-divshock", "carry", "c3", 2,
+  "The company unexpectedly raises a dividend paid before expiry. You are long calls, delta-hedged with short stock. What happens?",
+  ["You lose: the forward drops by the extra dividend, so the calls lose value the stock hedge does not give back",
+   "Nothing: the book is delta-neutral", "You gain, because the company is signalling strength", "You gain: the short stock is paid the dividend"],
+  "<b>You lose.</b> The stock price does not change today, so the hedge does nothing. The calls are priced off the forward, which falls by the present value of the extra dividend. A delta to the dividend is one nobody hedged. A short stock position pays the dividend; it does not receive it.");
+
+num("n-put-parity", "parity", "c1", 1, () => {
+  const S = pick([40, 50, 75, 100, 120]), K = Math.round(S * pick([0.9, 0.95, 1, 1.05, 1.1])), d = pick([30, 60, 90, 180]), T = d / 365,
+    r = pick([0.03, 0.04, 0.05]), v = pick([0.2, 0.3, 0.4]), C = r2(pxo(S, K, T, v, r, 0, true)), pk = K * Math.exp(-r * T), ans = C - S + pk;
+  return { stem: "Stock <b>" + S + "</b>, no dividends, European options with <b>" + d + "</b> days left, rate <b>" + pc1(r) + "</b> continuously compounded. The " + K +
+      " call trades at <b>" + f2(C) + "</b>. Where should the " + K + " put trade?",
+    ans, tol: 0.02, unit: "$ per share", q: { S, K, T, v, r, C },
+    why: "Parity: P = C − S + K·e^(−rT). K·e^(−rT) = " + f2(pk) + ", so P = " + f2(C) + " − " + S + " + " + f2(pk) + " = <b>" + f2(ans) + "</b>. No volatility needed." };
+});
+num("n-div-pv", "carry", "c1", 2, () => {
+  const S = pick([50, 80, 100]), K = S, d = pick([60, 90, 120]), T = d / 365, r = pick([0.03, 0.04, 0.05]), v = pick([0.2, 0.3]), D = pick([0.5, 0.75, 1, 1.5]);
+  const C = r2(pxo(S - D, K, T, v, r, 0, true)), P = r2(pxo(S - D, K, T, v, r, 0, false)), pk = K * Math.exp(-r * T), ans = S - pk - (C - P);
+  return { stem: "Stock <b>" + S + "</b>, easy to borrow, rate <b>" + pc1(r) + "</b>. European " + K + " options with <b>" + d + "</b> days left: call <b>" + f2(C) +
+      "</b>, put <b>" + f2(P) + "</b>. What present value of dividends before expiry are the options pricing?",
+    ans, tol: 0.03, unit: "$ per share", q: { S, K, T, v, r, D, C, P },
+    why: "C − P = S − PV(div) − K·e^(−rT), so PV(div) = S − K·e^(−rT) − (C − P) = " + S + " − " + f2(pk) + " − " + f2(C - P) + " = <b>" + f2(ans) + "</b>." };
+});
+multi("n-revcon", "parity", "c6", 2, () => {
+  const S = 100, K = pick([95, 100, 105]), d = pick([30, 60, 90]), T = d / 365, r = pick([0.04, 0.045, 0.05]), v = pick([0.25, 0.3]);
+  const dev = pick([-0.3, -0.2, 0.15, 0.25, 0.35, 0]);
+  const C = r2(pxo(S, K, T, v, r, 0, true) + dev), P = r2(pxo(S, K, T, v, r, 0, false)), fair = S - K * Math.exp(-r * T), gap = C - P - fair;
+  const ok = gap > 0.05 ? 0 : gap < -0.05 ? 1 : 2;
+  return { stem: "Stock <b>100.00</b>, no dividends, easy borrow, rate <b>" + pc1(r) + "</b>. European " + K + " options with <b>" + d + "</b> days: call <b>" + f2(C) +
+      "</b>, put <b>" + f2(P) + "</b>, both tradable at those prices.",
+    parts: [
+      { p: "What should C − P be?", t: "num", ans: fair, tol: 0.02, unit: "$ per share" },
+      { p: "What do you do?", t: "mc", fixed: true, ok, opts: ["Conversion: sell the call, buy the put, buy stock", "Reversal: buy the call, sell the put, short stock", "Nothing: the gap is within rounding"] },
+      { p: "Locked-in edge per contract (100 shares) before costs. Zero if nothing.", t: "num", ans: ok === 2 ? 0 : Math.abs(gap) * 100, tol: 2.5, unit: "$" }],
+    q: { S, K, T, v, r, dev, C, P },
+    why: "Fair C − P = S − K·e^(−rT) = " + f2(fair) + ". Quoted C − P = " + f2(C - P) + ", a gap of " + (gap >= 0 ? "+" : "−") + f2(Math.abs(gap)) + ". " +
+      (ok === 0 ? "The synthetic is rich: sell it and buy stock, a <b>conversion</b>, locking about $" + f2(Math.abs(gap) * 100) + " a contract."
+        : ok === 1 ? "The synthetic is cheap: buy it and short stock, a <b>reversal</b>, locking about $" + f2(Math.abs(gap) * 100) + " a contract. Check the borrow first."
+        : "That is rounding. <b>Nothing to do</b>.") };
+});
+num("n-box", "parity", "c7", 2, () => {
+  const W = pick([100, 250, 500, 1000]), d = pick([91, 182, 273, 365]), T = d / 365, rr = pick([0.038, 0.042, 0.047, 0.052]), px = r2(W * Math.exp(-rr * T)), ans = -Math.log(px / W) / T * 100;
+  return { stem: "A European box spread <b>" + W + "</b> points wide, cash-settled, <b>" + d + "</b> days to expiry, trades at <b>" + f2(px) + "</b>. What continuously compounded rate does it lend at?",
+    ans, tol: 0.03, unit: "% a year", q: { W, T, px, rr },
+    why: "A box pays its width for certain, so its price is W·e^(−rT). r = −ln(price ÷ width) ÷ T = −ln(" + f2(px) + " ÷ " + W + ") ÷ " + f4(T) + " = <b>" + f2(ans) + "%</b>." };
+});
+num("n-rateconv", "parity", "c7", 2, () => {
+  const s = pick([0.04, 0.045, 0.05, 0.055]), d = pick([30, 91, 182, 365]), T = d / 365, ans = Math.log(1 + s * T) / T * 100;
+  return { stem: "A screen quotes a <b>" + d + "</b>-day rate of <b>" + pc1(s) + "</b> simple (actual/365). What is the matching continuously compounded rate?",
+    ans, tol: 0.01, unit: "% a year", q: { s, T },
+    why: "Both must grow a dollar to the same amount: 1 + s·T = e^(r·T). So r = ln(1 + " + f2(s * 100) + "% × " + f4(T) + ") ÷ " + f4(T) + " = <b>" + f3(ans) + "%</b>. Continuous is always a little lower than simple." };
+});
+num("n-forward", "forwards", "c1", 1, () => {
+  const S = pick([50, 80, 100, 150]), r = pick([0.03, 0.04, 0.05]), d = pick([91, 182, 365]), T = d / 365, t1 = Math.round(d * pick([0.3, 0.5, 0.7])), D = pick([0.5, 1, 1.5, 2]);
+  const pv = D * Math.exp(-r * t1 / 365), ans = (S - pv) * Math.exp(r * T);
+  return { stem: "Stock <b>" + S + "</b>, rate <b>" + pc1(r) + "</b> continuously compounded. A dividend of <b>" + f2(D) + "</b> is paid in <b>" + t1 + "</b> days. What is the fair forward price for delivery in <b>" + d + "</b> days?",
+    ans, tol: 0.02, unit: "$", q: { S, r, T, t1, D },
+    why: "Subtract what the holder receives, then grow at the rate: F = (S − D·e^(−r·t₁))·e^(rT). PV of the dividend is " + f3(pv) + ", so F = (" + S + " − " + f3(pv) + ") × " + f4(Math.exp(r * T)) + " = <b>" + f2(ans) + "</b>." };
+});
+multi("n-earlyex", "early-exercise", "c3", 3, () => {
+  let S, K, D, tau, v, r, hold, ex, P, i = 0;
+  do { S = pick([60, 80, 100]); K = S - pick([10, 15, 20]); D = pick([0.5, 1, 1.5, 2]); tau = pick([10, 20, 30, 45]); v = pick([0.2, 0.25, 0.3]); r = pick([0.03, 0.05]);
+    hold = pxo(S - D, K, tau / 365, v, r, 0, true); ex = S - K; P = pxo(S - D, K, tau / 365, v, r, 0, false); i++;
+  } while (Math.abs(ex - hold) < 0.06 && i < 50);
+  const pick0 = ex > hold ? 0 : 1;
+  return { stem: "You hold an American <b>" + K + "</b> call. The stock is <b>" + S + "</b> and goes ex-dividend tomorrow by <b>" + f2(D) +
+      "</b>. After that the option has <b>" + tau + "</b> days left, with no further dividends. Volatility <b>" + pc0(v) + "</b>, rate <b>" + pc0(r) + "</b>.",
+    parts: [
+      { p: "What is the call worth tomorrow, after the stock drops by the dividend? (Price it as European on " + f2(S - D) + "; ignore one day's interest.)", t: "num", ans: hold, tol: Math.max(0.03, 0.01 * hold), unit: "$ per share" },
+      { p: "Exercise tonight or hold?", t: "mc", fixed: true, ok: pick0, opts: ["Exercise: the intrinsic value beats the call after the dividend", "Hold: the call after the dividend is worth more than exercising"] },
+      { p: "The gain from exercising tonight rather than holding. Negative if holding is better.", t: "num", ans: ex - hold, tol: Math.max(0.03, 0.01 * hold), unit: "$ per share" }],
+    q: { S, K, D, tau, v, r },
+    why: "Exercising tonight is worth S − K = " + f2(ex) + ". Holding is worth the call on the ex-dividend stock: C(" + f2(S - D) + ") = " + f2(hold) + ". The difference is " + f2(ex - hold) +
+      ". By parity that is the dividend less two things exercise gives up, interest on the strike K(1 − e^(−rτ)) = " + f3(K * (1 - Math.exp(-r * tau / 365))) + " and the put " + f3(P) + ": " +
+      f2(D) + " − " + f3(K * (1 - Math.exp(-r * tau / 365))) + " − " + f3(P) + " = " + f2(ex - hold) + ". <b>" + (pick0 === 0 ? "Exercise." : "Hold.") + "</b>" };
+});
+num("n-borrow", "carry", "c1", 3, () => {
+  const S = pick([20, 40, 50]), K = S, d = pick([60, 91, 182]), T = d / 365, r = pick([0.04, 0.05]), b = pick([0.05, 0.1, 0.2, 0.35]), v = 0.5;
+  const C = r2(pxo(S, K, T, v, r, b, true)), P = r2(pxo(S, K, T, v, r, b, false)), ans = -Math.log((C - P + K * Math.exp(-r * T)) / S) / T * 100;
+  return { stem: "A stock at <b>" + S + "</b> pays no dividends. European " + K + " options, <b>" + d + "</b> days: call <b>" + f2(C) + "</b>, put <b>" + f2(P) +
+      "</b>. Rate <b>" + pc0(r) + "</b>. Treating borrow as a continuous yield, what borrow rate are the options pricing?",
+    ans, tol: 100 * 0.012 / (S * T) + 0.15, unit: "% a year", q: { S, K, T, r, b, C, P },
+    why: "With borrow b, C − P = S·e^(−bT) − K·e^(−rT). So e^(−bT) = (C − P + K·e^(−rT)) ÷ S = " + f4((C - P + K * Math.exp(-r * T)) / S) + ", and b = <b>" + f1(ans) +
+      "%</b>. A reversal here would pay that fee on its short stock." };
+});
+
+/* ── 3 · The surface prices each piece of the distribution ───────────── */
+mc("sur-iv", "surface", "c1", 1,
+  "Implied volatility is",
+  ["The volatility that, put into Black–Scholes, reproduces the option's market price", "A forecast of realized volatility published by the exchange",
+   "The stock's historical volatility over the option's life", "The same for every strike, by definition"],
+  "<b>A price, quoted in volatility units.</b> The market sets the option's price; implied vol is the one input that makes the formula agree. Different strikes and expiries need different numbers, and that pattern is the surface.");
+mc("sur-skew", "surface", "c2", 2,
+  "Index puts trade at higher implied vol than calls the same distance away. In terms of the distribution, the market is",
+  ["Putting more probability in the left tail than a lognormal would", "Forecasting that the index will fall",
+   "Putting more probability in the right tail", "Making the puts cheaper than Black–Scholes"],
+  "<b>A fatter left tail.</b> Prices are expectations over the risk-neutral density, so a richer put means more mass below its strike. The density, not a forecast of direction, is what the skew encodes.");
+mc("sur-models", "surface", "c3", 3,
+  "Jumps and stochastic volatility can both make a smile. How do they differ across expiries?",
+  ["Jumps make steep short-dated smiles that flatten fast with maturity; stochastic vol builds the smile over longer horizons",
+   "Jumps affect only long-dated options", "Both give exactly the same term structure of skew",
+   "Stochastic vol makes the steepest smiles at the shortest expiries"],
+  "<b>Jumps are a short-dated effect.</b> A jump is a big move that diffusion cannot produce in a short time, so near expiries it dominates. Over longer horizons many small moves wash it out. Stochastic vol needs time to spread outcomes, so its smile grows with maturity.");
+mc("sur-calarb", "surface", "c6", 2,
+  "Which of these surfaces cannot be right?",
+  ["At the same moneyness, total variance σ²T is lower at three months than at one month", "Three-month implied vol below one-month implied vol",
+   "Downside puts at higher vol than upside calls", "A smile that rises on both wings"],
+  "<b>Falling total variance.</b> A longer option contains the shorter one's variance plus more. Implied vol itself can fall with maturity, and often does after an event; σ²T cannot, or a calendar spread is an arbitrage.");
+mc("sur-delta", "surface", "c5", 3,
+  "On an equity surface where implied vol rises as spot falls, what is the true delta of a long call compared with its Black–Scholes delta?",
+  ["Lower: when spot falls its vol rises and cushions the loss", "Higher: the vol change adds to the move",
+   "The same: delta does not depend on the surface", "Negative, once the skew is steep enough"],
+  "<b>Lower.</b> True delta = Black–Scholes delta + vega × (change in vol per $1 of spot). Vega is positive and the vol change is negative, so the sum is smaller. Hedging with the plain delta over-hedges a long call on a down-sloping skew.");
+mc("sur-fly", "surface", "c6", 2,
+  "The 95/100/105 call butterfly, C(95) − 2·C(100) + C(105), trades at a credit. What does that mean?",
+  ["Arbitrage: the butterfly's payoff is never negative, so sell the body, buy the wings and keep the credit",
+   "Nothing: deep-wing butterflies are often negative", "The market expects the stock to finish at 100",
+   "Buy the body, since 100 is cheap"],
+  "<b>An arbitrage.</b> The butterfly pays zero or more in every state, so it cannot have a negative price. A negative price would mean negative probability around 100. In practice, check first that it is a live quote and not a stale mark.");
+mc("cat-days", "catalyst", "c2", 2,
+  "Earnings are in ten days. The two-week option trades at 60 vol and the five-week at 40. Why is the nearer one higher?",
+  ["The same one-day event move is spread over fewer days, so it adds more annualized variance to the shorter option",
+   "The market expects a bigger move in the next two weeks than in five", "Short-dated options are less liquid",
+   "The five-week option is mispriced"],
+  "<b>The event is diluted by time.</b> Total variance = base variance × T + J². Divide by a small T and the J² term dominates the annualized number. Both expiries contain the same event.");
+mc("cat-crush", "catalyst", "c5", 2,
+  "You are long a straddle through earnings, with a 6% implied move. The stock moves 5%. Most likely",
+  ["You lose: the move was smaller than priced, and implied vol collapses after the print", "You win, because the stock moved",
+   "You break even, since 5% is close to 6%", "You win, because vol rises on the news"],
+  "<b>You lose.</b> The straddle was priced for an average move of 6%. After the announcement the event variance leaves the price, so implied vol drops. A 5% move recovers less than you paid.");
+mc("cat-express", "catalyst", "c6", 3,
+  "You think the earnings move is underpriced, but you have no view on volatility outside the event. The cleanest expression is",
+  ["Buy the expiry just after the event and sell a later one, sized so the base vol exposure roughly cancels",
+   "Buy the longest-dated straddle", "Sell the front-month straddle and buy the back", "Buy out-of-the-money calls"],
+  "<b>A calendar around the event.</b> Both expiries hold the same jump, but the front's vega to base vol is smaller. Weighting the legs to cancel base vega leaves you long the jump. A long-dated straddle buys mostly base vol, with a sliver of event.");
+mc("str-rr", "structures", "c3", 2,
+  "A customer buys the 110 call and sells the 90 put against you (a risk reversal). You, the market maker, are now",
+  ["Short delta, so you buy stock to hedge; long the put and short the call", "Long delta, so you sell stock to hedge",
+   "Flat delta, since the two options offset", "Long vega on both legs"],
+  "<b>Short delta.</b> You sold the call (short delta) and bought the put (also short delta), so you buy stock. On equity skew the put you own is the richer leg in vol, which is part of why customers pay to do this.");
+mc("str-jade", "structures", "c5", 3,
+  "A jade lizard (short put plus short call spread) is sold with no upside risk only if",
+  ["The total credit is at least as wide as the call spread", "The put is far out of the money",
+   "Implied volatility is low", "The call spread is wider than the credit"],
+  "<b>Credit at least the spread width.</b> The worst case on the upside is losing the full call spread width. If the credit covers it, a rally cannot lose money. Otherwise it is a different structure with a name that does not fit.");
+mc("str-print", "structures", "c2", 2,
+  "Which position is long gamma and short vega?",
+  ["Long near-dated options, short longer-dated ones (a short calendar)", "A long straddle", "A short straddle",
+   "Long longer-dated options, short near-dated ones"],
+  "<b>A short calendar.</b> Gamma is concentrated in short-dated options and vega in long-dated ones. Buy the front and sell the back and you own the near-term moves while being short the volatility level.");
+mc("spr-credit", "spreading", "c2", 2,
+  "A short out-of-the-money put spread 'wins 80% of the time'. Why is that not an edge?",
+  ["The losses in the other 20% are larger than the wins; at fair prices the expected P&L is zero whatever the win rate",
+   "It is an edge: 80% is better than a coin flip", "Because commissions are high on spreads", "Because the 80% is measured on calls"],
+  "<b>Win rate is not expected value.</b> A fair price balances a frequent small gain against a rare large loss. The edge is in whether the price is wrong, not in how often the trade wins.");
+mc("spr-ratio", "spreading", "c5", 2,
+  "You buy one 100 call and sell two 110 calls for zero cost. Where is the risk?",
+  ["A large rally: above 120 the extra short call loses without limit", "A sell-off, since you own a call",
+   "Time decay, since you are long an option", "Nowhere: it was free"],
+  "<b>A large rally.</b> Between 100 and 110 you make money; the peak is at 110. Above it the second short call starts to lose, and at 120 you are back to zero. Beyond that you are short a naked call.");
+mc("spr-choose", "spreading", "c7", 3,
+  "You are bullish and think implied vol is cheap. Which structure fits both views?",
+  ["Buying calls outright: long delta and long vega", "Selling put spreads, since you are paid up front",
+   "A risk reversal, long the call and short the put", "A call spread, since it is cheaper"],
+  "<b>Outright calls.</b> A spread sells an option against the one you buy, which cuts vega, the very thing you think is cheap. A risk reversal is roughly vega-neutral. Pick the structure whose greeks match every part of the view.");
+mc("var-convex", "variance", "c1", 2,
+  "Compare a variance swap and a volatility swap with the same strike and the same vega notional. Which statement is true?",
+  ["The variance swap pays at least as much at every realized level, which is why its fair strike sits above the vol swap's",
+   "They pay the same at every realized level", "The vol swap always pays more", "The variance swap pays less when realized is high"],
+  "<b>The variance swap is convex in vol.</b> Its payoff (σ² − K²)/(2K) per unit of vega notional is never below σ − K, because the difference is (σ − K)²/(2K). Paying for that convexity is why the variance strike trades above the vol strike.");
+mc("var-wings", "variance", "c4", 3,
+  "To replicate a variance swap you hold out-of-the-money options in weights proportional to",
+  ["1/K²: heavy in low-strike puts", "Equal weights at every strike", "The strike K", "Each option's delta"],
+  "<b>1/K².</b> That weighting makes the strip's dollar gamma constant across spot, so it collects variance wherever the stock goes. It also means the downside wings matter a lot, and they are the strikes that trade least.");
+mc("var-vix", "variance", "c6", 1,
+  "VIX is",
+  ["The 30-day variance swap strike on the S&P 500, computed from the option strip and quoted as a volatility",
+   "The at-the-money implied vol of S&P options", "The S&P's realized volatility over the last 30 days", "An average of call implied vols"],
+  "<b>A variance strike.</b> It is built from out-of-the-money puts and calls with 1/K² weights, then square-rooted. That is why skew moves VIX even when the at-the-money vol does not.");
+mc("var-cap", "variance", "c7", 3,
+  "Why are single-stock variance swaps usually capped?",
+  ["The replication needs strikes that do not trade, and a crash pays the square; the cap limits jump exposure dealers cannot hedge",
+   "Regulators require caps on all swaps", "Caps make the swap cheaper to the buyer with no change in risk", "Single stocks cannot realize high volatility"],
+  "<b>Unhedgeable wings.</b> The hedge runs out of strikes far below spot, and a jump through them pays the dealer's short variance on a squared scale. A cap, often 2.5 × the strike, puts a ceiling on that.");
+mc("dis-index", "dispersion", "c1", 1,
+  "Every component of an index trades at 40 vol and the index at 25. This says",
+  ["Implied correlation is well below one: the components are expected to partly cancel", "The index is mispriced against its components",
+   "The components are about to fall", "Index options are illiquid"],
+  "<b>Diversification.</b> Index variance is the weighted sum of every pair's covariance. With correlation below one, the parts cancel and the index moves less than any of them.");
+mc("dis-rich", "dispersion", "c4", 2,
+  "Why does implied correlation tend to sit above the correlation later realized?",
+  ["Investors buy index puts for protection and overwriters sell single-stock calls, so index vol is bid and single-stock vol offered",
+   "Correlation always rises over time", "Index options are harder to trade", "Dealers make a mistake in pricing the index"],
+  "<b>Flow.</b> Protection buying lifts index vol; covered-call selling depresses single-stock vol. The gap between them is a premium for absorbing that flow, collected by whoever is short correlation.");
+mc("dis-crash", "dispersion", "c5", 2,
+  "A short-correlation book (long single-stock vol, short index vol) loses most",
+  ["In a crash, when every stock falls together and correlations go to one", "In a quiet market",
+   "When a single stock jumps on its own news", "When rates rise"],
+  "<b>In a crash.</b> When everything moves together, the index moves as much as its parts. Short index vol then loses on the same days the strategy needed the components to diverge.");
+
+num("n-fwdvol", "surface", "c4", 2, () => {
+  let v1, d1, d2, v2, i = 0;
+  do { v1 = pick([20, 25, 30, 35, 40]); d1 = pick([30, 60]); d2 = d1 + pick([30, 60, 90]); v2 = v1 + pick([-4, -2, 2, 4]); i++; }
+  while (v2 * v2 * d2 - v1 * v1 * d1 <= 0.25 * v1 * v1 * (d2 - d1) && i < 50);
+  const ans = Math.sqrt((v2 * v2 * d2 - v1 * v1 * d1) / (d2 - d1));
+  return { stem: "The <b>" + d1 + "</b>-day option trades at <b>" + v1 + "</b> vol and the <b>" + d2 + "</b>-day at <b>" + v2 + "</b>. What volatility is implied for the period between the two expiries?",
+    ans, tol: 0.3, unit: "vol points", q: { v1, d1, v2, d2 },
+    why: "Total variance adds: σ₂²T₂ = σ₁²T₁ + σf²(T₂ − T₁). So σf = √[(" + v2 + "² × " + d2 + " − " + v1 + "² × " + d1 + ") ÷ " + (d2 - d1) + "] = <b>" + f2(ans) + "</b>. " +
+      (ans > Math.max(v1, v2) ? "Above both quotes: the forward period carries more variance than either average suggests." : "") };
+});
+num("n-event", "catalyst", "c3", 3, () => {
+  const b = pick([0.2, 0.25, 0.3, 0.35]), J = pick([0.04, 0.05, 0.06, 0.08]), d1 = pick([7, 14, 21]), d2 = d1 + pick([21, 28, 35]);
+  const T1 = d1 / 365, T2 = d2 / 365, v1 = r2(100 * Math.sqrt(b * b + J * J / T1)) / 100, v2 = r2(100 * Math.sqrt(b * b + J * J / T2)) / 100;
+  const sd2 = (v1 * v1 * T1 - v2 * v2 * T2) / (T1 - T2), ans = 100 * Math.sqrt(v1 * v1 * T1 - sd2 * T1);
+  return { stem: "Earnings fall before both expiries. The <b>" + d1 + "</b>-day option trades at <b>" + f2(v1 * 100) + "</b> vol and the <b>" + d2 + "</b>-day at <b>" + f2(v2 * 100) +
+      "</b>. Assuming a constant base vol plus one event move, how big is the event move (one standard deviation, as a % of spot)?",
+    ans, tol: 0.15, unit: "% of spot", q: { b, J, d1, d2, v1, v2 },
+    why: "σ₁²T₁ = σd²T₁ + J² and σ₂²T₂ = σd²T₂ + J². The slope of total variance against time is the base: σd² = (σ₁²T₁ − σ₂²T₂) ÷ (T₁ − T₂), so σd = " + pc1(Math.sqrt(sd2)) +
+      ". What is left is the event: J = √(σ₁²T₁ − σd²T₁) = <b>" + f2(ans) + "%</b>." };
+});
+num("n-impmove", "catalyst", "c4", 2, () => {
+  const S = pick([40, 80, 120, 200]), d = pick([1, 3, 7]), T = d / 365, v = pick([0.4, 0.6, 0.8, 1.0]), X = r2(2 * pxo(S, S, T, v, 0, 0, true)), ans = X / RT2PI;
+  return { stem: "Stock <b>" + S + "</b>. The at-the-money straddle expiring after tomorrow's announcement costs <b>" + f2(X) +
+      "</b>. That is the market's expected absolute move. What one-standard-deviation move, in dollars, does it imply?",
+    ans, tol: 0.025 * ans, unit: "$", q: { S, T, X },
+    why: "A straddle pays the absolute move, and for a normal E|move| = √(2/π)·σ ≈ 0.798σ. So one standard deviation = straddle ÷ 0.798 = " + f2(X) + " ÷ 0.798 = <b>" + f2(ans) +
+      "</b>. Treating the straddle price as one sigma understates the sigma by a fifth." };
+});
+num("n-varswap", "variance", "c5", 2, () => {
+  const N = pick([10000, 25000, 50000, 100000]), K = pick([18, 20, 22, 25, 30]), s = K + pick([-8, -5, -3, 3, 5, 10]), ans = N * (s * s - K * K) / (2 * K);
+  return { stem: "You are long a variance swap: vega notional <b>$" + N.toLocaleString("en-US") + "</b> per vol point, strike <b>" + K + "</b>. Realized volatility comes in at <b>" + s +
+      "</b>. What is the payoff?",
+    ans, tol: Math.max(50, 0.01 * Math.abs(ans)), unit: "$", q: { N, K, s },
+    why: "Variance notional = vega notional ÷ (2K) = " + num0(N / (2 * K)) + " per variance point. Payoff = " + num0(N / (2 * K)) + " × (" + s + "² − " + K + "²) = <b>" + usd(ans) +
+      "</b>. A vol swap with the same vega notional would pay " + usd(N * (s - K)) + "; the difference is the convexity." };
+});
+num("n-impcorr", "dispersion", "c2", 3, () => {
+  let n, ss, si, rho, i = 0;
+  do { n = pick([4, 5, 10, 20]); ss = pick([30, 35, 40, 45]); si = pick([18, 20, 22, 25]); rho = (si * si - ss * ss / n) / (ss * ss * (1 - 1 / n)); i++; } while ((rho <= 0.05 || rho >= 0.95) && i < 50);
+  return { stem: "An index of <b>" + n + "</b> equally weighted stocks. Every stock trades at <b>" + ss + "</b> implied vol; the index trades at <b>" + si +
+      "</b>. Assuming one correlation for every pair, what correlation is implied?",
+    ans: rho, tol: 0.01, unit: "correlation, 0 to 1", q: { n, ss, si },
+    why: "σI² = Σwᵢ²σᵢ² + ρ·Σᵢ≠ⱼ wᵢwⱼσᵢσⱼ. With equal weights and vols: σI² = σ²/n + ρ·σ²(1 − 1/n). So ρ = (" + si + "² − " + ss + "²/" + n + ") ÷ (" + ss + "² × " + f3(1 - 1 / n) + ") = <b>" + f3(rho) + "</b>." };
+});
+num("n-effdelta", "surface", "c5", 3, () => {
+  const S = 100, K = 100, d = pick([30, 60, 91]), T = d / 365, v = pick([0.2, 0.25]), r = 0.04, sk = pick([-0.3, -0.5, -0.8]), b = bs(S, K, T, v, r, 0, true), ans = b.delta + (b.vega / 100) * sk;
+  return { stem: "A 100-strike call, stock <b>100</b>, <b>" + d + "</b> days, implied vol <b>" + pc0(v) + "</b>, rate <b>4%</b>. Its Black–Scholes delta is " + f3(b.delta) + " and its vega is " + f3(b.vega / 100) +
+      " per vol point. On this surface the option's implied vol moves <b>" + Math.abs(sk) + "</b> vol points " + (sk < 0 ? "down" : "up") + " for every 1% the stock rises. What is the call's delta once the vol move is included?",
+    ans, tol: 0.01, unit: "0 to 1", q: { S, K, T, v, r, sk },
+    why: "Δ_true = Δ_BS + vega × dσ/dS. A 1% move is $1 here, so dσ/dS = " + sk + " points per $1. Δ = " + f3(b.delta) + " + " + f3(b.vega / 100) + " × (" + sk + ") = <b>" + f3(ans) + "</b>." };
+});
+multi("n-vertical", "spreading", "c2", 1, () => {
+  const S = 100, K1 = pick([95, 100, 105]), w = pick([5, 10]), K2 = K1 + w, d = pick([30, 60]), T = d / 365, v = pick([0.25, 0.3]), r = 0.04;
+  const debit = r2(pxo(S, K1, T, v, r, 0, true) - pxo(S, K2, T, v, r, 0, true));
+  return { stem: "You buy the <b>" + K1 + "/" + K2 + "</b> call spread for <b>" + f2(debit) + "</b>, stock at 100, <b>" + d + "</b> days.",
+    parts: [{ p: "Break-even stock price at expiry", t: "num", ans: K1 + debit, tol: 0.01, unit: "$" },
+            { p: "Maximum profit per contract (100 shares)", t: "num", ans: (w - debit) * 100, tol: 1, unit: "$" }],
+    q: { K1, K2, debit },
+    why: "You get the debit back once the stock is that far above the lower strike: " + K1 + " + " + f2(debit) + " = <b>" + f2(K1 + debit) + "</b>. Above " + K2 +
+      " the spread pays its full width, " + w + ", so the most you make is (" + w + " − " + f2(debit) + ") × 100 = <b>" + usd((w - debit) * 100) + "</b>." };
+});
+
+/* ── 4 · Edge is what is left after costs ────────────────────────────── */
+mc("exe-tradeoff", "execution", "c2", 2,
+  "Executing a large hedge faster",
+  ["Raises market impact and lowers timing risk; the best schedule balances the two", "Lowers both impact and timing risk",
+   "Raises both impact and timing risk", "Has no effect on cost, only on speed"],
+  "<b>A trade-off.</b> Trading fast pushes the price against you. Trading slowly leaves the position exposed to the market while you work it. The optimum depends on volatility, liquidity and how much risk you will carry.");
+mc("exe-bench", "execution", "c4", 2,
+  "Your hedge filled worse than the arrival price but better than the day's VWAP. Was it a good execution?",
+  ["It depends on the benchmark chosen beforehand: against arrival it cost money, against VWAP it beat",
+   "Yes, because it beat VWAP", "No, because it missed arrival", "There is no way to measure execution"],
+  "<b>The benchmark decides.</b> Arrival measures what you paid against the price when you decided. VWAP measures you against everyone else that day. Pick the benchmark before the trade, or every fill can be made to look good.");
+mc("exe-dark", "execution", "c5", 3,
+  "You notice your dark-pool fills tend to arrive just before the price moves against you. This is",
+  ["Adverse selection: you are filled when someone better informed wants the other side", "Luck, which evens out over time",
+   "A sign that your orders have low impact", "Proof the venue is cheaper than the lit market"],
+  "<b>Adverse selection.</b> A fill is not free if the counterparty knew more. Measure fills by what the price did after them, not only by the spread you saved.");
+mc("exe-etf", "execution", "c6", 2,
+  "Hedging a single-stock options book's delta with an index ETF leaves you with",
+  ["Basis risk: the part of each stock's move that the index does not share is unhedged", "No risk, since the ETF moves with the market",
+   "Only interest-rate risk", "Lower transaction costs and no other change"],
+  "<b>Basis risk.</b> The ETF hedges the market part of each name's move. Idiosyncratic moves, the part that is not beta, stay in the book. It is cheaper to trade, and you pay for that in tracking error.");
+mc("mic-inside", "microstructure", "c2", 2,
+  "What is inside an option's bid-offer spread?",
+  ["Compensation for adverse selection, hedging costs and inventory risk", "The exchange's fee and nothing else",
+   "Profit the market maker earns on every trade", "Nothing: spreads are arbitrary"],
+  "<b>Costs and risks.</b> Some flow is informed, hedges cost money to put on, and inventory has to be carried. The spread pays for all three. A market maker profits on average only if it covers them.");
+mc("mic-skew", "microstructure", "c3", 2,
+  "You are making a market and have just been lifted on calls three times. You should",
+  ["Raise both your bid and offer, leaning against the inventory and the information in the flow", "Widen symmetrically and change nothing else",
+   "Keep the same quote, since your fair value has not changed", "Lower your offer to sell more"],
+  "<b>Skew the quote up.</b> You are now short calls, and buyers may know something. Moving both sides up makes the next buyer pay more and invites sellers to bring you back to flat.");
+mc("mic-gamma", "microstructure", "c5", 3,
+  "Dealers are said to be long gamma around a big strike. What effect is claimed, and what does it rest on?",
+  ["Their hedging sells rallies and buys dips, damping moves, provided the positioning estimate is right",
+   "Their hedging amplifies every move", "It has no effect on the underlying", "It guarantees the stock pins to the strike"],
+  "<b>Damping, conditionally.</b> A long-gamma hedger trades against moves. But dealer positioning is estimated, not observed, and the effect is only as good as that estimate. Treat it as an assumption with a size, not a fact.");
+mc("mic-alloc", "microstructure", "c8", 3,
+  "Under pro-rata allocation, a market maker gets more of an incoming order by",
+  ["Showing more size at the best price", "Being first in time at the price", "Quoting a wider spread", "Trading on a different venue"],
+  "<b>Size.</b> Pro-rata splits an order across everyone at the best price in proportion to displayed size. Price-time priority rewards being first instead. The rule changes how firms quote.");
+mc("mer-rate", "merger", "c1", 1,
+  "A target trades below a cash offer expected to close in six months. The spread is best read as",
+  ["A return, annualized and compared with the riskless rate; the excess pays for the risk the deal breaks", "Free money, if the deal is announced",
+   "The probability the deal closes", "The premium the acquirer is paying"],
+  "<b>A rate.</b> The spread earns money only by waiting, so compare it per year with what cash earns. Whatever is above the riskless rate is the price of break risk.");
+mc("mer-second", "merger", "c5", 2,
+  "Regulators issue a second request on a pending deal. The spread widens because",
+  ["The probability of closing falls and the expected time to close lengthens, and both cost an arb money", "The offer price is cut automatically",
+   "The target's dividend is cancelled", "It does not; second requests are routine"],
+  "<b>Odds and time.</b> A second request raises the chance of a block and adds months. Both lower the target's price today: the first through the probability, the second through the discount.");
+mc("mer-opts", "merger", "c7", 3,
+  "Target puts struck well below the current price, on a pending cash deal, mainly price",
+  ["The break: the drop to the standalone price if the deal fails, a two-humped distribution rather than a lognormal",
+   "Ordinary daily volatility in the target", "The acquirer's volatility", "The interest rate until close"],
+  "<b>The bad hump.</b> If the deal closes the stock pins near the offer; if it breaks, it falls to where it would trade alone. Low puts pay only in the break, so their price is the break probability times the depth.");
+mc("pb-shape", "playbook", "c1", 2,
+  "Systematic put writing has earned a premium over long periods because",
+  ["It is paid to carry crash risk that many holders want to shed: a shape of risk, not free money", "Puts are always overpriced",
+   "Markets rise over time, so puts expire worthless", "Volatility always falls"],
+  "<b>It sells insurance.</b> The premium is pay for holding the left tail. It shows up as steady gains and occasional large losses. Size it for the losses.");
+mc("pb-covered", "playbook", "c2", 1,
+  "At expiry, a covered call (long stock, short call at strike K) has the same payoff as",
+  ["A short put at the same strike, plus cash", "A long call", "A long put", "A straddle"],
+  "<b>A short put.</b> By parity, S − C = K·e^(−rT) − P: stock minus a call is cash minus a put. Both have capped upside and full downside.");
+mc("pb-choose", "playbook", "c3", 2,
+  "A fund is choosing between writing puts and putting on a collar. It is really choosing",
+  ["Which risk it can carry: the put writer keeps crash risk for premium, the collar gives up upside to remove it",
+   "Which strategy has the higher expected return", "Which one has lower commissions", "Nothing: they have the same risk"],
+  "<b>Which risk to carry.</b> The two sit at opposite ends: one is paid to take the tail, the other pays to lose it. Strategies are chosen by the risk you can hold through the bad month.");
+
+num("n-tickvol", "microstructure", "c1", 2, () => {
+  const S = pick([50, 100, 200]), K = Math.round(S * pick([0.95, 1, 1.05])), d = pick([7, 30, 91]), T = d / 365, v = pick([0.2, 0.3, 0.5]), tk = pick([0.01, 0.05]);
+  const b = bs(S, K, T, v, 0.04, 0, true), ans = tk / (b.vega / 100), P0 = b.price;
+  let s = v; for (let i = 0; i < 30; i++) s -= (pxo(S, K, T, s, 0.04, 0, true) - P0 - tk) / bs(S, K, T, s, 0.04, 0, true).vega;
+  const ex = (s - v) * 100;
+  return { stem: "A call with stock <b>" + S + "</b>, strike <b>" + K + "</b>, <b>" + d + "</b> days, at <b>" + pc0(v) + "</b> implied (rate 4%) has a vega of <b>" + f3(b.vega / 100) +
+      "</b> per vol point. How many vol points is one price tick of <b>" + f2(tk) + "</b> worth?",
+    ans, tol: Math.max(0.03 * ans, 1.25 * Math.abs(ex - ans)), unit: "vol points", q: { S, K, T, v, tk, ex },
+    why: "Vol points per tick = tick ÷ vega per point = " + f2(tk) + " ÷ " + f3(b.vega / 100) + " = <b>" + f2(ans) + "</b>. Solving for the vol that adds exactly one tick gives " + f2(ex) +
+      "; both are inside the band. Short-dated and far-from-the-money options have small vega, so a tick is many vol points there, and vega itself moves with vol." };
+});
+num("n-mprob", "merger", "c2", 2, () => {
+  const O = pick([40, 50, 60]), D = O * pick([0.6, 0.7, 0.75]), m = pick([3, 4, 6, 9]), T = m / 12, r = pick([0.04, 0.05]), p = pick([0.8, 0.85, 0.9, 0.95]);
+  const S = r2(Math.exp(-r * T) * (p * O + (1 - p) * D)), ans = 100 * (S * Math.exp(r * T) - D) / (O - D);
+  return { stem: "A cash offer of <b>" + f2(O) + "</b> is expected to close in <b>" + m + "</b> months. If it breaks, you estimate the target trades at <b>" + f2(D) +
+      "</b>. The target is at <b>" + f2(S) + "</b> and the rate is <b>" + pc0(r) + "</b> continuously compounded. What probability of closing is priced in?",
+    ans, tol: 0.6, unit: "%", q: { O, D, T, r, S, p },
+    why: "Grow the price to the close date: S·e^(rT) = " + f3(S * Math.exp(r * T)) + ". That must equal p·offer + (1 − p)·break, so p = (" + f3(S * Math.exp(r * T)) + " − " + f2(D) + ") ÷ (" +
+      f2(O) + " − " + f2(D) + ") = <b>" + f1(ans) + "%</b>. Skipping the discount overstates the risk." };
+});
+num("n-mann", "merger", "c1", 1, () => {
+  const O = pick([25, 40, 50, 75]), S = r2(O * pick([0.95, 0.96, 0.97, 0.98])), d = pick([60, 90, 120, 182]), ans = (O - S) / S * 365 / d * 100;
+  return { stem: "A target trades at <b>" + f2(S) + "</b> against a <b>" + f2(O) + "</b> cash offer expected to close in <b>" + d + "</b> days. What is the spread as a simple annualized return?",
+    ans, tol: 0.1, unit: "% a year", q: { O, S, d },
+    why: "Gross spread = (" + f2(O) + " − " + f2(S) + ") ÷ " + f2(S) + " = " + pc2((O - S) / S) + " over " + d + " days. Annualized: × 365 ÷ " + d + " = <b>" + f2(ans) + "%</b>. Compare that with the riskless rate." };
+});
+
+/* ── 5 · Vol is the price, and σ√T is the ruler ──────────────────────── */
+mc("scr-ruler", "screen", "c3", 2,
+  "Compare a 25-delta put on a one-week option with a 25-delta put on a one-year option, same stock.",
+  ["About the same distance in standard deviations, but very different distances in dollars", "The same distance in dollars",
+   "The one-year put is closer to the money in standard deviations", "Delta does not measure distance"],
+  "<b>Same standard deviations.</b> Delta is close to a function of ln(K/F) ÷ σ√T. With √52 ≈ 7 times the σ√T, the one-year 25-delta strike is about seven times further away in dollars.");
+mc("scr-spread", "screen", "c4", 2,
+  "A far out-of-the-money strike shows a bid IV of 38 and an offer IV of 46. How should you read the IV column?",
+  ["With caution: a small vega turns a few cents of spread into many vol points, so the mid IV is a weak estimate",
+   "The true vol is 42, the mid", "The option is mispriced by 8 points", "The bid is the true vol"],
+  "<b>With caution.</b> IV spread ≈ price spread ÷ vega. Low-vega strikes magnify a tight price market into a wide vol market. Read the vol at strikes where vega is large.");
+mc("scr-forward", "screen", "c6", 3,
+  "Call IVs read about 3 points above put IVs at every strike. The first thing to suspect is",
+  ["The forward used to compute the IVs is wrong (dividend or borrow); fix the carry and the two columns meet",
+   "Calls are rich, so sell them and buy puts", "A mistake by the exchange", "Upside skew"],
+  "<b>The forward.</b> By parity, a European call and put at one strike must share one implied vol once the forward is right. A constant gap at every strike is a carry input that is off.");
+mc("scr-scan", "screen", "c7", 1,
+  "Front-month IV is 45 and every later month is about 30. No event is known. The first step is",
+  ["Find the event: earnings, a ruling, a vote. The front is pricing something before you call it rich", "Sell the front month, since it is 15 points rich",
+   "Buy the back months, since they are cheap", "Ignore it: term structures are noise"],
+  "<b>Find the event.</b> An inverted front usually means a known catalyst you have not found yet. Strip the event out before comparing vols.");
+mc("scr-chain", "screen", "c1", 2,
+  "Where on a chain do you read the market's probability that the stock finishes above a strike?",
+  ["From the price of a tight call spread around that strike, per dollar of width", "From the call's implied volatility",
+   "From the open interest at that strike", "From the put's delta alone"],
+  "<b>A tight call spread.</b> A K/K+1 call spread pays about $1 if the stock finishes above K, so its price per dollar of width is the discounted probability. Delta is close but includes the skew's slope differently.");
+mc("rul-0798", "rulers", "c3", 2,
+  "An at-the-money straddle is worth about 0.8 × S × σ√T. Where does the 0.8 come from?",
+  ["√(2/π) ≈ 0.7979 is the mean absolute value of a standard normal, and a straddle pays the absolute move", "It is the call's delta at the money",
+   "It is a market convention with no derivation", "It is e^(−0.2)"],
+  "<b>The normal's mean absolute value.</b> E|Z| = √(2/π). A straddle pays |S_T − S| and the move is about S·σ√T·Z. It is the normal's number; fatter tails change it.");
+mc("rul-fat", "rulers", "c4", 3,
+  "Hold variance fixed and fatten the tails. What happens to a long at-the-money straddle's chance of finishing with a profit?",
+  ["It falls: more of the variance sits in rare big moves, so typical moves are smaller and the straddle wins less often",
+   "It rises, because big moves are more likely", "It does not change, since the variance is the same", "It doubles"],
+  "<b>It falls.</b> Fat tails at the same variance mean more very large moves and more very small ones. The straddle wins rarely, but by more when it does.");
+mc("rul-two", "rulers", "c1", 1,
+  "For a normal distribution, which is larger: the standard deviation or the mean absolute move?",
+  ["The standard deviation; the mean absolute move is about 80% of it", "The mean absolute move", "They are equal", "It depends on the mean"],
+  "<b>The standard deviation.</b> Squaring weights big moves more, so the root of the mean square is larger than the mean of the absolute values. For a normal the ratio is 0.7979.");
+
+num("n-straddle", "rulers", "c3", 2, () => {
+  const S = pick([40, 60, 100, 150, 250]), d = pick([7, 14, 30, 60, 91]), T = d / 365, v = pick([0.15, 0.2, 0.3, 0.45, 0.6]), ans = 2 * pxo(S, S, T, v, 0, 0, true);
+  return { stem: "No rates, no dividends. Stock <b>" + S + "</b>, at-the-money straddle with <b>" + d + "</b> days, implied vol <b>" + pc0(v) + "</b>. Estimate the straddle's price.",
+    ans, tol: 0.03 * ans, unit: "$", q: { S, T, v },
+    why: "One standard deviation is S·σ√T = " + S + " × " + v + " × √(" + d + "/365) = " + f2(S * v * Math.sqrt(T)) + ". A straddle pays the absolute move: ≈ 0.8 × that = " +
+      f2(0.7979 * S * v * Math.sqrt(T)) + ". Black–Scholes gives <b>" + f2(ans) + "</b>." };
+});
+num("n-rule16", "screen", "c2", 1, () => {
+  const S = pick([50, 80, 120, 250, 400]), v = pick([0.16, 0.2, 0.24, 0.32, 0.48]), ans = S * v / Math.sqrt(252);
+  return { stem: "Stock <b>" + S + "</b>, implied vol <b>" + pc0(v) + "</b>. What one-day move (one standard deviation) does that imply, in dollars? Use trading days.",
+    ans, tol: 0.02 * ans, unit: "$", q: { S, v },
+    why: "Daily σ = annual σ ÷ √252 ≈ annual ÷ 16. " + pc0(v) + " ÷ 15.87 = " + pc2(v / Math.sqrt(252)) + ", times " + S + " = <b>" + usd2(ans) + "</b>. Dividing by √365 instead would understate it by about 17%." };
+});
+num("n-strikesd", "screen", "c2", 2, () => {
+  const S = 100, K = pick([80, 85, 90, 110, 115, 120]), d = pick([30, 60, 91, 182]), T = d / 365, v = pick([0.2, 0.3, 0.4]), ans = Math.log(K / S) / (v * Math.sqrt(T));
+  return { stem: "Stock <b>100</b>, implied vol <b>" + pc0(v) + "</b>, <b>" + d + "</b> days. How many standard deviations away is the <b>" + K + "</b> strike? Use log distance and ignore drift; negative below spot.",
+    ans, tol: 0.05, unit: "standard deviations", q: { S, K, T, v },
+    why: "Distance = ln(K/S) ÷ σ√T = " + f4(Math.log(K / S)) + " ÷ (" + v + " × " + f4(Math.sqrt(T)) + ") = <b>" + f2(ans) + "</b>. Dollars mean nothing until they are divided by σ√T." };
+});
+num("n-mad", "rulers", "c5", 2, () => {
+  const s = pick([0.8, 1, 1.2, 1.5, 2, 2.5]), ans = s * RT2PI;
+  return { stem: "A stock's daily returns are close to normal with a standard deviation of <b>" + s + "%</b>. What is its average absolute daily move?",
+    ans, tol: 0.015 * ans, unit: "%", q: { s },
+    why: "For a normal, E|X| = √(2/π)·σ = 0.7979 × " + s + "% = <b>" + f3(ans) + "%</b>. Going the other way, average absolute moves × 1.25 estimate the standard deviation." };
+});
+
+/* ── 6 · Hedged, it is realized against implied ──────────────────────── */
+mc("atl-theta", "atlas", "c1", 2,
+  "With zero rates and dividends, theta, gamma and volatility of a Black–Scholes option are tied by",
+  ["θ = −½·σ²·S²·Γ: theta is the rent on gamma at the implied vol", "θ = −Γ, always", "θ = vega × σ",
+   "Nothing; they are independent"],
+  "<b>θ = −½σ²S²Γ.</b> Daily rent equals expected gamma P&L at the implied vol. That is why the greek map has fewer real axes than greeks.");
+mc("atl-time", "atlas", "c4", 2,
+  "As expiry approaches, what happens to an at-the-money option's gamma and vega?",
+  ["Gamma rises, roughly as 1/√T; vega falls, roughly as √T", "Both rise", "Both fall", "Gamma falls and vega rises"],
+  "<b>Gamma up, vega down.</b> The distribution narrows, so the at-the-money delta flips faster, which is gamma. There is less time for vol to matter, which is vega.");
+mc("atl-be", "atlas", "c5", 3,
+  "Delta-hedged, long options bought at one implied vol all break even on the same daily move. Which?",
+  ["About σ/√252 of spot, the implied daily standard deviation, whatever the structure", "The move that reaches the strike",
+   "Twice the implied daily move", "It depends entirely on the structure's delta"],
+  "<b>The implied daily move.</b> Each day you pay θ = −½σ²S²Γ and earn ½Γ(ΔS)². They match when ΔS = σS√(1/252), the same for any structure with gamma. The structure decides how much you make; the implied vol decides where break-even is.");
+mc("rw-error", "real-world", "c2", 3,
+  "You rebalance a delta hedge more and more often. The hedging error",
+  ["Shrinks at first, then stops falling, as costs, jumps and the vol gap dominate", "Falls to zero in the limit, in practice",
+   "Grows steadily with each rebalance", "Does not depend on how often you hedge"],
+  "<b>It stops falling.</b> Discrete hedging error shrinks like 1/√(number of hedges), but every rebalance costs money and jumps cannot be hedged by trading after them. Past some frequency you pay more than you remove.");
+mc("rw-tails", "real-world", "c3", 2,
+  "Same variance, fatter tails. A delta-hedged short straddle now has",
+  ["A more lopsided P&L: frequent small gains and rare large losses", "The same P&L distribution, since the variance is unchanged",
+   "Bigger gains on average", "No risk, if hedged daily"],
+  "<b>A lopsided P&L.</b> Quiet days earn theta, jump days lose a lot at once. Variance alone does not describe the risk of a short-gamma book.");
+mc("rw-onevol", "real-world", "c4", 2,
+  "You mark every strike at the at-the-money vol on an equity surface. Against the market, your 90-strike puts are marked",
+  ["Too cheap, because the market charges more vol for downside puts", "Too expensive, since puts are cheaper away from the money",
+   "Correctly, since vol is one number", "Correctly for puts and wrongly for calls"],
+  "<b>Too cheap.</b> Equity skew prices the downside at a higher vol than the money. One flat vol under-marks the wings you own and the wings you are short alike.");
+mc("rw-survive", "real-world", "c5", 1,
+  "When the model's assumptions fail (jumps, costs, changing vol), what survives?",
+  ["The logic of hedged P&L: you earn realized against implied, weighted by gamma, less costs", "Nothing; the model must be thrown away",
+   "Only the put-call parity part", "The formula's exact price"],
+  "<b>The hedged P&L logic.</b> The price stops being exact, but the bookkeeping holds: every day a gamma position earns ½Γ(realized² − implied²)·S²·dt plus whatever the model left out. That is still how a desk thinks.");
+mc("dyn-sticky", "dynamics", "c1", 3,
+  "Spot falls 2% on an equity surface where vol falls as the strike rises. What happens to the implied vol of the 100-strike call, which was at the money?",
+  ["Sticky strike: unchanged. Sticky delta: lower, since the strike is now out of the money on a smile that moved with spot",
+   "Sticky strike: lower. Sticky delta: unchanged", "Higher under both", "Unchanged under both"],
+  "<b>Unchanged, or lower.</b> Sticky strike keeps each strike's vol. Sticky delta moves the smile with spot, so the 100 strike is now further out of the money relative to spot, where this smile is lower. The rule you assume changes your delta.");
+mc("dyn-term", "dynamics", "c3", 2,
+  "A book is flat on total vega: long one-month, short one-year, equal vega. In a typical vol spike",
+  ["It makes money: short-dated vol usually moves more than long-dated vol", "It is flat, because total vega is zero",
+   "It loses, because long-dated vol moves more", "It makes money only if spot rises"],
+  "<b>It makes money.</b> Equal vega assumes a parallel shift, and that is rare. Front vols move more than back vols, so the long front leg gains more than the short back leg loses.");
+mc("dyn-skew", "dynamics", "c4", 3,
+  "A delta-hedged long skew position (long low-strike puts, short high-strike calls) is paid mainly for",
+  ["The spot-vol correlation: implied vol rising as spot falls", "Spot rising", "Interest rates", "Time decay"],
+  "<b>Spot-vol correlation.</b> Each fall in spot lifts the vol of the puts you own. If spot and vol move less together than the skew priced, the position bleeds.");
+mc("dyn-which", "dynamics", "c5", 3,
+  "Which realized volatility decides a delta-hedged option's P&L?",
+  ["The realized vol along the path, weighted by the option's dollar gamma at each moment", "Close-to-close vol over the whole period, equally weighted",
+   "The vol on the final day", "Implied vol at expiry"],
+  "<b>Gamma-weighted realized.</b> A move counts in proportion to the gamma held when it happened. Two paths with the same headline realized vol can pay a hedged option very differently.");
+mc("cv-what", "converts", "c1", 1,
+  "A convertible bond is",
+  ["A bond plus a call on the issuer's stock, sized by the conversion ratio", "A bond whose coupon floats with rates",
+   "A stock with a guaranteed dividend", "A put on the issuer's credit"],
+  "<b>A bond with a call stapled to it.</b> The holder can swap the bond for a fixed number of shares. Low stock: it trades like a bond. High stock: like the shares.");
+mc("cv-arb", "converts", "c2", 2,
+  "A convertible arbitrageur buys the bond and shorts stock against it. What is the position long?",
+  ["Volatility, through the embedded call's gamma, financed by the bond's carry", "The issuer's stock",
+   "Interest rates", "Nothing: it is fully hedged"],
+  "<b>Volatility.</b> Delta-hedging the embedded call leaves its gamma: buy stock back on dips, sell on rallies. The coupon and the short-stock rebate pay for the wait.");
+mc("cv-floor", "converts", "c3", 3,
+  "Why is a convertible's bond floor not really a floor?",
+  ["If the stock collapses the issuer's credit worsens, so the floor falls with the stock exactly when you need it", "Because rates can rise",
+   "Because the conversion ratio changes", "It is a floor; it never falls"],
+  "<b>Credit and equity fall together.</b> The floor is the bond valued at the issuer's credit spread. A stock collapse usually comes with wider spreads, so the floor drops just as you lean on it.");
+
+num("n-gpnl", "atlas", "c5", 2, () => {
+  const S = pick([50, 100, 200]), d = pick([30, 60]), T = d / 365, v = pick([0.2, 0.3, 0.4]), N = pick([10, 20, 50]), x = pick([0.02, 0.03, 0.04]);
+  const g = 2 * bs(S, S, T, v, 0, 0, true).gamma, dS = S * x, ans = 0.5 * g * dS * dS * 100 * N;
+  return { stem: "You are long <b>" + N + "</b> at-the-money straddles (100 shares each), delta-hedged: stock <b>" + S + "</b>, <b>" + d + "</b> days, <b>" + pc0(v) +
+      "</b> vol, no rates. Each straddle's gamma is <b>" + f4(g) + "</b> per $1. The stock jumps <b>" + pc0(x) + "</b> instantly. Using gamma, estimate the P&L.",
+    ans, tol: 0.06 * ans, unit: "$", q: { S, T, v, N, x },
+    why: "ΔS = " + f2(dS) + ". Gamma P&L ≈ ½·Γ·(ΔS)² per share = ½ × " + f4(g) + " × " + f2(dS) + "² = " + f3(0.5 * g * dS * dS) + ". Times " + N * 100 + " shares of straddle = <b>" + usd(ans) +
+      "</b>. A hedged long-gamma position makes money on a move either way." };
+});
+num("n-be", "atlas", "c5", 2, () => {
+  const v = pick([0.16, 0.2, 0.25, 0.3, 0.4, 0.6]), ans = v / Math.sqrt(252) * 100;
+  return { stem: "You buy options at <b>" + pc0(v) + "</b> implied and delta-hedge them daily. How big must the average daily move be, as a % of spot, to break even? Use trading days.",
+    ans, tol: 0.02 * ans, unit: "% of spot", q: { v },
+    why: "Theta pays ½σ²S²Γ a year; a move earns ½Γ(ΔS)². Per trading day they match at ΔS/S = σ/√252 = " + pc0(v) + " ÷ 15.87 = <b>" + f2(ans) + "%</b>. Every hedged long-option position has the same break-even." };
+});
+num("n-cbprem", "converts", "c1", 1, () => {
+  const P = pick([1050, 1100, 1200, 1250]), cr = pick([20, 25, 40]), S = r2(P / cr / pick([1.1, 1.2, 1.3, 1.4])), par = cr * S, ans = (P / par - 1) * 100;
+  return { stem: "A convertible trades at <b>$" + P.toLocaleString("en-US") + "</b> per $1,000 face and converts into <b>" + cr + "</b> shares. The stock is <b>" + f2(S) + "</b>. What is the conversion premium?",
+    ans, tol: 0.2, unit: "%", q: { P, cr, S },
+    why: "Parity, the value if converted now, is " + cr + " × " + f2(S) + " = " + f2(par) + ". Premium = " + P + " ÷ " + f2(par) + " − 1 = <b>" + f1(ans) + "%</b>: what you pay for the option to wait and for the bond underneath." };
+});
+
+/* ── 7 · Size it, and run the book ───────────────────────────────────── */
+mc("bk-add", "book", "c1", 2,
+  "Which delta can you add across different stocks to get a meaningful total?",
+  ["Dollar delta (shares × price), since it measures dollars at risk per 1% in the same units", "Share delta, since it is in shares",
+   "Option delta (0 to 1), summed across names", "None: deltas cannot be added"],
+  "<b>Dollar delta.</b> A share of a $20 stock and a share of a $500 stock are not the same risk. Convert to dollars (and, for gamma, to a common percentage move) before adding.");
+mc("bk-vega", "book", "c4", 2,
+  "One total vega number across expiries misleads because",
+  ["Front vols move more per point than back vols, so a weighting such as 1/√T is closer to what the book makes",
+   "Vega is always zero for long-dated options", "Vega cannot be added at all", "Back-month vega is larger, so it should be ignored"],
+  "<b>Vols do not move in parallel.</b> A one-point move in the one-year vol is a bigger event than a one-point move in the one-month. Weighted vega puts the expiries in a common currency.");
+mc("bk-gamma", "book", "c5", 2,
+  "To add gamma across names you need",
+  ["A common move: express each as dollar P&L for a 1% move in its own stock", "Nothing: gamma in shares adds directly",
+   "The same strike in every name", "The same expiry in every name"],
+  "<b>A common move.</b> Gamma per $1 means a different-sized move for a $10 stock and a $1,000 one. ½·Γ·(1% × S)² in dollars puts every name on the same footing.");
+mc("bk-trust", "book", "c3", 3,
+  "Your report shows delta 0 and gamma +500 shares per $1. The stock moves $10. Roughly what is your delta now?",
+  ["About +5,000 shares: the report is local, and $10 is far from where it was computed", "Still 0, since you were hedged",
+   "About +500 shares", "About −5,000 shares"],
+  "<b>About +5,000.</b> Delta changes by gamma times the move: 500 × 10. And gamma itself moves over $10, so even that is an estimate. A greek report is a local slope, not a promise.");
+mc("bk-limit", "book", "c6", 2,
+  "A limit on total vega",
+  ["Caps the size of the vol bet but not its shape: term structure and skew risk can hide inside a vega-flat book", "Removes all volatility risk",
+   "Also limits gamma automatically", "Is meaningless"],
+  "<b>Size, not shape.</b> Long front, short back can show zero vega and still lose heavily on a twist. Limits need buckets by expiry and strike.");
+mc("bk-pnl", "book", "c8", 2,
+  "After a big move, P&L explained by greeks leaves a large unexplained piece. The first suspect is",
+  ["Terms the greeks leave out: gamma on a big move, vanna, volga, and the surface changing shape", "A booking error, always",
+   "Theta", "The interest rate"],
+  "<b>Higher-order terms.</b> Greeks are first and second derivatives at the open. A large move, and a surface that twists with it, produces P&L the linear terms miss. Reprice the legs to find which.");
+mc("cap-denom", "capital", "c1", 1,
+  "The same short put earns the same premium in two accounts, but shows a much higher return in one. Why?",
+  ["The margin rule sets the denominator: a strategy-based rule asks for more capital than a risk-based one", "One account gets better fills",
+   "One account pays lower taxes", "The higher return means more risk"],
+  "<b>The denominator.</b> Return on capital is P&L divided by what the trade ties up, and the account's rule decides that. The trade is identical.");
+mc("cap-spread", "capital", "c1", 2,
+  "Buying a further out-of-the-money put under a short put",
+  ["Cuts the premium a little and the capital a lot, raising return on capital", "Raises both premium and capital",
+   "Leaves capital unchanged", "Turns the trade into a long-volatility position"],
+  "<b>Less premium, much less capital.</b> The long put caps the worst loss, and a risk-based rule charges for the worst loss. Spreads exist because capital is often what runs out first.");
+mc("cap-procyc", "capital", "c2", 2,
+  "Why does a margin call arrive sooner than the loss alone suggests?",
+  ["The requirement rises as the stock falls and vol rises, while equity falls, so the two lines close from both sides",
+   "Brokers charge interest on losses", "Margin is fixed when the trade is opened", "Because premiums are paid at expiry"],
+  "<b>Both lines move.</b> A short put that is now at the money and more volatile needs more margin at the same time it has lost money. Size for the requirement after the stress, not today's.");
+
+num("n-vegapnl", "book", "c8", 2, () => {
+  const S = pick([50, 100, 200]), K = Math.round(S * pick([1, 1.05])), d = pick([30, 91, 182]), T = d / 365, v = pick([0.2, 0.3]), N = pick([20, 50, 100]), dv = pick([1, 2, 3]);
+  const b = bs(S, K, T, v, 0.04, 0, true), ans = N * 100 * (b.vega / 100) * dv, rep = N * 100 * (pxo(S, K, T, v + dv / 100, 0.04, 0, true) - b.price);
+  return { stem: "You are long <b>" + N + "</b> call contracts (100 shares each): stock <b>" + S + "</b>, strike <b>" + K + "</b>, <b>" + d + "</b> days, <b>" + pc0(v) +
+      "</b> vol, rate 4%. Each call's vega is <b>" + f3(b.vega / 100) + "</b> per vol point. Implied vol rises <b>" + dv + "</b> points with spot unchanged. Estimate the P&L.",
+    ans, tol: Math.max(0.04 * ans, 1.25 * Math.abs(rep - ans)), unit: "$", q: { S, K, T, v, N, dv },
+    why: "Vega P&L ≈ contracts × 100 × vega per point × points = " + N + " × 100 × " + f3(b.vega / 100) + " × " + dv + " = <b>" + usd(ans) + "</b>. Repricing at the new vol gives " + usd(rep) +
+      ": out of the money, vega grows as vol rises (volga), so the estimate runs a little short. Both are inside the band." };
+});
+num("n-dgamma", "book", "c5", 2, () => {
+  const S = 250, d = pick([30, 60, 91]), T = d / 365, v = pick([0.25, 0.35]), N = pick([10, 25, 50]), g = bs(S, S, T, v, 0.04, 0, true).gamma, ans = 0.5 * g * Math.pow(0.01 * S, 2) * 100 * N;
+  return { stem: "You hold <b>" + N + "</b> at-the-money call contracts (100 shares each) on a <b>$250</b> stock, <b>" + d + "</b> days, <b>" + pc0(v) + "</b> vol. Each call's gamma is <b>" + f4(g) +
+      "</b> per $1. What does gamma earn, in dollars, on a 1% move in the stock?",
+    ans, tol: 0.03 * ans, unit: "$", q: { S, T, v, N },
+    why: "A 1% move is $2.50. Gamma P&L = ½·Γ·(ΔS)² × shares = ½ × " + f4(g) + " × 2.50² × " + N * 100 + " = <b>" + usd2(ans) + "</b>. Quoting per 1% makes it comparable across names; at $250 it differs from the per-$1 number." };
+});
+num("n-stratm", "capital", "c1", 2, () => {
+  const S = 100, K = pick([85, 90, 95, 100]), d = 30, T = d / 365, v = pick([0.25, 0.3, 0.4]), prem = r2(pxo(S, K, T, v, 0.045, 0, false)), otm = Math.max(0, S - K);
+  const ans = 100 * (prem + Math.max(0.2 * S - otm, 0.1 * K));
+  return { stem: "You sell one <b>" + K + "</b> put for <b>" + f2(prem) + "</b> on a stock at <b>100</b>. The strategy-based rule is: premium + the greater of (20% of the stock − the amount out of the money) and 10% of the strike, × 100. What is the requirement?",
+    ans, tol: 1, unit: "$", q: { S, K, T, v, prem },
+    why: "20% of the stock less " + otm + " out of the money = " + f2(0.2 * S - otm) + "; 10% of the strike = " + f2(0.1 * K) + ". Take the larger, " + f2(Math.max(0.2 * S - otm, 0.1 * K)) +
+      ", add the premium " + f2(prem) + ", times 100 = <b>" + usd(ans) + "</b>. The return if the put expires worthless is " + pc1(prem * 100 / ans) + " for the month." };
+});
+multi("n-margin", "capital", "c2", 3, () => {
+  const cap = 100000, K = 95, T = 30 / 365, v0 = 0.3, u = pick([0.3, 0.4, 0.5, 0.6]), m = pick([-0.03, -0.05, -0.08]), S1 = 100 * (1 + m), v1 = v0 - m;
+  const P0 = r2(pxo(100, K, T, v0, 0.045, 0, false)), P1 = r2(pxo(S1, K, T, v1, 0.045, 0, false));
+  const m0 = Math.round(scanReq(100, T, v0, K)), m1 = Math.round(scanReq(S1, T, v1, K));
+  const N = Math.floor(u * cap / m0), pnl = N * 100 * (P0 - P1), exc = cap + pnl - N * m1;
+  return { stem: "An account with <b>$100,000</b> sells 30-day <b>95</b> puts on a stock at <b>100</b>, at <b>" + f2(P0) + "</b> each (100 shares a contract). The risk system charges <b>$" + m0.toLocaleString("en-US") +
+      "</b> of margin a contract. You sell as many as fit in <b>" + pc0(u) + "</b> of the account. The stock then falls <b>" + pc0(-m) + "</b> at once and implied vol rises a point per 1% fall: the put is now <b>" +
+      f2(P1) + "</b> and the system charges <b>$" + m1.toLocaleString("en-US") + "</b> a contract.",
+    parts: [
+      { p: "How many contracts did you sell?", t: "num", ans: N, tol: 0, unit: "contracts" },
+      { p: "Your P&L after the fall", t: "num", ans: pnl, tol: Math.max(20, 0.005 * Math.abs(pnl)), unit: "$" },
+      { p: "Excess equity after the fall: equity minus the new requirement. Negative is a margin call.", t: "num", ans: exc, tol: Math.max(50, 0.01 * Math.abs(exc)), unit: "$" },
+      { p: "Compared with before the fall, the excess has", t: "mc", fixed: true, ok: 0, opts: ["Fallen by more than the loss, because the requirement rose too", "Fallen by exactly the loss", "Fallen by less than the loss"] }],
+    q: { u, m, N, m0, m1, P0, P1 },
+    why: "Contracts = floor(" + pc0(u) + " × 100,000 ÷ " + m0 + ") = <b>" + N + "</b>. P&L = " + N + " × 100 × (" + f2(P0) + " − " + f2(P1) + ") = <b>" + usd(pnl) + "</b>. Equity is " + usd(cap + pnl) +
+      " and the requirement is " + N + " × " + m1 + " = " + usd(N * m1) + ", so excess is <b>" + usd(exc) + "</b>, down from " + usd(cap - N * m0) + ". The loss is " + usd(-pnl) + "; the excess fell " +
+      usd(cap - N * m0 - exc) + ", because the requirement rose as the equity fell." };
+});
+
+/* the risk-based requirement the scenario quotes: the worst loss on one short
+   put across an 11-point scan of ±15%, vol held. capital.html does the same
+   walk; verify.js checks the scenario against that page's own functions. */
+function scanReq(S, T, v, K){ const p0 = pxo(S, K, T, v, 0.045, 0, false); let w = 0;
+  for (let i = -5; i <= 5; i++){ const pl = -(pxo(S * (1 + 0.15 * i / 5), K, T, v, 0.045, 0, false) - p0) * 100; if (pl < w) w = pl; } return -w; }
+
+/* ── 8 · The questions they ask you ──────────────────────────────────── */
+mc("q-callspread", "questions", "c2", 2,
+  "Why can a 100/106 call spread never trade at $6 before expiry?",
+  ["It pays at most $6 at expiry, so today it is worth at most 6·e^(−rT), and less unless finishing above 106 is certain",
+   "Because market makers would never sell it there", "Because the 106 call always has some value", "It can, when vol is very high"],
+  "<b>The cap is discounted.</b> The maximum payoff is the width, received at expiry. Paying the full width today means paying for certainty with no interest. Higher vol pushes the price towards the middle, not the top.");
+mc("q-quarterly", "questions", "c3", 2,
+  "Four consecutive three-month at-the-money options, each bought when the last expires, cost about twice one one-year at-the-money option. Why?",
+  ["An at-the-money price grows with √T: each quarter costs half the year, and four halves are two", "Short-dated options carry more skew",
+   "The quarterly options include four sets of fees", "They do not; they cost the same"],
+  "<b>√T scaling.</b> 0.4·S·σ√0.25 is half of 0.4·S·σ√1. Each new quarterly is struck at the money again, so you keep buying the most expensive part of the time curve.");
+mc("q-25d", "questions", "c4", 1,
+  "You are long a 25-delta call and the stock rallies 5%. Is your position longer or shorter delta than before?",
+  ["Longer: the call is long gamma, so its delta rose with the stock", "Shorter, since the call is now closer to the money",
+   "The same: delta is fixed at 25", "It depends on implied vol only"],
+  "<b>Longer.</b> Every long option is long gamma: delta rises as the stock rises. A 25-delta call that moves towards the money might be 40 delta after the rally.");
+mc("q-sold30", "questions", "c7", 3,
+  "You sold options at 30 vol and delta-hedged daily. Realized vol came in at 25, and you lost money. How?",
+  ["The big moves came when your gamma was largest, near the strike close to expiry; hedged P&L is gamma-weighted, so the path decided",
+   "Impossible: realized below implied always makes a short-vol trade money", "Commissions on the hedges", "The stock drifted up"],
+  "<b>The path.</b> 25 realized is an average over the whole period. If the big days landed where your short gamma was concentrated, they cost more than the quiet days paid. It happens more often than the averages suggest.");
+mc("q-unknown", "questions", "c8", 2,
+  "In an interview you are handed a structure you have never seen. The best first step is",
+  ["Draw its payoff at expiry, then ask which greek it is long or short and which piece of the distribution it bets on",
+   "Guess its name", "Ask for the Black–Scholes price", "Compute its delta to four decimals"],
+  "<b>Payoff, then greeks.</b> Every structure is a bet on part of the distribution. Once the payoff is drawn, the gamma, vega and skew signs follow, and you can say who would want it and why.");
+num("n-csmax", "questions", "c2", 1, () => {
+  const K1 = pick([95, 100, 105]), w = pick([5, 6, 10]), K2 = K1 + w, d = pick([91, 182, 365]), T = d / 365, r = pick([0.04, 0.05]), ans = w * Math.exp(-r * T);
+  return { stem: "What is the most a European <b>" + K1 + "/" + K2 + "</b> call spread with <b>" + d + "</b> days to expiry can be worth today, with rates at <b>" + pc0(r) + "</b> continuously compounded?",
+    ans, tol: 0.01, unit: "$ per share", q: { w, T, r },
+    why: "It pays at most the width, " + w + ", at expiry. Today that is worth at most " + w + " × e^(−" + r + " × " + f3(T) + ") = <b>" + f2(ans) + "</b>." };
+});
+num("n-quarter", "questions", "c3", 2, () => {
+  const S = pick([50, 100, 200]), v = pick([0.2, 0.3, 0.4]), X = r2(2 * pxo(S, S, 1, v, 0, 0, true)), ans = 2 * pxo(S, S, 0.25, v, 0, 0, true);
+  return { stem: "No rates, no dividends. A one-year at-the-money straddle on a <b>" + S + "</b> stock costs <b>" + f2(X) + "</b> at <b>" + pc0(v) + "</b> implied. What does a three-month at-the-money straddle cost at the same vol?",
+    ans, tol: 0.03 * ans, unit: "$", q: { S, v, X },
+    why: "At the money the price is nearly proportional to √T: √(0.25) = ½, so about " + f2(X / 2) + ". Exactly: <b>" + f2(ans) + "</b>." };
+});
+
+/* ══ papers ════════════════════════════════════════════════════════════
+   Forty questions, weighted by the seven ideas on the reading route.
+   The three fixed versions are written out so they never change when the
+   bank grows; each covers all twenty-five pages and none shares a
+   question with another. A random paper draws from the whole bank by a
+   seed, so typing the same seed replays the same paper.                  */
+const WEIGHTS = { 1: 5, 2: 7, 3: 8, 4: 5, 5: 4, 6: 5, 7: 4, 8: 2 };
+const VERSIONS = {
+  A: ["bs-own", "bs-density", "bs-n2", "n-bin-call", "bin-break", "n-revcon", "par-borrow", "ee-zero", "ee-merger", "fwd-built", "carry-divshock", "n-div-pv", "n-effdelta", "sur-models", "cat-crush", "cat-days", "str-jade", "n-vertical", "var-vix", "dis-index", "exe-bench", "exe-tradeoff", "mic-alloc", "mer-rate", "pb-choose", "n-rule16", "scr-forward", "rul-0798", "n-straddle", "atl-be", "rw-onevol", "dyn-term", "dyn-skew", "cv-what", "bk-add", "bk-trust", "cap-denom", "cap-spread", "n-csmax", "q-callspread"],
+  B: ["n-hedge", "bs-voltime", "bs-desk", "n-bin-q", "bin-am", "n-put-parity", "par-jelly", "ee-leftover", "ee-put", "fwd-index", "fwd-invert", "carry-unknown", "sur-iv", "n-fwdvol", "cat-express", "str-print", "spr-ratio", "spr-choose", "var-cap", "dis-crash", "exe-dark", "mic-inside", "n-mann", "mer-second", "pb-covered", "scr-scan", "n-strikesd", "scr-ruler", "rul-fat", "atl-theta", "rw-tails", "rw-error", "dyn-sticky", "n-cbprem", "bk-gamma", "bk-pnl", "n-stratm", "n-margin", "n-quarter", "q-sold30"],
+  C: ["bs-drift", "n-bs-call", "bs-gamma", "bin-q", "bin-saw", "par-syn", "n-rateconv", "ee-pin", "n-earlyex", "n-forward", "fwd-black", "n-borrow", "sur-calarb", "sur-delta", "n-event", "str-rr", "spr-credit", "var-convex", "var-wings", "dis-rich", "exe-etf", "mic-skew", "mic-gamma", "mer-opts", "pb-shape", "scr-chain", "scr-spread", "rul-two", "n-mad", "atl-time", "rw-survive", "dyn-which", "cv-arb", "cv-floor", "bk-limit", "bk-vega", "n-dgamma", "cap-procyc", "q-25d", "q-quarterly"]
+};
+const PORDER = Object.keys(PAGE);
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function scaleWeights(n){
+  const w = {}; let tot = 0;
+  for (let k = 1; k <= 8; k++){ w[k] = Math.max(1, Math.round(WEIGHTS[k] * n / 40)); tot += w[k]; }
+  const big = () => { let b = 1; for (let k = 2; k <= 8; k++) if (w[k] > w[b]) b = k; return b; };
+  while (tot > n){ w[big()]--; tot--; }
+  while (tot < n){ w[big()]++; tot++; }
+  return w;
+}
+const byRoute = (a, b) => (a.idea - b.idea) || (PORDER.indexOf(a.page) - PORDER.indexOf(b.page)) || (a.lvl - b.lvl);
+function randomPlan(sd, n){
+  sd = sd | 0; seed(sd); const w = scaleWeights(n), items = [];
+  for (let k = 1; k <= 8; k++){
+    const pool = shuffle(BANK.filter(t => t.idea === k)), used = {}, got = [];
+    while (got.length < w[k] && pool.length){
+      let bi = 0, bu = 1e9; pool.forEach((t, i) => { const u = used[t.page] || 0; if (u < bu){ bu = u; bi = i; } });
+      const t = pool.splice(bi, 1)[0]; used[t.page] = (used[t.page] || 0) + 1; got.push(t);
+    }
+    got.sort(byRoute).forEach(t => items.push([t.id, (Math.imul(sd, 7919) + hashStr(t.id)) | 0]));
+  }
+  return { kind: "R", seed: sd, n, label: "Random paper " + sd, items };
+}
+function planFor(kind, sd, n){
+  if (kind === "R") return randomPlan(sd, n || 40);
+  return { kind, seed: 0, n: VERSIONS[kind].length, label: "Version " + kind, items: VERSIONS[kind].map(id => [id, hashStr(kind + ":" + id)]) };
+}
+
+/* ── one question, made from its template and seed ───────────────────── */
+function inst(id, s){
+  const t = BY[id]; seed(s); const x = t.make();
+  let parts = x.parts || (x.opts ? [{ t: "mc", opts: x.opts, ok: x.ok }] : [{ t: "num", ans: x.ans, tol: x.tol, unit: x.unit }]);
+  parts = parts.map(p => {
+    if (p.t !== "mc" || p.fixed) return Object.assign({}, p);
+    const ord = shuffle(p.opts.map((_, i) => i));
+    return Object.assign({}, p, { opts: ord.map(i => p.opts[i]), ok: ord.indexOf(p.ok) });
+  });
+  return { id, s, page: t.page, ch: t.ch, lvl: t.lvl, idea: t.idea, kind: t.kind, stem: x.stem, parts, why: x.why, q: x.q || null };
+}
+
+/* ── grading ─────────────────────────────────────────────────────────── */
+function parseNum(s){
+  if (s === null || s === undefined) return NaN;
+  const t = String(s).trim().replace(/[−–]/g, "-").replace(/[$,%\s]/g, "");
+  if (!/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t)) return NaN;
+  return parseFloat(t);
+}
+function partRight(p, a){
+  if (a === null || a === undefined || a === "") return false;
+  if (p.t === "mc") return a === p.ok;
+  const x = parseNum(a); return isFinite(x) && Math.abs(x - p.ans) <= p.tol + 1e-9;
+}
+const answered = a => a !== null && a !== undefined && a !== "";
+function grade(qs, ans){
+  const out = { got: 0, max: qs.length, idea: {}, page: {}, lvl: {}, each: [] };
+  qs.forEach((q, i) => {
+    const r = q.parts.map((p, j) => partRight(p, (ans[i] || [])[j])), g = r.filter(Boolean).length / r.length;
+    out.got += g; out.each.push({ g, r });
+    [["idea", q.idea], ["page", q.page], ["lvl", q.lvl]].forEach(([k, v]) => { const o = out[k][v] || (out[k][v] = [0, 0]); o[0] += g; o[1]++; });
+  });
+  return out;
+}
+
+/* ── a calculator, for papers that allow one ─────────────────────────── */
+let CALC_ANS = 0;
+function calcEval(src){
+  const toks = []; const re = /\s*(\d+\.?\d*(?:e[-+]?\d+)?|\.\d+(?:e[-+]?\d+)?|[A-Za-z]+|[-+*/^(),×÷−])/gy; let m, pos = 0;
+  src = String(src).trim();
+  while (pos < src.length){ re.lastIndex = pos; m = re.exec(src); if (!m) throw new Error("cannot read “" + src.slice(pos, pos + 6) + "”"); toks.push(m[1]); pos = re.lastIndex; }
+  let i = 0; const peek = () => toks[i], eat = t => { if (toks[i] !== t) throw new Error("expected " + t); i++; };
+  const FN = { sqrt: Math.sqrt, ln: Math.log, log: x => Math.log10(x), exp: Math.exp, abs: Math.abs, N: ncdf, n: npdf };
+  const CONST = { pi: Math.PI, e: Math.E, ans: CALC_ANS };
+  function expr(){ let v = term(); while (peek() === "+" || peek() === "-" || peek() === "−"){ const o = toks[i++]; const w = term(); v = o === "+" ? v + w : v - w; } return v; }
+  function term(){ let v = unary(); while (peek() === "*" || peek() === "/" || peek() === "×" || peek() === "÷"){ const o = toks[i++]; const w = unary(); v = (o === "*" || o === "×") ? v * w : v / w; } return v; }
+  function unary(){ if (peek() === "-" || peek() === "−"){ i++; return -unary(); } if (peek() === "+"){ i++; return unary(); } return power(); }
+  function power(){ const b = atom(); if (peek() === "^"){ i++; return Math.pow(b, unary()); } return b; }
+  function atom(){
+    const t = toks[i++];
+    if (t === undefined) throw new Error("unfinished");
+    if (t === "("){ const v = expr(); eat(")"); return v; }
+    if (/^[\d.]/.test(t)) return parseFloat(t);
+    if (FN[t]){ eat("("); const v = expr(); eat(")"); return FN[t](v); }
+    if (t in CONST) return CONST[t];
+    throw new Error("unknown “" + t + "”");
+  }
+  const v = expr(); if (i < toks.length) throw new Error("unexpected “" + toks[i] + "”");
+  if (!isFinite(v)) throw new Error("not a number");
+  return v;
+}
+
+/* ── storage: the attempt in progress and past results ───────────────── */
+const KEY = "ov-exam-v1";
+let ST = { cur: null, past: [] };
+function store(){ try { if (typeof localStorage !== "undefined") localStorage.setItem(KEY, JSON.stringify(ST)); } catch (e) {} }
+function restore(){ try { if (typeof localStorage !== "undefined"){ const s = localStorage.getItem(KEY); if (s){ const o = JSON.parse(s);
+  if (o && typeof o === "object"){ ST.cur = o.cur && o.cur.plan ? o.cur : null; ST.past = Array.isArray(o.past) ? o.past.filter(p => p && p.plan) : []; } } } } catch (e) {} }
+
+/* ══ rendering ═════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const LET = "ABCDEFGH";
+const LVL = ["", "warm-up", "standard", "hard"];
+let CFG = { kind: "A", n: 40, seed: 1 + (Date.now() % 99991), time: "std", calc: true };
+let X = null, TMR = null, RV = null, LASTNUM = null, ABANDON = false;
+
+function setLinks(host){ if (host && host.querySelectorAll) Array.prototype.forEach.call(host.querySelectorAll("a[data-h]"), a => a.setAttribute("href", a.getAttribute("data-h"))); }
+function show(which){ ["startHost", "examHost", "resultsHost"].forEach(h => { $(h).hidden = h !== which; }); }
+function limitFor(n, t){ return t === "std" ? Math.round(n * 2.25) : t === "tight" ? Math.round(n * 1.5) : 0; }
+function clock(ms){ const s = Math.max(0, Math.round(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); }
+function fmtNum(x, tol){ const d = tol >= 5 || tol === 0 ? 0 : tol >= 0.5 ? 1 : tol >= 0.05 ? 2 : tol >= 0.005 ? 3 : 4;
+  return (x < 0 ? "−" : "") + Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); }
+function rightText(p){ return p.t === "mc" ? LET[p.ok] + ". " + p.opts[p.ok] : fmtNum(p.ans, p.tol) + " " + p.unit + (p.tol ? " <span class=\"quiet\">(accepted within ±" + fmtNum(p.tol, p.tol / 10) + ")</span>" : ""); }
+function yourText(p, a){ if (!answered(a)) return "<i>no answer</i>"; return p.t === "mc" ? LET[a] + ". " + p.opts[a] : esc(String(a)) + " " + p.unit; }
+function esc(s){ return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" })[c]); }
+function where(q){ const P = PAGE[q.page], t = (CH[q.page] || {})[q.ch] || ""; return "page " + P[1] + " · " + P[2] + (t ? ", chapter " + q.ch.slice(1) + ": " + t : ""); }
+function bar(label, got, max){ const p = max ? got / max : 0;
+  return '<div class="srow"><span>' + label + '</span><i><b style="width:' + (p * 100).toFixed(0) + '%"></b></i><span class="sv">' + (+got.toFixed(2)) + " / " + max + "</span></div>"; }
+
+/* ── start screen ────────────────────────────────────────────────────── */
+function renderStart(){
+  const n = CFG.kind === "R" ? CFG.n : 40, w = scaleWeights(n), seg = (act, val, cur, label) =>
+    '<button data-act="' + act + '" data-v="' + val + '" aria-pressed="' + (String(cur) === String(val)) + '">' + label + "</button>";
+  let h = "";
+  if (ST.cur){
+    const c = ST.cur, done = c.ans.filter(a => a.some(answered)).length, left = c.deadline ? c.deadline - Date.now() : null;
+    h += '<div class="panel resume"><h4>A paper is in progress</h4><p>' + esc(c.plan.label) + ": " + done + " of " + c.plan.items.length + " answered. " +
+      (left === null ? "Untimed." : left > 0 ? clock(left) + " left on the clock, which keeps running while the page is closed." : "Time ran out while the page was closed; it will be marked as handed in at the deadline.") +
+      '</p><div class="btnrow"><button class="act" data-act="resume">' + (left !== null && left <= 0 ? "Mark it" : "Resume") + '</button><button class="act ghost" data-act="abandon">' +
+      (ABANDON ? "Press again to throw it away" : "Abandon it") + "</button></div></div>";
+  }
+  h += '<div class="panel"><h4>Paper</h4><div class="seg wide">' + ["A", "B", "C"].map(k => seg("kind", k, CFG.kind, "Version " + k)).join("") + seg("kind", "R", CFG.kind, "Random") + "</div>";
+  if (CFG.kind === "R")
+    h += '<div class="rrow"><label>Seed <input data-role="seed" inputmode="numeric" value="' + CFG.seed + '" size="7" aria-label="Seed for the random paper"></label>' +
+      '<button class="act ghost" data-act="reseed">New seed</button><div class="seg">' + seg("len", 40, CFG.n, "40 questions") + seg("len", 20, CFG.n, "20 questions") + "</div></div>" +
+      '<p class="quiet">The same seed always deals the same paper, so you can sit it again or send it to someone.</p>';
+  h += '<h4>Time</h4><div class="seg wide">' + seg("time", "std", CFG.time, "Standard · " + limitFor(n, "std") + " min") + seg("time", "tight", CFG.time, "Tight · " + limitFor(n, "tight") + " min") +
+    seg("time", "none", CFG.time, "Untimed") + "</div>";
+  h += '<h4>Calculator</h4><div class="seg wide">' + seg("calc", "1", CFG.calc ? "1" : "0", "Allowed") + seg("calc", "0", CFG.calc ? "1" : "0", "Not allowed") + "</div>" +
+    '<p class="quiet">Without one, the numeric questions want the head-math estimates the pages teach. The tolerance bands are the same either way.</p>';
+  h += '<p class="mix">' + n + " questions: " + [1, 2, 3, 4, 5, 6, 7, 8].map(k => w[k] + " on " + (k === 8 ? "the questions page" : "idea " + k)).join(", ") + ".</p>" +
+    '<button class="act big" data-act="start">Start the paper</button></div>';
+  h += '<div class="panel"><h4>How it runs</h4><ul class="rules"><li>One question per screen. Jump to any question from the grid, and flag one to come back to.</li>' +
+    "<li>Nothing is marked until you hand the paper in. Then every question shows your answer, the right one, the working, and the chapter that teaches it.</li>" +
+    "<li>Numeric answers are marked right inside a band around the computed answer. Type a plain number; $ , and % are ignored.</li>" +
+    "<li>Multi-step questions earn a share of the mark for each part.</li><li>Your attempt is saved in this browser as you go, so a reload loses nothing.</li></ul></div>";
+  if (ST.past.length){
+    h += '<div class="panel"><h4>Past papers</h4><div class="tblwrap"><table class="ptab"><tr><th>When</th><th>Paper</th><th>Score</th><th>Time</th><th></th></tr>' +
+      ST.past.map((p, i) => "<tr><td>" + new Date(p.t).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + "</td><td>" + esc(p.plan.label) + (p.calc ? "" : " · no calc") + "</td><td>" +
+        pc0(p.score / p.max) + " <span class=\"quiet\">" + (+p.score.toFixed(1)) + "/" + p.max + "</span></td><td>" + clock(p.used) + '</td><td><button class="act ghost sm" data-act="past" data-i="' + i + '">Review</button></td></tr>').join("") +
+      "</table></div></div>";
+  }
+  h += '<div class="panel"><h4>Answer keys</h4><p class="quiet">The full key for a fixed version, with the working, to print. Not for the night before.</p><div class="btnrow">' +
+    ["A", "B", "C"].map(k => '<button class="act ghost" data-act="key" data-v="' + k + '">Print key ' + k + "</button>").join("") + "</div></div>";
+  $("startHost").innerHTML = h;
+}
+
+/* ── the paper ───────────────────────────────────────────────────────── */
+function begin(plan, limit, calc){
+  const qs = plan.items.map(([id, s]) => inst(id, s));
+  X = { plan, qs, ans: qs.map(q => q.parts.map(() => null)), flag: qs.map(() => false), idx: 0, limit, calc, started: Date.now(), deadline: limit ? Date.now() + limit * 60000 : 0 };
+  saveCur(); enter();
+}
+function saveCur(){ ST.cur = { plan: X.plan, ans: X.ans, flag: X.flag, idx: X.idx, limit: X.limit, calc: X.calc, started: X.started, deadline: X.deadline }; store(); }
+function resume(){
+  const c = ST.cur; if (!c) return;
+  X = Object.assign({}, c, { qs: c.plan.items.map(([id, s]) => inst(id, s)) });
+  if (X.deadline && Date.now() >= X.deadline) return finish(true);
+  enter();
+}
+function enter(){ show("examHost"); $("exLabel").textContent = X.plan.label; $("calcBox").hidden = !X.calc; $("confirmHost").hidden = true; renderQ(); startTimer(); }
+function startTimer(){ stopTimer(); tick(); TMR = setInterval(tick, 1000); }
+function stopTimer(){ if (TMR){ clearInterval(TMR); TMR = null; } }
+function tick(){
+  if (!X) return stopTimer();
+  const el = $("exTimer");
+  if (!X.deadline){ el.textContent = clock(Date.now() - X.started) + " elapsed"; el.className = ""; return; }
+  const left = X.deadline - Date.now();
+  el.textContent = clock(left) + " left"; el.className = left < 300000 ? "low" : "";
+  if (left <= 0) finish(true);
+}
+function renderQ(){
+  const q = X.qs[X.idx], a = X.ans[X.idx], multi = q.parts.length > 1;
+  let h = '<div class="qhead"><span>Question ' + (X.idx + 1) + " of " + X.qs.length + "</span><span>" + (q.idea === 8 ? "The questions page" : "Idea " + q.idea + " · " + IDEA[q.idea]) + "</span></div>" +
+    '<div class="qstem">' + q.stem + "</div>";
+  q.parts.forEach((p, j) => {
+    h += '<div class="part">' + (p.p ? '<p class="ppr">' + (multi ? "(" + "abcdefgh"[j] + ") " : "") + p.p + "</p>" : "");
+    if (p.t === "mc") h += '<div class="opts2" role="group">' + p.opts.map((o, k) => '<button data-act="opt" data-p="' + j + '" data-o="' + k + '" aria-pressed="' + (a[j] === k) + '"><span class="ol">' + LET[k] + "</span><span>" + o + "</span></button>").join("") + "</div>";
+    else h += '<div class="ansrow"><input class="numin" data-p="' + j + '" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Answer' + (multi ? " to part " + "abcdefgh"[j] : "") + '" value="' + (answered(a[j]) ? esc(String(a[j])) : "") + '"> <span class="unit">' + p.unit + "</span></div>";
+    h += "</div>";
+  });
+  $("qHost").innerHTML = h;
+  $("exCount").textContent = X.ans.filter(r => r.some(answered)).length + " of " + X.qs.length + " answered";
+  renderNav();
+}
+function renderNav(){
+  $("navHost").innerHTML = X.qs.map((q, i) => { const a = X.ans[i], all = a.every(answered), some = a.some(answered);
+    return '<button data-act="go" data-i="' + i + '" class="nb' + (all ? " done" : some ? " half" : "") + (X.flag[i] ? " flag" : "") + (i === X.idx ? " cur" : "") + '" aria-label="Question ' + (i + 1) +
+      (all ? ", answered" : some ? ", partly answered" : ", not answered") + (X.flag[i] ? ", flagged" : "") + '">' + (i + 1) + "</button>"; }).join("");
+  const fb = $("flagBtn"); fb.textContent = X.flag[X.idx] ? "Unflag" : "Flag for review"; fb.setAttribute("aria-pressed", String(X.flag[X.idx]));
+  $("prevBtn").disabled = X.idx === 0; $("nextBtn").disabled = X.idx === X.qs.length - 1;
+}
+function go(i){
+  if (i < 0 || i >= X.qs.length) return;
+  X.idx = i; saveCur(); renderQ(); $("confirmHost").hidden = true;
+  const r = $("examHost").getBoundingClientRect(); if (r.top < 0) $("examHost").scrollIntoView({ block: "start" });
+}
+function askSubmit(){
+  const un = [], part = [], fl = [];
+  X.qs.forEach((q, i) => { const a = X.ans[i]; if (!a.some(answered)) un.push(i); else if (!a.every(answered)) part.push(i); if (X.flag[i]) fl.push(i); });
+  const jump = xs => xs.map(i => '<button class="nb" data-act="go" data-i="' + i + '">' + (i + 1) + "</button>").join("");
+  $("confirmHost").innerHTML = '<h4>Hand the paper in?</h4>' +
+    (un.length ? "<p>" + un.length + " not answered:</p><div class=\"navgrid\">" + jump(un) + "</div>" : "<p>Every question has an answer.</p>") +
+    (part.length ? "<p>" + part.length + " partly answered:</p><div class=\"navgrid\">" + jump(part) + "</div>" : "") +
+    (fl.length ? "<p>" + fl.length + " flagged:</p><div class=\"navgrid\">" + jump(fl) + "</div>" : "") +
+    "<p>Once it is in, the answers are fixed and marked.</p>" +
+    '<div class="btnrow"><button class="act" data-act="submit">Hand it in</button><button class="act ghost" data-act="cancel">Keep working</button></div>';
+  $("confirmHost").hidden = false;
+  $("confirmHost").scrollIntoView({ block: "nearest" });
+}
+function finish(auto){
+  stopTimer();
+  const g = grade(X.qs, X.ans), end = X.deadline && auto ? Math.min(Date.now(), X.deadline) : Date.now();
+  const e = { t: Date.now(), plan: X.plan, ans: X.ans, flag: X.flag, limit: X.limit, calc: X.calc, used: end - X.started, score: g.got, max: g.max, auto: !!auto };
+  ST.past.unshift(e); ST.past = ST.past.slice(0, 20); ST.cur = null; store(); X = null;
+  RV = { e, filter: "all" }; renderResults();
+}
+
+/* ── results ─────────────────────────────────────────────────────────── */
+function band(p){ return p >= 0.85 ? "Desk standard. Clear the misses below and sit another version cold."
+  : p >= 0.7 ? "Close. The misses cluster somewhere; the breakdown by idea shows where to go back."
+  : p >= 0.5 ? "Not yet. Work the chapters linked under each miss, then sit a different version."
+  : "Go back to the route. Read each idea's pages with the figures open, then try again."; }
+function renderResults(){
+  const e = RV.e, qs = e.plan.items.map(([id, s]) => inst(id, s)), g = grade(qs, e.ans), p = g.got / g.max;
+  let h = '<div class="dstats"><div class="c"><div class="k">Score</div><div class="v">' + (+g.got.toFixed(2)) + " / " + g.max + '</div></div><div class="c"><div class="k">Percent</div><div class="v">' + pc0(p) +
+    '</div></div><div class="c"><div class="k">Time used</div><div class="v">' + clock(e.used) + '</div></div><div class="c"><div class="k">Paper</div><div class="v sm">' + esc(e.plan.label) + (e.calc ? "" : " · no calc") + "</div></div></div>" +
+    '<p class="lead">' + band(p) + (e.auto ? " Time ran out, so the paper was handed in as it stood." : "") + "</p>";
+  h += '<div class="split res"><div><h4>By idea</h4>' + [1, 2, 3, 4, 5, 6, 7, 8].filter(k => g.idea[k]).map(k => bar((k === 8 ? "Q · " : k + " · ") + IDEA[k], g.idea[k][0], g.idea[k][1])).join("") +
+    '<h4>By level</h4>' + [1, 2, 3].filter(k => g.lvl[k]).map(k => bar(LVL[k], g.lvl[k][0], g.lvl[k][1])).join("") + "</div>" +
+    '<div><h4>By page</h4><table class="ptab pg">' + PORDER.filter(k => g.page[k]).map(k => { const x = g.page[k];
+      return '<tr class="' + (x[0] === x[1] ? "ok" : x[0] === 0 ? "no" : "") + '"><td>' + PAGE[k][1] + '</td><td><a data-h="' + k + '.html">' + PAGE[k][2] + "</a></td><td>" + (+x[0].toFixed(2)) + "/" + x[1] + "</td></tr>"; }).join("") +
+    "</table></div></div>";
+  const miss = g.each.filter(x => x.g < 1).length, flg = (e.flag || []).filter(Boolean).length;
+  h += '<div class="btnrow rvbar"><div class="seg">' + [["all", "All " + qs.length], ["miss", "Misses " + miss], ["flag", "Flagged " + flg]].map(([k, l]) =>
+      '<button data-act="filter" data-v="' + k + '" aria-pressed="' + (RV.filter === k) + '">' + l + "</button>").join("") + "</div></div><div id=\"rvList\">";
+  qs.forEach((q, i) => {
+    const r = g.each[i]; if (RV.filter === "miss" && r.g === 1) return; if (RV.filter === "flag" && !(e.flag || [])[i]) return;
+    const cls = r.g === 1 ? "ok" : r.g === 0 ? "no" : "half", a = e.ans[i] || [];
+    h += '<div class="rv ' + cls + '"><div class="rvh"><b>' + (i + 1) + "</b><span>" + (r.g === 1 ? "Right" : r.g === 0 ? "Wrong" : r.r.filter(Boolean).length + " of " + r.r.length + " parts") +
+      "</span><span>" + LVL[q.lvl] + ((e.flag || [])[i] ? " · flagged" : "") + '</span></div><div class="qstem">' + q.stem + "</div>";
+    q.parts.forEach((pt, j) => {
+      h += '<div class="rvp">' + (pt.p ? '<p class="ppr">' + (q.parts.length > 1 ? "(" + "abcdefgh"[j] + ") " : "") + pt.p + "</p>" : "") +
+        '<p><span class="tag ' + (r.r[j] ? "ok" : "no") + '">' + (r.r[j] ? "✓" : "✗") + "</span> Your answer: " + yourText(pt, a[j]) + "</p>" + (r.r[j] ? "" : "<p>Right answer: " + rightText(pt) + "</p>") + "</div>";
+    });
+    h += '<div class="work">' + q.why + '</div><p class="src"><a data-h="' + q.page + ".html#" + q.ch + '">Where this is taught: ' + where(q) + " &rarr;</a></p></div>";
+  });
+  h += '</div><div class="btnrow" style="margin-top:22px"><button class="act" data-act="home">Sit another paper</button><button class="act ghost" data-act="retake">Retake this paper</button>' +
+    '<button class="act ghost" data-act="printres">Print the results</button></div>';
+  $("resultsHost").innerHTML = h; setLinks($("resultsHost")); show("resultsHost");
+}
+
+/* ── printing: answer keys and results ───────────────────────────────── */
+function printKey(kind){
+  const plan = planFor(kind), qs = plan.items.map(([id, s]) => inst(id, s));
+  $("printHost").innerHTML = "<h2>Options, visually · exam, version " + kind + " · answer key</h2>" + qs.map((q, i) =>
+    '<div class="pk"><p><b>' + (i + 1) + ".</b> " + q.stem + ' <span class="quiet">[' + where(q) + "]</span></p>" +
+    q.parts.map((p, j) => "<p>" + (q.parts.length > 1 ? "(" + "abcdefgh"[j] + ") " + (p.p || "") + " — " : "") + "<b>" + rightText(p) + "</b></p>").join("") + '<p class="work">' + q.why + "</p></div>").join("");
+  doPrint();
+}
+function printResults(){ $("printHost").innerHTML = "<h2>Options, visually · exam results</h2>" + $("resultsHost").innerHTML; doPrint(); }
+function doPrint(){ document.body.setAttribute("data-print", "1"); try { window.print(); } finally { setTimeout(() => document.body.removeAttribute("data-print"), 500); } }
+
+/* ── one handler for clicks, one for typing, one for keys ────────────── */
+function onClick(ev){
+  const b = ev.target && ev.target.closest ? ev.target.closest("[data-act]") : null; if (!b) return;
+  const a = b.getAttribute("data-act"), v = b.getAttribute("data-v");
+  if (a !== "abandon") ABANDON = false;
+  if (a === "kind"){ CFG.kind = v; renderStart(); }
+  else if (a === "len"){ CFG.n = +v; renderStart(); }
+  else if (a === "time"){ CFG.time = v; renderStart(); }
+  else if (a === "calc"){ CFG.calc = v === "1"; renderStart(); }
+  else if (a === "reseed"){ CFG.seed = 1 + Math.floor(Math.random() * 99991); renderStart(); }
+  else if (a === "start"){ const plan = planFor(CFG.kind, CFG.seed, CFG.n); begin(plan, limitFor(plan.items.length, CFG.time), CFG.calc); }
+  else if (a === "resume") resume();
+  else if (a === "abandon"){ if (ABANDON){ ST.cur = null; store(); ABANDON = false; } else ABANDON = true; renderStart(); }
+  else if (a === "opt" && X){ const p = +b.getAttribute("data-p"), o = +b.getAttribute("data-o"); X.ans[X.idx][p] = X.ans[X.idx][p] === o ? null : o; saveCur(); renderQ(); }
+  else if (a === "prev" && X) go(X.idx - 1);
+  else if (a === "next" && X) go(X.idx + 1);
+  else if (a === "go" && X) go(+b.getAttribute("data-i"));
+  else if (a === "flag" && X){ X.flag[X.idx] = !X.flag[X.idx]; saveCur(); renderNav(); }
+  else if (a === "review" && X) askSubmit();
+  else if (a === "cancel") $("confirmHost").hidden = true;
+  else if (a === "submit" && X) finish(false);
+  else if (a === "filter" && RV){ RV.filter = v; renderResults(); }
+  else if (a === "home"){ RV = null; renderStart(); show("startHost"); }
+  else if (a === "retake" && RV){ const pl = RV.e.plan; RV = null; begin(pl, limitFor(pl.items.length, CFG.time), CFG.calc); }
+  else if (a === "past"){ RV = { e: ST.past[+b.getAttribute("data-i")], filter: "all" }; if (RV.e) renderResults(); }
+  else if (a === "key") printKey(v);
+  else if (a === "printres") printResults();
+  else if (a === "calc=") runCalc();
+  else if (a === "calcuse") useCalc();
+}
+function runCalc(){ const out = $("calcOut"); try { CALC_ANS = calcEval($("calcIn").value); out.textContent = "= " + (+CALC_ANS.toPrecision(10)); out.className = ""; }
+  catch (e) { out.textContent = e.message; out.className = "err"; } }
+function useCalc(){ if (!X || !LASTNUM || LASTNUM.i !== X.idx) return; X.ans[X.idx][LASTNUM.p] = String(+CALC_ANS.toPrecision(8)); saveCur(); renderQ(); }
+function onInput(ev){
+  const t = ev.target; if (!t || !t.getAttribute) return;
+  if (t.getAttribute("data-role") === "seed"){ const s = parseInt(t.value, 10); if (isFinite(s) && s > 0) CFG.seed = s; return; }
+  if (X && t.classList && t.classList.contains("numin")){
+    const p = +t.getAttribute("data-p"); X.ans[X.idx][p] = t.value.trim() === "" ? null : t.value; LASTNUM = { i: X.idx, p }; saveCur();
+    $("exCount").textContent = X.ans.filter(r => r.some(answered)).length + " of " + X.qs.length + " answered"; renderNavOnly();
+  }
+}
+function renderNavOnly(){ const fb = document.activeElement; renderNav(); if (fb && fb.focus && document.activeElement !== fb) fb.focus(); }
+function onFocus(ev){ const t = ev.target; if (X && t && t.classList && t.classList.contains("numin")) LASTNUM = { i: X.idx, p: +t.getAttribute("data-p") }; }
+function onKey(ev){
+  const t = ev.target, typing = t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || "");
+  if (t && t.id === "calcIn" && ev.key === "Enter"){ ev.preventDefault(); runCalc(); return; }
+  if (!X || $("examHost").hidden || typing || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const q = X.qs[X.idx];
+  if (ev.key === "ArrowRight") go(X.idx + 1);
+  else if (ev.key === "ArrowLeft") go(X.idx - 1);
+  else if (ev.key === "f" || ev.key === "F"){ X.flag[X.idx] = !X.flag[X.idx]; saveCur(); renderNav(); }
+  else {
+    const k = "1234abcd".indexOf(ev.key.toLowerCase()), j = q.parts.findIndex(p => p.t === "mc");
+    if (k >= 0 && j >= 0){ const o = k % 4; if (o < q.parts[j].opts.length){ X.ans[X.idx][j] = o; saveCur(); renderQ(); } }
+  }
+}
+
+restore();
+renderStart();
+document.addEventListener("click", onClick);
+document.addEventListener("input", onInput);
+document.addEventListener("focusin", onFocus);
+document.addEventListener("keydown", onKey);
+LAB.boot(() => {});
+
+</script>
+</body>
+</html>

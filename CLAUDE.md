@@ -451,3 +451,29 @@ Three traps found on the way:
   after rendering from a `data-h` attribute instead.
 - **Detaching `o.X` from a Fig breaks it** — `X()` uses `this`. Wrap it:
   `const X = v => o.X(v)`.
+
+## The exam page
+
+`exam.html` is the fourth companion: full forty-question papers. One script,
+in this order: a seedable generator; `IDEA`, `PAGE` (keyed by file name, with
+the page's route number) and `CH` (chapter titles for the "where this is
+taught" links); the `BANK` of templates, added with `mc()`, `num()` and
+`multi()`; `VERSIONS` (A, B, C, written out so they never change when the
+bank grows) and `randomPlan(seed, n)`; `inst(id, seed)`, which makes one
+question and shuffles its options from the seed; grading; storage under
+`ov-exam-v1`; rendering; one delegated handler per event type.
+
+To add a question: a multiple-choice one is one `mc()` call whose first
+option is right and whose other three are real misconceptions. A numeric
+one returns `{stem, ans, tol, unit, why, q}` with `ans` computed from the
+numbers the stem shows, and needs a `chk()` claim in `PAGES["exam"]` that
+re-derives it a different way. The harness fails if a numeric template has
+none. Where a greek estimate and a full reprice differ (volga on short-dated
+wings, for instance), set the band to cover both and say so in `why`. The
+first run of verify.js caught exactly that on the tick and vega questions.
+
+The fixed versions are balanced by hand: each follows `WEIGHTS`, covers all
+twenty-five pages, shares no question with another, and has at least one
+multi-step scenario. verify.js checks all of that. To change one, swap in a
+question from the same page. The timer starts only on a click, never at
+load, for the same reason as on the program page.
